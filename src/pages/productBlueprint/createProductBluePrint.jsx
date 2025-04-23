@@ -660,8 +660,8 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
             }
             Array.from(files).forEach((file) => {
                 const fileSize = file.size / (1024 * 1024); // Convert size to MB
-                if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                    errorMessage = "Only image files are allowed (jpg, jpeg, png, gif)";
+                if (!file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                    errorMessage = "Only image files are allowed (jpg, jpeg, png, gif, WEBP)";
                     errorCount++;
                 } else if (fileSize > 1) {
                     errorMessage = "File size must be less than 1MB";
