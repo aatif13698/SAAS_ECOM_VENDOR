@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
-import Swal from "sweetalert2";
 import { Card } from "@mui/material";
 import debounceFunction from "@/helper/Debounce";
 
@@ -19,7 +18,9 @@ import warehouseService from "@/services/warehouse/warehouse.service";
 import stockService from "@/services/stock/stock.service";
 import ordersService from "@/services/orders/orders.service";
 import Select from "react-select"; // Import react-select
-import zIndex from "@mui/material/styles/zIndex";
+import * as XLSX from "xlsx";
+import Button from "@/components/ui/Button";
+
 
 
 const Orders = ({ noFade, scrollContent }) => {
@@ -42,6 +43,11 @@ const Orders = ({ noFade, scrollContent }) => {
         { value: "DELIVERED", label: "Delivered" },
         { value: "CANCELLED", label: "Cancelled" },
     ];
+
+    const rowsPerPageOptions = Array.from(
+        { length: 100 },
+        (_, i) => (i + 1) * 5
+    );
 
     const handleStatusChange = (selectedOptions) => {
         setStatus(selectedOptions ? selectedOptions.map((option) => option.value) : []);
@@ -66,12 +72,14 @@ const Orders = ({ noFade, scrollContent }) => {
             "&:hover": {
                 borderColor: isDark ? "#475569" : "#94A3B8",
             },
+            textAlign: "left",
         }),
         menu: (provided) => ({
             ...provided,
             backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
             color: isDark ? "#FFFFFF" : "#1E293B",
-            zIndex:"99999"
+            zIndex: "99999",
+            textAlign: "left",
         }),
         option: (provided, state) => ({
             ...provided,
@@ -85,17 +93,20 @@ const Orders = ({ noFade, scrollContent }) => {
             color: state.isSelected ? "#FFFFFF" : isDark ? "#FFFFFF" : "#1E293B",
             "&:hover": {
                 backgroundColor: isDark ? "#334155" : "#F1F5F9",
-                zIndex:"999"
+                zIndex: "999"
             },
+            textAlign: "left",
         }),
         multiValue: (provided) => ({
             ...provided,
             backgroundColor: isDark ? "#3B82F6" : "#DBEAFE",
             color: isDark ? "#FFFFFF" : "#1E293B",
+            textAlign: "left",
         }),
         multiValueLabel: (provided) => ({
             ...provided,
             color: isDark ? "#FFFFFF" : "#1E293B",
+            textAlign: "left",
         }),
         multiValueRemove: (provided) => ({
             ...provided,
@@ -104,14 +115,17 @@ const Orders = ({ noFade, scrollContent }) => {
                 backgroundColor: isDark ? "#2563EB" : "#BFDBFE",
                 color: "#FFFFFF",
             },
+            textAlign: "left",
         }),
         placeholder: (provided) => ({
             ...provided,
             color: isDark ? "#9CA3AF" : "#6B7280",
+            textAlign: "left",
         }),
         input: (provided) => ({
             ...provided,
             color: isDark ? "#FFFFFF" : "#1E293B",
+            textAlign: "left",
         }),
     };
 
@@ -130,8 +144,6 @@ const Orders = ({ noFade, scrollContent }) => {
     const [perPage, setPerPage] = useState(10);
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [isViewed, setIsViewed] = useState(false);
-    const [userId, setUserId] = useState(null);
 
     const [refresh, setRefresh] = useState(0);
 
@@ -221,177 +233,160 @@ const Orders = ({ noFade, scrollContent }) => {
     ];
     const [paginationData, setPaginationData] = useState();
     const [keyWord, setkeyWord] = useState("");
+
     const handleFilter = (e) => {
-        let currentKeyword = e.target.value;
-        setkeyWord(currentKeyword);
-        debounceSearch(currentKeyword);
+        setKeyword(e.target.value);
     };
 
-    const debounceSearch = useCallback(
-        debounceFunction(
-            async (nextValue) => {
-                try {
-                    const response = await warehouseService.getList(page, nextValue, perPage);
-                    setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.warehouses);
-                } catch (error) {
-                    console.error("Error while fetching business:", error);
-                }
-            },
-            1000
-        ),
-        []
-    );
-
-
-    // async function getList() {
-    //     try {
-    //         const response = await ordersService.getAllList(page, keyWord, perPage);
-    //         setTotalRows(response?.data?.count);
-    //         setPaginationData(response?.data?.orders);
-    //         setPending(false);
-    //     } catch (error) {
-    //         setPending(false);
-    //         console.log("error while fetching orders");
-    //     }
-    // }
 
 
     const debounceFetch = useCallback(
         debounceFunction(async (filters) => {
-          try {
-            const response = await ordersService.getAllList(
-              filters.page,
-              filters.keyword,
-              filters.perPage,
-              filters.status.join(","), // Convert array to comma-separated string
-              filters.startDate,
-              filters.endDate
-            );
-            setTotalRows(response?.data?.count || 0);
-            setPaginationData(response?.data?.orders || []);
-            setPending(false);
-          } catch (error) {
-            setPending(false);
-            toast.error("Error fetching orders");
-            console.error("Error fetching orders:", error);
-          }
+            try {
+                const response = await ordersService.getAllList(
+                    filters.page,
+                    filters.keyword,
+                    filters.perPage,
+                    filters.status.join(","), // Convert array to comma-separated string
+                    filters.startDate,
+                    filters.endDate
+                );
+                setTotalRows(response?.data?.count || 0);
+                setPaginationData(response?.data?.orders || []);
+                setPending(false);
+            } catch (error) {
+                setPending(false);
+                toast.error("Error fetching orders");
+                console.error("Error fetching orders:", error);
+            }
         }, 500),
         []
-      );
-
-
-
+    );
 
     async function getList() {
         setPending(true);
         debounceFetch({
-          page,
-          keyword,
-          perPage,
-          status,
-          startDate,
-          endDate,
+            page,
+            keyword,
+            perPage,
+            status,
+            startDate,
+            endDate,
         });
-      }
+    }
 
-    // useEffect(() => {
-    //     getList()
-    // }, [refresh]);
 
     useEffect(() => {
         getList();
-      }, [page, perPage, keyword, status, startDate, endDate, refresh]);
+    }, [page, perPage, keyword, status, startDate, endDate, refresh]);
 
-    // ------Performing Action when page change -----------
-    const handlePageChange = async (page) => {
-        try {
-            const response = await stockService.getAllList(page, keyWord, perPage);
-            setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
-            setPage(page);
-        } catch (error) {
-            console.log("error while fetching orders");
-        }
-    };
-    // ------Handling Action after the perPage data change ---------
-    const handlePerRowChange = async (perPage) => {
-        try {
-            const response = await warehouseService.getList(page, keyWord, perPage);
-            setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
-            setPerPage(perPage);
-        } catch (error) {
-            console.log("error while fetching orders");
-        }
-        setPerPage(perPage);
+    const handlePageChange = (newPage) => {
+        setPage(newPage);
     };
 
-    // -----Adding a Search Box ---------
+    const handlePerRowChange = (newPerPage) => {
+        setPerPage(newPerPage);
+        setPage(1); // Reset to first page when rows per page changes
+    };
 
-    // const subHeaderComponent = (
-    //     <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
-    //         <div className="table-heading text-start ">Orders List</div>
-    //         <div className="grid lg:justify-end md:justify-start">
-    //             <input
-    //                 type="text"
-    //                 placeholder="Search.."
-    //                 // style={inputBoxStyle}
-    //                 onChange={handleFilter}
-    //                 className="form-control rounded-md px-4 py-2 border border-lightborderInputColor  dark:border-darkSecondary text-lightinputTextColor  bg-lightBgInputColor dark:bg-darkInput dark:text-white"
-    //             />
-    //         </div>
-    //     </div>
-    // );
+    const exportToExcel = () => {
+        try {
+            const exportData = paginationData.map((row) => ({
+                OrderNumber: row.orderNumber,
+                CustomerName: `${row?.customer?.firstName} ${row?.customer?.lastName}`,
+                Product_Name: row.items
+                    .map((item) => item.productStock?.product?.name || "Unknown")
+                    .join(", "),
+                Quantity: row.items.reduce((sum, item) => sum + (item.quantity || 0), 0),
+                ItemsPurchased: row.items.length,
+                Total_Amount: row.totalAmount,
+                Status: row.status,
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+
+            // Auto-size columns
+            const colWidths = exportData.reduce((acc, row) => {
+                Object.keys(row).forEach((key, i) => {
+                    const value = row[key] ? row[key].toString() : "";
+                    acc[i] = Math.max(acc[i] || 10, value.length + 2);
+                });
+                return acc;
+            }, []);
+            worksheet["!cols"] = colWidths.map((width) => ({ wch: width }));
+
+            XLSX.writeFile(workbook, `orders_export_${new Date().toISOString()}.xlsx`);
+        } catch (error) {
+            toast.error("Error exporting to Excel");
+            console.error("Error exporting to Excel:", error);
+        }
+    };
+
 
     // new
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-1 md:grid-cols-1 gap-3 items-center">
-          <div className="table-heading text-start">Orders List</div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
-            <input
-              type="text"
-              placeholder="Search by order number..."
-              value={keyword}
-              onChange={handleFilter}
-              className="form-control rounded-md px-4 py-2 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor bg-lightBgInputColor dark:bg-darkInput dark:text-white"
-            />
-            <Select
-              isMulti
-              options={statusOptions}
-              value={statusOptions.filter((option) => status.includes(option.value))}
-              onChange={handleStatusChange}
-              placeholder="Select Status..."
-              styles={selectStyles}
-              className="react-select-container"
-              classNamePrefix="react-select"
-            />
-            <div className="flex gap-2">
-              <input
-                type="date"
-                name="startDate"
-                value={startDate}
-                onChange={handleDateChange}
-                placeholder="Start Date"
-                className="form-control rounded-md px-4 py-2 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor bg-lightBgInputColor dark:bg-darkInput dark:text-white"
-              />
-              <input
-                type="date"
-                name="endDate"
-                value={endDate}
-                onChange={handleDateChange}
-                placeholder="End Date"
-                className="form-control rounded-md px-4 py-2 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor bg-lightBgInputColor dark:bg-darkInput dark:text-white"
-              />
+            <div className="flex justify-between items-center">
+                <div className="table-heading text-start">Orders List</div>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={exportToExcel}
+                    disabled={!paginationData.length}
+                >
+                    Export to Excel
+                </Button>
             </div>
-          </div>
+            <div className=" grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
+                <input
+                    type="text"
+                    placeholder="Search by order number..."
+                    value={keyword}
+                    onChange={handleFilter}
+                    className="form-control rounded-md px-4 py-2 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor bg-lightBgInputColor dark:bg-darkInput dark:text-white"
+                />
+                <Select
+                    isMulti
+                    options={statusOptions}
+                    value={statusOptions.filter((option) => status.includes(option.value))}
+                    onChange={handleStatusChange}
+                    placeholder="Select Status..."
+                    styles={selectStyles}
+                    className="react-select-container"
+                    classNamePrefix="react-select"
+                />
+                <input
+                    type="date"
+                    name="startDate"
+                    value={startDate}
+                    onChange={handleDateChange}
+                    placeholder="Start Date"
+                    className="form-control rounded-md px-4 py-2 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor bg-lightBgInputColor dark:bg-darkInput dark:text-white"
+                />
+                <input
+                    type="date"
+                    name="endDate"
+                    value={endDate}
+                    onChange={handleDateChange}
+                    placeholder="End Date"
+                    className="form-control rounded-md px-4 py-2 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor bg-lightBgInputColor dark:bg-darkInput dark:text-white"
+                />
+                {/* <div className="flex gap-2">
+             
+             
+            </div> */}
+            </div>
         </div>
-      );
+    );
 
 
     const paginationOptions = {
-        rowsPerPageText: "row",
+        rowsPerPageText: "Rows per page:",
         rangeSeparatorText: "of",
+        selectAllRowsItem: false,
+        rowsPerPageOptions,
     };
     return (
         <div className={`${isDark ? "bg-darkSecondary text-white" : ""}`}>
@@ -411,6 +406,8 @@ const Orders = ({ noFade, scrollContent }) => {
                 paginationTotalRows={totalRows}
                 onChangePage={handlePageChange}
                 onChangeRowsPerPage={handlePerRowChange}
+                paginationRowsPerPageOptions={rowsPerPageOptions}
+
                 // selectableRows
                 pointerOnHover
                 progressPending={pending}
