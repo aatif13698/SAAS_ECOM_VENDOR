@@ -298,7 +298,7 @@ const Orders = ({ noFade, scrollContent }) => {
                     .map((item) => item.productStock?.product?.name || "Unknown")
                     .join(", "),
                 Quantity: row.items.reduce((sum, item) => sum + (item.quantity || 0), 0),
-                ItemsPurchased: row.items.length,
+                ItemsPurchased: row?.items?.length,
                 Total_Amount: row.totalAmount,
                 Status: row.status,
             }));
@@ -311,7 +311,7 @@ const Orders = ({ noFade, scrollContent }) => {
             const colWidths = exportData.reduce((acc, row) => {
                 Object.keys(row).forEach((key, i) => {
                     const value = row[key] ? row[key].toString() : "";
-                    acc[i] = Math.max(acc[i] || 10, value.length + 2);
+                    acc[i] = Math.max(acc[i] || 10, value?.length + 2);
                 });
                 return acc;
             }, []);
@@ -334,7 +334,7 @@ const Orders = ({ noFade, scrollContent }) => {
                     variant="contained"
                     color="primary"
                     onClick={exportToExcel}
-                    disabled={!paginationData.length}
+                    disabled={!paginationData?.length}
                 >
                     Export to Excel
                 </Button>
