@@ -119,6 +119,19 @@ const activeInActive = async ({ id, status, page, keyword: keyWord, perPage }) =
 
 
 
+const getAllStock = async ( page, keyword, perPage ) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/getAllStock?clientId=${clientId}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
 
 
 
@@ -134,5 +147,8 @@ export default {
     activeInActive,
     update,
     getOne,
-    updateStatus
+    updateStatus,
+
+
+    getAllStock
 }

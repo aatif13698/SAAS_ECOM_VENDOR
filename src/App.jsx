@@ -48,7 +48,8 @@ const Stock = lazy(() => import("./pages/stock/Srock"));
 const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
 
 const Orders = lazy(() => import("./pages/orders/Orders"));
-const ViewOrder = lazy(() => import("./pages/orders/ViewOrder"))
+const ViewOrder = lazy(() => import("./pages/orders/ViewOrder"));
+const CreateOrder = lazy(() => import("./pages/orders/CreateOrder"))
 
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
@@ -175,6 +176,7 @@ function App() {
                 <Route path="create-stock" element={<CreateStock/>} />
                 <Route path="order-list" element={<Orders/>} />
                 <Route path="order-view" element={<ViewOrder/>} />
+                <Route path="create-order" element={<CreateOrder/>} />
 
 
 
