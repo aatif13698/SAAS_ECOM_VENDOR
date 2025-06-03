@@ -21,7 +21,8 @@ const AssignPermission = lazy(() => import("./pages/rolesAndPermission/AssignPer
 const CreateEmployee = lazy(() => import("./pages/employee/CreateEmployee"));
 const Employee = lazy(() => import("./pages/employee/Employee"));
 
-const CreateCustomer = lazy(() => import("./pages/customer/CreateCustomer"))
+const CreateCustomer = lazy(() => import("./pages/customer/CreateCustomer"));
+const CreateCustomerAddress = lazy(() =>  import("./pages/customer/CreateCustomerAddress"));
 const Customer = lazy(() => import("./pages/customer/Customer"));
 
 
@@ -153,6 +154,7 @@ function App() {
 
                 <Route path="customer-list" element={<Customer />} />
                 <Route path="create-customer" element={<CreateCustomer />} />
+                <Route path="create-customer/add/address" element={<CreateCustomerAddress />} />
 
 
 

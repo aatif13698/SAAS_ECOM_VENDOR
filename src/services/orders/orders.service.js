@@ -78,6 +78,19 @@ const create = async (data) => {
 };
 
 
+
+const createOrder = async (data) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/order/createOrder`, { clientId : clientId, ...data}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 const update = async (data) => {
     const authToken = await localStorage.getItem("saas_client_token");
 
@@ -142,6 +155,7 @@ const getAllStock = async ( page, keyword, perPage ) => {
 export default {
 
     create,
+    createOrder,
     getAllList,
     deleteOne,
     activeInActive,

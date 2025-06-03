@@ -47,7 +47,7 @@ const MobileMenu = ({ className = "custom-class" }) => {
             </div>
             <div>
               <h1 style={{color: isDark ?  "white" : "#019B88"}} className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-              Kosmo 
+              SAAS Ecom 
               </h1>
             </div>
           </div>

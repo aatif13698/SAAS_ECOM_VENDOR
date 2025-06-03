@@ -215,14 +215,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
         icon: "",
     });
 
-    console.log("formDataErr",formDataErr);
-    
-
-
-
-
-
-
+    console.log("formDataErr", formDataErr);
 
     const {
         level,
@@ -237,9 +230,6 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
         password,
         confirmPassword,
         gender,
-
-
-
         country,
         city,
         state,
@@ -508,8 +498,8 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
         //         errorCount++
         //     }
         // }
-        console.log("errorCount",errorCount);
-        
+        console.log("errorCount", errorCount);
+
         if (errorCount > 0) {
             return true
         } else {
@@ -844,8 +834,8 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
         const error = validationFunction();
         setLoading(true);
         if (error) {
-            console.log("error",error);
-            
+            console.log("error", error);
+
             setLoading(false);
             return
         } else {
@@ -1598,8 +1588,11 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
 
                                     {
                                         !isViewed && (
-                                            <div className="lg:col-span-2 col-span-1">
-                                                <div className="ltr:text-right rtl:text-left p-5">
+                                            <div className="">
+                                                <div className=" flex flex-row items-center justify-between py-5">
+
+
+
                                                     {showAddButton ? (
                                                         <button
                                                             disabled={loading}
@@ -1644,6 +1637,8 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
                                                     ) : (
                                                         ""
                                                     )}
+
+
                                                 </div>
                                             </div>
                                         )
@@ -1652,6 +1647,17 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
 
 
                                 </form>
+
+                                {
+                                    id ?
+                                        <button
+                                            onClick={() => navigate("/create-customer/add/address", { state: { customerId: id } })}
+                                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                        >
+                                            Add Address
+                                        </button>
+                                        : ""
+                                }
 
 
                             </div>
