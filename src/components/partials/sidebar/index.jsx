@@ -105,10 +105,10 @@ const Sidebar = () => {
         }}
       >
         <SidebarLogo menuHover={menuHover} />
-        <div
-          className={`h-[60px]  absolute top-[80px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none ${scroll ? " opacity-100" : " opacity-0"
+        {/* <div
+          className={`h-[60px]  absolute top-[76px] nav-shadow z-[1] w-full transition-all duration-200 pointer-events-none ${scroll ? " opacity-100" : " opacity-0"
             }`}
-        ></div>
+        ></div> */}
 
         <SimpleBar
           className="sidebar-menu px-4 h-[calc(100%-80px)]"
