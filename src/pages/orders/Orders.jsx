@@ -158,6 +158,8 @@ const Orders = ({ noFade, scrollContent }) => {
         try {
             setShowLoadingModal(true);
             const response = await ordersService.getOne(row?._id);
+            console.log("order response", response);
+            
             scrollToTop();
             navigate("/order-view", { state: { data: response?.data } });
             setShowLoadingModal(false);

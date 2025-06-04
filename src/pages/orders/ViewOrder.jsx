@@ -11,6 +11,8 @@ function ViewOrder() {
     const [orders, setOrders] = useState([]);
 
     console.log("orders", orders);
+    console.log("data",data);
+    
 
 
     // handling status change
@@ -190,6 +192,11 @@ function ViewOrder() {
                                 </div>
                             ) : (
                                 orders?.map((item) => {
+
+                                    console.log("item",item);
+                                    
+
+
                                     const name = item?.productStock?.product?.name || "Unnamed Product";
                                     const priceOption = item?.priceOption || {};
                                     const price = priceOption?.price || 0;
@@ -198,7 +205,7 @@ function ViewOrder() {
                                     const image =
                                         item?.productStock?.product?.images?.[0] ||
                                         "https://via.placeholder.com/80";
-                                    const status = item?.status || "DELIVERED";
+                                    const status = data?.status || "DELIVERED";
                                     const deliveryDate = item?.deliveryDate
                                         ? new Date(item.deliveryDate).toLocaleDateString()
                                         : "Aug 12, 2025";
