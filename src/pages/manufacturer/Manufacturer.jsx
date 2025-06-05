@@ -860,7 +860,7 @@ function Manufacturer({ centered, noFade, scrollContent }) {
             <div className="table-heading text-start ">
                 <button className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-3 py-2 rounded   `}
                     onClick={handleCreate} >
-                    Create Manuufacturer
+                    Create Manufacturer
                 </button>
             </div>
             <div className="grid lg:justify-end md:justify-start">
@@ -953,7 +953,7 @@ function Manufacturer({ centered, noFade, scrollContent }) {
                                             className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                                         >
                                             <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-                                                Create Brand
+                                                Create Manufacturer
                                             </h2>
                                             <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                                                 <Icon icon="heroicons-outline:x" />

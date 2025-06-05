@@ -131,7 +131,7 @@ const Supplier = ({ noFade, scrollContent }) => {
         const id = row._id;
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-employee", { state: { id, row } });
+        navigate("/create-supplier", { state: { id, row } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -158,14 +158,14 @@ const Supplier = ({ noFade, scrollContent }) => {
                 keyword: keyWord,
                 page: page,
                 perPage: perPage,
-                warehouseId: id,
+                supplierId: id,
             }
-            const response = await warehouseService.deleteOne(dataObject);
+            const response = await supplierService.deleteOne(dataObject);
             setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.warehouses);
+            setPaginationData(response?.data?.data?.suppliers);
             toast.success(`Deleted Successfully`)
         } catch (error) {
-            console.error("Error while fetching manufacturer:", error);
+            console.error("Error while deleting supplier:", error);
         }
     }
     //   ---- Active And InActive the Row
@@ -184,10 +184,10 @@ const Supplier = ({ noFade, scrollContent }) => {
                 id: id,
                 clientId: clinetId
             }
-            const response = await warehouseService.activeInactive(dataObject);
+            const response = await supplierService.activeInActive(dataObject);
 
             setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.warehouses);
+            setPaginationData(response?.data?.data?.suppliers);
             toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
             setShowLoadingModal(false)
 
@@ -317,11 +317,11 @@ const Supplier = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await warehouseService.getList(page, nextValue, perPage);
+                    const response = await supplierService.getAllList(page, nextValue, perPage);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.warehouses);
+                    setPaginationData(response?.data?.suppliers);
                 } catch (error) {
-                    console.error("Error while fetching business:", error);
+                    console.error("Error while fetching supplier:", error);
                 }
             },
             1000

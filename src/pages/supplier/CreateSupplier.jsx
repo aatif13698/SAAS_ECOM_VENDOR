@@ -98,17 +98,12 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
 
     const [formData, setFormData] = useState({
-
-
-
         name: '',
         contactPerson: '',
         emailContact: "",
         contactNumber: "",
         url: "",
         GstVanNumber: "",
-
-
         country: "",
         city: "",
         state: "",
@@ -316,7 +311,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
         let errorCount = 0;
 
         console.log("ssss");
-        
+
 
         if (!name) {
             setFormDataErr((prev) => ({
@@ -470,11 +465,11 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             }));
         }
 
-        console.log("errorCount",errorCount);
-        
+        console.log("errorCount", errorCount);
 
-      
-      
+
+
+
         // if (id == null) {
         //     if (!selectedFile) {
         //         setFormDataErr((prev) => ({
@@ -748,30 +743,23 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-
-                console.log("comming gerad");
-
-
                 let dataObject = {
-                    clientId : clientId,
+                    clientId: clientId,
+                    supplierId: id,
                     name,
                     contactPerson,
                     emailContact,
                     contactNumber,
                     url,
                     GstVanNumber,
-        
-                    city : countryData?.cityName,
-                    state : countryData?.stateName,
-                    country : countryData?.countryName,
-                    ZipCode : ZipCode,
-                    address : address,
+                    city: countryData?.cityName,
+                    state: countryData?.stateName,
+                    country: countryData?.countryName,
+                    ZipCode: ZipCode,
+                    address: address,
                 }
-                
-
 
                 if (id) {
-                    payload.append("employeeId", id);
                     const response = await supplierService.update(dataObject)
                     toast.success(response?.data?.message);
                 } else {
@@ -815,7 +803,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                 setImgPreviwe(null);
                 setselectedFile(null);
                 setLoading(false);
-                // navigate("/employee-list");
+                navigate("/supplier-list");
 
             } catch (error) {
                 setLoading(false);
@@ -829,13 +817,9 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             async function getBranch() {
                 try {
                     setPageLoading(true)
-                    const response = await employeeService.getOne(id);
-                    console.log('Response get employee', response?.data);
+                    const response = await supplierService.getOne(id);
                     const baseAddress = response?.data;
-
-
                     let level = "";
-
                     if (baseAddress.isBuLevel) {
                         level = "business"
                     } else if (baseAddress.isVendorLevel) {
@@ -845,38 +829,26 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
                     }
-
-
                     setFormData((prev) => ({
                         ...prev,
-                        level: level,
-                        businessUnit: baseAddress.businessUnit,
-                        branch: baseAddress.branch,
-                        warehouse: baseAddress.warehouse,
-                        roleId: baseAddress.role,
-                        firstName: baseAddress.firstName,
-                        lastName: baseAddress.lastName,
-                        email: baseAddress.email,
-                        phone: baseAddress.phone,
-                        gender: baseAddress.gender,
-
-                        country: baseAddress.country,
-                        city: baseAddress.city,
-                        state: baseAddress.state,
-                        address: baseAddress.address,
-                        ZipCode: baseAddress.ZipCode,
+                        name: baseAddress?.name,
+                        contactPerson: baseAddress?.contactPerson,
+                        emailContact: baseAddress?.emailContact,
+                        contactNumber: baseAddress?.contactNumber,
+                        url: baseAddress?.url,
+                        GstVanNumber: baseAddress?.GstVanNumber,
+                        country: baseAddress?.country,
+                        city: baseAddress?.city,
+                        state: baseAddress?.state,
+                        address: baseAddress?.address,
+                        ZipCode: baseAddress?.ZipCode,
 
                     }));
-
-                    setImgPreviwe(`http://localhost:8088/warehouse/${baseAddress?.icon}`)
-
                     const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
                     const state = State.getStatesOfCountry(selectedCountry?.isoCode);
-
                     const stateName = state?.find(
                         (item) => item?.name === baseAddress?.state
                     );
-
                     setCountryData((prev) => ({
                         ...prev,
                         stateList: state,
@@ -886,12 +858,10 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                         stateISOCode: stateName?.isoCode,
                         cityName: baseAddress?.city,
                     }));
-
                     setPageLoading(false)
-
                 } catch (error) {
                     setPageLoading(false)
-                    console.log("error in fetching vendor data");
+                    console.log("error in fetching supplier data");
                 }
             }
             getBranch()
@@ -906,11 +876,8 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         async function getActiveBusinessUnit() {
-            console.log("yess");
-
             try {
                 const response = await warehouseService.getActiveBusinessUnit();
-                console.log("respone active", response);
                 setActiveBusinessUnits(response?.data?.businessUnits)
             } catch (error) {
                 console.log("error while getting the active business unit", error);
