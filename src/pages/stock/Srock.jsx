@@ -96,7 +96,7 @@ const Stock = ({ noFade, scrollContent }) => {
         const id = row._id;
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-warehouse", { state: { id, row } });
+        navigate("/create-stock", { state: { id, row } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -149,10 +149,10 @@ const Stock = ({ noFade, scrollContent }) => {
                 id: id,
                 clientId: clinetId
             }
-            const response = await warehouseService.activeInactive(dataObject);
+            const response = await stockService.activeInActive(dataObject);
 
             setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.warehouses);
+            setPaginationData(response?.data?.data?.stocks);
             toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
             setShowLoadingModal(false)
 
@@ -252,6 +252,7 @@ const Stock = ({ noFade, scrollContent }) => {
                             <button
                                 className="action-btn"
                                 type="button"
+                                disabled={true}
                                 onClick={() => handleDelete(row)}
                             >
                                 <Icon icon="heroicons:trash" />
@@ -279,11 +280,11 @@ const Stock = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await warehouseService.getList(page, nextValue, perPage);
+                    const response = await stockService.getAllList(page, nextValue, perPage);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.warehouses);
+                    setPaginationData(response?.data?.stocks);
                 } catch (error) {
-                    console.error("Error while fetching business:", error);
+                    console.error("Error while fetching stocks:", error);
                 }
             },
             1000
@@ -300,7 +301,7 @@ const Stock = ({ noFade, scrollContent }) => {
             setPending(false);
         } catch (error) {
             setPending(false);
-            console.log("error while fetching warehouse");
+            console.log("error while fetching stocks");
         }
     }
 
@@ -313,21 +314,21 @@ const Stock = ({ noFade, scrollContent }) => {
         try {
             const response = await stockService.getAllList(page, keyWord, perPage);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
+            setPaginationData(response?.data?.stocks);
             setPage(page);
         } catch (error) {
-            console.log("error while fetching warehouse");
+            console.log("error while fetching stocks");
         }
     };
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await warehouseService.getList(page, keyWord, perPage);
+            const response = await stockService.getAllList(page, keyWord, perPage);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
+            setPaginationData(response?.data?.stocks);
             setPerPage(perPage);
         } catch (error) {
-            console.log("error while fetching warehouse");
+            console.log("error while fetching stocks");
         }
         setPerPage(perPage);
     };

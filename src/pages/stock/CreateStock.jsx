@@ -97,12 +97,10 @@ const CreateStock = ({ noFade, scrollContent }) => {
         lowStockThreshold: "",
         restockQuantity: "",
         priceOptions: [],
-
-
-       
     });
 
-    console.log("formData warehouse", formData);
+    console.log("formData", formData);
+
 
 
     const [formDataErr, setFormDataErr] = useState({
@@ -117,11 +115,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
         lowStockThreshold: "",
         restockQuantity: "",
         priceOptions: "",
-
-
-
-
-       
     });
     const {
         product,
@@ -567,46 +560,39 @@ const CreateStock = ({ noFade, scrollContent }) => {
             setLoading(false);
             return
         } else {
-            setLoading(false);
-
-
-
             console.log("yess");
-
-
-
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-               
+
                 let dataObject = {
-                    clientId : clientId,
-                    product : product,
-                    businessUnit : businessUnit,
-                    branch : branch,
-                    warehouse : warehouse,
-                    totalStock :  totalStock,
-                    priceOptions : selectedPrices,
-                    onlineStock : onlineStock,
-                    offlineStock : offlineStock,
-                    lowStockThreshold : lowStockThreshold,
-                    restockQuantity : restockQuantity,
+                    clientId: clientId,
+                    
+                    product: product,
+                    businessUnit: businessUnit,
+                    branch: branch,
+                    warehouse: warehouse,
+                    totalStock: totalStock,
+                    priceOptions: selectedPrices,
+                    onlineStock: onlineStock,
+                    offlineStock: offlineStock,
+                    lowStockThreshold: lowStockThreshold,
+                    restockQuantity: restockQuantity,
                 }
 
                 if (id) {
-                    payload.append("warehouseId", id);
-                    const response = await stockService.update(payload)
+                    const response = await stockService.update({...dataObject,stockId: id, })
                     toast.success(response?.data?.message);
                 } else {
                     const response = await stockService.create(dataObject);
                     toast.success(response?.data?.message);
                 }
-                
+
                 setFormData({
                     product: "",
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-            
+
                     totalStock: "",
                     onlineStock: "",
                     offlineStock: "",
@@ -619,7 +605,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-            
+
                     totalStock: "",
                     onlineStock: "",
                     offlineStock: "",
@@ -642,45 +628,36 @@ const CreateStock = ({ noFade, scrollContent }) => {
             async function getBranch() {
                 try {
                     setPageLoading(true)
-                    const response = await warehouseService.getOne(id);
-                    console.log('Response get business unit', response?.data);
+                    const response = await stockService.getParticularStocks(id);
+                    console.log('Response stock data', response?.data);
                     const baseAddress = response?.data;
                     setFormData((prev) => ({
                         ...prev,
-                        businessUnit: baseAddress.businessUnit,
-                        branchId: baseAddress.branchId,
-                        name: baseAddress?.name,
-                        incorporationName: baseAddress.incorporationName,
-                        emailContact: baseAddress?.emailContact,
-                        contactNumber: baseAddress?.contactNumber,
-                        ZipCode: baseAddress?.ZipCode,
-                        address: baseAddress?.address,
+                        product: baseAddress?.product,
+                        businessUnit: baseAddress?.businessUnit,
+                        branch: baseAddress?.branch,
+                        warehouse: baseAddress?.warehouse,
+
+                        totalStock: baseAddress?.totalStock,
+                        onlineStock: baseAddress?.onlineStock,
+                        offlineStock: baseAddress?.offlineStock,
+                        lowStockThreshold: baseAddress?.lowStockThreshold,
+                        restockQuantity: baseAddress?.restockQuantity,
+                        // priceOptions: baseAddress?.priceOptions,
                     }));
-
-                    setImgPreviwe(`http://localhost:8088/warehouse/${baseAddress?.icon}`)
-
-                    const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
-                    const state = State.getStatesOfCountry(selectedCountry?.isoCode);
-
-                    const stateName = state?.find(
-                        (item) => item?.name === baseAddress?.state
-                    );
-
-                    setCountryData((prev) => ({
-                        ...prev,
-                        stateList: state,
-                        countryName: selectedCountry?.name,
-                        countryISOCode: selectedCountry?.isoCode,
-                        stateName: stateName?.name,
-                        stateISOCode: stateName?.isoCode,
-                        cityName: baseAddress?.city,
-                    }));
-
+                    console.log("baseAddress?.priceOptions", baseAddress?.priceOptions);
+                    const filteredOptions = baseAddress?.priceOptions?.length > 0 ? baseAddress?.priceOptions?.map((item) => {
+                        return {
+                            price: item?.price,
+                            quantity: item?.quantity,
+                            unit: item?.unit
+                        }
+                    }) : []
+                    setSelectedPrices(filteredOptions)
                     setPageLoading(false)
-
                 } catch (error) {
                     setPageLoading(false)
-                    console.log("error in fetching vendor data");
+                    console.log("error in fetching stock data");
                 }
             }
             getBranch()
@@ -695,8 +672,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         async function getActiveBusinessUnit() {
-            console.log("yess");
-
             try {
                 const response = await warehouseService.getActiveBusinessUnit();
                 console.log("respone active", response);

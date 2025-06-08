@@ -58,7 +58,7 @@ const activeInActive = async ({ id, status, page, keyword: keyWord, perPage }) =
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/activeInactiveStock/`, { clientId, id, status, page, keyword: keyWord, perPage }, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/activeInactiveStock`, { clientId, id, status, page, keyword: keyWord, perPage }, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -84,6 +84,21 @@ const getAllStocks = async ( ) => {
 
 
 
+const getParticularStocks = async ( id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/Stock/${clientId}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
+
+
 
 
 
@@ -94,5 +109,6 @@ export default {
     deleteOne,
     activeInActive,
     update,
-    getAllStocks
+    getAllStocks,
+    getParticularStocks
 }

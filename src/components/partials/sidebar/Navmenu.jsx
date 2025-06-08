@@ -239,7 +239,7 @@ const Navmenu = ({ menus }) => {
           // Add the menu item to the result
           result.push({
             title: menu.name,
-            icon: "material-symbols:supervised-user-circle", // Customize icons if needed
+            icon: "material-symbols:mobile-arrow-down-outline-rounded", // Customize icons if needed
             child: childItems,
           });
         }

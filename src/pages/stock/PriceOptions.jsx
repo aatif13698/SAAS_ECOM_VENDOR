@@ -10,6 +10,8 @@ function PriceOptions({activePriceOptions, selectedFinding, setSelectedFinding, 
   const dispatch = useDispatch();
   //   const { needToClear: isClrar,  count : count  } = useSelector((state) => state.clearToothAndDiagnosisSlice);
 
+  console.log("activePriceOptions",activePriceOptions);
+  
 
   const [tags, setTags] = useState([]);
   const [inputValue, setInputValue] = useState('');
@@ -20,8 +22,8 @@ function PriceOptions({activePriceOptions, selectedFinding, setSelectedFinding, 
 
   useEffect(() => {
     setFilteredOptions(activePriceOptions);
-    setTags([]);
-    setSelectedFinding([])
+    // setTags([]);
+    // setSelectedFinding([])
   },[activePriceOptions])
 
 
