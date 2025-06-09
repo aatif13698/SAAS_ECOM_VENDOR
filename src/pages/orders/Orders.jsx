@@ -65,7 +65,7 @@ const Orders = ({ noFade, scrollContent }) => {
             ...provided,
             backgroundColor: isDark ? "#1E293B" : "#F8FAFC",
             borderColor: isDark ? "#334155" : "#CBD5E1",
-            color: isDark ? "#FFFFFF" : "#1E293B",
+            color: isDark ? "#FFFFFF" : "#FFFFFF",
             padding: "0.25rem",
             borderRadius: "0.375rem",
             minHeight: "2.5rem",
@@ -77,7 +77,7 @@ const Orders = ({ noFade, scrollContent }) => {
         menu: (provided) => ({
             ...provided,
             backgroundColor: isDark ? "#1E293B" : "#FFFFFF",
-            color: isDark ? "#FFFFFF" : "#1E293B",
+            color: isDark ? "#FFFFFF" : "#FFFFFF",
             zIndex: "99999",
             textAlign: "left",
         }),
@@ -100,17 +100,17 @@ const Orders = ({ noFade, scrollContent }) => {
         multiValue: (provided) => ({
             ...provided,
             backgroundColor: isDark ? "#3B82F6" : "#DBEAFE",
-            color: isDark ? "#FFFFFF" : "#1E293B",
+            color: isDark ? "#FFFFFF" : "#FFFFFF",
             textAlign: "left",
         }),
         multiValueLabel: (provided) => ({
             ...provided,
-            color: isDark ? "#FFFFFF" : "#1E293B",
+            color: isDark ? "#FFFFFF" : "#FFFFFF",
             textAlign: "left",
         }),
         multiValueRemove: (provided) => ({
             ...provided,
-            color: isDark ? "#FFFFFF" : "#1E293B",
+            color: isDark ? "#FFFFFF" : "#FFFFFF",
             "&:hover": {
                 backgroundColor: isDark ? "#2563EB" : "#BFDBFE",
                 color: "#FFFFFF",
