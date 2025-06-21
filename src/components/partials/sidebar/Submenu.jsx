@@ -113,7 +113,7 @@ const Submenu = ({ activeSubmenu, item, i }) => {
                 className={({ isActive }) =>
                   `flex items-center py-2 px-3 text-sm rounded-md transition-colors duration-150 ${
                     isActive
-                      ? "bg-emerald-500 text-white dark:bg-emerald-600"
+                      ? "bg-lightBtn text-white dark:bg-emerald-600"
                       : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                   }`
                 }

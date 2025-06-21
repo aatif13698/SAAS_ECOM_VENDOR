@@ -344,7 +344,7 @@ const Navmenu = ({ menus }) => {
           className={`single-sidebar-menu ${
             item.child ? "item-has-children" : ""
           } ${activeSubmenu === i ? "open" : ""} ${
-            isParentActive(item) ? "bg-emerald-100 dark:bg-emerald-900" : ""
+            isParentActive(item) ? "bg-emerald-100 dark:bg-lightBtn" : ""
           } rounded-md`}
         >
           {/* Single menu with no children */}
@@ -354,7 +354,7 @@ const Navmenu = ({ menus }) => {
               className={({ isActive }) =>
                 `menu-link flex items-center py-2 px-4 rounded-md transition-colors duration-150 ${
                   isActive
-                    ? "bg-red-500 text-white dark:bg-emerald-600"
+                    ? "bg-red-500 text-white dark:bg-lightBtn"
                     : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`
               }
@@ -374,7 +374,7 @@ const Navmenu = ({ menus }) => {
           {/* Menu label (header) */}
           {item.isHeadr && !item.child && (
             <div
-              className="menulabel py-2 px-4 text-sm font-semibold text-emerald-600 dark:text-emerald-400"
+              className="menulabel py-2 px-4 text-sm font-semibold text-lightBtn dark:text-emerald-400"
             >
               {item.title}
             </div>
@@ -386,7 +386,7 @@ const Navmenu = ({ menus }) => {
               type="button"
               className={`menu-link flex items-center justify-between py-2 px-4 rounded-md w-full text-left transition-colors duration-150 ${
                 isParentActive(item)
-                  ? "bg-emerald-500 text-white dark:bg-emerald-600"
+                  ? "bg-lightBtn text-white dark:bg-emerald-600"
                   : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               }`}
               onClick={() => toggleSubmenu(i)}
