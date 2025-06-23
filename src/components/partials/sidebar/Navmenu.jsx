@@ -260,9 +260,9 @@ const Navmenu = ({ menus }) => {
       }
     });
     setActiveSubmenu(submenuIndex);
-    if (mobileMenu) {
-      setMobileMenu(false);
-    }
+    // if (mobileMenu) {
+    //   setMobileMenu(false);
+    // }
   }, [location, menus, mobileMenu, setMobileMenu]);
 
   // Transform permissions to generate menu items

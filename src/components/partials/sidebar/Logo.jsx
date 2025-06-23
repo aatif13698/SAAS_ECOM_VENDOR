@@ -5,6 +5,8 @@ import useDarkMode from "@/hooks/useDarkMode";
 import useSidebar from "@/hooks/useSidebar";
 import useSemiDark from "@/hooks/useSemiDark";
 import useSkin from "@/hooks/useSkin";
+import logo from "../../../assets/images/logo/logo.png"
+import logoDark from "../../../assets/images/logo/aestree-logo-dark.png"
 
 
 const SidebarLogo = ({ menuHover }) => {
@@ -27,22 +29,14 @@ const SidebarLogo = ({ menuHover }) => {
       `}
     >
       <Link to="/dashboard">
-        <div className="flex items-center space-x-4">
-          <div className="logo-icon">
+        <div className="flex justify-center items-center space-x-4">
+          <div className="logo-icon flex justify-center ">
             {!isDark && !isSemiDark ? (
-              <img src="" alt="" className="w-10" />
+              <img src={logo} alt="" className="w-[90%] h-10" />
             ) : (
-              <img src="" alt="" className="w-10" />
+              <img src={logoDark} alt="" className="w-[90%] h-6"  />
             )}
           </div>
-
-          {(!collapsed || menuHover) && (
-            <div>
-              <h1 style={{color: isDark ?  "white" : "#019B88"}} className="text-xl font-semibold  dark:text-orange-500">
-                SAAS ECOM
-              </h1>
-            </div>
-          )}
         </div>
       </Link>
 

@@ -13,6 +13,7 @@ import useRtl from "@/hooks/useRtl";
 import useMobileMenu from "@/hooks/useMobileMenu";
 import MonoChrome from "./Tools/MonoChrome";
 import GoogleLanguage from "./Tools/GoogleLanguage";
+import logo from "../../../assets/images/logo/logo.png"
 
 const Header = ({ className = "custom-class" }) => {
   const [collapsed, setMenuCollapsed] = useSidebar();
@@ -81,7 +82,7 @@ const Header = ({ className = "custom-class" }) => {
                 </button>
               )}
               {width < breakpoints.xl && (
-                <img src="" alt="logo" className="w-12" />
+                <img src={logo} alt="logo" className="w-12" />
               )}
               {/* {width < breakpoints.xl && <Logo />} */}
               {/* open mobile menu handlaer*/}
