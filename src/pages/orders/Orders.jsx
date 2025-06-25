@@ -732,23 +732,18 @@ const Orders = ({ noFade, scrollContent }) => {
             selector: (row) => row?.orderNumber,
             sortable: true,
             style: {
-                width: "150px", // Fixed width to prevent overflow
-                minWidth: "150px",
-                maxWidth: "150px",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
+                 width: "auto",
             },
             cell: (row) => (
                 <div
-                    className="truncate"
+                    // className="truncate"
                     title={row?.orderNumber} // Tooltip for full text on hover
-                    style={{
-                        width: "150px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                    }}
+                    // style={{
+                    //     width: "150px",
+                    //     overflow: "hidden",
+                    //     textOverflow: "ellipsis",
+                    //     whiteSpace: "nowrap",
+                    // }}
                 >
                     {row?.orderNumber}
                 </div>
