@@ -50,7 +50,8 @@ const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
 
 const Orders = lazy(() => import("./pages/orders/Orders"));
 const ViewOrder = lazy(() => import("./pages/orders/ViewOrder"));
-const CreateOrder = lazy(() => import("./pages/orders/CreateOrder"))
+const CreateOrder = lazy(() => import("./pages/orders/CreateOrder"));
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"))
 
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
@@ -133,6 +134,9 @@ function App() {
                   path="*"
                   element={<Error roleId={currentUser?.roleId} />}
                 />
+
+                <Route path="dashboard" element={<Dashboard />} />
+
 
 
                 {/* ---- Profile Routes ----- */}
