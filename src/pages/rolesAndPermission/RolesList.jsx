@@ -310,7 +310,7 @@ function RoleList({ noFade }) {
                                             />
                                         </div>
                                     </div>
-                                    <div className='overflow-x-auto px-5 pb-5'>
+                                    <div className='overflow-x-auto  '>
                                         <table className="min-w-full  ">
                                             <thead className="bg-lightBtn dark:bg-darkBtn text-white sticky top-0">
                                                 <tr className="border-b border-dashed border-lighttableBorderColor">

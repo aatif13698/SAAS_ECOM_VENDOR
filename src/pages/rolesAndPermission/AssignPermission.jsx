@@ -321,7 +321,7 @@ function AssignPermission() {
                                         </div>
                                     </div>
 
-                                    <div className='overflow-x-auto px-4'>
+                                    <div className='overflow-x-auto '>
                                         <table className="min-w-full mt-5">
                                             <thead className="bg-lightBtn dark:bg-darkBtn dark:text-white sticky top-0">
                                                 <tr className="border-b border-dashed border-lighttableBorderColor">

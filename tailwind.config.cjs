@@ -140,7 +140,7 @@ module.exports = {
         darkAccent: "#0a292b",
 
 
-        darkBtn: "rgb(110 147 143)",
+        darkBtn: "#059669",
         lightBtn : "rgb(4 203 182)",
         lightBtnHover : "#000000",
         darkBtnHover : "rgb(206 206 206)",

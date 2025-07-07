@@ -32,9 +32,9 @@ const SidebarLogo = ({ menuHover }) => {
         <div className="flex justify-center items-center space-x-4">
           <div className="logo-icon flex justify-center ">
             {!isDark && !isSemiDark ? (
-              <img src={logo} alt="" className="w-[90%] h-10" />
+              <img src={logo} alt="" className="w-[90%] h-10 object-contain" />
             ) : (
-              <img src={logoDark} alt="" className="w-[90%] h-6"  />
+              <img src={logoDark} alt="" className="w-[90%] h-6 object-contain"  />
             )}
           </div>
         </div>

@@ -61,7 +61,7 @@ const tableConfigure = () => {
         // headcell
         headCells: {
             style: {
-                backgroundColor: isDark ? "rgb(0 116 117 / var(--tw-bg-opacity))" : "",  //its is darkAccent backgroundColor
+                backgroundColor: isDark ? "#059669" : "",  //its is darkAccent backgroundColor
                 color: isDark
                     ? "rgb(203 213 225 / var(--tw-text-opacity))"
                     : "rgb(71 85 105 / var(--tw-text-opacity))",

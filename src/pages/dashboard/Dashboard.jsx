@@ -128,7 +128,7 @@ const Dashboard = () => {
 
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
             Total Sales
           </h3>
@@ -136,7 +136,7 @@ const Dashboard = () => {
             {metrics.totalSales}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
             Total Orders
           </h3>
@@ -144,7 +144,7 @@ const Dashboard = () => {
             {metrics.totalOrders}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
             Revenue
           </h3>
@@ -152,10 +152,8 @@ const Dashboard = () => {
             ${metrics.revenue.toLocaleString()}
           </p>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
-            Active Customers
-          </h3>
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
+         
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
             Active Customers
           </h3>
@@ -167,7 +165,7 @@ const Dashboard = () => {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
             Sales Over Time
           </h3>
@@ -175,7 +173,7 @@ const Dashboard = () => {
             <Line data={salesData} options={chartOptions} />
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
             Top Products
           </h3>
@@ -186,7 +184,7 @@ const Dashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
             Order Status
           </h3>
@@ -194,7 +192,7 @@ const Dashboard = () => {
             <Pie data={orderStatusData} options={chartOptions} />
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
           <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
             Recent Orders
           </h3>
@@ -259,7 +257,7 @@ const Dashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-md p-6">
         <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-4">
           Quick Actions
         </h3>

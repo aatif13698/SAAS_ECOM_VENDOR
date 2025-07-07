@@ -22,7 +22,7 @@ const CreateEmployee = lazy(() => import("./pages/employee/CreateEmployee"));
 const Employee = lazy(() => import("./pages/employee/Employee"));
 
 const CreateCustomer = lazy(() => import("./pages/customer/CreateCustomer"));
-const CreateCustomerAddress = lazy(() =>  import("./pages/customer/CreateCustomerAddress"));
+const CreateCustomerAddress = lazy(() => import("./pages/customer/CreateCustomerAddress"));
 const Customer = lazy(() => import("./pages/customer/Customer"));
 
 
@@ -43,7 +43,7 @@ const Pricing = lazy(() => import("./pages/pricing/pricing"));
 
 
 const Supplier = lazy(() => import("./pages/supplier/Supplier"));
-const CreateSupplier = lazy(() =>  import("./pages/supplier/CreateSupplier"));
+const CreateSupplier = lazy(() => import("./pages/supplier/CreateSupplier"));
 
 const Stock = lazy(() => import("./pages/stock/Srock"));
 const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
@@ -144,7 +144,7 @@ function App() {
                 <Route path="viewProfile" element={<ViewProfile />} />
                 <Route path="business-unit" element={<BusinessUnit />} />
                 {/* <Route path="vendors-list" element={<Vendors roleId={currentUser?.roleId} />} /> */}
-               <Route path="create-vendor" element={<CreateVendor roleId={currentUser?.roleId} />} />
+                <Route path="create-vendor" element={<CreateVendor roleId={currentUser?.roleId} />} />
                 <Route path="category" element={<Category />} />
 
 
@@ -176,13 +176,13 @@ function App() {
                 <Route path="product-list" element={<ProductBluePrint />} />
                 <Route path="create-product" element={<CreateProductBluePrint />} />
                 <Route path="pricing-list" element={<Pricing />} />
-                <Route path="supplier-list" element={<Supplier/>} />
-                <Route path="create-supplier" element={<CreateSupplier/>} />
-                <Route path="stock-list" element={<Stock/>} />
-                <Route path="create-stock" element={<CreateStock/>} />
-                <Route path="order-list" element={<Orders/>} />
-                <Route path="order-view" element={<ViewOrder/>} />
-                <Route path="create-order" element={<CreateOrder/>} />
+                <Route path="supplier-list" element={<Supplier />} />
+                <Route path="create-supplier" element={<CreateSupplier />} />
+                <Route path="stock-list" element={<Stock />} />
+                <Route path="create-stock" element={<CreateStock />} />
+                <Route path="order-list" element={<Orders />} />
+                <Route path="order-view" element={<ViewOrder />} />
+                <Route path="create-order" element={<CreateOrder />} />
 
 
 
