@@ -17,6 +17,7 @@ import IconImg from "../../assets/images/aestree-logo.png"
 import tableConfigure from '../common/tableConfigure';
 import AttributeValue from './AttributeValue';
 import attributeService from '@/services/attribute/attribute.service';
+import productBlueprintService from '@/services/productBlueprint/productBlueprint.service';
 
 
 
@@ -43,7 +44,6 @@ function Attribute({ centered, noFade, scrollContent }) {
     const [showModal, setShowModal] = useState(false);
     const [activeCategory, setActiveCategory] = useState([]);
     const [activeSubCategory, setActiveSubCategory] = useState([]);
-
     const [selectedAttributeValue, setSelectedAttributeValue] = useState([])
 
     console.log("selectedAttributeValue", selectedAttributeValue);
@@ -52,31 +52,38 @@ function Attribute({ centered, noFade, scrollContent }) {
         setShowLoadingModal(false);
     };
 
+    const [attribute, setAttribute] = useState({
+        name: "",
+        description: "",
+    });
+
+    console.log("attribute", attribute);
+
+    const [activeProductBlueprint, setActiveProductBlueprint] = useState([]);
+    
+
+
+    const [attributeError, setAttributeError] = useState({});
+
+    const [attributeArray, setAttributeArray] = useState([]);
+
+    console.log("attributeError", attributeError);
+
+
 
     const [formData, setFormData] = useState({
-        categoryId: "",
-        subCategoryId: "",
-        name: "",
-        description: "",
-        values: "",
+        productId: "",
     });
-    console.log("formData subcategory", formData);
 
     const [formDataErr, setFormDataErr] = useState({
-        categoryId: "",
-        subCategoryId: "",
-        name: "",
-        description: "",
-        values: "",
+        productId: "",
     });
     console.log("formDataErr", formDataErr);
 
     const {
+        productId,
         categoryId,
         subCategoryId,
-        name,
-        description,
-        values
     } = formData;
 
     useEffect(() => {
@@ -174,10 +181,7 @@ function Attribute({ centered, noFade, scrollContent }) {
     function handleChange(e) {
         const { name, value } = e.target;
         const errorMessages = {
-            name: "Name is Required",
-            description: "Description is Required",
-            categoryId: "Category is required",
-            subCategoryId: "Subcategory is required",
+            productId : "Product id is required.",
         };
         setFormDataErr((prev) => ({
             ...prev,
@@ -189,14 +193,68 @@ function Attribute({ centered, noFade, scrollContent }) {
         }));
     }
 
+
+    useEffect(() => {
+        if (selectedAttributeValue.length == 0) {
+            setAttributeError((prev) => ({
+                ...prev,
+                ["values"]: "Values are required."
+            }))
+        } else {
+            setAttributeError((prev) => ({
+                ...prev,
+                ["values"]: ""
+            }))
+        }
+    }, [selectedAttributeValue])
+
+
+
+    function handleSaveAndMore(e) {
+        e.preventDefault();
+        let errorCount = 0;
+        const errors = {};
+        const { name, description } = attribute;
+        if (!name) {
+            errorCount++
+            errors["name"] = "Name is required."
+        } else {
+            errors["name"] = ""
+        }
+        if (!description) {
+            errorCount++
+            errors["description"] = "Description is required."
+        } else {
+            errors["description"] = ""
+        }
+        if (selectedAttributeValue.length == 0) {
+            errorCount++
+            errors["values"] = "Values are required."
+        } else {
+            errors["values"] = ""
+        }
+
+
+        setAttributeError(errors);
+
+        if (errorCount == 0) {
+            setAttributeArray((prev) => ([...prev, {
+                name: name,
+                description: description,
+                values: selectedAttributeValue
+            }]));
+            setSelectedAttributeValue([])
+            setAttribute({
+                name: "",
+                description: "",
+            });
+        }
+
+    }
+
     function validation() {
         const fieldErrors = {
-            name: "Name is Required",
-            description: "Description is Required",
-            categoryId: "Category is required",
-            subCategoryId: "Subcategory is required",
-            // values: "Value is required"
-
+            productId: "Product id is required",
         };
         let errorCount = 0;
         const errors = {};
@@ -208,37 +266,31 @@ function Attribute({ centered, noFade, scrollContent }) {
                 errors[field] = "";
             }
         });
-        if (selectedAttributeValue.length == 0) {
-            errorCount++
-            errors["values"] = "Value is required"
-        } else {
-            errors["values"] = ""
+
+        if (attributeArray.length == 0) {
+            errorCount++;
         }
         setFormDataErr((prev) => ({
             ...prev,
             ...errors,
         }));
 
-        console.log("errorCount",errorCount);
-        
+        console.log("errorCount aa", errorCount);
+
         return errorCount > 0;
     }
 
     async function handleSubmit(e) {
         e.preventDefault();
         const isError = validation();
-        console.log("isError",isError);
-        
+        console.log("isError", isError);
+
         if (!isError) {
             const clientId = localStorage.getItem("saas_client_clientId");
-
             let dataObject = {
                 clientId: clientId,
-                categoryId: categoryId,
-                subCategoryId: subCategoryId,
-                name: name,
-                description: description,
-                values: selectedAttributeValue
+                productId: productId,
+                attributes: attributeArray
             }
 
             setLoading(true)
@@ -246,7 +298,7 @@ function Attribute({ centered, noFade, scrollContent }) {
                 console.log("222");
                 dataObject = {
                     ...dataObject,
-                    attributesId : id
+                    attributesId: id
                 }
                 try {
                     const response = await attributeService.update(dataObject)
@@ -259,7 +311,6 @@ function Attribute({ centered, noFade, scrollContent }) {
                 }
             } else {
                 try {
-                    
                     const response = await attributeService?.create(dataObject);
                     closeModal()
                     toast.success(response.data.message)
@@ -280,19 +331,15 @@ function Attribute({ centered, noFade, scrollContent }) {
         setId(id)
         setFormData((prev) => ({
             ...prev,
-            name: row?.name,
-            description: row?.description,
-            categoryId: row?.categoryId,
-            subCategoryId: row?.subCategoryId
+            productId: row?.productId?._id,
+           
         }));
-        setSelectedAttributeValue(row.values)
         setFormDataErr((prev) => ({
             ...prev,
-            name: "",
-            description: "",
-            categoryId: "",
-            subCategoryId: ""
-        }))
+            productId: "",
+            
+        }));
+        setAttributeArray(row?.attributes);
         setShowLoadingModal(false)
         openModal()
     };
@@ -304,18 +351,15 @@ function Attribute({ centered, noFade, scrollContent }) {
         setId(id)
         setFormData((prev) => ({
             ...prev,
-            name: row?.name,
-            description: row?.description,
-            categoryId: row?.categoryId,
-            subCategoryId: row?.subCategoryId
+            productId: row?.productId?._id,
+           
         }));
-        setSelectedAttributeValue(row.values)
+        setAttributeArray(row?.attributes);
+
         setFormDataErr((prev) => ({
             ...prev,
-            name: "",
-            description: "",
-            categoryId: "",
-            subCategoryId: ""
+            productId: "",
+          
         }))
     };
 
@@ -379,14 +423,19 @@ function Attribute({ centered, noFade, scrollContent }) {
 
     const columns = [
         {
-            name: "Name",
-            selector: (row) => row.name,
-            sortable: true,
+            name: "Product Name",
+            selector: (row) => row?.productId?.name,
         },
+       
         {
-            name: "Description",
-            selector: (row) => row.description,
+            name: "Attributes",
+            selector: (row) => {
+                const attributeArray = row?.attributes?.map((item) => item?.name);
+                const nameString = attributeArray.join(", ");
+                return nameString
+            },
         },
+
         {
             name: "Status",
             sortable: true,
@@ -471,6 +520,7 @@ function Attribute({ centered, noFade, scrollContent }) {
 
     useEffect(() => {
         getAllActiveCategory()
+        getActiveProducctBlueprint()
     }, [])
 
     async function getAllActiveCategory() {
@@ -481,6 +531,15 @@ function Attribute({ centered, noFade, scrollContent }) {
             console.log("error in getting active category", error);
         }
     }
+
+     async function getActiveProducctBlueprint() {
+            try {
+                const response = await productBlueprintService.getActive();
+                setActiveProductBlueprint(response.data.roductBluePrints)
+            } catch (error) {
+                console.log("error in getting active", error);
+            }
+        }
 
 
     async function getAllList(data) {
@@ -632,7 +691,31 @@ function Attribute({ centered, noFade, scrollContent }) {
 
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
-                                                <div className=''
+                                                 <div className='md:col-span-2'
+                                                >
+                                                    <label >
+                                                        <p className="form-label">
+                                                            Product <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="productId"
+                                                        value={productId}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeProductBlueprint &&
+                                                            activeProductBlueprint?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item && item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-red-600  text-xs"> {formDataErr.productId}</p>}
+
+                                                </div>
+                                                {/* <div className=''
                                                 >
                                                     <label >
                                                         <p className="form-label">
@@ -655,8 +738,8 @@ function Attribute({ centered, noFade, scrollContent }) {
                                                     </select>
                                                     {<p className="text-red-600  text-xs"> {formDataErr.categoryId}</p>}
 
-                                                </div>
-                                                <div className=''
+                                                </div> */}
+                                                {/* <div className=''
                                                 >
                                                     <label >
                                                         <p className="form-label">
@@ -679,8 +762,8 @@ function Attribute({ centered, noFade, scrollContent }) {
                                                     </select>
                                                     {<p className="text-red-600  text-xs"> {formDataErr.subCategoryId}</p>}
 
-                                                </div>
-                                                <div className="col-span-2">
+                                                </div> */}
+                                                {/* <div className="col-span-2">
                                                     <label>
                                                         <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
                                                             Name <span className="text-red-500">*</span>
@@ -696,19 +779,19 @@ function Attribute({ centered, noFade, scrollContent }) {
                                                         />
                                                         {<p className="text-red-600  text-xs"> {formDataErr.name}</p>}
                                                     </label>
-                                                </div>
-                                                <div className="col-span-2">
+                                                </div> */}
+                                                {/* <div className="col-span-2">
                                                     <label>
                                                         <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
                                                             Value<span className="text-red-500">*</span>
                                                         </p>
 
-                                                        <AttributeValue  selectedFinding={selectedAttributeValue} setSelectedFinding={setSelectedAttributeValue} isViewed={isViewed} />
+                                                        <AttributeValue selectedFinding={selectedAttributeValue} setSelectedFinding={setSelectedAttributeValue} isViewed={isViewed} />
 
                                                         {<p className="text-red-600  text-xs"> {formDataErr.values}</p>}
                                                     </label>
-                                                </div>
-                                                <div className="md:col-span-2">
+                                                </div> */}
+                                                {/* <div className="md:col-span-2">
                                                     <label style={{ marginBottom: "4px" }}>
                                                         <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
                                                             Description <span className="text-red-500">*</span>
@@ -725,8 +808,185 @@ function Attribute({ centered, noFade, scrollContent }) {
                                                         onChange={handleChange}
                                                     ></textarea>
                                                     {<p className="text-red-600  text-xs"> {formDataErr.description}</p>}
-                                                </div>
+                                                </div> */}
                                             </div>
+
+                                            {
+                                                isViewed ? "" :
+                                                    <div className=" my-4 bg-gray-300/80 dark:bg-darkAccent rounded-md mx-2 px-2">
+                                                        <div className="grid grid-cols-1 md:grid-cols-2   my-4 py-2 px-2  gap-5 ">
+                                                            <div className="col-span-2">
+                                                                <label>
+                                                                    <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                                                        Name <span className="text-red-500">*</span>
+                                                                    </p>
+                                                                    <input
+                                                                        name="name"
+                                                                        type="text"
+                                                                        value={attribute?.name}
+                                                                        placeholder="Enter name"
+                                                                        onChange={(e) => {
+                                                                            const { name, value } = e.target;
+                                                                            setAttribute((prev) => ({
+                                                                                ...prev,
+                                                                                [name]: value,
+                                                                            }));
+                                                                            if (!value) {
+                                                                                setAttributeError((prev) => ({
+                                                                                    ...prev,
+                                                                                    [name]: "Name is required"
+                                                                                }))
+                                                                            } else {
+                                                                                setAttributeError((prev) => ({
+                                                                                    ...prev,
+                                                                                    [name]: ""
+                                                                                }))
+                                                                            }
+                                                                        }}
+                                                                        readOnly={isViewed}
+                                                                        className="form-control py-2"
+                                                                    />
+                                                                    {<p className="text-red-600  text-xs"> {attributeError?.name ? attributeError?.name : ""}</p>}
+                                                                </label>
+                                                            </div>
+
+                                                            <div className="md:col-span-2">
+                                                                <label style={{ marginBottom: "4px" }}>
+                                                                    <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                                                        Description <span className="text-red-500">*</span>
+                                                                    </p>
+                                                                </label>
+                                                                <textarea
+                                                                    name='description'
+                                                                    className={` form-control py-2 `}
+                                                                    placeholder="Enter description"
+                                                                    rows={3}
+                                                                    disabled={isViewed}
+                                                                    value={attribute?.description}
+                                                                    onChange={(e) => {
+                                                                        const { name, value } = e.target;
+                                                                        setAttribute((prev) => ({
+                                                                            ...prev,
+                                                                            [name]: value,
+                                                                        }));
+                                                                        if (!value) {
+                                                                            setAttributeError((prev) => ({
+                                                                                ...prev,
+                                                                                [name]: "Description is required"
+                                                                            }))
+                                                                        } else {
+                                                                            setAttributeError((prev) => ({
+                                                                                ...prev,
+                                                                                [name]: ""
+                                                                            }))
+                                                                        }
+                                                                    }}
+                                                                ></textarea>
+                                                                {<p className="text-red-600  text-xs"> {attributeError?.description ? attributeError?.description : ""}</p>}
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <label>
+                                                                    <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                                                        Value<span className="text-red-500">*</span>
+                                                                    </p>
+
+                                                                    <AttributeValue selectedFinding={selectedAttributeValue} setSelectedFinding={setSelectedAttributeValue} isViewed={isViewed} />
+
+                                                                    {<p className="text-red-600  text-xs"> {attributeError?.values ? attributeError?.values : ""}</p>}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex justify-end py-2 px-2 ">
+                                                            <button
+                                                                onClick={handleSaveAndMore}
+                                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                                            >
+                                                                Save & Add more
+                                                            </button>
+                                                        </div>
+
+                                                    </div>
+                                            }
+
+
+                                            {
+                                                attributeArray && attributeArray?.length > 0 ?
+                                                    <div className='overflow-x-auto my-4 px-2'>
+                                                        <table className="min-w-full ">
+                                                            <thead className="bg-[#C9FEFF] dark:bg-darkBtn dark:text-white sticky top-0">
+                                                                <tr className="border-b border-dashed border-lighttableBorderColor">
+                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                        Name
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                        Description
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                        Values
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-3 text-end text-xs font-semibold  tracking-wider">
+                                                                        Action
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="bg-white dark:bg-darkAccent">
+                                                                {attributeArray && attributeArray.length > 0 ? (
+                                                                    attributeArray.map((item, ind) => {
+                                                                        const valuesArray = item.values.map((items) => items.valueName)
+                                                                        const valuesString = valuesArray.join(", ");
+                                                                        return (
+                                                                            <tr key={ind} className="border-b border-dashed border-lighttableBorderColor">
+                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                    {item.name}
+                                                                                </td>
+                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                    {item.description}
+                                                                                </td>
+                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                    {valuesString}
+                                                                                </td>
+                                                                                <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-tableTextColor">
+                                                                                    <div className="flex justify-end text-lg space-x-5 rtl:space-x-reverse">
+                                                                                        <Tooltip
+                                                                                            content="Delete"
+                                                                                            placement="top"
+                                                                                            arrow
+                                                                                            animation="shift-away"
+                                                                                            theme="danger"
+                                                                                        >
+                                                                                            <button
+                                                                                                className="action-btn"
+                                                                                                type="button"
+                                                                                                disabled={isViewed}
+                                                                                                onClick={() => {
+                                                                                                    const updatedArray = [...attributeArray];
+                                                                                                    updatedArray.splice(ind, 1);
+                                                                                                    setAttributeArray(updatedArray);
+                                                                                                }}
+                                                                                            >
+                                                                                                <Icons icon="heroicons:trash" />
+                                                                                            </button>
+                                                                                        </Tooltip>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                        )
+                                                                    })
+                                                                ) : (
+                                                                    <tr>
+                                                                        <td colSpan="4" className="px-6 py-4 text-center text-lg font-medium text-lightModalHeaderColor">
+                                                                            NO DATA FOUND
+                                                                        </td>
+                                                                    </tr>
+                                                                )}
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                    : ""
+                                            }
+
+
                                         </div>
 
                                         {(

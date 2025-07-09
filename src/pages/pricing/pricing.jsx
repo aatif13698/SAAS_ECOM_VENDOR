@@ -17,6 +17,7 @@ import IconImg from "../../assets/images/aestree-logo.png"
 import tableConfigure from '../common/tableConfigure';
 import productBlueprintService from '@/services/productBlueprint/productBlueprint.service';
 import priceService from '@/services/price/price.service';
+import attributeService from '@/services/attribute/attribute.service';
 
 
 
@@ -57,11 +58,6 @@ function Pricing({ centered, noFade, scrollContent }) {
     const [customFormArray, setCustomFormArray] = useState([]);
     const [isErrorInCustomForm, setIsErrorInCustomForm] = useState(false);
 
-    console.log("paginationData", paginationData);
-
-
-
-
 
     function handleSaveAndMore(e) {
         e.preventDefault()
@@ -86,10 +82,14 @@ function Pricing({ centered, noFade, scrollContent }) {
     }
 
 
+    const [attributesPriceArray, setAttributesPriceArray] = useState([]);
+    const [attributesArray, setAttributesArray] = useState([])
+    console.log("attributesPriceArray", attributesPriceArray);
+
+
     const [formData, setFormData] = useState({
         product: "",
     });
-    console.log("formData subcategory", formData);
 
     const [formDataErr, setFormDataErr] = useState({
         product: "",
@@ -102,6 +102,94 @@ function Pricing({ centered, noFade, scrollContent }) {
         categoryId,
         product
     } = formData;
+
+    const generateCombinations = (attributes) => {
+        const values = attributes.map((attr) => ({
+            name: attr.name,
+            values: attr.values.map((v) => v.valueName),
+        }));
+
+        const combine = (index, current, result) => {
+            if (index === values.length) {
+                result.push({ attributes: { ...current }, price: '' });
+                return;
+            }
+            const { name, values: attrValues } = values[index];
+            attrValues.forEach((value) => {
+                current[name] = value;
+                combine(index + 1, current, result);
+            });
+        };
+
+        const combinations = [];
+        combine(0, {}, combinations);
+        return combinations;
+    };
+
+    const getCombinationColumns = () => {
+       
+        
+        
+        const attributeColumns = attributesArray.map((attr) => ({
+            name: attr.name,
+            selector: (row) => row.attributes[attr.name] || 'N/A',
+            sortable: true,
+        }));
+        return [
+            ...attributeColumns,
+            {
+                name: 'Price (₹)',
+                selector: (row, index) => (
+                    <input
+                        type="number"
+                        value={row.price}
+                        onChange={(e) => handlePriceChange(index, e.target.value)}
+                        disabled={isViewed}
+                        className={`form-control py-1 px-2 border rounded-md w-24 ${isDark ? 'bg-darkInput text-white border-darkSecondary' : 'bg-white border-lightborderInputColor'
+                            } ${isErrorInCustomForm && !row.price ? 'border-red-500' : ''}`}
+                        placeholder="Enter price"
+                        min="0"
+                        step="0.01"
+                        aria-label={`Price for ${Object.values(row.attributes).join('/')}`}
+                    />
+                ),
+            },
+        ];
+    };
+
+
+    const handlePriceChange = (index, value) => {
+        if (value && (isNaN(value) || value < 0)) {
+            toast.error('Price must be a positive number');
+            return;
+        }
+        setAttributesPriceArray((prev) => {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], price: value };
+            return updated;
+        });
+        setIsErrorInCustomForm(false);
+    };
+
+    useEffect(() => {
+        if (product) {
+            console.log("product ad", product);
+            getAttributesOfProduct(product)
+        }
+        async function getAttributesOfProduct(product) {
+            try {
+                const response = await attributeService.getAttributesOfProduct(product);
+                setAttributesArray(response?.data?.attributes)
+                const combinations = generateCombinations(response?.data?.attributes);
+                console.log("combinations", combinations);
+                setAttributesPriceArray(combinations);
+
+
+            } catch (error) {
+                console.log("error while fetching attribute of product", error);
+            }
+        }
+    }, [product])
 
     const closeModal = () => {
         setShowModal(false);
@@ -312,9 +400,9 @@ function Pricing({ centered, noFade, scrollContent }) {
         }
     }
 
-   
 
-   
+
+
 
     const columns = [
         {
@@ -599,7 +687,7 @@ function Pricing({ centered, noFade, scrollContent }) {
                                             className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                                         >
                                             <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-                                                Create Category
+                                                Create Pricing
                                             </h2>
                                             <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                                                 <Icon icon="heroicons-outline:x" />
@@ -640,167 +728,21 @@ function Pricing({ centered, noFade, scrollContent }) {
 
                                             </div>
 
-                                            {
-                                                isViewed ? "" :
-                                                    <div className=" my-4  px-2">
-                                                        <div className="grid grid-cols-1 md:grid-cols-2   my-4 py-2 px-2  gap-5 ">
-                                                            <label className={`fromGroup   `}>
-                                                                <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
-                                                                    Unit <span className="text-red-500">*</span>
-                                                                </p>
-                                                                <input
-                                                                    name="unit"
-                                                                    type="text"
-                                                                    value={customiseableFormData.unit}
-                                                                    placeholder="Enter unit"
-                                                                    onChange={(e) => {
-                                                                        const { name, value } = e.target;
-                                                                        setCustomiseableFormData((prev) => ({
-                                                                            ...prev,
-                                                                            [name]: value,
-                                                                        }))
-                                                                    }}
-                                                                    readOnly={isViewed}
-                                                                    className="form-control py-2"
-                                                                />
-                                                                {/* {<p className="text-red-600  text-xs"> {formDataErr.isCustomizable}</p>} */}
-                                                            </label>
-                                                            <label className={`fromGroup   `}>
-                                                                <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
-                                                                    Quantity <span className="text-red-500">*</span>
-                                                                </p>
-                                                                <input
-                                                                    name="quantity"
-                                                                    type="number"
-                                                                    value={customiseableFormData.quantity}
-                                                                    placeholder="Enter quantity"
-                                                                    onChange={(e) => {
-                                                                        const { name, value } = e.target;
-                                                                        setCustomiseableFormData((prev) => ({
-                                                                            ...prev,
-                                                                            [name]: value,
-                                                                        }))
-                                                                    }}
-                                                                    readOnly={isViewed}
-                                                                    className="form-control py-2"
-                                                                />
-                                                                {/* {<p className="text-red-600  text-xs"> {formDataErr.isCustomizable}</p>} */}
-                                                            </label>
-
-                                                            <label className={`fromGroup   `}>
-                                                                <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
-                                                                    Price <span className="text-red-500">*</span>
-                                                                </p>
-                                                                <input
-                                                                    name="price"
-                                                                    type="number"
-                                                                    value={customiseableFormData.price}
-                                                                    placeholder="Enter price"
-                                                                    onChange={(e) => {
-                                                                        const { name, value } = e.target;
-                                                                        setCustomiseableFormData((prev) => ({
-                                                                            ...prev,
-                                                                            [name]: value,
-                                                                        }))
-                                                                    }}
-                                                                    readOnly={isViewed}
-                                                                    className="form-control py-2"
-                                                                />
-                                                                {/* {<p className="text-red-600  text-xs"> {formDataErr.isCustomizable}</p>} */}
-                                                            </label>
-                                                        </div>
-
-                                                        <div className="flex justify-end py-2 px-2 ">
-                                                            <button
-                                                                onClick={handleSaveAndMore}
-                                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                                            >
-                                                                Save & Add more
-                                                            </button>
-                                                        </div>
-
-                                                    </div>
-                                            }
-
-
-                                            <div>
-                                                {
-                                                    customFormArray && customFormArray?.length > 0 ?
-                                                        <div className='overflow-x-auto my-4 px-2'>
-                                                            <table className="min-w-full ">
-                                                                <thead className="bg-[#C9FEFF] dark:bg-darkBtn dark:text-white sticky top-0">
-                                                                    <tr className="border-b border-dashed border-lighttableBorderColor">
-                                                                        <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
-                                                                            Unit
-                                                                        </th>
-                                                                        <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
-                                                                            Quantity
-                                                                        </th>
-                                                                        <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
-                                                                            Price
-                                                                        </th>
-                                                                        <th scope="col" className="px-6 py-3 text-end text-xs font-semibold  tracking-wider">
-                                                                            Action
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody className="bg-white dark:bg-darkAccent">
-                                                                    {customFormArray && customFormArray.length > 0 ? (
-                                                                        customFormArray.map((item, ind) => {
-                                                                            // const newArr = item.selectOptions.map((items) => items.valueName)
-                                                                            // const optionsString = newArr.join(", ");
-                                                                            return (
-                                                                                <tr key={ind} className="border-b border-dashed border-lighttableBorderColor">
-                                                                                    <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
-                                                                                        {item.unit}
-                                                                                    </td>
-                                                                                    <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
-                                                                                        {item.quantity}
-                                                                                    </td>
-                                                                                    <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
-                                                                                        {item.price}
-                                                                                    </td>
-                                                                                    <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-tableTextColor">
-                                                                                        <div className="flex justify-end text-lg space-x-5 rtl:space-x-reverse">
-                                                                                            <Tooltip
-                                                                                                content="Delete"
-                                                                                                placement="top"
-                                                                                                arrow
-                                                                                                animation="shift-away"
-                                                                                                theme="danger"
-                                                                                            >
-                                                                                                <button
-                                                                                                    className="action-btn"
-                                                                                                    type="button"
-                                                                                                    disabled={isViewed}
-                                                                                                    onClick={() => {
-                                                                                                        const updatedArray = [...customFormArray];
-                                                                                                        updatedArray.splice(ind, 1);
-                                                                                                        setCustomFormArray(updatedArray);
-                                                                                                    }}
-                                                                                                >
-                                                                                                    <Icons icon="heroicons:trash" />
-                                                                                                </button>
-                                                                                            </Tooltip>
-                                                                                        </div>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            )
-                                                                        })
-                                                                    ) : (
-                                                                        <tr>
-                                                                            <td colSpan="4" className="px-6 py-4 text-center text-lg font-medium text-lightModalHeaderColor">
-                                                                                NO DATA FOUND
-                                                                            </td>
-                                                                        </tr>
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                        : ""
-                                                }
-                                            </div>
-
+                                            {attributesPriceArray.length > 0 && (
+                                                <div>
+                                                    <label className="form-label">Price Combinations</label>
+                                                    <DataTable
+                                                        columns={getCombinationColumns()}
+                                                        data={attributesPriceArray}
+                                                        customStyles={customStyles}
+                                                        highlightOnHover
+                                                        noDataComponent={<p>No combinations available</p>}
+                                                    />
+                                                    {isErrorInCustomForm && (
+                                                        <p className="text-red-600 text-xs">Please enter valid prices for all combinations</p>
+                                                    )}
+                                                </div>
+                                            )}
 
                                         </div>
 
@@ -907,3 +849,4 @@ function Pricing({ centered, noFade, scrollContent }) {
 }
 
 export default Pricing
+

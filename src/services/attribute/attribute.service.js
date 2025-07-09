@@ -44,6 +44,21 @@ const getAllList = async ({ page, keyword, perPage }) => {
     return response.data
 }
 
+
+// get attribute of product
+const getAttributesOfProduct = async (productId) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/attribute/attributes/product/${clientId}/${productId}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
 const deleteOne = async ({ id, page, keyword: keyWord, perPage }) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -108,5 +123,6 @@ export default {
     activeInActive,
     update,
     getAllActiveCategory,
-    getAllSubCategoryByCategory
+    getAllSubCategoryByCategory,
+    getAttributesOfProduct
 }

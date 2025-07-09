@@ -627,7 +627,7 @@ function SubCategory({ centered, noFade, scrollContent }) {
                                             className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                                         >
                                             <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-                                                Create Category
+                                                Create Subcategory
                                             </h2>
                                             <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                                                 <Icon icon="heroicons-outline:x" />

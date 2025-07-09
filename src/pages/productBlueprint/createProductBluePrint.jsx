@@ -112,7 +112,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
         subCategoryId: "",
         brandId: "",
         manufacturerId: "",
-        attributeId: "",
+        // attributeId: "",
         name: "",
         description: "",
         price: "",
@@ -127,7 +127,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
         subCategoryId: "",
         brandId: "",
         manufacturerId: "",
-        attributeId: "",
+        // attributeId: "",
         name: "",
         description: "",
         price: "",
@@ -143,7 +143,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
         subCategoryId,
         brandId,
         manufacturerId,
-        attributeId,
+        // attributeId,
         name,
         description,
         taxRate,
@@ -215,19 +215,19 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 }))
             }
         }
-        if (name == "attributeId") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    attributeId: "Attribute is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    attributeId: ""
-                }))
-            }
-        }
+        // if (name == "attributeId") {
+        //     if (value == "") {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             attributeId: "Attribute is Required"
+        //         }))
+        //     } else {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             attributeId: ""
+        //         }))
+        //     }
+        // }
         if (name === "name") {
             if (value === "") {
                 setFormDataErr((prev) => ({
@@ -351,18 +351,18 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 manufacturerId: ""
             }))
         }
-        if (!attributeId) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                attributeId: "Attribute is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                attributeId: ""
-            }))
-        }
+        // if (!attributeId) {
+        //     setFormDataErr((prev) => ({
+        //         ...prev,
+        //         attributeId: "Attribute is Required"
+        //     }))
+        //     errorCount++
+        // } else {
+        //     setFormDataErr((prev) => ({
+        //         ...prev,
+        //         attributeId: ""
+        //     }))
+        // }
         if (!name) {
             setFormDataErr((prev) => ({
                 ...prev,
@@ -472,7 +472,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 payload.append("subCategoryId", subCategoryId);
                 payload.append("brandId", brandId);
                 payload.append("manufacturerId", manufacturerId);
-                payload.append("attributeId", attributeId);
+                // payload.append("attributeId", attributeId);
                 payload.append("name", name);
                 payload.append("description", description);
                 payload.append("taxRate", taxRate);
@@ -494,7 +494,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                     subCategoryId: "",
                     brandId: "",
                     manufacturerId: "",
-                    attributeId: "",
+                    // attributeId: "",
                     name: "",
                     description: "",
                     price: "",
@@ -508,7 +508,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                     subCategoryId: "",
                     brandId: "",
                     manufacturerId: "",
-                    attributeId: "",
+                    // attributeId: "",
                     name: "",
                     description: "",
                     price: "",
@@ -541,7 +541,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                         subCategoryId: baseAddress.subCategoryId,
                         brandId: baseAddress.brandId,
                         manufacturerId: baseAddress.manufacturerId,
-                        attributeId: baseAddress.attributeId,
+                        // attributeId: baseAddress.attributeId,
                         name: baseAddress.name,
                         description: baseAddress.description,
                         price: baseAddress.price,
@@ -824,31 +824,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                             {<p className="text-red-600  text-xs"> {formDataErr.manufacturerId}</p>}
 
                                         </label>
-                                        <label className={`fromGroup   ${formDataErr?.attributeId !== "" ? "has-error" : ""
-                                            } `}
-                                        >
-                                            <p className="form-label">
-                                                Attribute <span className="text-red-500">*</span>
-                                            </p>
-                                            <select
-                                                name="attributeId"
-                                                value={attributeId}
-                                                // disabled={isViewed}
-                                                readOnly={isViewed}
-
-                                                onChange={handleChange}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
-
-                                                {activeAttribute &&
-                                                    activeAttribute?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item && item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-red-600  text-xs"> {formDataErr.attributeId}</p>}
-
-                                        </label>
+                                       
                                         <label className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
                                             } `}>
                                             <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
