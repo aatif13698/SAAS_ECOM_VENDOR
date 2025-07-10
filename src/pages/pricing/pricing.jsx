@@ -111,7 +111,7 @@ function Pricing({ centered, noFade, scrollContent }) {
 
         const combine = (index, current, result) => {
             if (index === values.length) {
-                result.push({ attributes: { ...current }, price: '' });
+                result.push({ attributes: { ...current }, price: '', active: false });
                 return;
             }
             const { name, values: attrValues } = values[index];
@@ -127,9 +127,9 @@ function Pricing({ centered, noFade, scrollContent }) {
     };
 
     const getCombinationColumns = () => {
-       
-        
-        
+
+
+
         const attributeColumns = attributesArray.map((attr) => ({
             name: attr.name,
             selector: (row) => row.attributes[attr.name] || 'N/A',
@@ -154,6 +154,17 @@ function Pricing({ centered, noFade, scrollContent }) {
                     />
                 ),
             },
+            {
+                name: 'Action',
+                selector: (row, index) => (
+                    <button
+                        className={`${row?.active == false ? "bg-red-300 " : "bg-green-300"} p-2 rounded-full`}
+                        onClick={() => handleActivate(index, row?.active)}
+                    >
+                        {row?.active == false ? "Activate" : "Inactivate"}
+                    </button>
+                ),
+            },
         ];
     };
 
@@ -166,6 +177,15 @@ function Pricing({ centered, noFade, scrollContent }) {
         setAttributesPriceArray((prev) => {
             const updated = [...prev];
             updated[index] = { ...updated[index], price: value };
+            return updated;
+        });
+        setIsErrorInCustomForm(false);
+    };
+
+    const handleActivate = (index, value) => {
+        setAttributesPriceArray((prev) => {
+            const updated = [...prev];
+            updated[index] = { ...updated[index], active: !value };
             return updated;
         });
         setIsErrorInCustomForm(false);
