@@ -18,6 +18,7 @@ import tableConfigure from '../common/tableConfigure';
 import productBlueprintService from '@/services/productBlueprint/productBlueprint.service';
 import priceService from '@/services/price/price.service';
 import attributeService from '@/services/attribute/attribute.service';
+import Loading from '@/components/Loading';
 
 
 
@@ -28,64 +29,32 @@ function Pricing({ centered, noFade, scrollContent }) {
 
     const [loading, setLoading] = useState(false);
     const [pending, setPending] = useState(true);
+    const [attributeLoadinng, setAttributeLoading] = useState(false);
     const [totalRows, setTotalRows] = useState();
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
     const [isViewed, setIsViewed] = useState(false);
+    const [editData, setEditData] = useState(false);
+    const [create, setCreate] = useState(true);
     const [refresh, setRefresh] = useState(0);
     const [paginationData, setPaginationData] = useState();
     const [id, setId] = useState(null);
     const [keyWord, setkeyWord] = useState("");
     const [toggleWord, setToggleWord] = useState(false);
-    const [iconImgErr, setIconImgErr] = useState("");
-    const [imgPreview, setImgPreviwe] = useState(null);
-    const [selectedFile, setselectedFile] = useState(null);
     const [showLoadingModal, setShowLoadingModal] = useState(false);
     const [showModal, setShowModal] = useState(false);
-    const [activeCategory, setActiveCategory] = useState([]);
     const [activeProductBlueprint, setActiveProductBlueprint] = useState([]);
+
 
     const handleCloseLoadingModal = () => {
         setShowLoadingModal(false);
-        setCustomFormArray([])
     };
 
-    const [customiseableFormData, setCustomiseableFormData] = useState({
-        unit: "",
-        quantity: "",
-        price: ""
-    });
-    const [customFormArray, setCustomFormArray] = useState([]);
     const [isErrorInCustomForm, setIsErrorInCustomForm] = useState(false);
-
-
-    function handleSaveAndMore(e) {
-        e.preventDefault()
-        const { unit, quantity, price } = customiseableFormData;
-        if (!unit || !quantity || !price) {
-            toast.error("Please fill all data");
-            setIsErrorInCustomForm(true)
-            return;
-        } else {
-            setIsErrorInCustomForm(false)
-        }
-        setCustomFormArray((prev) => ([...prev, {
-            unit: unit,
-            price: price,
-            quantity: quantity
-        }]))
-        setCustomiseableFormData({
-            unit: "",
-            quantity: "",
-            price: ""
-        });
-    }
-
 
     const [attributesPriceArray, setAttributesPriceArray] = useState([]);
     const [attributesArray, setAttributesArray] = useState([])
     console.log("attributesPriceArray", attributesPriceArray);
-
 
     const [formData, setFormData] = useState({
         product: "",
@@ -96,10 +65,6 @@ function Pricing({ centered, noFade, scrollContent }) {
 
     });
     const {
-        name,
-        slug,
-        description,
-        categoryId,
         product
     } = formData;
 
@@ -127,9 +92,6 @@ function Pricing({ centered, noFade, scrollContent }) {
     };
 
     const getCombinationColumns = () => {
-
-
-
         const attributeColumns = attributesArray.map((attr) => ({
             name: attr.name,
             selector: (row) => row.attributes[attr.name] || 'N/A',
@@ -144,7 +106,7 @@ function Pricing({ centered, noFade, scrollContent }) {
                         type="number"
                         value={row.price}
                         onChange={(e) => handlePriceChange(index, e.target.value)}
-                        disabled={isViewed}
+                        disabled={editData}
                         className={`form-control py-1 px-2 border rounded-md w-24 ${isDark ? 'bg-darkInput text-white border-darkSecondary' : 'bg-white border-lightborderInputColor'
                             } ${isErrorInCustomForm && !row.price ? 'border-red-500' : ''}`}
                         placeholder="Enter price"
@@ -159,6 +121,7 @@ function Pricing({ centered, noFade, scrollContent }) {
                 selector: (row, index) => (
                     <button
                         className={`${row?.active == false ? "bg-red-300 " : "bg-green-300"} p-2 rounded-full`}
+                        disabled={editData}
                         onClick={() => handleActivate(index, row?.active)}
                     >
                         {row?.active == false ? "Activate" : "Inactivate"}
@@ -192,7 +155,7 @@ function Pricing({ centered, noFade, scrollContent }) {
     };
 
     useEffect(() => {
-        if (product) {
+        if (product && create) {
             console.log("product ad", product);
             getAttributesOfProduct(product)
         }
@@ -203,8 +166,6 @@ function Pricing({ centered, noFade, scrollContent }) {
                 const combinations = generateCombinations(response?.data?.attributes);
                 console.log("combinations", combinations);
                 setAttributesPriceArray(combinations);
-
-
             } catch (error) {
                 console.log("error while fetching attribute of product", error);
             }
@@ -213,7 +174,8 @@ function Pricing({ centered, noFade, scrollContent }) {
 
     const closeModal = () => {
         setShowModal(false);
-        setLoading(false)
+        setLoading(false);
+        setCreate(true);
         setFormData((prev) => ({
             ...prev,
             product: ""
@@ -222,11 +184,9 @@ function Pricing({ centered, noFade, scrollContent }) {
             ...prev,
             product: ""
         }));
-        setCustomFormArray([])
-        setImgPreviwe(null);
-        setselectedFile(null);
         setLoading(false);
-        setId(null)
+        setId(null);
+        setAttributesPriceArray([])
         setRefresh((prev) => prev + 1)
     };
 
@@ -261,7 +221,7 @@ function Pricing({ centered, noFade, scrollContent }) {
 
     function handleCreate() {
         openModal()
-        setIsViewed(false)
+        setIsViewed(false);
         setFormData((prev) => ({
             ...prev,
             product: ""
@@ -305,7 +265,7 @@ function Pricing({ centered, noFade, scrollContent }) {
         if (isErrorInCustomForm) {
             errorCount++
         }
-        if (customFormArray.length == 0) {
+        if (attributesPriceArray.length == 0) {
             errorCount++
         }
 
@@ -325,7 +285,7 @@ function Pricing({ centered, noFade, scrollContent }) {
             const clientId = localStorage.getItem("saas_client_clientId");
             const dataObject = {
                 clientId: clientId,
-                product: product, priceOptions: customFormArray
+                product: product, priceOptions: attributesPriceArray
             }
             setLoading(true)
             if (id) {
@@ -356,9 +316,12 @@ function Pricing({ centered, noFade, scrollContent }) {
 
     const handleView = (row) => {
         const id = row._id;
-        setToggleWord(true)
-        setShowLoadingModal(true)
-        setIsViewed(true)
+        setToggleWord(true);
+        setShowLoadingModal(true);
+        setIsViewed(true);
+        setEditData(true);
+        setCreate(false);
+       
         setId(id);
         setFormData((prev) => ({
             ...prev,
@@ -366,7 +329,22 @@ function Pricing({ centered, noFade, scrollContent }) {
 
         }));
 
-        setCustomFormArray(row?.priceOptions)
+        setAttributesPriceArray(row?.priceOptions);
+
+        getAttributesOfProduct(row?.product?._id)
+
+        async function getAttributesOfProduct(product) {
+            try {
+                 setAttributeLoading(true)
+                const response = await attributeService.getAttributesOfProduct(product);
+                setAttributesArray(response?.data?.attributes);
+                 setAttributeLoading(false)
+            } catch (error) {
+                 setAttributeLoading(false)
+                console.log("error while fetching attribute of product", error);
+            }
+        }
+
         setFormDataErr((prev) => ({
             ...prev,
             product: ""
@@ -378,14 +356,29 @@ function Pricing({ centered, noFade, scrollContent }) {
     const handleEdit = (row) => {
         const id = row._id;
         openModal()
-        setIsViewed(false)
+        setIsViewed(true);
+        setEditData(false);
+        setCreate(false);
         setId(id)
         setFormData((prev) => ({
             ...prev,
             product: row?.product?._id
 
         }));
-        setCustomFormArray(row?.priceOptions)
+        setAttributesPriceArray(row?.priceOptions);
+        getAttributesOfProduct(row?.product?._id)
+
+        async function getAttributesOfProduct(product) {
+            try {
+                 setAttributeLoading(true)
+                const response = await attributeService.getAttributesOfProduct(product);
+                setAttributesArray(response?.data?.attributes);
+                 setAttributeLoading(false)
+            } catch (error) {
+                 setAttributeLoading(false)
+                console.log("error while fetching attribute of product", error);
+            }
+        }
         setFormDataErr((prev) => ({
             ...prev,
             product: ""
@@ -512,7 +505,6 @@ function Pricing({ centered, noFade, scrollContent }) {
     }, [refresh]);
 
     useEffect(() => {
-        getAllActiveCategory();
         getActiveProducctBlueprint()
     }, [])
 
@@ -524,16 +516,6 @@ function Pricing({ centered, noFade, scrollContent }) {
             console.log("error in getting active", error);
         }
     }
-
-    async function getAllActiveCategory() {
-        try {
-            const response = await subcategoryService.getAllActiveCategory();
-            setActiveCategory(response?.data)
-        } catch (error) {
-            console.log("error in getting active category", error);
-        }
-    }
-
 
     async function getAllList(data) {
         try {
@@ -573,42 +555,6 @@ function Pricing({ centered, noFade, scrollContent }) {
         }
     };
 
-    const handleFileChange = (e) => {
-        const { name, value } = e.target;
-        if (name == "profileImage") {
-            if (!selectedFile && value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "Icon is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "",
-                }));
-            }
-        }
-        setIconImgErr("");
-        let fileSize = 0;
-        let errorCount = 0;
-        const file = e.target.files[0];
-        if (file) {
-            fileSize = file.size / 1024;
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setIconImgErr("Only img file is allowd");
-                errorCount++;
-            }
-            if (fileSize > 1024) {
-                setIconImgErr("file size less than 1MB");
-                errorCount++;
-            }
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-                setselectedFile(file);
-                setImgPreviwe(imageAsBase64);
-            }
-        }
-    };
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
             <div className="table-heading text-start ">
@@ -685,9 +631,9 @@ function Pricing({ centered, noFade, scrollContent }) {
                                 <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
                             </Transition.Child>
                         )}
-                        <div className="fixed inset-0 overflow-y-auto">
+                        <div className="fixed w-[100%]  inset-0 overflow-y-auto">
                             <div
-                                className={`flex min-h-full justify-center text-center p-6 items-center "
+                                className={`flex min-h-full    justify-center text-center p-6 items-center "
                                     }`}
                             >
                                 <Transition.Child
@@ -701,7 +647,7 @@ function Pricing({ centered, noFade, scrollContent }) {
                                 >
                                     <Dialog.Panel
                                         className={`w-full transform overflow-hidden rounded-md
-                                        text-left align-middle shadow-xl transition-alll max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                        text-left align-middle shadow-xl transition-alll  ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
                                     >
                                         <div
                                             className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
@@ -718,10 +664,8 @@ function Pricing({ centered, noFade, scrollContent }) {
                                             className={`px-0 py-8 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
                                                 }`}
                                         >
-
-
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
-                                                <div className='md:col-span-2'
+                                                <div className=''
                                                 >
                                                     <label >
                                                         <p className="form-label">
@@ -748,21 +692,34 @@ function Pricing({ centered, noFade, scrollContent }) {
 
                                             </div>
 
-                                            {attributesPriceArray.length > 0 && (
-                                                <div>
-                                                    <label className="form-label">Price Combinations</label>
-                                                    <DataTable
-                                                        columns={getCombinationColumns()}
-                                                        data={attributesPriceArray}
-                                                        customStyles={customStyles}
-                                                        highlightOnHover
-                                                        noDataComponent={<p>No combinations available</p>}
-                                                    />
-                                                    {isErrorInCustomForm && (
-                                                        <p className="text-red-600 text-xs">Please enter valid prices for all combinations</p>
-                                                    )}
-                                                </div>
-                                            )}
+                                            {
+                                                attributeLoadinng ? 
+                                                <div className='flex flex-col justify-center items-center'>
+                                                    <FormLoader /> 
+                                                    <span>...Loading</span>
+                                                </div> :
+                                                    <>
+
+                                                        {attributesPriceArray.length > 0 && (
+                                                            <div className='p-4'>
+                                                                <label className="form-label">Price Combinations</label>
+                                                                <DataTable
+                                                                    columns={getCombinationColumns()}
+                                                                    data={attributesPriceArray}
+                                                                    customStyles={customStyles}
+                                                                    highlightOnHover
+                                                                    noDataComponent={<p>No combinations available</p>}
+                                                                />
+                                                                {isErrorInCustomForm && (
+                                                                    <p className="text-red-600 text-xs">Please enter valid prices for all combinations</p>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                    </>
+                                            }
+
+
 
                                         </div>
 
