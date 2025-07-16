@@ -23,36 +23,6 @@ import PriceOptions from "./PriceOptions";
 import Multiselect from "multiselect-react-dropdown";
 import stockService from "@/services/stock/stock.service";
 
-
-
-const companyTypeList = [
-    {
-        name: "Sole Proprietorship",
-        value: "soleProprietorship"
-    },
-    {
-        name: "Partnership",
-        value: "partnership"
-    },
-    {
-        name: "Private Limited (Corporation)",
-        value: "privateLimited"
-    },
-    {
-        name: "Limited Liability Company",
-        value: "limitedLiabilityCompany"
-    },
-    {
-        name: "One Person Company",
-        value: "onePersonCompany"
-    },
-    {
-        name: "Public Limited",
-        value: "publicLimited"
-    }
-]
-
-
 const CreateStock = ({ noFade, scrollContent }) => {
 
     // useEffect(() => {
@@ -67,6 +37,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const location = useLocation();
     const row = location?.state?.row;
     const id = location?.state?.id;
+    // const isViewed = location?.state?.isViewed
 
     console.log("id", id);
 
@@ -78,9 +49,19 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [activeWarehouses, setActiveWarehouses] = useState([]);
     const [activeProductBlueprint, setActiveProductBlueprint] = useState([])
     const [activePriceOptions, setActivePriceOptions] = useState([]);
-    const [selectedPrices, setSelectedPrices] = useState([]);
+    const [rawPriceOptions, setRawPriceOptions] = useState([]);
+    const [selectedPrices, setSelectedPrices] = useState("");
+    const [iconImgErr, setIconImgErr] = useState("");
 
+    const [isEditing, setIsEditing] = useState(false);
+    const [stockId, setStockId] = useState(null)
+
+    const [normalStocks, setNormalStacks] = useState([])
+
+
+    console.log("normalStocks", normalStocks);
     console.log("selectedPrices", selectedPrices);
+
 
 
 
@@ -90,6 +71,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
         businessUnit: "",
         branch: "",
         warehouse: "",
+
+        name: "",
+        description: "",
 
         totalStock: "",
         onlineStock: "",
@@ -109,6 +93,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
         branch: "",
         warehouse: "",
 
+        name: "",
+        description: "",
+
         totalStock: "",
         onlineStock: "",
         offlineStock: "",
@@ -116,12 +103,20 @@ const CreateStock = ({ noFade, scrollContent }) => {
         restockQuantity: "",
         priceOptions: "",
     });
+
+
+    console.log("formDataErr", formDataErr);
+
+
+
     const {
         product,
         businessUnit,
         branch,
         warehouse,
 
+        name,
+        description,
 
         totalStock,
         onlineStock,
@@ -131,31 +126,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
         priceOptions,
 
     } = formData;
-    const [countryData, setCountryData] = useState({
-        countryList: "",
-        countryName: "",
-        countryISOCode: "",
-        CountryISDCode: "",
-        stateList: "",
-        stateName: "",
-        stateISOCode: "",
-        cityList: "",
-        cityName: "",
-    });
-    const {
-        countryList,
-        countryName,
-        countryISOCode,
-        CountryISDCode,
-        stateList,
-        stateName,
-        stateISOCode,
-        cityList,
-        cityName,
-    } = countryData;
 
-    const [passwordErr, setPasswordErr] = useState("");
-    const [confirmPasswordErr, setConfirmPasswordErr] = useState("");
+
+
     const [isViewed, setIsViewed] = useState(false);
     const [showAddButton, setShowAddButton] = useState(true);
     const [isPasswordVissible, setIsPasswordVissile] = useState(false);
@@ -173,183 +146,58 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [ImgErr2, setImgErr2] = useState("");
     const [selectedFile2, setSelectedFile2] = useState(null);
 
-
-
-
-
-
-
-
-
-
-
     const navigate = useNavigate();
-    const [vehicleViewByNotification, setVehicleViewByNotification] = useState(false);
-
-
-
-    useEffect(() => {
-        if (selectedPrices.length == 0) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                priceOptions: "Price Is Required.",
-            }));
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                priceOptions: "",
-            }));
-        }
-    }, [selectedPrices])
-
-
-
 
 
     //------- Handling the VAlidation ------
     function validationFunction() {
         let errorCount = 0;
 
-        if (!businessUnit) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                businessUnit: "Business Unit Is Required.",
-            }));
-            errorCount++
+        const requiredFields = {
+            name: "Name is required",
+            description: "Descriptoion is required",
+            businessUnit: "Business Unit is Required.",
+            branch: "Branch is Required.",
+            warehouse: "Warehouse is Required.",
+            product: "Product is Required.",
+            totalStock: "Total Stock is Required.",
+            onlineStock: "Online Stock is Required.",
+            offlineStock: "Offline Stock is Required.",
+            lowStockThreshold: "Low Stock Threshold is Required.",
+            restockQuantity: "Restock Quantity is Required.",
+        };
+
+        const tempErrors = {};
+
+        Object.entries(requiredFields).forEach(([field, message]) => {
+            if (!formData[field]) {
+                tempErrors[field] = message;
+                errorCount++;
+            } else {
+                tempErrors[field] = "";
+            }
+        });
+
+        if (selectedPrices === "") {
+            console.log("coming here");
+
+            tempErrors.priceOptions = "Price is Required.";
+            errorCount++;
         } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                businessUnit: "",
-            }));
+            tempErrors.priceOptions = "";
         }
 
-        if (!branch) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                branch: "Branch Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                branch: "",
-            }));
-        }
-
-        if (!warehouse) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                warehouse: "Warehouse Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                warehouse: "",
-            }));
-        }
-
-        if (!product) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                product: "Product Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                product: "",
-            }));
-        }
+        console.log("tempErrors", tempErrors);
+        console.log("errorCount", errorCount);
 
 
-        if (!totalStock) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                totalStock: "Total Stock Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                totalStock: "",
-            }));
-        }
 
-        if (!onlineStock) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                onlineStock: "Online Stock Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                onlineStock: "",
-            }));
-        }
+        setFormDataErr(tempErrors);
 
-        if (!offlineStock) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                offlineStock: "Offline Stock Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                offlineStock: "",
-            }));
-        }
-
-        if (!lowStockThreshold) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                lowStockThreshold: "Low Stock Threshold Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                lowStockThreshold: "",
-            }));
-        }
-
-        if (!restockQuantity) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                restockQuantity: "Restock Quantity Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                restockQuantity: "",
-            }));
-        }
-
-
-        if (selectedPrices.length == 0) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                priceOptions: "Price Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                priceOptions: "",
-            }));
-            errorCount++
-        }
-
-
-        if (errorCount > 0) {
-            return false
-        } else {
-            return true
-        }
+        return errorCount !== 0;
     }
+
+
 
 
 
@@ -359,141 +207,58 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        if (name == "businessUnit") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
+        const requiredFields = [
+            "businessUnit",
+            "branch",
+            "warehouse",
+            "product",
+            "name",
+            "description",
+            "totalStock",
+            "onlineStock",
+            "offlineStock",
+            "lowStockThreshold",
+            "restockQuantity"
+        ];
+
+        // Validation for required fields
+        if (requiredFields.includes(name)) {
+            setFormDataErr(prev => ({
+                ...prev,
+                [name]: value === "" ? `${formatLabel(name)} is Required.` : ""
+            }));
+        }
+
+        // Handle special logic for businessUnit
+        if (name === "businessUnit") {
+            if (value === "") {
+                setFormDataErr(prev => ({
                     ...prev,
                     businessUnit: "Business Unit is Required"
-                }))
+                }));
             } else {
-                setActiveBranches([])
-                setFormData((prev) => ({
+                setActiveBranches([]);
+                setFormData(prev => ({
                     ...prev,
                     branchId: ""
-                }))
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: ""
-                }))
-            }
-        }
-
-        if (name == "branch") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: "Branch is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: ""
-                }))
-            }
-        }
-
-        if (name == "warehouse") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    warehouse: "Warehouse is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    warehouse: ""
-                }))
-            }
-        }
-
-        if (name == "product") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    product: "Product is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    product: ""
-                }))
-            }
-        }
-
-        if (name === "totalStock") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    totalStock: "Total Stock Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    totalStock: "",
                 }));
             }
         }
 
-        if (name === "onlineStock") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    onlineStock: "Online Stock Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    onlineStock: "",
-                }));
-            }
-        }
-
-        if (name === "offlineStock") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    offlineStock: "Offline Stock Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    offlineStock: "",
-                }));
-            }
-        }
-
-        if (name === "lowStockThreshold") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    lowStockThreshold: "Low Stock Threshold Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    lowStockThreshold: "",
-                }));
-            }
-        }
-
-        if (name === "restockQuantity") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    restockQuantity: "Restock Quantity Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    restockQuantity: "",
-                }));
-            }
-        }
-        setFormData((prev) => ({
+        // Update form data
+        setFormData(prev => ({
             ...prev,
-            [name]: value,
+            [name]: value
         }));
     };
+
+    // Helper function to format camelCase to Title Case for labels
+    const formatLabel = (fieldName) => {
+        return fieldName
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^./, str => str.toUpperCase());
+    };
+
 
 
     useEffect(() => {
@@ -539,17 +304,84 @@ const CreateStock = ({ noFade, scrollContent }) => {
         }
     }, [product]);
 
+
+    function transformPriceArray(priceArray) {
+        if (!Array.isArray(priceArray)) {
+            throw new Error("Input must be an array");
+        }
+        return priceArray.map(item => {
+            const { attributes, price } = item;
+
+            if (typeof attributes !== 'object' || attributes === null) {
+                throw new Error("Each item must have an 'attributes' object");
+            }
+            // Dynamically build the label from attributes
+            const labelParts = Object.values(attributes);
+            const label = `${labelParts.join(' / ')} = ${price}`;
+            return {
+                label,
+                value: item?.id
+            };
+        });
+    }
+
     async function getPriceListByProduct(id) {
         try {
             const response = await priceService.getRateByProductId(id);
-            setActivePriceOptions(response.data.priceOptions)
-
+            console.log("responsedsfa", response);
+            const filteredPriceOptions = response.data.priceOptions?.length > 0 ? response.data.priceOptions?.filter((item) => {
+                if (item?.price && item?.active) {
+                    return item
+                }
+            }) : [];
+            const a = filteredPriceOptions?.map((item, index) => ({ ...item, id: index }));
+            setRawPriceOptions(a)
+            const result = transformPriceArray(a);
+            setActivePriceOptions(result)
         } catch (error) {
-            console.log("error while getting rate by product");
+            console.log("error while getting rate by product", error);
         }
     }
 
     //---------- Adding & Editing the Organiser ----------
+
+    const [baseAddress, setBaseAddress] = useState(null);
+
+    useEffect(() => {
+
+        if (baseAddress) {
+
+
+            setFormData((prev) => ({
+                ...prev,
+                product: baseAddress?.product,
+                businessUnit: baseAddress?.businessUnit,
+                branch: baseAddress?.branch,
+                warehouse: baseAddress?.warehouse,
+                totalStock: baseAddress?.totalStock,
+                onlineStock: baseAddress?.onlineStock,
+                offlineStock: baseAddress?.offlineStock,
+                lowStockThreshold: baseAddress?.lowStockThreshold,
+                restockQuantity: baseAddress?.restockQuantity,
+                // priceOptions: baseAddress?.priceOptions,
+            }));
+
+            setNormalStacks(baseAddress?.normalSaleStock)
+            console.log("baseAddress?.priceOptions", baseAddress?.priceOptions);
+            const filteredOptions = baseAddress?.priceOptions?.length > 0 ? baseAddress?.priceOptions?.map((item) => {
+                return {
+                    price: item?.price,
+                    quantity: item?.quantity,
+                    unit: item?.unit
+                }
+            }) : [];
+
+            setSelectedPrices(filteredOptions)
+
+        }
+
+    }, [baseAddress])
+
 
     const onSubmit = async (e) => {
         e.preventDefault();
@@ -560,65 +392,80 @@ const CreateStock = ({ noFade, scrollContent }) => {
             setLoading(false);
             return
         } else {
-            console.log("yess");
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
+                const priceOption = rawPriceOptions.filter((item) => {
+                    if (item?.id == selectedPrices) {
+                        return item
+                    }
+                });
 
-                let dataObject = {
-                    clientId: clientId,
-                    
-                    product: product,
-                    businessUnit: businessUnit,
-                    branch: branch,
-                    warehouse: warehouse,
-                    totalStock: totalStock,
-                    priceOptions: selectedPrices,
-                    onlineStock: onlineStock,
-                    offlineStock: offlineStock,
-                    lowStockThreshold: lowStockThreshold,
-                    restockQuantity: restockQuantity,
+                const payload = new FormData();
+                payload.append("clientId", clientId);
+                if (selectedFile && selectedFile) {
+                    for (let i = 0; i < selectedFile?.length; i++) {
+                        payload.append("file", selectedFile[i]);
+                    }
                 }
-
-                if (id) {
-                    const response = await stockService.update({...dataObject,stockId: id, })
+                payload.append("product", product);
+                payload.append("businessUnit", businessUnit);
+                payload.append("branch", branch);
+                payload.append("warehouse", warehouse);
+                payload.append("name", name);
+                payload.append("description", description);
+                payload.append("totalStock", totalStock);
+                payload.append("onlineStock", onlineStock);
+                payload.append("offlineStock", offlineStock);
+                payload.append("lowStockThreshold", lowStockThreshold);
+                payload.append("restockQuantity", restockQuantity);
+                payload.append("priceOptions", JSON.stringify(priceOption[0]));
+;
+                let response
+                if (stockId) {
+                    payload.append("stockId", stockId);
+                     response = await stockService.update(payload)
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await stockService.create(dataObject);
+                     response = await stockService.create(payload);
                     toast.success(response?.data?.message);
                 }
 
-                setFormData({
-                    product: "",
-                    businessUnit: "",
-                    branch: "",
-                    warehouse: "",
+                setBaseAddress(response?.data?.data)
 
+                setFormData((prev) => ({
+                    ...prev,
                     totalStock: "",
                     onlineStock: "",
                     offlineStock: "",
                     lowStockThreshold: "",
                     restockQuantity: "",
                     priceOptions: [],
-                });
+                    name: "",
+                    description: ""
+                }));
+                setSelectedPrices("");
                 setFormDataErr({
                     product: "",
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-
                     totalStock: "",
                     onlineStock: "",
                     offlineStock: "",
                     lowStockThreshold: "",
                     restockQuantity: "",
                     priceOptions: "",
+                    name: "",
+                    description: ""
                 })
                 setLoading(false);
-                navigate("/stock-list");
+                setImgPreviwe(null)
+                // navigate("/stock-list");
 
             } catch (error) {
                 setLoading(false);
-                console.log("error while creating", error);
+                console.log("error while creating", error?.response?.data?.message);
+                toast.error( error?.response?.data?.message)
             }
         }
     };
@@ -631,40 +478,49 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     const response = await stockService.getParticularStocks(id);
                     console.log('Response stock data', response?.data);
                     const baseAddress = response?.data;
-                    setFormData((prev) => ({
-                        ...prev,
-                        product: baseAddress?.product,
-                        businessUnit: baseAddress?.businessUnit,
-                        branch: baseAddress?.branch,
-                        warehouse: baseAddress?.warehouse,
 
-                        totalStock: baseAddress?.totalStock,
-                        onlineStock: baseAddress?.onlineStock,
-                        offlineStock: baseAddress?.offlineStock,
-                        lowStockThreshold: baseAddress?.lowStockThreshold,
-                        restockQuantity: baseAddress?.restockQuantity,
-                        // priceOptions: baseAddress?.priceOptions,
-                    }));
-                    console.log("baseAddress?.priceOptions", baseAddress?.priceOptions);
-                    const filteredOptions = baseAddress?.priceOptions?.length > 0 ? baseAddress?.priceOptions?.map((item) => {
-                        return {
-                            price: item?.price,
-                            quantity: item?.quantity,
-                            unit: item?.unit
-                        }
-                    }) : []
-                    setSelectedPrices(filteredOptions)
+                    setBaseAddress(response?.data)
+                    // setFormData((prev) => ({
+                    //     ...prev,
+                    //     product: baseAddress?.product,
+                    //     businessUnit: baseAddress?.businessUnit,
+                    //     branch: baseAddress?.branch,
+                    //     warehouse: baseAddress?.warehouse,
+                    //     totalStock: baseAddress?.totalStock,
+                    //     onlineStock: baseAddress?.onlineStock,
+                    //     offlineStock: baseAddress?.offlineStock,
+                    //     lowStockThreshold: baseAddress?.lowStockThreshold,
+                    //     restockQuantity: baseAddress?.restockQuantity,
+                    //     // priceOptions: baseAddress?.priceOptions,
+                    // }));
+
+                    // setNormalStacks(baseAddress?.normalSaleStock)
+                    // console.log("baseAddress?.priceOptions", baseAddress?.priceOptions);
+                    // const filteredOptions = baseAddress?.priceOptions?.length > 0 ? baseAddress?.priceOptions?.map((item) => {
+                    //     return {
+                    //         price: item?.price,
+                    //         quantity: item?.quantity,
+                    //         unit: item?.unit
+                    //     }
+                    // }) : [];
+
+                    // setSelectedPrices(filteredOptions)
                     setPageLoading(false)
                 } catch (error) {
                     setPageLoading(false)
                     console.log("error in fetching stock data");
                 }
             }
-            getBranch()
+            getBranch();
+            setIsViewed(true);
+
         } else {
-            setPageLoading(false)
+            setPageLoading(false);
+            setIsViewed(false);
+
         }
-    }, [id, countryList]);
+
+    }, [id]);
 
 
 
@@ -694,148 +550,78 @@ const CreateStock = ({ noFade, scrollContent }) => {
     }
 
 
-    const [isUserClicked, setIsUserClicked] = useState(true);
 
 
-
-
-
-    //------------- Allow only Numbers in contact number -------------
-    const handleKeyPress = (e) => {
-        const value = e.target.value;
-        const cleanedValue = value.replace(/[^0-9]/g, '');
-        if (cleanedValue.trim() !== "") {
-            if ((cleanedValue.match(/\./g) || []).length <= 1) {
-                const formattedValue = cleanedValue.toLocaleString('en-US');
-                e.target.value = formattedValue;
-            } else {
-                e.target.value = cleanedValue.replace(/\.(?=.*\.)/g, '');
+    const handleFileChange1 = (e) => {
+        const files = e.target.files;
+        let errorCount = 0;
+        let tempImgPreviews = [];
+        let tempSelectedFiles = [];
+        let errorMessage = "";
+        if (files) {
+            if (files.length + tempSelectedFiles.length > 5) {
+                setIconImgErr("You can only upload up to 5 images.");
+                return;
             }
-        } else {
-            e.target.value = '';
+            Array.from(files).forEach((file) => {
+                const fileSize = file.size / (1024 * 1024); // Convert size to MB
+                if (!file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+                    errorMessage = "Only image files are allowed (jpg, jpeg, png, gif, WEBP)";
+                    errorCount++;
+                } else if (fileSize > 1) {
+                    errorMessage = "File size must be less than 1MB";
+                    errorCount++;
+                } else {
+                    const imageAsBase64 = URL.createObjectURL(file);
+                    tempImgPreviews.push(imageAsBase64);
+                    tempSelectedFiles.push(file);
+                }
+            });
+            if (errorCount === 0) {
+                setIconImgErr(""); // Clear any previous errors
+                setselectedFile(tempSelectedFiles); // Save selected files
+                setImgPreviwe(tempImgPreviews); // Save previews
+            } else {
+                setIconImgErr(errorMessage);
+            }
+        }
+    };
+
+
+
+    function onEditStock(data) {
+
+        console.log("data", data);
+
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setIsEditing(true);
+
+        setStockId(data?._id);
+
+        setSelectedPrices(data?.priceOptions?.id);
+        setFormData((prev) => (
+            {
+                ...prev,
+                name: data?.name,
+                description: data?.description,
+                totalStock: data?.totalStock,
+                onlineStock: data?.onlineStock,
+                offlineStock: data?.offlineStock,
+                lowStockThreshold: data?.lowStockThreshold,
+                restockQuantity: data?.restockQuantity
+            }));
+
+
+        if (data.images) {
+            setImgPreviwe(data.images.map((image) => {
+                return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+            }))
         }
     }
 
 
-
-
-    const handleFileChange2 = (e) => {
-        const { name, value } = e.target;
-        setImgErr2("");
-        if (name === "tradeLicense") {
-            if (!selectedFile2 && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "Trade License is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
-        let errorCount = 0;
-
-        const file = e.target.files[0];
-
-        if (file) {
-            fileSize = file.size / 1024;
-
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr2("Only images are allowed");
-
-                errorCount++;
-            }
-
-            //check if filesize is not more than 1MB
-            if (fileSize > 1024) {
-                setImgErr2("Image size should not be more than 1MB.");
-
-                errorCount++;
-            }
-
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-
-                setSelectedFile2(file);
-
-                setImgPreviwe2(imageAsBase64);
-            }
-        }
-
-    };
-
-
-
-    // handle file change
-    const handleFileChange = (e) => {
-        const { name, value } = e.target;
-        setImgErr("");
-        if (name === "profileImage") {
-            if (!selectedFile && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "Logo is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
-        let errorCount = 0;
-
-        const file = e.target.files[0];
-
-        if (file) {
-            fileSize = file.size / 1024;
-
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr("Only images are allowed");
-                errorCount++;
-            }
-
-            //check if filesize is not more than 1MB
-            if (fileSize > 1024) {
-                setImgErr("Image size should not be more than 1MB.");
-                errorCount++;
-            }
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-                setselectedFile(file);
-                setImgPreviwe(imageAsBase64);
-            }
-        }
-    };
-
-
-
-    const handleCloseLoadingModal = () => {
-        setShowLoadingModal(false);
-    };
-
-
-
-
-    const onSelect = (selectedList, selectedItem) => {
-        console.log("Selected List: ", selectedList);
-        setSelectedPrices(selectedList);
-    };
-
-    const onRemove = (selectedList, removedItem) => {
-        console.log("Updated List: ", selectedList);
-        setSelectedPrices(selectedList);
-    };
-
-
-
-
+    const [isUserClicked, setIsUserClicked] = useState(true);
 
     return (
 
@@ -970,139 +756,265 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                 </select>
                                                 {<p className="text-sm text-red-500">{formDataErr.product}</p>}
                                             </div>
+                                        </div>
 
-                                            <div>
+                                        <div className="mt-4 bg-black-200 dark:bg-black-500 p-2 rounded-md">
+                                            <h5>Stock Fields</h5>
+                                            <div className="grid lg:grid-cols-3 flex-col gap-3">
 
-                                                <p className="form-label">
-                                                    Select Prices <span className="text-red-500">*</span>
-                                                </p>
-                                                <PriceOptions activePriceOptions={activePriceOptions} selectedFinding={selectedPrices} setSelectedFinding={setSelectedPrices} />
-                                                {<p className="text-sm text-red-500">{formDataErr.priceOptions}</p>}
+                                                <div>
+
+                                                    <p className="form-label">
+                                                        Select Prices <span className="text-red-500">*</span>
+                                                    </p>
+
+                                                    <select
+                                                        name="priceOptions"
+                                                        value={selectedPrices}
+                                                        onChange={(e) => {
+                                                            const { name, value } = e.target;
+                                                            console.log("value111", value);
+
+                                                            setSelectedPrices(value);
+                                                        }}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activePriceOptions &&
+                                                            activePriceOptions?.map((item, index) => {
+                                                                console.log("item222", item?.value);
+
+                                                                return (
+
+                                                                    <option value={item?.value} key={index}>{item && item?.label}</option>
+                                                                )
+
+                                                            })}
+                                                    </select>
+                                                    {/* <PriceOptions activePriceOptions={activePriceOptions} selectedFinding={selectedPrices} setSelectedFinding={setSelectedPrices} /> */}
+                                                    {<p className="text-sm text-red-500">{formDataErr.priceOptions}</p>}
+                                                </div>
+
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Visible Name <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <input
+                                                        name="name"
+                                                        type="text"
+                                                        placeholder="Enter product name"
+                                                        value={name}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.name}
+                                                        </p>
+                                                    }
+                                                </label>
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.description !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Description <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <textarea
+                                                        name="description"
+                                                        placeholder="Enter total Stock"
+                                                        value={description}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.description}
+                                                        </p>
+                                                    }
+                                                </label>
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.totalStock !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Total Stock <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <input
+                                                        name="totalStock"
+                                                        type="number"
+                                                        placeholder="Enter total Stock"
+                                                        value={totalStock}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.totalStock}
+                                                        </p>
+                                                    }
+                                                </label>
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.onlineStock !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Online Stock <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <input
+                                                        name="onlineStock"
+                                                        type="number"
+                                                        placeholder="Enter online stock"
+                                                        value={onlineStock}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.onlineStock}
+                                                        </p>
+                                                    }
+                                                </label>
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.offlineStock !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Offline Stock <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <input
+                                                        name="offlineStock"
+                                                        type="number"
+                                                        placeholder="Enter offline Stock"
+                                                        value={offlineStock}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.offlineStock}
+                                                        </p>
+                                                    }
+                                                </label>
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.lowStockThreshold !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Low Stock Threshold <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <input
+                                                        name="lowStockThreshold"
+                                                        type="number"
+                                                        placeholder="Enter low stock threshold"
+                                                        value={lowStockThreshold}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.lowStockThreshold}
+                                                        </p>
+                                                    }
+                                                </label>
+
+                                                <label
+                                                    className={`fromGroup   ${formDataErr?.restockQuantity !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <p className="form-label">
+                                                        Restock Quantity <span className="text-red-500">*</span>
+                                                    </p>
+                                                    <input
+                                                        name="restockQuantity"
+                                                        type="number"
+                                                        placeholder="Enter restock quantity"
+                                                        value={restockQuantity}
+                                                        onChange={handleChange}
+                                                        className="form-control py-2"
+                                                    />
+                                                    {
+                                                        <p className="text-sm text-red-500">
+                                                            {formDataErr.restockQuantity}
+                                                        </p>
+                                                    }
+                                                </label>
+
                                             </div>
 
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.totalStock !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Total Stock <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="totalStock"
-                                                    type="number"
-                                                    placeholder="Enter total Stock"
-                                                    value={totalStock}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    readOnly={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.totalStock}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.onlineStock !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Online Stock <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="onlineStock"
-                                                    type="number"
-                                                    placeholder="Enter online stock"
-                                                    value={onlineStock}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    readOnly={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.onlineStock}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.offlineStock !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Offline Stock <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="offlineStock"
-                                                    type="number"
-                                                    placeholder="Enter offline Stock"
-                                                    value={offlineStock}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    readOnly={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.offlineStock}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.lowStockThreshold !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Low Stock Threshold <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="lowStockThreshold"
-                                                    type="number"
-                                                    placeholder="Enter low stock threshold"
-                                                    value={lowStockThreshold}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    readOnly={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.lowStockThreshold}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.restockQuantity !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Restock Quantity <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="restockQuantity"
-                                                    type="number"
-                                                    placeholder="Enter restock quantity"
-                                                    value={restockQuantity}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    readOnly={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.restockQuantity}
-                                                    </p>
-                                                }
-                                            </label>
-
-
-
-
-
-
+                                            <div className="mt-4">
+                                                <label
+                                                    htmlFor="profileImage1"
+                                                    className="block text-base  font-medium mb-2"
+                                                >
+                                                    <p className={`mb-1 dark:text-white text-black`}>Upload Files</p>
+                                                </label>
+                                                <label
+                                                    htmlFor="profileImage1"
+                                                    className="flex flex-col cursor-pointer  form-control relative border border-dashed border-lightHoverBgBtn dark:border-darkBtn  rounded-lg py-4 text-center"
+                                                >
+                                                    <label htmlFor="profileImage1" className="text-primary cursor-pointer">
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                Click to upload.
+                                                            </h3>
+                                                            <label
+                                                                htmlFor="profileImage1"
+                                                                className="text-sm text-gray-500 cursor-pointer"
+                                                            >
+                                                                (Allowed .jpg, .png less than 1MB)
+                                                            </label>
+                                                        </div>
+                                                    </label>
+                                                    <input
+                                                        id="profileImage1"
+                                                        type="file"
+                                                        className="hidden"
+                                                        accept="image/*"
+                                                        multiple // Enable multiple file selection
+                                                        // disabled={isViewed}
+                                                        onChange={(e) => {
+                                                            handleFileChange1(e);
+                                                        }}
+                                                    />
+                                                    <span style={{ color: "red", fontSize: "0.7em" }}>
+                                                        {<p className="text-red-600 text-xs pt-6 ">{iconImgErr}</p>}
+                                                    </span>
+                                                </label>
+                                                {imgPreview && imgPreview.length > 0 && (
+                                                    <div
+                                                        onClick={() => setShowAttachmentModal(true)}
+                                                        className="flex form-control flex-wrap gap-4 mt-3 px-2 py-2 justify-center border border-dashed border-lightHoverBgBtn dark:border-gray-600">
+                                                        {imgPreview.map((preview, index) => (
+                                                            <div key={index} className="flex justify-center items-center">
+                                                                <img
+                                                                    src={preview}
+                                                                    className="w-20 h-20 object-cover border-[#ffffff]"
+                                                                    alt={`Preview ${index + 1}`}
+                                                                />
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
 
                                         </div>
+
+
+
+
+
+
 
 
                                         <div className="lg:col-span-2 col-span-1">
@@ -1120,9 +1032,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     >
                                                         {loading
                                                             ? ""
-                                                            : showAddButton && id
+                                                            : isEditing
                                                                 ? "Update"
-                                                                : "Save"}
+                                                                : "Save & add more"}
                                                         {loading && (
                                                             <>
                                                                 <svg
@@ -1158,6 +1070,69 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                 )}
 
                             </div>
+
+                            {normalStocks && normalStocks.length > 0 ? (
+                                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                                    <div className="bg-transparent dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
+                                        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                                            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                                                Stock Inventory
+                                            </h2>
+                                        </div>
+                                        <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                                            {normalStocks.map((item, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex flex-col md:flex-row items-start md:items-center gap-4 p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                                                >
+                                                    <div className="flex-shrink-0">
+                                                        <img
+                                                            src={`${import.meta.env.VITE_BASE_URL}/productBluePrint/${item?.defaultImage}`}
+                                                            alt={item?.name}
+                                                            className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm"
+                                                            onError={(e) => (e.target.src = 'https://via.placeholder.com/80')}
+                                                            loading="lazy"
+                                                        />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-lg font-medium text-gray-900 dark:text-white break-words">
+                                                            {item?.name}
+                                                        </h3>
+                                                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                            {item?.description}
+                                                        </p>
+                                                    </div>
+                                                    <div className="flex flex-col items-end gap-3 w-full md:w-auto">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                                                            <div className="text-gray-700 dark:text-gray-300">
+                                                                <span className="font-medium">Total:</span> {item?.totalStock}
+                                                            </div>
+                                                            <div className="text-gray-700 dark:text-gray-300">
+                                                                <span className="font-medium">Online:</span> {item?.onlineStock}
+                                                            </div>
+                                                            <div className="text-gray-700 dark:text-gray-300">
+                                                                <span className="font-medium">Offline:</span> {item?.offlineStock}
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => onEditStock(item)}
+                                                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors duration-150"
+                                                        >
+                                                            Edit Stock
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
+                                    <div className="bg-white dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
+                                        <p className="text-gray-600 dark:text-gray-400">No stocks available</p>
+                                    </div>
+                                </div>
+                            )}
                         </Card>
                     </div>
             }

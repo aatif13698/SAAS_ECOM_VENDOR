@@ -433,7 +433,7 @@ function Pricing({ centered, noFade, scrollContent }) {
             selector: (row) => {
 
                 const priceArr = row?.priceOptions?.map((item) => {
-                    const string = `${item?.quantity}-${item?.unit}/${item?.price}`;
+                    const string = `${item?.price}`;
                     return string
                 });
 

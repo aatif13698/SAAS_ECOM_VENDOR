@@ -96,7 +96,7 @@ const Stock = ({ noFade, scrollContent }) => {
         const id = row._id;
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-stock", { state: { id, row } });
+        navigate("/create-stock", { state: { id, row, isViewed : true } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -173,24 +173,24 @@ const Stock = ({ noFade, scrollContent }) => {
             },
         },
         {
-            name: "Total Stock",
-            selector: (row) => row.totalStock,
+            name: "Category",
+            selector: (row) => row.product?.categoryId?.name,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "Online Stock",
-            selector: (row) => row.onlineStock,
+            name: "Subcategory",
+            selector: (row) =>  row.product?.categoryId?.name,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "Offline Stock",
-            selector: (row) => row.offlineStock,
+            name: "Products",
+            selector: (row) => row.normalSaleStock?.length,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here

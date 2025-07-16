@@ -450,6 +450,8 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
         }
     }
 
+
+
     const onSubmit = async (e) => {
         e.preventDefault();
         setIsViewed(false);
@@ -481,14 +483,23 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 if (isCustomizable) {
                     payload.append("customizableOptions", JSON.stringify(customFormArray));
                 }
+
                 if (id) {
                     payload.append("productBlueprintId", id);
-                    const response = await productBlueprintService.update(payload)
+                    const  response = await productBlueprintService.update(payload);
+                    // console.log("response kasif", response);
+
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await productBlueprintService.create(payload);
+                     const  response = await productBlueprintService.create(payload);
+
                     toast.success(response?.data?.message);
                 }
+
+
+
+                setBaseAddress(response?.data?.data)
+
                 setFormData({
                     categoryId: "",
                     subCategoryId: "",
@@ -521,7 +532,11 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 setImgPreviwe(null);
                 setselectedFile(null);
                 setLoading(false);
-                navigate("/product-list");
+
+                
+
+
+
             } catch (error) {
                 setLoading(false);
                 console.log("error while creating or updating", error);
@@ -529,37 +544,77 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
         }
     };
     // -----setting the data if contain id ----------
+
+
+
+    useEffect(() => {
+
+        console.log("coming hrer", baseAddress);
+        
+
+        if (baseAddress) {
+
+            setFormData((prev) => ({
+                categoryId: baseAddress.categoryId,
+                subCategoryId: baseAddress.subCategoryId,
+                brandId: baseAddress.brandId,
+                manufacturerId: baseAddress.manufacturerId,
+                // attributeId: baseAddress.attributeId,
+                name: baseAddress.name,
+                description: baseAddress.description,
+                price: baseAddress.price,
+                taxRate: baseAddress.taxRate,
+                sku: baseAddress.sku,
+                isCustomizable: baseAddress.isCustomizable,
+                customizableOptions: ""
+            }));
+
+            if (baseAddress.isCustomizable) {
+                setCustomFormArray(baseAddress.customizableOptions)
+            };
+
+            if (baseAddress.images) {
+                setImgPreviwe(baseAddress.images.map((image) => {
+                    return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+                }))
+            }
+
+        }
+
+    }, [baseAddress])
+
     useEffect(() => {
         if (id) {
             async function getBranch() {
                 try {
                     setPageLoading(true)
                     const response = await productBlueprintService.getOne(id);
-                    const baseAddress = response?.data;
-                    setFormData((prev) => ({
-                        categoryId: baseAddress.categoryId,
-                        subCategoryId: baseAddress.subCategoryId,
-                        brandId: baseAddress.brandId,
-                        manufacturerId: baseAddress.manufacturerId,
-                        // attributeId: baseAddress.attributeId,
-                        name: baseAddress.name,
-                        description: baseAddress.description,
-                        price: baseAddress.price,
-                        taxRate: baseAddress.taxRate,
-                        sku: baseAddress.sku,
-                        isCustomizable: baseAddress.isCustomizable,
-                        customizableOptions: ""
-                    }));
+                    // const baseAddress = response?.data;
+                    setBaseAddress(response?.data)
+                    // setFormData((prev) => ({
+                    //     categoryId: baseAddress.categoryId,
+                    //     subCategoryId: baseAddress.subCategoryId,
+                    //     brandId: baseAddress.brandId,
+                    //     manufacturerId: baseAddress.manufacturerId,
+                    //     // attributeId: baseAddress.attributeId,
+                    //     name: baseAddress.name,
+                    //     description: baseAddress.description,
+                    //     price: baseAddress.price,
+                    //     taxRate: baseAddress.taxRate,
+                    //     sku: baseAddress.sku,
+                    //     isCustomizable: baseAddress.isCustomizable,
+                    //     customizableOptions: ""
+                    // }));
 
-                    if (baseAddress.isCustomizable) {
-                        setCustomFormArray(baseAddress.customizableOptions)
-                    };
+                    // if (baseAddress.isCustomizable) {
+                    //     setCustomFormArray(baseAddress.customizableOptions)
+                    // };
 
-                    if (baseAddress.images) {
-                        setImgPreviwe(baseAddress.images.map((image) => {
-                            return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
-                        }))
-                    }
+                    // if (baseAddress.images) {
+                    //     setImgPreviwe(baseAddress.images.map((image) => {
+                    //         return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+                    //     }))
+                    // }
                     setPageLoading(false)
 
                 } catch (error) {
@@ -578,10 +633,10 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
 
 
 
-  
 
 
-  
+
+
 
 
     useEffect(() => {
@@ -824,7 +879,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                             {<p className="text-red-600  text-xs"> {formDataErr.manufacturerId}</p>}
 
                                         </label>
-                                       
+
                                         <label className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
                                             } `}>
                                             <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
@@ -1204,14 +1259,14 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                 <div className="">
                                     {
                                         isViewed ? <button
-                                        onClick={handleEdit}
+                                            onClick={handleEdit}
 
-                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                    >
-                                        Edit
-                                    </button> : ""
+                                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                        >
+                                            Edit
+                                        </button> : ""
                                     }
-                                    
+
                                 </div>
 
 
