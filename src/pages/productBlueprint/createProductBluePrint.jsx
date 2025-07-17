@@ -547,41 +547,41 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
 
 
 
-    useEffect(() => {
+    // useEffect(() => {
 
-        console.log("coming hrer", baseAddress);
+    //     console.log("coming hrer", baseAddress);
         
 
-        if (baseAddress) {
+    //     if (baseAddress) {
 
-            setFormData((prev) => ({
-                categoryId: baseAddress.categoryId,
-                subCategoryId: baseAddress.subCategoryId,
-                brandId: baseAddress.brandId,
-                manufacturerId: baseAddress.manufacturerId,
-                // attributeId: baseAddress.attributeId,
-                name: baseAddress.name,
-                description: baseAddress.description,
-                price: baseAddress.price,
-                taxRate: baseAddress.taxRate,
-                sku: baseAddress.sku,
-                isCustomizable: baseAddress.isCustomizable,
-                customizableOptions: ""
-            }));
+    //         setFormData((prev) => ({
+    //             categoryId: baseAddress.categoryId,
+    //             subCategoryId: baseAddress.subCategoryId,
+    //             brandId: baseAddress.brandId,
+    //             manufacturerId: baseAddress.manufacturerId,
+    //             // attributeId: baseAddress.attributeId,
+    //             name: baseAddress.name,
+    //             description: baseAddress.description,
+    //             price: baseAddress.price,
+    //             taxRate: baseAddress.taxRate,
+    //             sku: baseAddress.sku,
+    //             isCustomizable: baseAddress.isCustomizable,
+    //             customizableOptions: ""
+    //         }));
 
-            if (baseAddress.isCustomizable) {
-                setCustomFormArray(baseAddress.customizableOptions)
-            };
+    //         if (baseAddress.isCustomizable) {
+    //             setCustomFormArray(baseAddress.customizableOptions)
+    //         };
 
-            if (baseAddress.images) {
-                setImgPreviwe(baseAddress.images.map((image) => {
-                    return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
-                }))
-            }
+    //         if (baseAddress.images) {
+    //             setImgPreviwe(baseAddress.images.map((image) => {
+    //                 return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+    //             }))
+    //         }
 
-        }
+    //     }
 
-    }, [baseAddress])
+    // }, [baseAddress])
 
     useEffect(() => {
         if (id) {
