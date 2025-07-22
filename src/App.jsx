@@ -39,7 +39,10 @@ const Attribute = lazy(() => import("./pages/attribute/Attributes"));
 const ProductBluePrint = lazy(() => import("./pages/productBlueprint/ProductBluePrint"))
 const CreateProductBluePrint = lazy(() => import("./pages/productBlueprint/createProductBluePrint"));
 
+const Variant2 = lazy(() => import("./pages/variant/Variant2"))
+
 const Pricing = lazy(() => import("./pages/pricing/pricing"));
+const Pricing2 = lazy(() => import("./pages/pricing/Pricing2"))
 
 
 const Supplier = lazy(() => import("./pages/supplier/Supplier"));
@@ -175,7 +178,11 @@ function App() {
                 <Route path="attribute-list" element={<Attribute />} />
                 <Route path="product-list" element={<ProductBluePrint />} />
                 <Route path="create-product" element={<CreateProductBluePrint />} />
-                <Route path="pricing-list" element={<Pricing />} />
+
+                <Route path="variant-list" element={<Variant2 />} />
+
+                
+                <Route path="pricing-list" element={<Pricing2 />} />
                 <Route path="supplier-list" element={<Supplier />} />
                 <Route path="create-supplier" element={<CreateSupplier />} />
                 <Route path="stock-list" element={<Stock />} />
