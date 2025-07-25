@@ -117,7 +117,6 @@ function Pricing2({ centered, noFade, scrollContent }) {
 
     useEffect(() => {
         if (product) {
-            console.log("product ad", product);
             getVariant(product)
         }
     }, [product]);
@@ -125,7 +124,7 @@ function Pricing2({ centered, noFade, scrollContent }) {
 
     async function getVariant(product) {
         try {
-            const response = await variantService.getVariantByProductId(product);
+            const response = await variantService.getAllVariantByProductId(product);
             const variants = response?.data
             const formatedVariants = variants?.map((item) => {
                 const variant = item?.variant;

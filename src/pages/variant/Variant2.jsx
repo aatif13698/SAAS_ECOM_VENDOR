@@ -632,42 +632,42 @@ function Variant2({ centered, noFade, scrollContent }) {
                     }
                 />
                 <Transition appear show={showModal} as={Fragment}>
-                    <Dialog
-                        as="div"
-                        className="relative z-[99999]"
-                        onClose={closeModal}
-                    >
-                        {(
-                            <Transition.Child
-                                as={Fragment}
-                                enter={noFade ? "" : "duration-300 ease-out"}
-                                enterFrom={noFade ? "" : "opacity-0"}
-                                enterTo={noFade ? "" : "opacity-100"}
-                                leave={noFade ? "" : "duration-200 ease-in"}
-                                leaveFrom={noFade ? "" : "opacity-100"}
-                                leaveTo={noFade ? "" : "opacity-0"}
-                            >
-                                <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
-                            </Transition.Child>
-                        )}
-                        <div className="fixed w-[100%]  inset-0 overflow-y-auto">
-                            <div
-                                className={`flex min-h-full    justify-center text-center p-6 items-center "
-                                        }`}
-                            >
-                                <Transition.Child
-                                    as={Fragment}
-                                    enter={noFade ? "" : "duration-300  ease-out"}
-                                    enterFrom={noFade ? "" : "opacity-0 scale-95"}
-                                    enterTo={noFade ? "" : "opacity-100 scale-100"}
-                                    leave={noFade ? "" : "duration-200 ease-in"}
-                                    leaveFrom={noFade ? "" : "opacity-100 scale-100"}
-                                    leaveTo={noFade ? "" : "opacity-0 scale-95"}
-                                >
-                                    <Dialog.Panel
-                                        className={`w-full transform overflow-hidden rounded-md
-                                            text-left align-middle shadow-xl transition-alll  ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                    <Dialog
+                                        as="div"
+                                        className="relative z-[99999]"
+                                        onClose={closeModal}
                                     >
+                                        {(
+                                            <Transition.Child
+                                                as={Fragment}
+                                                enter={noFade ? "" : "duration-300 ease-out"}
+                                                enterFrom={noFade ? "" : "opacity-0"}
+                                                enterTo={noFade ? "" : "opacity-100"}
+                                                leave={noFade ? "" : "duration-200 ease-in"}
+                                                leaveFrom={noFade ? "" : "opacity-100"}
+                                                leaveTo={noFade ? "" : "opacity-0"}
+                                            >
+                                                <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                                            </Transition.Child>
+                                        )}
+                                        <div className="fixed inset-0 overflow-y-auto">
+                                            <div
+                                                className={`flex min-h-full justify-center text-center p-6 items-center "
+                                                                    }`}
+                                            >
+                                                <Transition.Child
+                                                    as={Fragment}
+                                                    enter={noFade ? "" : "duration-300  ease-out"}
+                                                    enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                                    enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                                    leave={noFade ? "" : "duration-200 ease-in"}
+                                                    leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                                    leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                                                >
+                                                    <Dialog.Panel
+                                                        className={`w-full transform overflow-hidden rounded-md
+                                                                        text-left align-middle shadow-xl transition-alll max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                                    >
                                         <div
                                             className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                                         >

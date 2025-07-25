@@ -22,6 +22,7 @@ import priceService from "@/services/price/price.service";
 import PriceOptions from "./PriceOptions";
 import Multiselect from "multiselect-react-dropdown";
 import stockService from "@/services/stock/stock.service";
+import variantService from "@/services/variant/variant.service";
 
 const CreateStock = ({ noFade, scrollContent }) => {
 
@@ -53,21 +54,21 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [selectedPrices, setSelectedPrices] = useState("");
     const [iconImgErr, setIconImgErr] = useState("");
 
+    const [productVariants, setProductVariants] = useState([])
+
     const [isEditing, setIsEditing] = useState(false);
     const [stockId, setStockId] = useState(null)
 
     const [normalStocks, setNormalStacks] = useState([])
 
 
-    console.log("normalStocks", normalStocks);
-    console.log("selectedPrices", selectedPrices);
-
-
+    console.log("productVariants", productVariants);
 
 
 
     const [formData, setFormData] = useState({
         product: "",
+        variant: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
@@ -80,10 +81,13 @@ const CreateStock = ({ noFade, scrollContent }) => {
         offlineStock: "",
         lowStockThreshold: "",
         restockQuantity: "",
-        priceOptions: [],
     });
 
-    console.log("formData", formData);
+    const [seletedVariantData, setSelectedVariantData] = useState(null);
+
+    console.log("seletedVariantData", seletedVariantData?.priceId?.price);
+
+
 
 
 
@@ -101,7 +105,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
         offlineStock: "",
         lowStockThreshold: "",
         restockQuantity: "",
-        priceOptions: "",
+        variant: ""
     });
 
 
@@ -111,6 +115,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     const {
         product,
+        variant,
         businessUnit,
         branch,
         warehouse,
@@ -123,9 +128,16 @@ const CreateStock = ({ noFade, scrollContent }) => {
         offlineStock,
         lowStockThreshold,
         restockQuantity,
-        priceOptions,
-
     } = formData;
+
+    useEffect(() => {
+        if (variant) {
+            const variantValue = productVariants.find((item) => item?._id === variant);
+            setSelectedVariantData(variantValue)
+        } else {
+            setSelectedVariantData(null)
+        }
+    }, [variant])
 
 
 
@@ -165,6 +177,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
             offlineStock: "Offline Stock is Required.",
             lowStockThreshold: "Low Stock Threshold is Required.",
             restockQuantity: "Restock Quantity is Required.",
+            variant: "Variant is Required."
         };
 
         const tempErrors = {};
@@ -178,22 +191,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
             }
         });
 
-        if (selectedPrices === "") {
-            console.log("coming here");
-
-            tempErrors.priceOptions = "Price is Required.";
-            errorCount++;
-        } else {
-            tempErrors.priceOptions = "";
-        }
-
-        console.log("tempErrors", tempErrors);
-        console.log("errorCount", errorCount);
-
-
-
         setFormDataErr(tempErrors);
-
         return errorCount !== 0;
     }
 
@@ -241,6 +239,21 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 setFormData(prev => ({
                     ...prev,
                     branchId: ""
+                }));
+            }
+        }
+
+
+        if (name === "variant") {
+            if (value === "") {
+                setFormDataErr(prev => ({
+                    ...prev,
+                    variant: "Variant is Required"
+                }));
+            } else {
+                setFormDataErr(prev => ({
+                    ...prev,
+                    variant: ""
                 }));
             }
         }
@@ -300,9 +313,33 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (product) {
-            getPriceListByProduct(product)
+            // getPriceListByProduct(product);
+            getVariant(product);
         }
     }, [product]);
+
+
+    async function getVariant(product) {
+        try {
+            const response = await variantService.getVariantByProductId(product);
+            const variants = response?.data
+            const formatedVariants = variants?.map((item) => {
+                const variant = item?.variant;
+                const vari = Object.entries(variant).map(([key, value]) => (`${value}`));
+                const variantString = vari.length > 6
+                    ? vari.slice(0, 6).join(", ") + "..."
+                    : vari.join(" / ");
+                return {
+                    ...item,
+                    variant: variantString,
+                    variantValue: variant,
+                }
+            });
+            setProductVariants(formatedVariants)
+        } catch (error) {
+            console.log("error while fetching attribute of product", error);
+        }
+    }
 
 
     function transformPriceArray(priceArray) {
@@ -325,23 +362,23 @@ const CreateStock = ({ noFade, scrollContent }) => {
         });
     }
 
-    async function getPriceListByProduct(id) {
-        try {
-            const response = await priceService.getRateByProductId(id);
-            console.log("responsedsfa", response);
-            const filteredPriceOptions = response.data.priceOptions?.length > 0 ? response.data.priceOptions?.filter((item) => {
-                if (item?.price && item?.active) {
-                    return item
-                }
-            }) : [];
-            const a = filteredPriceOptions?.map((item, index) => ({ ...item, id: index }));
-            setRawPriceOptions(a)
-            const result = transformPriceArray(a);
-            setActivePriceOptions(result)
-        } catch (error) {
-            console.log("error while getting rate by product", error);
-        }
-    }
+    // async function getPriceListByProduct(id) {
+    //     try {
+    //         const response = await priceService.getRateByProductId(id);
+    //         console.log("responsedsfa", response);
+    //         const filteredPriceOptions = response.data.priceOptions?.length > 0 ? response.data.priceOptions?.filter((item) => {
+    //             if (item?.price && item?.active) {
+    //                 return item
+    //             }
+    //         }) : [];
+    //         const a = filteredPriceOptions?.map((item, index) => ({ ...item, id: index }));
+    //         setRawPriceOptions(a)
+    //         const result = transformPriceArray(a);
+    //         setActivePriceOptions(result)
+    //     } catch (error) {
+    //         console.log("error while getting rate by product", error);
+    //     }
+    // }
 
     //---------- Adding & Editing the Organiser ----------
 
@@ -394,11 +431,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-                const priceOption = rawPriceOptions.filter((item) => {
-                    if (item?.id == selectedPrices) {
-                        return item
-                    }
-                });
+
+                const variantValue = productVariants.find((item) => item?._id === variant);
+                console.log("variantValue", variantValue);
 
                 const payload = new FormData();
                 payload.append("clientId", clientId);
@@ -418,15 +453,15 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 payload.append("offlineStock", offlineStock);
                 payload.append("lowStockThreshold", lowStockThreshold);
                 payload.append("restockQuantity", restockQuantity);
-                payload.append("priceOptions", JSON.stringify(priceOption[0]));
-;
+                payload.append("variant", variantValue?._id)
+                payload.append("varianValue", JSON.stringify(variantValue.variantValue));
                 let response
                 if (stockId) {
                     payload.append("stockId", stockId);
-                     response = await stockService.update(payload)
+                    response = await stockService.update(payload)
                     toast.success(response?.data?.message);
                 } else {
-                     response = await stockService.create(payload);
+                    response = await stockService.create(payload);
                     toast.success(response?.data?.message);
                 }
 
@@ -439,9 +474,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     offlineStock: "",
                     lowStockThreshold: "",
                     restockQuantity: "",
-                    priceOptions: [],
                     name: "",
-                    description: ""
+                    description: "",
+                    variant: ""
                 }));
                 setSelectedPrices("");
                 setFormDataErr({
@@ -454,9 +489,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     offlineStock: "",
                     lowStockThreshold: "",
                     restockQuantity: "",
-                    priceOptions: "",
                     name: "",
-                    description: ""
+                    description: "",
+                    variant: ""
                 })
                 setLoading(false);
                 setImgPreviwe(null)
@@ -465,7 +500,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
             } catch (error) {
                 setLoading(false);
                 console.log("error while creating", error?.response?.data?.message);
-                toast.error( error?.response?.data?.message)
+                toast.error(error?.response?.data?.message)
             }
         }
     };
@@ -609,7 +644,8 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 onlineStock: data?.onlineStock,
                 offlineStock: data?.offlineStock,
                 lowStockThreshold: data?.lowStockThreshold,
-                restockQuantity: data?.restockQuantity
+                restockQuantity: data?.restockQuantity,
+                variant: data?.variant
             }));
 
 
@@ -666,7 +702,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="businessUnit"
                                                     value={businessUnit}
                                                     onChange={handleChange}
-                                                    disabled={isViewed}
+                                                    disabled={isViewed || normalStocks?.length > 0}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -692,7 +728,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="branch"
                                                     value={branch}
                                                     onChange={handleChange}
-                                                    disabled={isViewed}
+                                                    disabled={isViewed || normalStocks?.length > 0}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -718,7 +754,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="warehouse"
                                                     value={warehouse}
                                                     onChange={handleChange}
-                                                    disabled={isViewed}
+                                                    disabled={isViewed || normalStocks?.length > 0}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -744,7 +780,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="product"
                                                     value={product}
                                                     onChange={handleChange}
-                                                    disabled={isViewed}
+                                                    disabled={isViewed || normalStocks?.length > 0}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -761,39 +797,85 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                         <div className="mt-4 bg-black-200 dark:bg-black-500 p-2 rounded-md">
                                             <h5>Stock Fields</h5>
                                             <div className="grid lg:grid-cols-3 flex-col gap-3">
-
-                                                <div>
-
-                                                    <p className="form-label">
-                                                        Select Prices <span className="text-red-500">*</span>
-                                                    </p>
-
+                                                <div className=''
+                                                >
+                                                    <label >
+                                                        <p className="form-label">
+                                                            Variant <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
                                                     <select
-                                                        name="priceOptions"
-                                                        value={selectedPrices}
-                                                        onChange={(e) => {
-                                                            const { name, value } = e.target;
-                                                            console.log("value111", value);
-
-                                                            setSelectedPrices(value);
-                                                        }}
+                                                        name="variant"
+                                                        value={variant}
+                                                        onChange={handleChange}
+                                                        // disabled={isViewed}
                                                         className="form-control py-2  appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
 
-                                                        {activePriceOptions &&
-                                                            activePriceOptions?.map((item, index) => {
-                                                                console.log("item222", item?.value);
-
-                                                                return (
-
-                                                                    <option value={item?.value} key={index}>{item && item?.label}</option>
-                                                                )
-
-                                                            })}
+                                                        {productVariants &&
+                                                            productVariants?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item && item?.variant}</option>
+                                                            ))}
                                                     </select>
-                                                    {/* <PriceOptions activePriceOptions={activePriceOptions} selectedFinding={selectedPrices} setSelectedFinding={setSelectedPrices} /> */}
-                                                    {<p className="text-sm text-red-500">{formDataErr.priceOptions}</p>}
+                                                    {<p className="text-red-600  text-xs"> {formDataErr.variant}</p>}
+
+                                                </div>
+
+                                                <div className="col-span-3 bg-red">
+
+                                                    {
+                                                        seletedVariantData ? <div>
+
+                                                            {
+                                                                seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price.length > 0 ?
+                                                                    <div className='overflow-x-auto my-4 '>
+                                                                        <span>Price table</span>
+                                                                        <table className="min-w-full ">
+                                                                            <thead className="bg-[#C9FEFF] dark:bg-darkBtn dark:text-white sticky top-0">
+                                                                                <tr className="border-b border-dashed border-lighttableBorderColor">
+                                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                                        Quantity(+)
+                                                                                    </th>
+                                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                                        Unit Price
+                                                                                    </th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody className="bg-white dark:bg-darkAccent">
+                                                                                {seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price?.length > 0 ? (
+                                                                                    seletedVariantData?.priceId?.price?.map((item, ind) => {
+                                                                                        return (
+                                                                                            <tr key={ind} className="border-b border-dashed border-lighttableBorderColor">
+                                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                                    {item.quantity}
+                                                                                                </td>
+                                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                                    {item.unitPrice}
+                                                                                                </td>
+
+                                                                                               
+                                                                                            </tr>
+                                                                                        )
+                                                                                    })
+                                                                                ) : (
+                                                                                    <tr>
+                                                                                        <td colSpan="4" className="px-6 py-4 text-center text-lg font-medium text-lightModalHeaderColor">
+                                                                                            NO DATA FOUND
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                )}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                    : ""
+                                                            }
+
+                                                        </div> :
+
+                                                            <span>Variant not seleceted yet.</span>
+                                                    }
+
                                                 </div>
 
 

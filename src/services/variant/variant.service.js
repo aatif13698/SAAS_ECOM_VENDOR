@@ -57,11 +57,26 @@ const getVariantByProductId = async (id) => {
 
 
 
+const getAllVariantByProductId = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/variant/all/productVariantByProduct/${clientId}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
+
+
 
 
 export default {
     create,
     getAllList,
     update,
-    getVariantByProductId
+    getVariantByProductId,
+    getAllVariantByProductId
 }
