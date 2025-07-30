@@ -911,7 +911,7 @@ const CreateCustomerAddress = () => {
                         {addresses.reverse().map((address, index) => (
                             <div
                                 key={index}
-                                className={` shadow-sm p-4 rounded-lg border relative ${isDark ? "bg-darkSecondary text-white" : ""}`}
+                                className={` shadow-sm p-4 rounded-lg border relative ${isDark ? "bg-darkSecondary text-white" : "bg-white text-dark"}`}
                             >
                                 <p className="font-bold">{address.fullName}</p>
                                 <p className="text-gray-600 dark:text-white">{address.phone}</p>

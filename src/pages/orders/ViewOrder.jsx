@@ -624,7 +624,7 @@ function ViewOrder() {
                 orders?.map((item, index) => {
                   const name = item?.productStock?.product?.name || 'Unnamed Product';
                   const priceOption = item?.priceOption || {};
-                  const price = priceOption?.price || 0;
+                  const price = priceOption?.unitPrice || 0;
                   const quantity = item?.quantity || 1;
                   const subtotal = price * quantity;
                   const image = item?.productStock?.product?.images?.[0] || 'https://via.placeholder.com/80';
@@ -783,7 +783,7 @@ function ViewOrder() {
             <span>
               $
               {orders
-                .reduce((acc, item) => acc + (item?.priceOption?.price || 0) * (item?.quantity || 1), 0)
+                .reduce((acc, item) => acc + (item?.priceOption?.unitPrice || 0) * (item?.quantity || 1), 0)
                 .toFixed(2)}
             </span>
           </div>
@@ -796,7 +796,7 @@ function ViewOrder() {
             <span>
               $
               {orders
-                .reduce((acc, item) => acc + (item?.priceOption?.price || 0) * (item?.quantity || 1), 0)
+                .reduce((acc, item) => acc + (item?.priceOption?.unitPrice || 0) * (item?.quantity || 1), 0)
                 .toFixed(2)}
             </span>
           </div>
