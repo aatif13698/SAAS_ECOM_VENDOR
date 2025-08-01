@@ -38,9 +38,10 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const location = useLocation();
     const row = location?.state?.row;
     const id = location?.state?.id;
-    // const isViewed = location?.state?.isViewed
+    // const isViewed = location?.state?.isViewed;
 
-    console.log("id", id);
+    const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
+
 
     const [pageLoading, setPageLoading] = useState(true);
     const [showLoadingModal, setShowLoadingModal] = useState(false);
@@ -657,6 +658,73 @@ const CreateStock = ({ noFade, scrollContent }) => {
     }
 
 
+
+    useEffect(() => {
+        if (currentUser && isAuthenticated) {
+            if (currentUser.isVendorLevel) {
+                // setLevelList([
+                //     {
+                //         name: "Vendor",
+                //         value: "vendor"
+                //     },
+                //     {
+                //         name: "Business",
+                //         value: "business"
+                //     },
+                //     {
+                //         name: "Branch",
+                //         value: "branch"
+                //     },
+                //     {
+                //         name: "Warehouse",
+                //         value: "warehouse"
+                //     },
+                // ])
+            } else if (currentUser.isBuLevel) {
+                // setLevelList([
+                //     {
+                //         name: "Business",
+                //         value: "business"
+                //     },
+                //     {
+                //         name: "Branch",
+                //         value: "branch"
+                //     },
+                //     {
+                //         name: "Warehouse",
+                //         value: "warehouse"
+                //     },
+                // ]);
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
+            } else if (currentUser.isBranchLevel) {
+                // setLevelList([
+                //     {
+                //         name: "Branch",
+                //         value: "branch"
+                //     },
+                //     {
+                //         name: "Warehouse",
+                //         value: "warehouse"
+                //     },
+                // ]);
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
+            } else if (currentUser.isWarehouseLevel) {
+                // setLevelList([
+                //     {
+                //         name: "Warehouse",
+                //         value: "warehouse"
+                //     },
+                // ])
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
+            }
+
+        } else {
+
+        }
+
+    }, [currentUser])
+
+
     const [isUserClicked, setIsUserClicked] = useState(true);
 
     return (
@@ -702,7 +770,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="businessUnit"
                                                     value={businessUnit}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0}
+                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel }
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -728,7 +796,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="branch"
                                                     value={branch}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0}
+                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -754,7 +822,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="warehouse"
                                                     value={warehouse}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0}
+                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isWarehouseLevel}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -854,7 +922,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                                                                     {item.unitPrice}
                                                                                                 </td>
 
-                                                                                               
+
                                                                                             </tr>
                                                                                         )
                                                                                     })

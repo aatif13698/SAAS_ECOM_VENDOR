@@ -3,7 +3,7 @@ import axios from "axios";
 
 
 
-const getAllList = async (page, keyword, perPage, status, startDate, endDate) => {
+const getAllList = async (page, keyword, perPage, status, startDate, endDate, currentLevel, levelId) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
@@ -14,6 +14,8 @@ const getAllList = async (page, keyword, perPage, status, startDate, endDate) =>
 
     // });
 
+    console.log("levelIdaaa",levelId);
+    
 
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/order/listOrder`, {
         params: {
@@ -24,6 +26,8 @@ const getAllList = async (page, keyword, perPage, status, startDate, endDate) =>
             status, // Comma-separated string (e.g., "PENDING,APPROVED")
             startDate,
             endDate,
+            level: currentLevel,
+            levelId: levelId
         },
         headers: {
             Authorization: `Bearer ${authToken}`,

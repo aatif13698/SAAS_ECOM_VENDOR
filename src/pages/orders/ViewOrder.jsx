@@ -621,11 +621,11 @@ function ViewOrder() {
 
         {/* Order Items Section */}
         <div className="md:col-span-2">
-          <div className="bg-white dark:bg-darkSecondary px-6 py-4 mb-2 rounded-lg shadow-md border border-gray-200 dark:border-darkSecondary/50">
+          {/* <div className="bg-white dark:bg-darkSecondary px-6 py-4 mb-2 rounded-lg shadow-md border border-gray-200 dark:border-darkSecondary/50">
             <p className='text-gray-900 dark:text-white'>
               Current Status: <span className="font-semibold dark:text-white/80">{data?.status}</span>
             </p>
-          </div>
+          </div> */}
 
           <div className="bg-white dark:bg-darkSecondary p-6 rounded-lg shadow-md border border-gray-200 dark:border-darkSecondary/50">
             <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Order Items</h3>

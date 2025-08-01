@@ -514,6 +514,7 @@ import * as XLSX from "xlsx";
 import Button from "@/components/ui/Button";
 import { Document, Page, Text, View, StyleSheet, pdf } from "@react-pdf/renderer";
 import { saveAs } from "file-saver";
+import { useSelector } from "react-redux";
 
 // PDF styles
 const pdfStyles = StyleSheet.create({
@@ -606,6 +607,15 @@ const Orders = ({ noFade, scrollContent }) => {
     const navigate = useNavigate();
     const [refresh, setRefresh] = useState(0);
     const [paginationData, setPaginationData] = useState();
+    const [currentLevel, setCurrentLevel] = useState("");
+    const [levelId, setLevelId] = useState("");
+
+    console.log("currentLevel", currentLevel);
+    console.log("levelId", levelId);
+
+
+    const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
+
 
     const statusOptions = [
         { value: "PENDING", label: "Pending" },
@@ -732,18 +742,18 @@ const Orders = ({ noFade, scrollContent }) => {
             selector: (row) => row?.orderNumber,
             sortable: true,
             style: {
-                 width: "auto",
+                width: "auto",
             },
             cell: (row) => (
                 <div
                     // className="truncate"
                     title={row?.orderNumber} // Tooltip for full text on hover
-                    // style={{
-                    //     width: "150px",
-                    //     overflow: "hidden",
-                    //     textOverflow: "ellipsis",
-                    //     whiteSpace: "nowrap",
-                    // }}
+                // style={{
+                //     width: "150px",
+                //     overflow: "hidden",
+                //     textOverflow: "ellipsis",
+                //     whiteSpace: "nowrap",
+                // }}
                 >
                     {row?.orderNumber}
                 </div>
@@ -768,20 +778,20 @@ const Orders = ({ noFade, scrollContent }) => {
                 <span className="block w-full">
                     <span
                         className={`inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${row?.status === "PENDING"
-                                ? "text-yellow-500 bg-yellow-500"
-                                : row?.status === "APPROVED"
-                                    ? "text-green-500 bg-green-500"
-                                    : row?.status === "DISAPPROVED"
-                                        ? "text-red-500 bg-red-500"
-                                        : row?.status === "IN_PRODUCTION"
-                                            ? "text-blue-500 bg-blue-500"
-                                            : row?.status === "SHIPPED"
-                                                ? "text-purple-500 bg-purple-500"
-                                                : row?.status === "DELIVERED"
-                                                    ? "text-teal-500 bg-teal-500"
-                                                    : row?.status === "CANCELLED"
-                                                        ? "text-gray-500 bg-gray-500"
-                                                        : ""
+                            ? "text-yellow-500 bg-yellow-500"
+                            : row?.status === "APPROVED"
+                                ? "text-green-500 bg-green-500"
+                                : row?.status === "DISAPPROVED"
+                                    ? "text-red-500 bg-red-500"
+                                    : row?.status === "IN_PRODUCTION"
+                                        ? "text-blue-500 bg-blue-500"
+                                        : row?.status === "SHIPPED"
+                                            ? "text-purple-500 bg-purple-500"
+                                            : row?.status === "DELIVERED"
+                                                ? "text-teal-500 bg-teal-500"
+                                                : row?.status === "CANCELLED"
+                                                    ? "text-gray-500 bg-gray-500"
+                                                    : ""
                             }`}
                     >
                         {row.status}
@@ -816,7 +826,8 @@ const Orders = ({ noFade, scrollContent }) => {
                     filters.perPage,
                     filters.status.join(","),
                     filters.startDate,
-                    filters.endDate
+                    filters.endDate,
+                    filters.currentLevel, levelId
                 );
                 setTotalRows(response?.data?.count || 0);
                 setPaginationData(response?.data?.orders || []);
@@ -827,24 +838,41 @@ const Orders = ({ noFade, scrollContent }) => {
                 console.error("Error fetching orders:", error);
             }
         }, 500),
-        []
+        [levelId]
     );
 
     async function getList() {
         setPending(true);
-        debounceFetch({
-            page,
-            keyword,
-            perPage,
-            status,
-            startDate,
-            endDate,
-        });
+
+        if (levelId && currentLevel == "warehouse") {
+            debounceFetch({
+                page,
+                keyword,
+                perPage,
+                status,
+                startDate,
+                endDate,
+                currentLevel
+            });
+        } else {
+            debounceFetch({
+                page,
+                keyword,
+                perPage,
+                status,
+                startDate,
+                endDate,
+                currentLevel
+            });
+
+        }
+
+
     }
 
     useEffect(() => {
         getList();
-    }, [page, perPage, keyword, status, startDate, endDate, refresh]);
+    }, [page, perPage, keyword, status, startDate, endDate, refresh, currentLevel, levelId]);
 
     const handlePageChange = (newPage) => {
         setPage(newPage);
@@ -919,6 +947,32 @@ const Orders = ({ noFade, scrollContent }) => {
     const closePDFPreview = () => {
         setShowPDFPreview(false);
     };
+
+
+    useEffect(() => {
+
+        if (currentUser && isAuthenticated) {
+            if (currentUser.isVendorLevel) {
+                setCurrentLevel("vendor");
+            } else if (currentUser.isBuLevel) {
+                setCurrentLevel("business");
+                setLevelId(currentUser.businessUnit)
+            } else if (currentUser.isBranchLevel) {
+                setCurrentLevel("branch");
+                setLevelId(currentUser.branch)
+            } else if (currentUser.isWarehouseLevel) {
+                setCurrentLevel("warehouse");
+                setLevelId(currentUser.warehouse)
+            } else {
+                setCurrentLevel("vendor");
+            }
+        } else {
+
+
+        }
+
+    }, [currentUser])
+
 
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-1 md:grid-cols-1 gap-3 items-center">
