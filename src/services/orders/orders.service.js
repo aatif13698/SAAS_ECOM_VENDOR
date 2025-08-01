@@ -47,14 +47,14 @@ const getOne = async (id) => {
 
 
 
-const updateStatus = async (orderId, selectedStatus) => {
+const updateStatus = async (orderId, selectedStatus, itemId) => {
     console.log("orderId", orderId);
     console.log("selectedStatus", selectedStatus);
 
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/order/order/status/update`, { clientId, status: selectedStatus, orderId: orderId }, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/order/order/status/update`, { clientId, status: selectedStatus, orderId: orderId, itemId: itemId }, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }

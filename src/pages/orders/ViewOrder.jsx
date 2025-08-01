@@ -12,7 +12,7 @@
 
 //     console.log("orders", orders);
 //     console.log("data",data);
-    
+
 
 
 //     // handling status change
@@ -194,7 +194,7 @@
 //                                 orders?.map((item) => {
 
 //                                     console.log("item",item);
-                                    
+
 
 
 //                                     const name = item?.productStock?.product?.name || "Unnamed Product";
@@ -391,6 +391,9 @@ function ViewOrder() {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingFile, setDownloadingFile] = useState(null);
+  const [refreshCount, setRefreshCount] = useState(0);
+
+  const [currentItemId, setCurrentItemId] = useState(null);
 
   const statusOptions = [
     'APPROVED',
@@ -411,10 +414,10 @@ function ViewOrder() {
     }
     setIsLoading(true);
     try {
-      const response = await ordersService.updateStatus(data?._id, selectedStatus);
+      const response = await ordersService.updateStatus(data?._id, selectedStatus, currentItemId);
       toast.success(response.data.message);
+      setRefreshCount((prev) => prev + 1)
       setIsModalOpen(false);
-      navigate('/order-list');
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update status');
     } finally {
@@ -439,9 +442,6 @@ function ViewOrder() {
         //   'Accept': 'application/octet-stream',
         // },
       });
-
-      console.log("response", response);
-      
 
       if (!response.ok) {
         throw new Error(`Failed to fetch file: ${response.statusText}`);
@@ -478,6 +478,18 @@ function ViewOrder() {
     }
   }, [data]);
 
+  useEffect(() => {
+    async function fetchUpdatedOrders() {
+      try {
+        const response = await ordersService.getOne(data?._id);
+        setOrders(response?.data?.items);
+      } catch (error) {
+        console.log("error while getting the updated order", error);
+      }
+    }
+    fetchUpdatedOrders()
+  }, [refreshCount])
+
   function removePublicPrefix(path) {
     if (path && path.startsWith('/public')) {
       return path.slice(7);
@@ -490,7 +502,7 @@ function ViewOrder() {
       {/* Page Header */}
       <div className="mb-6 flex justify-between items-center">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white">Order Details</h2>
-        <div className="flex gap-2">
+        {/* <div className="flex gap-2">
           <button
             onClick={() => setIsModalOpen(true)}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -504,7 +516,7 @@ function ViewOrder() {
           >
             Cancel Order
           </button>
-        </div>
+        </div> */}
       </div>
 
       {/* Modal for Status Update */}
@@ -530,7 +542,10 @@ function ViewOrder() {
             </select>
             <div className="mt-6 flex justify-end gap-2">
               <button
-                onClick={() => setIsModalOpen(false)}
+                onClick={() => {
+                  setIsModalOpen(false);
+                  setCurrentItemId(null)
+                }}
                 className="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 aria-label="Cancel status update"
               >
@@ -539,9 +554,8 @@ function ViewOrder() {
               <button
                 onClick={() => handleUpdateStatus(data?._id)}
                 disabled={isLoading}
-                className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : ''
-                } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 aria-label="Update order status"
               >
                 {isLoading ? 'Updating...' : 'Update'}
@@ -628,7 +642,7 @@ function ViewOrder() {
                   const quantity = item?.quantity || 1;
                   const subtotal = price * quantity;
                   const image = item?.productStock?.product?.images?.[0] || 'https://via.placeholder.com/80';
-                  const status = data?.status || 'DELIVERED';
+                  const status = item?.status || 'DELIVERED';
                   const deliveryDate = item?.deliveryDate
                     ? new Date(item.deliveryDate).toLocaleDateString()
                     : 'Aug 12, 2025';
@@ -653,21 +667,20 @@ function ViewOrder() {
                           </p>
                           <div className="mt-2 flex items-center gap-2">
                             <span
-                              className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
-                                status === 'DELIVERED'
-                                  ? 'bg-green-100 text-green-800'
-                                  : status === 'SHIPPED'
+                              className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${status === 'DELIVERED'
+                                ? 'bg-green-100 text-green-800'
+                                : status === 'SHIPPED'
                                   ? 'bg-blue-100 text-blue-800'
                                   : status === 'PENDING'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : status === 'APPROVED'
-                                  ? 'bg-indigo-100 text-indigo-800'
-                                  : status === 'DISAPPROVED'
-                                  ? 'bg-red-100 text-red-800'
-                                  : status === 'IN_PRODUCTION'
-                                  ? 'bg-purple-100 text-purple-800'
-                                  : 'bg-gray-100 text-gray-800 dark:text-white/50'
-                              }`}
+                                    ? 'bg-yellow-100 text-yellow-800'
+                                    : status === 'APPROVED'
+                                      ? 'bg-indigo-100 text-indigo-800'
+                                      : status === 'DISAPPROVED'
+                                        ? 'bg-red-100 text-red-800'
+                                        : status === 'IN_PRODUCTION'
+                                          ? 'bg-purple-100 text-purple-800'
+                                          : 'bg-gray-100 text-gray-800 dark:text-white/50'
+                                }`}
                             >
                               {status}
                             </span>
@@ -691,6 +704,24 @@ function ViewOrder() {
                         <div className="flex flex-col items-end gap-2 w-full md:w-auto">
                           <div className="text-lg font-bold text-gray-800 dark:text-white/90">
                             Total: ${subtotal.toFixed(2)}
+                          </div>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => {
+                                setIsModalOpen(true)
+                                setCurrentItemId(item?._id)
+                              }}
+                              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              aria-label="Update order status"
+                            >
+                              Update Status
+                            </button>
+                            <button
+                              className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                              aria-label="Cancel order"
+                            >
+                              Cancel Order
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -726,9 +757,8 @@ function ViewOrder() {
                                       <button
                                         onClick={() => handleDownloadFile(img?.fileUrl, img?.fieldName)}
                                         disabled={downloadingFile === img?.fieldName}
-                                        className={`absolute top-2 right-2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                          downloadingFile === img?.fieldName ? 'opacity-50 cursor-not-allowed' : ''
-                                        }`}
+                                        className={`absolute top-2 right-2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${downloadingFile === img?.fieldName ? 'opacity-50 cursor-not-allowed' : ''
+                                          }`}
                                         aria-label={`Download ${img?.fieldName} file`}
                                         title={`Download ${img?.fieldName}`}
                                       >
