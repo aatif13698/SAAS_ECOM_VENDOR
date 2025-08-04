@@ -8,6 +8,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
 import "../../assets/scss/common.scss"
+import { FiEdit } from "react-icons/fi";
+import { FaRegTrashAlt } from "react-icons/fa";
+
+
 
 import { useSelector } from "react-redux";
 import ProfileImage from "../../assets/images/users/user-4.jpg"
@@ -63,7 +67,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [normalStocks, setNormalStacks] = useState([])
 
 
-    console.log("productVariants", productVariants);
+    // console.log("productVariants", productVariants);
 
 
 
@@ -86,7 +90,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     const [seletedVariantData, setSelectedVariantData] = useState(null);
 
-    console.log("seletedVariantData", seletedVariantData?.priceId?.price);
+    // console.log("seletedVariantData", seletedVariantData?.priceId?.price);
 
 
 
@@ -110,7 +114,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
     });
 
 
-    console.log("formDataErr", formDataErr);
+    // console.log("formDataErr", formDataErr);
 
 
 
@@ -158,6 +162,96 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [imgPreview2, setImgPreviwe2] = useState(null);
     const [ImgErr2, setImgErr2] = useState("");
     const [selectedFile2, setSelectedFile2] = useState(null);
+
+
+    const [specifications, setSpecifications] = useState([]);
+    const [currentSpec, setCurrentSpec] = useState({ title: '', items: [] });
+    const [currentItem, setCurrentItem] = useState({ name: '', description: '' });
+    const [editingSpecIndex, setEditingSpecIndex] = useState(null);
+    const [editingItemIndex, setEditingItemIndex] = useState(null);
+    const [specError, setSpecError] = useState('');
+
+    console.log("specifications", specifications);
+    console.log("currentSpec", currentSpec);
+
+
+
+    const handleAddSpec = () => {
+        if (!currentSpec.title.trim()) {
+            setSpecError('Specification title is required');
+            return;
+        }
+        if (currentSpec.items.length === 0) {
+            setSpecError('At least one item is required');
+            return;
+        }
+        if (editingSpecIndex !== null) {
+            const updatedSpecs = [...specifications];
+            updatedSpecs[editingSpecIndex] = currentSpec;
+            setSpecifications(updatedSpecs);
+            setEditingSpecIndex(null);
+        } else {
+            setSpecifications([...specifications, currentSpec]);
+        }
+        setCurrentSpec({ title: '', items: [] });
+        setSpecError('');
+    };
+
+    const handleAddItem = () => {
+        if (!currentItem.name.trim() || !currentItem.description.trim()) {
+            setSpecError('Item name and description are required');
+            return;
+        }
+        setCurrentSpec({
+            ...currentSpec,
+            items: [...currentSpec.items, currentItem],
+        });
+        setCurrentItem({ name: '', description: '' });
+        setSpecError('');
+    };
+
+    const handleEditSpec = (index) => {
+        setCurrentSpec(specifications[index]);
+        setEditingSpecIndex(index);
+        setSpecError('');
+    };
+
+    const handleDeleteSpec = (index) => {
+        setSpecifications(specifications.filter((_, i) => i !== index));
+    };
+
+    const handleEditItem = (specIndex, itemIndex) => {
+        setCurrentSpec(specifications[specIndex]);
+        setCurrentItem(specifications[specIndex].items[itemIndex]);
+        setEditingSpecIndex(specIndex);
+        setEditingItemIndex(itemIndex);
+    };
+
+    const handleDeleteItem = (specIndex, itemIndex) => {
+        const updatedSpecs = [...specifications];
+        updatedSpecs[specIndex].items = updatedSpecs[specIndex].items.filter((_, i) => i !== itemIndex);
+        if (updatedSpecs[specIndex].items.length === 0) {
+            updatedSpecs.splice(specIndex, 1);
+        }
+        setSpecifications(updatedSpecs);
+        setEditingSpecIndex(null);
+        setEditingItemIndex(null);
+    };
+
+    const handleUpdateItem = () => {
+        if (!currentItem.name.trim() || !currentItem.description.trim()) {
+            setSpecError('Item name and description are required');
+            return;
+        }
+        const updatedSpecs = [...specifications];
+        updatedSpecs[editingSpecIndex].items[editingItemIndex] = currentItem;
+        setSpecifications(updatedSpecs);
+        setCurrentSpec({ title: '', items: [] });
+        setCurrentItem({ name: '', description: '' });
+        setEditingSpecIndex(null);
+        setEditingItemIndex(null);
+        setSpecError('');
+    };
 
     const navigate = useNavigate();
 
@@ -456,6 +550,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 payload.append("restockQuantity", restockQuantity);
                 payload.append("variant", variantValue?._id)
                 payload.append("varianValue", JSON.stringify(variantValue.variantValue));
+                payload.append("specification", JSON.stringify(specifications));
                 let response
                 if (stockId) {
                     payload.append("stockId", stockId);
@@ -566,7 +661,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
         async function getActiveBusinessUnit() {
             try {
                 const response = await warehouseService.getActiveBusinessUnit();
-                console.log("respone active", response);
+                // console.log("respone active", response);
                 setActiveBusinessUnits(response?.data?.businessUnits)
             } catch (error) {
                 console.log("error while getting the active business unit", error);
@@ -648,6 +743,8 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 restockQuantity: data?.restockQuantity,
                 variant: data?.variant
             }));
+
+        setSpecifications(data?.specification)
 
 
         if (data.images) {
@@ -770,7 +867,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     name="businessUnit"
                                                     value={businessUnit}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel }
+                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -1100,6 +1197,143 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     }
                                                 </label>
 
+                                            </div>
+
+                                            {/* Specification Section */}
+                                            <div className="col-span-3 mt-3">
+                                                <h5>Specifications</h5>
+                                                <div className="grid lg:grid-cols-3 flex-col gap-3">
+                                                    <div className="fromGroup">
+                                                        <label className="form-label">
+                                                            <p>
+                                                                Specification Title <span className="text-red-500">*</span>
+                                                            </p>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter specification title"
+                                                            value={currentSpec.title}
+                                                            onChange={(e) =>
+                                                                setCurrentSpec({ ...currentSpec, title: e.target.value })
+                                                            }
+                                                            className="form-control py-2"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="grid lg:grid-cols-2 flex-col mt-3 gap-3">
+                                                    <div className="fromGroup">
+                                                        <label className="form-label">
+                                                            <p>
+                                                                Item Name <span className="text-red-500">*</span>
+                                                            </p>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter item name"
+                                                            value={currentItem.name}
+                                                            onChange={(e) =>
+                                                                setCurrentItem({ ...currentItem, name: e.target.value })
+                                                            }
+                                                            className="form-control py-2"
+                                                        />
+                                                    </div>
+                                                    <div className="fromGroup">
+                                                        <label className="form-label">
+                                                            <p>
+                                                                Item Description <span className="text-red-500">*</span>
+                                                            </p>
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Enter item description"
+                                                            value={currentItem.description}
+                                                            onChange={(e) =>
+                                                                setCurrentItem({ ...currentItem, description: e.target.value })
+                                                            }
+                                                            className="form-control py-2"
+                                                        />
+                                                        {specError && <p className="text-sm text-red-500">{specError}</p>}
+                                                    </div>
+                                                </div>
+                                                <div className="flex justify-end gap-2 mt-3">
+                                                    <button
+                                                        onClick={editingItemIndex !== null ? handleUpdateItem : handleAddItem}
+                                                        className="bg-lightBtn dark:bg-darkBtn p-2 rounded-md text-white"
+                                                    >
+                                                        {editingItemIndex !== null ? 'Update Item' : 'Save & Add More Item'}
+                                                    </button>
+
+                                                </div>
+
+                                                <div className="flex justify-end gap-2 mt-3">
+                                                    <button
+                                                        onClick={handleAddSpec}
+                                                        className="bg-lightBtn dark:bg-darkBtn p-2 rounded-md text-white"
+                                                    >
+                                                        {editingSpecIndex !== null ? 'Update Specification' : 'Add Specification'}
+                                                    </button>
+                                                </div>
+                                                {specifications.length > 0 && (
+                                                    <div className="bg-white  rounded-lg border-1 pb-4  my-4 ">
+                                                        <h6 className="p-4">Saved Specifications</h6>
+                                                        {specifications.map((spec, specIndex) => (
+                                                            <div
+                                                                key={specIndex}
+                                                            className="border mx-2 shadow-md border-1 p-3 rounded-md mb-2"
+                                                            >
+                                                                <div className="flex w-full justify-between items-center">
+                                                                    <h3 className="text-lg  font-medium text-gray-700 bg-gray-100 p-3 rounded-t-md">
+                                                                        {spec?.title}
+                                                                    </h3>
+                                                                    <div>
+                                                                        <button
+                                                                            onClick={() => handleEditSpec(specIndex)}
+                                                                            className="text-blue-500 border p-[.20rem] rounded-md mr-2"
+                                                                        >
+                                                                            <FiEdit/>
+                                                                        </button>
+                                                                        <button
+                                                                            onClick={() => handleDeleteSpec(specIndex)}
+                                                                            className="text-red-500 border p-[.20rem] rounded-md "
+                                                                        >
+                                                                            <FaRegTrashAlt/>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="rounded-b-md">
+                                                                    {spec.items.map((item, itemIndex) => (
+                                                                        <div key={itemIndex} className="divide-y border-b-2 divide-gray-200">
+                                                                            <div
+                                                                                key={itemIndex}
+                                                                                className="flex justify-between p-4  hover:bg-gray-50"
+                                                                            >
+                                                                                <span className="text-gray-600 w-1/2">{item?.name}</span>
+                                                                                <span className="text-gray-800 w-1/2">{item?.description}</span>
+                                                                                <div className="flex ml-2">
+                                                                                    <button
+                                                                                        onClick={() => handleEditItem(specIndex, itemIndex)}
+                                                                                        className="text-blue-500 border p-[.20rem] rounded-md mr-2"
+                                                                                    >
+                                                                                         <FiEdit/>
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() => handleDeleteItem(specIndex, itemIndex)}
+                                                                                        className="text-red-500 border p-[.20rem] rounded-md"
+                                                                                    >
+                                                                                        <FaRegTrashAlt/>
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* <span className="font-medium">{item.name}</span>: {item.description} */}
+
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                )}
                                             </div>
 
                                             <div className="mt-4">
