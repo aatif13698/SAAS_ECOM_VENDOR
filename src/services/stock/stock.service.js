@@ -29,11 +29,11 @@ const update = async (data) => {
 
 
 // for getting all business unit list
-const getAllList = async ( page, keyword, perPage ) => {
+const getAllList = async ( page, keyword, perPage, currentLevel, levelId ) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/listStock?keyword=${keyword}&&page=${page}&&perPage=${perPage}&&clientId=${clientId}`, {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/listStock?keyword=${keyword}&&page=${page}&&perPage=${perPage}&&clientId=${clientId}&&level=${currentLevel}&&levelId=${levelId}`, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }

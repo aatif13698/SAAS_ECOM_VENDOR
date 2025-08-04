@@ -928,7 +928,8 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
 
             } catch (error) {
                 setLoading(false);
-                console.log("error while creating branch", error);
+                toast.error(error?.response?.data?.message)
+                console.log("error while creating customer", error);
             }
         }
     };

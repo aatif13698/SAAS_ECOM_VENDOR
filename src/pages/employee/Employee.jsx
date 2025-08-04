@@ -215,6 +215,12 @@ const Employee = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             },
         },
+         {
+            name: "Designation",
+            selector: (row) => row?.role?.name  ? row?.role?.name : "N/A",
+            sortable: false,
+
+        },
         {
             name: "Email",
             selector: (row) => row.email,
