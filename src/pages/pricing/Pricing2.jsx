@@ -20,6 +20,7 @@ import priceService from '@/services/price/price.service';
 import attributeService from '@/services/attribute/attribute.service';
 import Loading from '@/components/Loading';
 import variantService from '@/services/variant/variant.service';
+import { price } from '@/constant/data';
 
 
 
@@ -52,11 +53,16 @@ function Pricing2({ centered, noFade, scrollContent }) {
 
     const [pricing, setPricing] = useState({
         quantity: "",
-        unitPrice: ""
+        unitPrice: "",
+        hasDiscount: false,
+        discountPercent: 0
     });
 
     const [pricingError, setPricingError] = useState({});
-    const [pricingArray, setPricingArray] = useState([])
+    const [pricingArray, setPricingArray] = useState([]);
+
+    console.log("pricingArray",pricingArray);
+    
 
 
 
@@ -64,7 +70,7 @@ function Pricing2({ centered, noFade, scrollContent }) {
         e.preventDefault();
         let errorCount = 0;
         const errors = {};
-        const { quantity, unitPrice } = pricing;
+        const { quantity, unitPrice, hasDiscount, discountPercent } = pricing;
         if (!quantity) {
             errorCount++
             errors["quantity"] = "Quantity is required."
@@ -77,15 +83,25 @@ function Pricing2({ centered, noFade, scrollContent }) {
         } else {
             errors["unitPrice"] = ""
         }
+        if (!discountPercent) {
+            errorCount++
+            errors["discountPercent"] = "Discount % is required."
+        } else {
+            errors["discountPercent"] = ""
+        }
         setPricingError(errors);
         if (errorCount == 0) {
             setPricingArray((prev) => ([...prev, {
                 quantity: quantity,
                 unitPrice: unitPrice,
+                hasDiscount: hasDiscount,
+                discountPercent:  discountPercent
             }]));
             setPricing({
                 quantity: "",
                 unitPrice: "",
+                hasDiscount: false,
+                discountPercent: 0
             });
         }
     }
@@ -243,7 +259,7 @@ function Pricing2({ centered, noFade, scrollContent }) {
             errorCount++
         }
         if (pricingArray.length == 0) {
-            alert("Please fill quantity and unit price")
+            alert("Please fill quantity, unit price and discount.")
             errorCount++
         }
 
@@ -758,6 +774,62 @@ function Pricing2({ centered, noFade, scrollContent }) {
                                                                     {<p className="text-red-600  text-xs"> {pricingError?.unitPrice ? pricingError?.unitPrice : ""}</p>}
                                                                 </label>
                                                             </div>
+                                                            <div className='md:col-span-2'>
+                                                                <label className={`mb-1 ${isDark ? "text-white" : "text-black"}`} htmlFor="">
+                                                                    Has Discount
+                                                                </label>
+
+                                                                <div
+                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${pricing?.hasDiscount ? "bg-lightBtn" : "bg-gray-500"
+                                                                        }`}
+                                                                    onClick={() => setPricing((prev) => {
+                                                                        return {
+                                                                            ...prev,
+                                                                            hasDiscount: !pricing?.hasDiscount
+                                                                        }
+                                                                    })}
+                                                                >
+                                                                    <div
+                                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${pricing?.hasDiscount ? "translate-x-4" : "translate-x-0"
+                                                                            }`}
+                                                                    ></div>
+                                                                </div>
+
+                                                            </div>
+                                                            <div className="md:col-span-2">
+                                                                <label>
+                                                                    <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                                                        Discount % <span className="text-red-500">*</span>
+                                                                    </p>
+                                                                    <input
+                                                                        name="discountPercent"
+                                                                        type="number"
+                                                                        value={pricing?.discountPercent}
+                                                                        placeholder="Enter Discount %."
+                                                                        onChange={(e) => {
+                                                                            const { name, value } = e.target;
+                                                                            setPricing((prev) => ({
+                                                                                ...prev,
+                                                                                [name]: value,
+                                                                            }));
+                                                                            if (!value) {
+                                                                                setPricingError((prev) => ({
+                                                                                    ...prev,
+                                                                                    [name]: "Discount % is required"
+                                                                                }))
+                                                                            } else {
+                                                                                setPricingError((prev) => ({
+                                                                                    ...prev,
+                                                                                    [name]: ""
+                                                                                }))
+                                                                            }
+                                                                        }}
+                                                                        readOnly={isViewed}
+                                                                        className="form-control py-2"
+                                                                    />
+                                                                    {<p className="text-red-600  text-xs"> {pricingError?.discountPercent ? pricingError?.discountPercent : ""}</p>}
+                                                                </label>
+                                                            </div>
 
                                                         </div>
 
@@ -786,6 +858,12 @@ function Pricing2({ centered, noFade, scrollContent }) {
                                                                     <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
                                                                         Unit Price
                                                                     </th>
+                                                                     <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                        Has Discount
+                                                                    </th>
+                                                                     <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                       Discount %
+                                                                    </th>
 
                                                                     <th scope="col" className="px-6 py-3 text-end text-xs font-semibold  tracking-wider">
                                                                         Action
@@ -802,6 +880,12 @@ function Pricing2({ centered, noFade, scrollContent }) {
                                                                                 </td>
                                                                                 <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
                                                                                     {item.unitPrice}
+                                                                                </td>
+                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                    {item?.hasDiscount ? "YES" : "NO"}
+                                                                                </td>
+                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                    {item?.discountPercent}
                                                                                 </td>
 
                                                                                 <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-tableTextColor">

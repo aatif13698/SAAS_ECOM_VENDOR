@@ -164,7 +164,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [selectedFile2, setSelectedFile2] = useState(null);
 
 
-    const [specifications, setSpecifications] = useState([]);
+    const [specifications, setSpecifications] = useState([{ title: '', isSaved: false, items: [{ name: '', description: '' }] }]);
     const [currentSpec, setCurrentSpec] = useState({ title: '', items: [] });
     const [currentItem, setCurrentItem] = useState({ name: '', description: '' });
     const [editingSpecIndex, setEditingSpecIndex] = useState(null);
@@ -173,6 +173,10 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     console.log("specifications", specifications);
     console.log("currentSpec", currentSpec);
+
+    useEffect(() => {
+
+    }, [])
 
 
 
@@ -561,7 +565,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     toast.success(response?.data?.message);
                 }
 
-                setBaseAddress(response?.data?.data)
+                setBaseAddress(response?.data?.data);
+
+                setSpecifications([{ title: '', isSaved: false, items: [{ name: '', description: '' }] }])
 
                 setFormData((prev) => ({
                     ...prev,
@@ -744,8 +750,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 variant: data?.variant
             }));
 
-        setSpecifications(data?.specification)
-
+        if (data?.specification) {
+            setSpecifications(data?.specification)
+        }
 
         if (data.images) {
             setImgPreviwe(data.images.map((image) => {
@@ -1201,137 +1208,136 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
                                             {/* Specification Section */}
                                             <div className="col-span-3 mt-3">
-                                                <h5>Specifications</h5>
-                                                <div className="grid lg:grid-cols-3 flex-col gap-3">
-                                                    <div className="fromGroup">
-                                                        <label className="form-label">
-                                                            <p>
-                                                                Specification Title <span className="text-red-500">*</span>
-                                                            </p>
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Enter specification title"
-                                                            value={currentSpec.title}
-                                                            onChange={(e) =>
-                                                                setCurrentSpec({ ...currentSpec, title: e.target.value })
-                                                            }
-                                                            className="form-control py-2"
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div className="grid lg:grid-cols-2 flex-col mt-3 gap-3">
-                                                    <div className="fromGroup">
-                                                        <label className="form-label">
-                                                            <p>
-                                                                Item Name <span className="text-red-500">*</span>
-                                                            </p>
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Enter item name"
-                                                            value={currentItem.name}
-                                                            onChange={(e) =>
-                                                                setCurrentItem({ ...currentItem, name: e.target.value })
-                                                            }
-                                                            className="form-control py-2"
-                                                        />
-                                                    </div>
-                                                    <div className="fromGroup">
-                                                        <label className="form-label">
-                                                            <p>
-                                                                Item Description <span className="text-red-500">*</span>
-                                                            </p>
-                                                        </label>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Enter item description"
-                                                            value={currentItem.description}
-                                                            onChange={(e) =>
-                                                                setCurrentItem({ ...currentItem, description: e.target.value })
-                                                            }
-                                                            className="form-control py-2"
-                                                        />
-                                                        {specError && <p className="text-sm text-red-500">{specError}</p>}
-                                                    </div>
-                                                </div>
-                                                <div className="flex justify-end gap-2 mt-3">
-                                                    <button
-                                                        onClick={editingItemIndex !== null ? handleUpdateItem : handleAddItem}
-                                                        className="bg-lightBtn dark:bg-darkBtn p-2 rounded-md text-white"
-                                                    >
-                                                        {editingItemIndex !== null ? 'Update Item' : 'Save & Add More Item'}
-                                                    </button>
-
-                                                </div>
-
-                                                <div className="flex justify-end gap-2 mt-3">
-                                                    <button
-                                                        onClick={handleAddSpec}
-                                                        className="bg-lightBtn dark:bg-darkBtn p-2 rounded-md text-white"
-                                                    >
-                                                        {editingSpecIndex !== null ? 'Update Specification' : 'Add Specification'}
-                                                    </button>
-                                                </div>
                                                 {specifications.length > 0 && (
                                                     <div className="bg-white  rounded-lg border-1 pb-4  my-4 ">
-                                                        <h6 className="p-4">Saved Specifications</h6>
+                                                        <h6 className="p-4">Add Specifications</h6>
                                                         {specifications.map((spec, specIndex) => (
                                                             <div
                                                                 key={specIndex}
-                                                            className="border mx-2 shadow-md border-1 p-3 rounded-md mb-2"
+                                                                className="border relative pt-4 mx-2 shadow-md border-1 p-3 rounded-md mb-2"
                                                             >
-                                                                <div className="flex w-full justify-between items-center">
-                                                                    <h3 className="text-lg  font-medium text-gray-700 bg-gray-100 p-3 rounded-t-md">
-                                                                        {spec?.title}
-                                                                    </h3>
-                                                                    <div>
+                                                                {
+                                                                    specifications?.length == 1 ? "" :
                                                                         <button
-                                                                            onClick={() => handleEditSpec(specIndex)}
-                                                                            className="text-blue-500 border p-[.20rem] rounded-md mr-2"
+                                                                            onClick={() => {
+                                                                                const previousValues = [...specifications];
+                                                                                if (previousValues?.length !== 1) {
+                                                                                    previousValues.splice(specIndex, 1);
+                                                                                    setSpecifications(previousValues);
+                                                                                }
+                                                                            }}
+                                                                            className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
                                                                         >
-                                                                            <FiEdit/>
+                                                                            <FaRegTrashAlt className="text-red-500" />
                                                                         </button>
-                                                                        <button
-                                                                            onClick={() => handleDeleteSpec(specIndex)}
-                                                                            className="text-red-500 border p-[.20rem] rounded-md "
-                                                                        >
-                                                                            <FaRegTrashAlt/>
-                                                                        </button>
+                                                                }
+                                                                <div className="grid lg:grid-cols-3 mb-3 flex-col gap-3">
+                                                                    <div className="fromGroup">
+                                                                        <label className="form-label">
+                                                                            <p>
+                                                                                Specification Title <span className="text-red-500">*</span>
+                                                                            </p>
+                                                                        </label>
+                                                                        <input
+                                                                            name="title"
+                                                                            type="text"
+                                                                            placeholder="Enter specification title"
+                                                                            value={spec?.title}
+                                                                            onChange={(e) => {
+                                                                                const { name, value } = e.target;
+                                                                                const previousValues = [...specifications];
+                                                                                previousValues[specIndex].title = value;
+                                                                                setSpecifications(previousValues);
+                                                                            }}
+                                                                            className="form-control py-2"
+                                                                        />
                                                                     </div>
                                                                 </div>
                                                                 <div className="rounded-b-md">
                                                                     {spec.items.map((item, itemIndex) => (
-                                                                        <div key={itemIndex} className="divide-y border-b-2 divide-gray-200">
-                                                                            <div
-                                                                                key={itemIndex}
-                                                                                className="flex justify-between p-4  hover:bg-gray-50"
-                                                                            >
-                                                                                <span className="text-gray-600 w-1/2">{item?.name}</span>
-                                                                                <span className="text-gray-800 w-1/2">{item?.description}</span>
-                                                                                <div className="flex ml-2">
+                                                                        <div key={itemIndex} className="relative mb-3 pt-4 border-2 border-lightBtn dark:border-darkBtn border-dashed rounded-md p-2 divide-gray-200">
+                                                                            {
+                                                                                specifications[specIndex].items?.length == 1 ? "" :
                                                                                     <button
-                                                                                        onClick={() => handleEditItem(specIndex, itemIndex)}
-                                                                                        className="text-blue-500 border p-[.20rem] rounded-md mr-2"
+                                                                                        onClick={() => {
+                                                                                            const previousValues = [...specifications];
+                                                                                            previousValues[specIndex].items.splice(itemIndex, 1);
+                                                                                            setSpecifications(previousValues);
+                                                                                        }}
+                                                                                        className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
                                                                                     >
-                                                                                         <FiEdit/>
+                                                                                        <FaRegTrashAlt className="text-red-500" />
                                                                                     </button>
-                                                                                    <button
-                                                                                        onClick={() => handleDeleteItem(specIndex, itemIndex)}
-                                                                                        className="text-red-500 border p-[.20rem] rounded-md"
-                                                                                    >
-                                                                                        <FaRegTrashAlt/>
-                                                                                    </button>
+                                                                            }
+                                                                            <div className="grid lg:grid-cols-2  flex-col my-3 gap-3">
+                                                                                <div className="fromGroup">
+                                                                                    <label className="form-label">
+                                                                                        <p>
+                                                                                            Item Name <span className="text-red-500">*</span>
+                                                                                        </p>
+                                                                                    </label>
+                                                                                    <input
+                                                                                        name="name"
+                                                                                        type="text"
+                                                                                        placeholder="Enter item name"
+                                                                                        value={item.name}
+                                                                                        onChange={(e) => {
+                                                                                            const { name, value } = e.target;
+                                                                                            const previousValues = [...specifications];
+                                                                                            previousValues[specIndex].items[itemIndex].name = value;
+                                                                                            setSpecifications(previousValues);
+                                                                                        }}
+                                                                                        className="form-control py-2"
+                                                                                    />
+                                                                                </div>
+                                                                                <div className="fromGroup">
+                                                                                    <label className="form-label">
+                                                                                        <p>
+                                                                                            Item Description <span className="text-red-500">*</span>
+                                                                                        </p>
+                                                                                    </label>
+                                                                                    <input
+                                                                                        name="description"
+                                                                                        type="text"
+                                                                                        placeholder="Enter item description"
+                                                                                        value={item.description}
+                                                                                        className="form-control py-2"
+                                                                                        onChange={(e) => {
+                                                                                            const { name, value } = e.target;
+                                                                                            const previousValues = [...specifications];
+                                                                                            previousValues[specIndex].items[itemIndex].description = value;
+                                                                                            setSpecifications(previousValues);
+                                                                                        }}
+                                                                                    />
                                                                                 </div>
                                                                             </div>
-
-                                                                            {/* <span className="font-medium">{item.name}</span>: {item.description} */}
-
                                                                         </div>
                                                                     ))}
                                                                 </div>
+                                                                <div className="flex justify-end">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            const previousValues = [...specifications];
+                                                                            previousValues[specIndex].items.push({ name: "", description: "" });
+                                                                            console.log("previousValues", previousValues);
+                                                                            setSpecifications(previousValues)
+                                                                        }}
+                                                                        className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
+                                                                    >+ And More</button>
+                                                                </div>
                                                             </div>
                                                         ))}
+                                                        <div className="flex justify-end px-2">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setSpecifications((prev) => {
+                                                                        return ([...prev, { title: "", items: [{ name: "", description: "" }] }])
+                                                                    })
+
+                                                                }}
+                                                                className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
+                                                            >+ Add More Specification</button>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
