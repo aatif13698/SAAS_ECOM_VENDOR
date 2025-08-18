@@ -966,9 +966,9 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                             </div>
                                         </div>
 
-                                        <div className="mt-4 bg-black-200 dark:bg-black-500 p-2 rounded-md">
+                                        <div className="mt-4 border-dashed border-2   p-2 rounded-md">
                                             <h5>Stock Fields</h5>
-                                            <div className="grid lg:grid-cols-3 flex-col gap-3">
+                                            <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1  gap-3">
                                                 <div className=''
                                                 >
                                                     <label >
@@ -992,13 +992,11 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     </select>
                                                     {<p className="text-red-600  text-xs"> {formDataErr.variant}</p>}
 
-                                                </div>
+                                                </div> 
 
-                                                <div className="col-span-3 bg-red">
-
+                                                <div className="lg:col-span-3 md:col-span-2 bg-red">
                                                     {
                                                         seletedVariantData ? <div>
-
                                                             {
                                                                 seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price.length > 0 ?
                                                                     <div className='overflow-x-auto my-4 '>
@@ -1025,8 +1023,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                                                                 <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
                                                                                                     {item.unitPrice}
                                                                                                 </td>
-
-
                                                                                             </tr>
                                                                                         )
                                                                                     })
@@ -1044,10 +1040,8 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                             }
 
                                                         </div> :
-
                                                             <span>Variant not seleceted yet.</span>
                                                     }
-
                                                 </div>
 
 
@@ -1209,7 +1203,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                             {/* Specification Section */}
                                             <div className="col-span-3 mt-3">
                                                 {specifications.length > 0 && (
-                                                    <div className="bg-white  rounded-lg border-1 pb-4  my-4 ">
+                                                    <div className={` ${isDark ? "bg-darkSecondary text-white" : "bg-white"}  rounded-lg border-1 pb-4  my-4 `}>
                                                         <h6 className="p-4">Add Specifications</h6>
                                                         {specifications.map((spec, specIndex) => (
                                                             <div
@@ -1400,13 +1394,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
                                         </div>
 
-
-
-
-
-
-
-
                                         <div className="lg:col-span-2 col-span-1">
                                             <div className="ltr:text-right rtl:text-left p-5">
                                                 {showAddButton ? (
@@ -1461,9 +1448,11 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
                             </div>
 
+                            <hr />
+
                             {normalStocks && normalStocks.length > 0 ? (
-                                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
-                                    <div className="bg-transparent dark:bg-gray-800 shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
+                                <div className={`  px-4 sm:px-6 lg:px-8 py-6 ${isDark ? "bg-darkSecondary text-white" : "bg-white"} `}>
+                                    <div className="dark:bg-black-500 bg-transparent shadow-sm rounded-xl border border-gray-200 dark:border-gray-700">
                                         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
                                             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
                                                 Stock Inventory
@@ -1488,19 +1477,19 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                         <h3 className="text-lg font-medium text-gray-900 dark:text-white break-words">
                                                             {item?.name}
                                                         </h3>
-                                                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                                        <p className="mt-1 text-sm text-gray-600 dark:text-gray-200 line-clamp-2">
                                                             {item?.description}
                                                         </p>
                                                     </div>
                                                     <div className="flex flex-col items-end gap-3 w-full md:w-auto">
                                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
-                                                            <div className="text-gray-700 dark:text-gray-300">
+                                                            <div className="text-gray-700 dark:text-gray-200">
                                                                 <span className="font-medium">Total:</span> {item?.totalStock}
                                                             </div>
-                                                            <div className="text-gray-700 dark:text-gray-300">
+                                                            <div className="text-gray-700 dark:text-gray-200">
                                                                 <span className="font-medium">Online:</span> {item?.onlineStock}
                                                             </div>
-                                                            <div className="text-gray-700 dark:text-gray-300">
+                                                            <div className="text-gray-700 dark:text-gray-200">
                                                                 <span className="font-medium">Offline:</span> {item?.offlineStock}
                                                             </div>
                                                         </div>
