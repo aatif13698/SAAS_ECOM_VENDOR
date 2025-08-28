@@ -93,6 +93,15 @@ const CreateStock = ({ noFade, scrollContent }) => {
     // console.log("seletedVariantData", seletedVariantData?.priceId?.price);
 
 
+    const [paymentOption, setPaymentOption] = useState({
+        cod: false,
+        fullPayment: false,
+        multiStep: false,
+        wallet: false,
+        bnpl: false,
+        upi: false,
+        paymentSteps: []
+    })
 
 
 
@@ -992,7 +1001,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     </select>
                                                     {<p className="text-red-600  text-xs"> {formDataErr.variant}</p>}
 
-                                                </div> 
+                                                </div>
 
                                                 <div className="lg:col-span-3 md:col-span-2 bg-red">
                                                     {
@@ -1393,6 +1402,145 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                             </div>
 
                                         </div>
+
+                                        <div className="mt-4 border-dashed border-2   p-2 rounded-md">
+                                            <h5>Payment option</h5>
+
+                                            <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1  gap-3">
+
+                                                <div>
+                                                    <label htmlFor="">COD</label>
+                                                    <div
+                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.cod ? "bg-lightBtn" : "bg-gray-400"
+                                                            }`}
+                                                        onClick={() => setPaymentOption((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                cod: !paymentOption?.cod
+                                                            }
+                                                        })}                                                    >
+                                                        <div
+                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.cod ? "translate-x-4" : "translate-x-0"
+                                                                }`}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label htmlFor="">Full Payment</label>
+                                                    <div
+                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.fullPayment ? "bg-lightBtn" : "bg-gray-400"
+                                                            }`}
+                                                        onClick={() => setPaymentOption((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                fullPayment: !paymentOption?.fullPayment
+                                                            }
+                                                        })}                                                    >
+                                                        <div
+                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.fullPayment ? "translate-x-4" : "translate-x-0"
+                                                                }`}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label htmlFor="">Wallet</label>
+                                                    <div
+                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.wallet ? "bg-lightBtn" : "bg-gray-400"
+                                                            }`}
+                                                        onClick={() => setPaymentOption((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                wallet: !paymentOption?.wallet
+                                                            }
+                                                        })}                                                    >
+                                                        <div
+                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.wallet ? "translate-x-4" : "translate-x-0"
+                                                                }`}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label htmlFor="">BNPL</label>
+                                                    <div
+                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.bnpl ? "bg-lightBtn" : "bg-gray-400"
+                                                            }`}
+                                                        onClick={() => setPaymentOption((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                bnpl: !paymentOption?.bnpl
+                                                            }
+                                                        })}                                                    >
+                                                        <div
+                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.bnpl ? "translate-x-4" : "translate-x-0"
+                                                                }`}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label htmlFor="">UPI</label>
+                                                    <div
+                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.upi ? "bg-lightBtn" : "bg-gray-400"
+                                                            }`}
+                                                        onClick={() => setPaymentOption((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                upi: !paymentOption?.upi
+                                                            }
+                                                        })}                                                    >
+                                                        <div
+                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.upi ? "translate-x-4" : "translate-x-0"
+                                                                }`}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label htmlFor="">Multi Step</label>
+                                                    <div
+                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.multiStep ? "bg-lightBtn" : "bg-gray-400"
+                                                            }`}
+                                                        onClick={() => setPaymentOption((prev) => {
+                                                            return {
+                                                                ...prev,
+                                                                multiStep: !paymentOption?.multiStep
+                                                            }
+                                                        })}
+                                                    >
+                                                        <div
+                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.multiStep ? "translate-x-4" : "translate-x-0"
+                                                                }`}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+
+
+
+                                            </div>
+
+
+                                            {/* <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.update?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                        }`}
+                                                    onClick={() => !item?.menuList?.update?.disabled && handleCheckBox(item?.menuList?.update?.id, item?.feature)}
+                                                >
+                                                    <div
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${item?.menuList?.update?.access ? "translate-x-4" : "translate-x-0"
+                                                            }`}
+                                                    ></div>
+                                                </div>
+                                            </td> */}
+
+
+
+                                        </div>
+
+
+
 
                                         <div className="lg:col-span-2 col-span-1">
                                             <div className="ltr:text-right rtl:text-left p-5">
