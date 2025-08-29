@@ -41,8 +41,6 @@
 // });
 
 
-
-
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
@@ -55,7 +53,9 @@ export default defineConfig({
     },
   },
   plugins: [
-    react(),
+    react({
+      jsxImportSource: '@emotion/react', // Add this for MUI with Emotion
+    }),
     replace({
       values: {
         __DEV__: 'true',
@@ -70,7 +70,7 @@ export default defineConfig({
         target: 'http://localhost:8088',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path, // Preserve /customizations path
+        rewrite: (path) => path,
       },
     },
   },
