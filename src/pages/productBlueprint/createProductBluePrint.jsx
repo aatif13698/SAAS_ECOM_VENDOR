@@ -589,37 +589,37 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 try {
                     setPageLoading(true)
                     const response = await productBlueprintService.getOne(id);
-                    // const baseAddress = response?.data;
-                    setBaseAddress(response?.data)
-                    // setFormData((prev) => ({
-                    //     categoryId: baseAddress.categoryId,
-                    //     subCategoryId: baseAddress.subCategoryId,
-                    //     brandId: baseAddress.brandId,
-                    //     manufacturerId: baseAddress.manufacturerId,
-                    //     // attributeId: baseAddress.attributeId,
-                    //     name: baseAddress.name,
-                    //     description: baseAddress.description,
-                    //     price: baseAddress.price,
-                    //     taxRate: baseAddress.taxRate,
-                    //     sku: baseAddress.sku,
-                    //     isCustomizable: baseAddress.isCustomizable,
-                    //     customizableOptions: ""
-                    // }));
+                    const baseAddress = response?.data;
+                    // setBaseAddress(response?.data)
+                    setFormData((prev) => ({
+                        categoryId: baseAddress.categoryId,
+                        subCategoryId: baseAddress.subCategoryId,
+                        brandId: baseAddress.brandId,
+                        manufacturerId: baseAddress.manufacturerId,
+                        // attributeId: baseAddress.attributeId,
+                        name: baseAddress.name,
+                        description: baseAddress.description,
+                        price: baseAddress.price,
+                        taxRate: baseAddress.taxRate,
+                        sku: baseAddress.sku,
+                        isCustomizable: baseAddress.isCustomizable,
+                        customizableOptions: ""
+                    }));
 
-                    // if (baseAddress.isCustomizable) {
-                    //     setCustomFormArray(baseAddress.customizableOptions)
-                    // };
+                    if (baseAddress.isCustomizable) {
+                        setCustomFormArray(baseAddress.customizableOptions)
+                    };
 
-                    // if (baseAddress.images) {
-                    //     setImgPreviwe(baseAddress.images.map((image) => {
-                    //         return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
-                    //     }))
-                    // }
+                    if (baseAddress.images) {
+                        setImgPreviwe(baseAddress.images.map((image) => {
+                            return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+                        }))
+                    }
                     setPageLoading(false)
 
                 } catch (error) {
                     setPageLoading(false)
-                    console.log("error in fetching vendor data");
+                    console.log("error in fetching vendor data", error);
                 }
             }
             getBranch()

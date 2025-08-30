@@ -30,32 +30,21 @@ import variantService from "@/services/variant/variant.service";
 
 const CreateStock = ({ noFade, scrollContent }) => {
 
-    // useEffect(() => {
-    //     if (roleId !== 1) {
-    //         navigate("/dashboard");
-    //         return;
-    //     }
-    //     return;
-    // }, []);
     const [isDark] = useDarkMode();
     const dispatch = useDispatch();
     const location = useLocation();
     const row = location?.state?.row;
     const id = location?.state?.id;
-    // const isViewed = location?.state?.isViewed;
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
 
     const [pageLoading, setPageLoading] = useState(true);
-    const [showLoadingModal, setShowLoadingModal] = useState(false);
 
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([])
     const [activeBranches, setActiveBranches] = useState([]);
     const [activeWarehouses, setActiveWarehouses] = useState([]);
     const [activeProductBlueprint, setActiveProductBlueprint] = useState([])
-    const [activePriceOptions, setActivePriceOptions] = useState([]);
-    const [rawPriceOptions, setRawPriceOptions] = useState([]);
     const [selectedPrices, setSelectedPrices] = useState("");
     const [iconImgErr, setIconImgErr] = useState("");
 
@@ -65,9 +54,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
     const [stockId, setStockId] = useState(null)
 
     const [normalStocks, setNormalStacks] = useState([])
-
-
-    // console.log("productVariants", productVariants);
 
 
 
@@ -90,8 +76,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     const [seletedVariantData, setSelectedVariantData] = useState(null);
 
-    // console.log("seletedVariantData", seletedVariantData?.priceId?.price);
-
 
     const [paymentOption, setPaymentOption] = useState({
         cod: false,
@@ -100,8 +84,66 @@ const CreateStock = ({ noFade, scrollContent }) => {
         wallet: false,
         bnpl: false,
         upi: false,
-        paymentSteps: []
-    })
+        paymentSteps: [{ name: '', percentage: '' }]
+    });
+
+    // Helper function to calculate sum of percentages
+    const calculatePercentageSum = (steps) => {
+        return steps.reduce((sum, step) => {
+            const percentage = parseFloat(step.percentage) || 0;
+            return sum + percentage;
+        }, 0);
+    };
+
+    // Handler for adding new payment step
+    const handleAddStep = () => {
+        setPaymentOption((prev) => {
+            const newSteps = [...prev.paymentSteps, { name: '', percentage: '' }];
+            return { ...prev, paymentSteps: newSteps };
+        });
+    };
+
+    // Handler for updating payment step
+    const handleUpdateStep = (index, field, value) => {
+        const newSteps = [...paymentOption.paymentSteps];
+        newSteps[index][field] = value;
+
+        // Calculate sum with the new value
+        const sum = calculatePercentageSum(newSteps);
+
+        // Only update if sum is not greater than 100
+        if (sum <= 100) {
+            setPaymentOption((prev) => ({
+                ...prev,
+                paymentSteps: newSteps
+            }));
+        } else {
+            alert('Sum of percentages cannot exceed 100%');
+        }
+    };
+
+    // Handler for deleting payment step
+    const handleDeleteStep = (index) => {
+        const newSteps = [...paymentOption.paymentSteps];
+        newSteps.splice(index, 1);
+        setPaymentOption((prev) => ({
+            ...prev,
+            paymentSteps: newSteps
+        }));
+    };
+
+    // Validate sum before form submission or other actions
+    const validatePercentages = () => {
+        const sum = calculatePercentageSum(paymentOption.paymentSteps);
+        if (sum !== 100) {
+            alert('Sum of percentages must be exactly 100%');
+            return false;
+        }
+        return true;
+    };
+
+    console.log("paymentOption", paymentOption);
+
 
 
 
@@ -121,11 +163,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
         restockQuantity: "",
         variant: ""
     });
-
-
-    // console.log("formDataErr", formDataErr);
-
-
 
     const {
         product,
@@ -156,118 +193,11 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
 
     const [isViewed, setIsViewed] = useState(false);
-    const [showAddButton, setShowAddButton] = useState(true);
-    const [isPasswordVissible, setIsPasswordVissile] = useState(false);
     const [loading, setLoading] = useState(false)
-    const [isConfirmPasswordVissible, setConfirmIsPasswordVissile] = useState(false);
-    const [refresh, setRefresh] = useState(0);
-
     const [imgPreview, setImgPreviwe] = useState(null);
-    const [ImgErr, setImgErr] = useState("");
     const [selectedFile, setselectedFile] = useState(null);
 
-
-
-    const [imgPreview2, setImgPreviwe2] = useState(null);
-    const [ImgErr2, setImgErr2] = useState("");
-    const [selectedFile2, setSelectedFile2] = useState(null);
-
-
     const [specifications, setSpecifications] = useState([{ title: '', isSaved: false, items: [{ name: '', description: '' }] }]);
-    const [currentSpec, setCurrentSpec] = useState({ title: '', items: [] });
-    const [currentItem, setCurrentItem] = useState({ name: '', description: '' });
-    const [editingSpecIndex, setEditingSpecIndex] = useState(null);
-    const [editingItemIndex, setEditingItemIndex] = useState(null);
-    const [specError, setSpecError] = useState('');
-
-    console.log("specifications", specifications);
-    console.log("currentSpec", currentSpec);
-
-    useEffect(() => {
-
-    }, [])
-
-
-
-    const handleAddSpec = () => {
-        if (!currentSpec.title.trim()) {
-            setSpecError('Specification title is required');
-            return;
-        }
-        if (currentSpec.items.length === 0) {
-            setSpecError('At least one item is required');
-            return;
-        }
-        if (editingSpecIndex !== null) {
-            const updatedSpecs = [...specifications];
-            updatedSpecs[editingSpecIndex] = currentSpec;
-            setSpecifications(updatedSpecs);
-            setEditingSpecIndex(null);
-        } else {
-            setSpecifications([...specifications, currentSpec]);
-        }
-        setCurrentSpec({ title: '', items: [] });
-        setSpecError('');
-    };
-
-    const handleAddItem = () => {
-        if (!currentItem.name.trim() || !currentItem.description.trim()) {
-            setSpecError('Item name and description are required');
-            return;
-        }
-        setCurrentSpec({
-            ...currentSpec,
-            items: [...currentSpec.items, currentItem],
-        });
-        setCurrentItem({ name: '', description: '' });
-        setSpecError('');
-    };
-
-    const handleEditSpec = (index) => {
-        setCurrentSpec(specifications[index]);
-        setEditingSpecIndex(index);
-        setSpecError('');
-    };
-
-    const handleDeleteSpec = (index) => {
-        setSpecifications(specifications.filter((_, i) => i !== index));
-    };
-
-    const handleEditItem = (specIndex, itemIndex) => {
-        setCurrentSpec(specifications[specIndex]);
-        setCurrentItem(specifications[specIndex].items[itemIndex]);
-        setEditingSpecIndex(specIndex);
-        setEditingItemIndex(itemIndex);
-    };
-
-    const handleDeleteItem = (specIndex, itemIndex) => {
-        const updatedSpecs = [...specifications];
-        updatedSpecs[specIndex].items = updatedSpecs[specIndex].items.filter((_, i) => i !== itemIndex);
-        if (updatedSpecs[specIndex].items.length === 0) {
-            updatedSpecs.splice(specIndex, 1);
-        }
-        setSpecifications(updatedSpecs);
-        setEditingSpecIndex(null);
-        setEditingItemIndex(null);
-    };
-
-    const handleUpdateItem = () => {
-        if (!currentItem.name.trim() || !currentItem.description.trim()) {
-            setSpecError('Item name and description are required');
-            return;
-        }
-        const updatedSpecs = [...specifications];
-        updatedSpecs[editingSpecIndex].items[editingItemIndex] = currentItem;
-        setSpecifications(updatedSpecs);
-        setCurrentSpec({ title: '', items: [] });
-        setCurrentItem({ name: '', description: '' });
-        setEditingSpecIndex(null);
-        setEditingItemIndex(null);
-        setSpecError('');
-    };
-
-    const navigate = useNavigate();
-
 
     //------- Handling the VAlidation ------
     function validationFunction() {
@@ -289,6 +219,13 @@ const CreateStock = ({ noFade, scrollContent }) => {
         };
 
         const tempErrors = {};
+
+        if (paymentOption?.multiStep) {
+            const percentageValidation = validatePercentages();
+            if (!percentageValidation) {
+                errorCount++;
+            }
+        }
 
         Object.entries(requiredFields).forEach(([field, message]) => {
             if (!formData[field]) {
@@ -421,7 +358,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (product) {
-            // getPriceListByProduct(product);
             getVariant(product);
         }
     }, [product]);
@@ -450,53 +386,10 @@ const CreateStock = ({ noFade, scrollContent }) => {
     }
 
 
-    function transformPriceArray(priceArray) {
-        if (!Array.isArray(priceArray)) {
-            throw new Error("Input must be an array");
-        }
-        return priceArray.map(item => {
-            const { attributes, price } = item;
-
-            if (typeof attributes !== 'object' || attributes === null) {
-                throw new Error("Each item must have an 'attributes' object");
-            }
-            // Dynamically build the label from attributes
-            const labelParts = Object.values(attributes);
-            const label = `${labelParts.join(' / ')} = ${price}`;
-            return {
-                label,
-                value: item?.id
-            };
-        });
-    }
-
-    // async function getPriceListByProduct(id) {
-    //     try {
-    //         const response = await priceService.getRateByProductId(id);
-    //         console.log("responsedsfa", response);
-    //         const filteredPriceOptions = response.data.priceOptions?.length > 0 ? response.data.priceOptions?.filter((item) => {
-    //             if (item?.price && item?.active) {
-    //                 return item
-    //             }
-    //         }) : [];
-    //         const a = filteredPriceOptions?.map((item, index) => ({ ...item, id: index }));
-    //         setRawPriceOptions(a)
-    //         const result = transformPriceArray(a);
-    //         setActivePriceOptions(result)
-    //     } catch (error) {
-    //         console.log("error while getting rate by product", error);
-    //     }
-    // }
-
-    //---------- Adding & Editing the Organiser ----------
-
     const [baseAddress, setBaseAddress] = useState(null);
 
     useEffect(() => {
-
         if (baseAddress) {
-
-
             setFormData((prev) => ({
                 ...prev,
                 product: baseAddress?.product,
@@ -510,9 +403,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 restockQuantity: baseAddress?.restockQuantity,
                 // priceOptions: baseAddress?.priceOptions,
             }));
-
             setNormalStacks(baseAddress?.normalSaleStock)
-            console.log("baseAddress?.priceOptions", baseAddress?.priceOptions);
             const filteredOptions = baseAddress?.priceOptions?.length > 0 ? baseAddress?.priceOptions?.map((item) => {
                 return {
                     price: item?.price,
@@ -520,11 +411,8 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     unit: item?.unit
                 }
             }) : [];
-
             setSelectedPrices(filteredOptions)
-
         }
-
     }, [baseAddress])
 
 
@@ -539,10 +427,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-
                 const variantValue = productVariants.find((item) => item?._id === variant);
-                console.log("variantValue", variantValue);
-
                 const payload = new FormData();
                 payload.append("clientId", clientId);
                 if (selectedFile && selectedFile) {
@@ -564,6 +449,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 payload.append("variant", variantValue?._id)
                 payload.append("varianValue", JSON.stringify(variantValue.variantValue));
                 payload.append("specification", JSON.stringify(specifications));
+                payload.append("paymentOPtions", JSON.stringify(paymentOption))
                 let response
                 if (stockId) {
                     payload.append("stockId", stockId);
@@ -573,11 +459,17 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     response = await stockService.create(payload);
                     toast.success(response?.data?.message);
                 }
-
                 setBaseAddress(response?.data?.data);
-
-                setSpecifications([{ title: '', isSaved: false, items: [{ name: '', description: '' }] }])
-
+                setSpecifications([{ title: '', isSaved: false, items: [{ name: '', description: '' }] }]);
+                setPaymentOption({
+                    cod: false,
+                    fullPayment: false,
+                    multiStep: false,
+                    wallet: false,
+                    bnpl: false,
+                    upi: false,
+                    paymentSteps: [{ name: '', percentage: '' }]
+                })
                 setFormData((prev) => ({
                     ...prev,
                     totalStock: "",
@@ -606,8 +498,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 })
                 setLoading(false);
                 setImgPreviwe(null)
-                // navigate("/stock-list");
-
             } catch (error) {
                 setLoading(false);
                 console.log("error while creating", error?.response?.data?.message);
@@ -615,7 +505,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
             }
         }
     };
-    // -----setting the data if contain id ----------
     useEffect(() => {
         if (id) {
             async function getBranch() {
@@ -624,33 +513,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     const response = await stockService.getParticularStocks(id);
                     console.log('Response stock data', response?.data);
                     const baseAddress = response?.data;
-
                     setBaseAddress(response?.data)
-                    // setFormData((prev) => ({
-                    //     ...prev,
-                    //     product: baseAddress?.product,
-                    //     businessUnit: baseAddress?.businessUnit,
-                    //     branch: baseAddress?.branch,
-                    //     warehouse: baseAddress?.warehouse,
-                    //     totalStock: baseAddress?.totalStock,
-                    //     onlineStock: baseAddress?.onlineStock,
-                    //     offlineStock: baseAddress?.offlineStock,
-                    //     lowStockThreshold: baseAddress?.lowStockThreshold,
-                    //     restockQuantity: baseAddress?.restockQuantity,
-                    //     // priceOptions: baseAddress?.priceOptions,
-                    // }));
-
-                    // setNormalStacks(baseAddress?.normalSaleStock)
-                    // console.log("baseAddress?.priceOptions", baseAddress?.priceOptions);
-                    // const filteredOptions = baseAddress?.priceOptions?.length > 0 ? baseAddress?.priceOptions?.map((item) => {
-                    //     return {
-                    //         price: item?.price,
-                    //         quantity: item?.quantity,
-                    //         unit: item?.unit
-                    //     }
-                    // }) : [];
-
-                    // setSelectedPrices(filteredOptions)
                     setPageLoading(false)
                 } catch (error) {
                     setPageLoading(false)
@@ -659,24 +522,16 @@ const CreateStock = ({ noFade, scrollContent }) => {
             }
             getBranch();
             setIsViewed(true);
-
         } else {
             setPageLoading(false);
             setIsViewed(false);
-
         }
-
     }, [id]);
-
-
-
-
 
     useEffect(() => {
         async function getActiveBusinessUnit() {
             try {
                 const response = await warehouseService.getActiveBusinessUnit();
-                // console.log("respone active", response);
                 setActiveBusinessUnits(response?.data?.businessUnits)
             } catch (error) {
                 console.log("error while getting the active business unit", error);
@@ -694,9 +549,6 @@ const CreateStock = ({ noFade, scrollContent }) => {
             console.log("error in getting active", error);
         }
     }
-
-
-
 
     const handleFileChange1 = (e) => {
         const files = e.target.files;
@@ -733,18 +585,10 @@ const CreateStock = ({ noFade, scrollContent }) => {
         }
     };
 
-
-
     function onEditStock(data) {
-
-        console.log("data", data);
-
-
         window.scrollTo({ top: 0, behavior: 'smooth' });
         setIsEditing(true);
-
         setStockId(data?._id);
-
         setSelectedPrices(data?.priceOptions?.id);
         setFormData((prev) => (
             {
@@ -759,10 +603,28 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 variant: data?.variant
             }));
 
-        if (data?.specification) {
+        setFormDataErr({
+            product: "",
+            businessUnit: "",
+            branch: "",
+            warehouse: "",
+
+            name: "",
+            description: "",
+
+            totalStock: "",
+            onlineStock: "",
+            offlineStock: "",
+            lowStockThreshold: "",
+            restockQuantity: "",
+            variant: ""
+        })
+        if (data?.specification?.length > 0) {
             setSpecifications(data?.specification)
         }
-
+        if (data?.paymentOPtions) {
+            setPaymentOption(data?.paymentOPtions)
+        }
         if (data.images) {
             setImgPreviwe(data.images.map((image) => {
                 return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
@@ -770,75 +632,19 @@ const CreateStock = ({ noFade, scrollContent }) => {
         }
     }
 
-
-
     useEffect(() => {
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
-                // setLevelList([
-                //     {
-                //         name: "Vendor",
-                //         value: "vendor"
-                //     },
-                //     {
-                //         name: "Business",
-                //         value: "business"
-                //     },
-                //     {
-                //         name: "Branch",
-                //         value: "branch"
-                //     },
-                //     {
-                //         name: "Warehouse",
-                //         value: "warehouse"
-                //     },
-                // ])
+
             } else if (currentUser.isBuLevel) {
-                // setLevelList([
-                //     {
-                //         name: "Business",
-                //         value: "business"
-                //     },
-                //     {
-                //         name: "Branch",
-                //         value: "branch"
-                //     },
-                //     {
-                //         name: "Warehouse",
-                //         value: "warehouse"
-                //     },
-                // ]);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
             } else if (currentUser.isBranchLevel) {
-                // setLevelList([
-                //     {
-                //         name: "Branch",
-                //         value: "branch"
-                //     },
-                //     {
-                //         name: "Warehouse",
-                //         value: "warehouse"
-                //     },
-                // ]);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
             } else if (currentUser.isWarehouseLevel) {
-                // setLevelList([
-                //     {
-                //         name: "Warehouse",
-                //         value: "warehouse"
-                //     },
-                // ])
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
             }
-
-        } else {
-
         }
-
     }, [currentUser])
-
-
-    const [isUserClicked, setIsUserClicked] = useState(true);
 
     return (
 
@@ -866,734 +672,780 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     <div>
                         <Card>
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
-                                {isUserClicked && (
-                                    <div>
-                                        <div className="grid lg:grid-cols-3 flex-col gap-3">
+                                <div>
+                                    <div className="grid lg:grid-cols-3 flex-col gap-3">
 
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
-                                                    } `}
+                                        <div
+                                            className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <label htmlFor=" hh" className="form-label ">
+                                                <p className="form-label">
+                                                    Business Unit <span className="text-red-500">*</span>
+                                                </p>
+                                            </label>
+                                            <select
+                                                name="businessUnit"
+                                                value={businessUnit}
+                                                onChange={handleChange}
+                                                disabled={isViewed || normalStocks?.length > 0 || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                className="form-control py-2  appearance-none relative flex-1"
                                             >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        Business Unit <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="businessUnit"
-                                                    value={businessUnit}
-                                                    onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
+                                                <option value="">None</option>
 
-                                                    {activeBusinessUnits &&
-                                                        activeBusinessUnits?.map((item) => (
-                                                            <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
-                                            </div>
-
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.branch !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        Branch <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="branch"
-                                                    value={branch}
-                                                    onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-
-                                                    {activeBranches &&
-                                                        activeBranches?.map((item) => (
-                                                            <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.branch}</p>}
-                                            </div>
-
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.warehouse !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        Warehouse <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="warehouse"
-                                                    value={warehouse}
-                                                    onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0 || currentUser.isWarehouseLevel}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-
-                                                    {activeWarehouses &&
-                                                        activeWarehouses?.map((item) => (
-                                                            <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
-                                            </div>
-
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.product !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        Product <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="product"
-                                                    value={product}
-                                                    onChange={handleChange}
-                                                    disabled={isViewed || normalStocks?.length > 0}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-
-                                                    {activeProductBlueprint &&
-                                                        activeProductBlueprint?.map((item) => (
-                                                            <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.product}</p>}
-                                            </div>
+                                                {activeBusinessUnits &&
+                                                    activeBusinessUnits?.map((item) => (
+                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                    ))}
+                                            </select>
+                                            {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
                                         </div>
 
-                                        <div className="mt-4 border-dashed border-2   p-2 rounded-md">
-                                            <h5>Stock Fields</h5>
-                                            <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1  gap-3">
-                                                <div className=''
-                                                >
-                                                    <label >
-                                                        <p className="form-label">
-                                                            Variant <span className="text-red-500">*</span>
-                                                        </p>
-                                                    </label>
-                                                    <select
-                                                        name="variant"
-                                                        value={variant}
-                                                        onChange={handleChange}
-                                                        // disabled={isViewed}
-                                                        className="form-control py-2  appearance-none relative flex-1"
-                                                    >
-                                                        <option value="">None</option>
+                                        <div
+                                            className={`fromGroup   ${formDataErr?.branch !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <label htmlFor=" hh" className="form-label ">
+                                                <p className="form-label">
+                                                    Branch <span className="text-red-500">*</span>
+                                                </p>
+                                            </label>
+                                            <select
+                                                name="branch"
+                                                value={branch}
+                                                onChange={handleChange}
+                                                disabled={isViewed || normalStocks?.length > 0 || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                className="form-control py-2  appearance-none relative flex-1"
+                                            >
+                                                <option value="">None</option>
 
-                                                        {productVariants &&
-                                                            productVariants?.map((item) => (
-                                                                <option value={item?._id} key={item?._id}>{item && item?.variant}</option>
-                                                            ))}
-                                                    </select>
-                                                    {<p className="text-red-600  text-xs"> {formDataErr.variant}</p>}
+                                                {activeBranches &&
+                                                    activeBranches?.map((item) => (
+                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                    ))}
+                                            </select>
+                                            {<p className="text-sm text-red-500">{formDataErr.branch}</p>}
+                                        </div>
 
-                                                </div>
+                                        <div
+                                            className={`fromGroup   ${formDataErr?.warehouse !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <label htmlFor=" hh" className="form-label ">
+                                                <p className="form-label">
+                                                    Warehouse <span className="text-red-500">*</span>
+                                                </p>
+                                            </label>
+                                            <select
+                                                name="warehouse"
+                                                value={warehouse}
+                                                onChange={handleChange}
+                                                disabled={isViewed || normalStocks?.length > 0 || currentUser.isWarehouseLevel}
+                                                className="form-control py-2  appearance-none relative flex-1"
+                                            >
+                                                <option value="">None</option>
 
-                                                <div className="lg:col-span-3 md:col-span-2 bg-red">
-                                                    {
-                                                        seletedVariantData ? <div>
-                                                            {
-                                                                seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price.length > 0 ?
-                                                                    <div className='overflow-x-auto my-4 '>
-                                                                        <span>Price table</span>
-                                                                        <table className="min-w-full ">
-                                                                            <thead className="bg-[#C9FEFF] dark:bg-darkBtn dark:text-white sticky top-0">
-                                                                                <tr className="border-b border-dashed border-lighttableBorderColor">
-                                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
-                                                                                        Quantity(+)
-                                                                                    </th>
-                                                                                    <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
-                                                                                        Unit Price
-                                                                                    </th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody className="bg-white dark:bg-darkAccent">
-                                                                                {seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price?.length > 0 ? (
-                                                                                    seletedVariantData?.priceId?.price?.map((item, ind) => {
-                                                                                        return (
-                                                                                            <tr key={ind} className="border-b border-dashed border-lighttableBorderColor">
-                                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
-                                                                                                    {item.quantity}
-                                                                                                </td>
-                                                                                                <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
-                                                                                                    {item.unitPrice}
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        )
-                                                                                    })
-                                                                                ) : (
-                                                                                    <tr>
-                                                                                        <td colSpan="4" className="px-6 py-4 text-center text-lg font-medium text-lightModalHeaderColor">
-                                                                                            NO DATA FOUND
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                )}
-                                                                            </tbody>
-                                                                        </table>
-                                                                    </div>
-                                                                    : ""
-                                                            }
+                                                {activeWarehouses &&
+                                                    activeWarehouses?.map((item) => (
+                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                    ))}
+                                            </select>
+                                            {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
+                                        </div>
 
-                                                        </div> :
-                                                            <span>Variant not seleceted yet.</span>
-                                                    }
-                                                </div>
+                                        <div
+                                            className={`fromGroup   ${formDataErr?.product !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <label htmlFor=" hh" className="form-label ">
+                                                <p className="form-label">
+                                                    Product <span className="text-red-500">*</span>
+                                                </p>
+                                            </label>
+                                            <select
+                                                name="product"
+                                                value={product}
+                                                onChange={handleChange}
+                                                disabled={isViewed || normalStocks?.length > 0}
+                                                className="form-control py-2  appearance-none relative flex-1"
+                                            >
+                                                <option value="">None</option>
 
+                                                {activeProductBlueprint &&
+                                                    activeProductBlueprint?.map((item) => (
+                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                    ))}
+                                            </select>
+                                            {<p className="text-sm text-red-500">{formDataErr.product}</p>}
+                                        </div>
+                                    </div>
 
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
-                                                        } `}
-                                                >
+                                    <div className="mt-4 border-dashed border-2   p-2 rounded-md">
+                                        <h5>Stock Fields</h5>
+                                        <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1  gap-3">
+                                            <div className=''
+                                            >
+                                                <label >
                                                     <p className="form-label">
-                                                        Visible Name <span className="text-red-500">*</span>
+                                                        Variant <span className="text-red-500">*</span>
                                                     </p>
-                                                    <input
-                                                        name="name"
-                                                        type="text"
-                                                        placeholder="Enter product name"
-                                                        value={name}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.name}
-                                                        </p>
-                                                    }
                                                 </label>
-
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.description !== "" ? "has-error" : ""
-                                                        } `}
+                                                <select
+                                                    name="variant"
+                                                    value={variant}
+                                                    onChange={handleChange}
+                                                    // disabled={isViewed}
+                                                    className="form-control py-2  appearance-none relative flex-1"
                                                 >
-                                                    <p className="form-label">
-                                                        Description <span className="text-red-500">*</span>
-                                                    </p>
-                                                    <textarea
-                                                        name="description"
-                                                        placeholder="Enter total Stock"
-                                                        value={description}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.description}
-                                                        </p>
-                                                    }
-                                                </label>
+                                                    <option value="">None</option>
 
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.totalStock !== "" ? "has-error" : ""
-                                                        } `}
-                                                >
-                                                    <p className="form-label">
-                                                        Total Stock <span className="text-red-500">*</span>
-                                                    </p>
-                                                    <input
-                                                        name="totalStock"
-                                                        type="number"
-                                                        placeholder="Enter total Stock"
-                                                        value={totalStock}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.totalStock}
-                                                        </p>
-                                                    }
-                                                </label>
-
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.onlineStock !== "" ? "has-error" : ""
-                                                        } `}
-                                                >
-                                                    <p className="form-label">
-                                                        Online Stock <span className="text-red-500">*</span>
-                                                    </p>
-                                                    <input
-                                                        name="onlineStock"
-                                                        type="number"
-                                                        placeholder="Enter online stock"
-                                                        value={onlineStock}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.onlineStock}
-                                                        </p>
-                                                    }
-                                                </label>
-
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.offlineStock !== "" ? "has-error" : ""
-                                                        } `}
-                                                >
-                                                    <p className="form-label">
-                                                        Offline Stock <span className="text-red-500">*</span>
-                                                    </p>
-                                                    <input
-                                                        name="offlineStock"
-                                                        type="number"
-                                                        placeholder="Enter offline Stock"
-                                                        value={offlineStock}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.offlineStock}
-                                                        </p>
-                                                    }
-                                                </label>
-
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.lowStockThreshold !== "" ? "has-error" : ""
-                                                        } `}
-                                                >
-                                                    <p className="form-label">
-                                                        Low Stock Threshold <span className="text-red-500">*</span>
-                                                    </p>
-                                                    <input
-                                                        name="lowStockThreshold"
-                                                        type="number"
-                                                        placeholder="Enter low stock threshold"
-                                                        value={lowStockThreshold}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.lowStockThreshold}
-                                                        </p>
-                                                    }
-                                                </label>
-
-                                                <label
-                                                    className={`fromGroup   ${formDataErr?.restockQuantity !== "" ? "has-error" : ""
-                                                        } `}
-                                                >
-                                                    <p className="form-label">
-                                                        Restock Quantity <span className="text-red-500">*</span>
-                                                    </p>
-                                                    <input
-                                                        name="restockQuantity"
-                                                        type="number"
-                                                        placeholder="Enter restock quantity"
-                                                        value={restockQuantity}
-                                                        onChange={handleChange}
-                                                        className="form-control py-2"
-                                                    />
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.restockQuantity}
-                                                        </p>
-                                                    }
-                                                </label>
+                                                    {productVariants &&
+                                                        productVariants?.map((item) => (
+                                                            <option value={item?._id} key={item?._id}>{item && item?.variant}</option>
+                                                        ))}
+                                                </select>
+                                                {<p className="text-red-600  text-xs"> {formDataErr.variant}</p>}
 
                                             </div>
 
-                                            {/* Specification Section */}
-                                            <div className="col-span-3 mt-3">
-                                                {specifications.length > 0 && (
-                                                    <div className={` ${isDark ? "bg-darkSecondary text-white" : "bg-white"}  rounded-lg border-1 pb-4  my-4 `}>
-                                                        <h6 className="p-4">Add Specifications</h6>
-                                                        {specifications.map((spec, specIndex) => (
-                                                            <div
-                                                                key={specIndex}
-                                                                className="border relative pt-4 mx-2 shadow-md border-1 p-3 rounded-md mb-2"
-                                                            >
-                                                                {
-                                                                    specifications?.length == 1 ? "" :
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                const previousValues = [...specifications];
-                                                                                if (previousValues?.length !== 1) {
-                                                                                    previousValues.splice(specIndex, 1);
-                                                                                    setSpecifications(previousValues);
-                                                                                }
-                                                                            }}
-                                                                            className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
-                                                                        >
-                                                                            <FaRegTrashAlt className="text-red-500" />
-                                                                        </button>
-                                                                }
-                                                                <div className="grid lg:grid-cols-3 mb-3 flex-col gap-3">
-                                                                    <div className="fromGroup">
-                                                                        <label className="form-label">
-                                                                            <p>
-                                                                                Specification Title <span className="text-red-500">*</span>
-                                                                            </p>
-                                                                        </label>
-                                                                        <input
-                                                                            name="title"
-                                                                            type="text"
-                                                                            placeholder="Enter specification title"
-                                                                            value={spec?.title}
-                                                                            onChange={(e) => {
-                                                                                const { name, value } = e.target;
-                                                                                const previousValues = [...specifications];
-                                                                                previousValues[specIndex].title = value;
-                                                                                setSpecifications(previousValues);
-                                                                            }}
-                                                                            className="form-control py-2"
-                                                                        />
-                                                                    </div>
+                                            <div className="lg:col-span-3 md:col-span-2 bg-red">
+                                                {
+                                                    seletedVariantData ? <div>
+                                                        {
+                                                            seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price.length > 0 ?
+                                                                <div className='overflow-x-auto my-4 '>
+                                                                    <span>Price table</span>
+                                                                    <table className="min-w-full ">
+                                                                        <thead className="bg-[#C9FEFF] dark:bg-darkBtn dark:text-white sticky top-0">
+                                                                            <tr className="border-b border-dashed border-lighttableBorderColor">
+                                                                                <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                                    Quantity(+)
+                                                                                </th>
+                                                                                <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                                    Unit Price
+                                                                                </th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody className="bg-white dark:bg-darkAccent">
+                                                                            {seletedVariantData?.priceId?.price && seletedVariantData?.priceId?.price?.length > 0 ? (
+                                                                                seletedVariantData?.priceId?.price?.map((item, ind) => {
+                                                                                    return (
+                                                                                        <tr key={ind} className="border-b border-dashed border-lighttableBorderColor">
+                                                                                            <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                                {item.quantity}
+                                                                                            </td>
+                                                                                            <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                                {item.unitPrice}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    )
+                                                                                })
+                                                                            ) : (
+                                                                                <tr>
+                                                                                    <td colSpan="4" className="px-6 py-4 text-center text-lg font-medium text-lightModalHeaderColor">
+                                                                                        NO DATA FOUND
+                                                                                    </td>
+                                                                                </tr>
+                                                                            )}
+                                                                        </tbody>
+                                                                    </table>
                                                                 </div>
-                                                                <div className="rounded-b-md">
-                                                                    {spec.items.map((item, itemIndex) => (
-                                                                        <div key={itemIndex} className="relative mb-3 pt-4 border-2 border-lightBtn dark:border-darkBtn border-dashed rounded-md p-2 divide-gray-200">
-                                                                            {
-                                                                                specifications[specIndex].items?.length == 1 ? "" :
-                                                                                    <button
-                                                                                        onClick={() => {
-                                                                                            const previousValues = [...specifications];
-                                                                                            previousValues[specIndex].items.splice(itemIndex, 1);
-                                                                                            setSpecifications(previousValues);
-                                                                                        }}
-                                                                                        className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
-                                                                                    >
-                                                                                        <FaRegTrashAlt className="text-red-500" />
-                                                                                    </button>
-                                                                            }
-                                                                            <div className="grid lg:grid-cols-2  flex-col my-3 gap-3">
-                                                                                <div className="fromGroup">
-                                                                                    <label className="form-label">
-                                                                                        <p>
-                                                                                            Item Name <span className="text-red-500">*</span>
-                                                                                        </p>
-                                                                                    </label>
-                                                                                    <input
-                                                                                        name="name"
-                                                                                        type="text"
-                                                                                        placeholder="Enter item name"
-                                                                                        value={item.name}
-                                                                                        onChange={(e) => {
-                                                                                            const { name, value } = e.target;
-                                                                                            const previousValues = [...specifications];
-                                                                                            previousValues[specIndex].items[itemIndex].name = value;
-                                                                                            setSpecifications(previousValues);
-                                                                                        }}
-                                                                                        className="form-control py-2"
-                                                                                    />
-                                                                                </div>
-                                                                                <div className="fromGroup">
-                                                                                    <label className="form-label">
-                                                                                        <p>
-                                                                                            Item Description <span className="text-red-500">*</span>
-                                                                                        </p>
-                                                                                    </label>
-                                                                                    <input
-                                                                                        name="description"
-                                                                                        type="text"
-                                                                                        placeholder="Enter item description"
-                                                                                        value={item.description}
-                                                                                        className="form-control py-2"
-                                                                                        onChange={(e) => {
-                                                                                            const { name, value } = e.target;
-                                                                                            const previousValues = [...specifications];
-                                                                                            previousValues[specIndex].items[itemIndex].description = value;
-                                                                                            setSpecifications(previousValues);
-                                                                                        }}
-                                                                                    />
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
-                                                                <div className="flex justify-end">
+                                                                : ""
+                                                        }
+
+                                                    </div> :
+                                                        <span>Variant not seleceted yet.</span>
+                                                }
+                                            </div>
+
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Visible Name <span className="text-red-500">*</span>
+                                                </p>
+                                                <input
+                                                    name="name"
+                                                    type="text"
+                                                    placeholder="Enter product name"
+                                                    value={name}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.name}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.description !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Description <span className="text-red-500">*</span>
+                                                </p>
+                                                <textarea
+                                                    name="description"
+                                                    placeholder="Enter total Stock"
+                                                    value={description}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.description}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.totalStock !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Total Stock <span className="text-red-500">*</span>
+                                                </p>
+                                                <input
+                                                    name="totalStock"
+                                                    type="number"
+                                                    placeholder="Enter total Stock"
+                                                    value={totalStock}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.totalStock}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.onlineStock !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Online Stock <span className="text-red-500">*</span>
+                                                </p>
+                                                <input
+                                                    name="onlineStock"
+                                                    type="number"
+                                                    placeholder="Enter online stock"
+                                                    value={onlineStock}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.onlineStock}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.offlineStock !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Offline Stock <span className="text-red-500">*</span>
+                                                </p>
+                                                <input
+                                                    name="offlineStock"
+                                                    type="number"
+                                                    placeholder="Enter offline Stock"
+                                                    value={offlineStock}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.offlineStock}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.lowStockThreshold !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Low Stock Threshold <span className="text-red-500">*</span>
+                                                </p>
+                                                <input
+                                                    name="lowStockThreshold"
+                                                    type="number"
+                                                    placeholder="Enter low stock threshold"
+                                                    value={lowStockThreshold}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.lowStockThreshold}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                            <label
+                                                className={`fromGroup   ${formDataErr?.restockQuantity !== "" ? "has-error" : ""
+                                                    } `}
+                                            >
+                                                <p className="form-label">
+                                                    Restock Quantity <span className="text-red-500">*</span>
+                                                </p>
+                                                <input
+                                                    name="restockQuantity"
+                                                    type="number"
+                                                    placeholder="Enter restock quantity"
+                                                    value={restockQuantity}
+                                                    onChange={handleChange}
+                                                    className="form-control py-2"
+                                                />
+                                                {
+                                                    <p className="text-sm text-red-500">
+                                                        {formDataErr.restockQuantity}
+                                                    </p>
+                                                }
+                                            </label>
+
+                                        </div>
+
+                                        {/* Specification Section */}
+                                        <div className="col-span-3 mt-3">
+                                            {specifications.length > 0 && (
+                                                <div className={` ${isDark ? "bg-darkSecondary text-white" : "bg-white"}  rounded-lg border-1 pb-4  my-4 `}>
+                                                    <h6 className="p-4">Add Specifications</h6>
+                                                    {specifications.map((spec, specIndex) => (
+                                                        <div
+                                                            key={specIndex}
+                                                            className="border relative pt-4 mx-2 shadow-md border-1 p-3 rounded-md mb-2"
+                                                        >
+                                                            {
+                                                                specifications?.length == 1 ? "" :
                                                                     <button
                                                                         onClick={() => {
                                                                             const previousValues = [...specifications];
-                                                                            previousValues[specIndex].items.push({ name: "", description: "" });
-                                                                            console.log("previousValues", previousValues);
-                                                                            setSpecifications(previousValues)
+                                                                            if (previousValues?.length !== 1) {
+                                                                                previousValues.splice(specIndex, 1);
+                                                                                setSpecifications(previousValues);
+                                                                            }
                                                                         }}
-                                                                        className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
-                                                                    >+ And More</button>
+                                                                        className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
+                                                                    >
+                                                                        <FaRegTrashAlt className="text-red-500" />
+                                                                    </button>
+                                                            }
+                                                            <div className="grid lg:grid-cols-3 mb-3 flex-col gap-3">
+                                                                <div className="fromGroup">
+                                                                    <label className="form-label">
+                                                                        <p>
+                                                                            Specification Title <span className="text-red-500">*</span>
+                                                                        </p>
+                                                                    </label>
+                                                                    <input
+                                                                        name="title"
+                                                                        type="text"
+                                                                        placeholder="Enter specification title"
+                                                                        value={spec?.title}
+                                                                        onChange={(e) => {
+                                                                            const { name, value } = e.target;
+                                                                            const previousValues = [...specifications];
+                                                                            previousValues[specIndex].title = value;
+                                                                            setSpecifications(previousValues);
+                                                                        }}
+                                                                        className="form-control py-2"
+                                                                    />
                                                                 </div>
                                                             </div>
-                                                        ))}
-                                                        <div className="flex justify-end px-2">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSpecifications((prev) => {
-                                                                        return ([...prev, { title: "", items: [{ name: "", description: "" }] }])
-                                                                    })
-
-                                                                }}
-                                                                className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
-                                                            >+ Add More Specification</button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            <div className="mt-4">
-                                                <label
-                                                    htmlFor="profileImage1"
-                                                    className="block text-base  font-medium mb-2"
-                                                >
-                                                    <p className={`mb-1 dark:text-white text-black`}>Upload Files</p>
-                                                </label>
-                                                <label
-                                                    htmlFor="profileImage1"
-                                                    className="flex flex-col cursor-pointer  form-control relative border border-dashed border-lightHoverBgBtn dark:border-darkBtn  rounded-lg py-4 text-center"
-                                                >
-                                                    <label htmlFor="profileImage1" className="text-primary cursor-pointer">
-                                                        <div>
-                                                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                                                                Click to upload.
-                                                            </h3>
-                                                            <label
-                                                                htmlFor="profileImage1"
-                                                                className="text-sm text-gray-500 cursor-pointer"
-                                                            >
-                                                                (Allowed .jpg, .png less than 1MB)
-                                                            </label>
-                                                        </div>
-                                                    </label>
-                                                    <input
-                                                        id="profileImage1"
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        multiple // Enable multiple file selection
-                                                        // disabled={isViewed}
-                                                        onChange={(e) => {
-                                                            handleFileChange1(e);
-                                                        }}
-                                                    />
-                                                    <span style={{ color: "red", fontSize: "0.7em" }}>
-                                                        {<p className="text-red-600 text-xs pt-6 ">{iconImgErr}</p>}
-                                                    </span>
-                                                </label>
-                                                {imgPreview && imgPreview.length > 0 && (
-                                                    <div
-                                                        onClick={() => setShowAttachmentModal(true)}
-                                                        className="flex form-control flex-wrap gap-4 mt-3 px-2 py-2 justify-center border border-dashed border-lightHoverBgBtn dark:border-gray-600">
-                                                        {imgPreview.map((preview, index) => (
-                                                            <div key={index} className="flex justify-center items-center">
-                                                                <img
-                                                                    src={preview}
-                                                                    className="w-20 h-20 object-cover border-[#ffffff]"
-                                                                    alt={`Preview ${index + 1}`}
-                                                                />
+                                                            <div className="rounded-b-md">
+                                                                {spec.items.map((item, itemIndex) => (
+                                                                    <div key={itemIndex} className="relative mb-3 pt-4 border-2 border-lightBtn dark:border-darkBtn border-dashed rounded-md p-2 divide-gray-200">
+                                                                        {
+                                                                            specifications[specIndex].items?.length == 1 ? "" :
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        const previousValues = [...specifications];
+                                                                                        previousValues[specIndex].items.splice(itemIndex, 1);
+                                                                                        setSpecifications(previousValues);
+                                                                                    }}
+                                                                                    className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
+                                                                                >
+                                                                                    <FaRegTrashAlt className="text-red-500" />
+                                                                                </button>
+                                                                        }
+                                                                        <div className="grid lg:grid-cols-2  flex-col my-3 gap-3">
+                                                                            <div className="fromGroup">
+                                                                                <label className="form-label">
+                                                                                    <p>
+                                                                                        Item Name <span className="text-red-500">*</span>
+                                                                                    </p>
+                                                                                </label>
+                                                                                <input
+                                                                                    name="name"
+                                                                                    type="text"
+                                                                                    placeholder="Enter item name"
+                                                                                    value={item.name}
+                                                                                    onChange={(e) => {
+                                                                                        const { name, value } = e.target;
+                                                                                        const previousValues = [...specifications];
+                                                                                        previousValues[specIndex].items[itemIndex].name = value;
+                                                                                        setSpecifications(previousValues);
+                                                                                    }}
+                                                                                    className="form-control py-2"
+                                                                                />
+                                                                            </div>
+                                                                            <div className="fromGroup">
+                                                                                <label className="form-label">
+                                                                                    <p>
+                                                                                        Item Description <span className="text-red-500">*</span>
+                                                                                    </p>
+                                                                                </label>
+                                                                                <input
+                                                                                    name="description"
+                                                                                    type="text"
+                                                                                    placeholder="Enter item description"
+                                                                                    value={item.description}
+                                                                                    className="form-control py-2"
+                                                                                    onChange={(e) => {
+                                                                                        const { name, value } = e.target;
+                                                                                        const previousValues = [...specifications];
+                                                                                        previousValues[specIndex].items[itemIndex].description = value;
+                                                                                        setSpecifications(previousValues);
+                                                                                    }}
+                                                                                />
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
                                                             </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
+                                                            <div className="flex justify-end">
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const previousValues = [...specifications];
+                                                                        previousValues[specIndex].items.push({ name: "", description: "" });
+                                                                        console.log("previousValues", previousValues);
+                                                                        setSpecifications(previousValues)
+                                                                    }}
+                                                                    className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
+                                                                >+ And More</button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    <div className="flex justify-end px-2">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSpecifications((prev) => {
+                                                                    return ([...prev, { title: "", items: [{ name: "", description: "" }] }])
+                                                                })
 
+                                                            }}
+                                                            className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
+                                                        >+ Add More Specification</button>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
-                                        <div className="mt-4 border-dashed border-2   p-2 rounded-md">
-                                            <h5>Payment option</h5>
-
-                                            <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1  gap-3">
-
-                                                <div>
-                                                    <label htmlFor="">COD</label>
-                                                    <div
-                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.cod ? "bg-lightBtn" : "bg-gray-400"
-                                                            }`}
-                                                        onClick={() => setPaymentOption((prev) => {
-                                                            return {
-                                                                ...prev,
-                                                                cod: !paymentOption?.cod
-                                                            }
-                                                        })}                                                    >
-                                                        <div
-                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.cod ? "translate-x-4" : "translate-x-0"
-                                                                }`}
-                                                        ></div>
+                                        <div className="mt-4">
+                                            <label
+                                                htmlFor="profileImage1"
+                                                className="block text-base  font-medium mb-2"
+                                            >
+                                                <p className={`mb-1 dark:text-white text-black`}>Upload Files</p>
+                                            </label>
+                                            <label
+                                                htmlFor="profileImage1"
+                                                className="flex flex-col cursor-pointer  form-control relative border border-dashed border-lightHoverBgBtn dark:border-darkBtn  rounded-lg py-4 text-center"
+                                            >
+                                                <label htmlFor="profileImage1" className="text-primary cursor-pointer">
+                                                    <div>
+                                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                            Click to upload.
+                                                        </h3>
+                                                        <label
+                                                            htmlFor="profileImage1"
+                                                            className="text-sm text-gray-500 cursor-pointer"
+                                                        >
+                                                            (Allowed .jpg, .png less than 1MB)
+                                                        </label>
                                                     </div>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="">Full Payment</label>
-                                                    <div
-                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.fullPayment ? "bg-lightBtn" : "bg-gray-400"
-                                                            }`}
-                                                        onClick={() => setPaymentOption((prev) => {
-                                                            return {
-                                                                ...prev,
-                                                                fullPayment: !paymentOption?.fullPayment
-                                                            }
-                                                        })}                                                    >
-                                                        <div
-                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.fullPayment ? "translate-x-4" : "translate-x-0"
-                                                                }`}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="">Wallet</label>
-                                                    <div
-                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.wallet ? "bg-lightBtn" : "bg-gray-400"
-                                                            }`}
-                                                        onClick={() => setPaymentOption((prev) => {
-                                                            return {
-                                                                ...prev,
-                                                                wallet: !paymentOption?.wallet
-                                                            }
-                                                        })}                                                    >
-                                                        <div
-                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.wallet ? "translate-x-4" : "translate-x-0"
-                                                                }`}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="">BNPL</label>
-                                                    <div
-                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.bnpl ? "bg-lightBtn" : "bg-gray-400"
-                                                            }`}
-                                                        onClick={() => setPaymentOption((prev) => {
-                                                            return {
-                                                                ...prev,
-                                                                bnpl: !paymentOption?.bnpl
-                                                            }
-                                                        })}                                                    >
-                                                        <div
-                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.bnpl ? "translate-x-4" : "translate-x-0"
-                                                                }`}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="">UPI</label>
-                                                    <div
-                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.upi ? "bg-lightBtn" : "bg-gray-400"
-                                                            }`}
-                                                        onClick={() => setPaymentOption((prev) => {
-                                                            return {
-                                                                ...prev,
-                                                                upi: !paymentOption?.upi
-                                                            }
-                                                        })}                                                    >
-                                                        <div
-                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.upi ? "translate-x-4" : "translate-x-0"
-                                                                }`}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-                                                <div>
-                                                    <label htmlFor="">Multi Step</label>
-                                                    <div
-                                                        className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.multiStep ? "bg-lightBtn" : "bg-gray-400"
-                                                            }`}
-                                                        onClick={() => setPaymentOption((prev) => {
-                                                            return {
-                                                                ...prev,
-                                                                multiStep: !paymentOption?.multiStep
-                                                            }
-                                                        })}
-                                                    >
-                                                        <div
-                                                            className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.multiStep ? "translate-x-4" : "translate-x-0"
-                                                                }`}
-                                                        ></div>
-                                                    </div>
-                                                </div>
-
-
-
-                                            </div>
-
-
-                                            {/* <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
+                                                </label>
+                                                <input
+                                                    id="profileImage1"
+                                                    type="file"
+                                                    className="hidden"
+                                                    accept="image/*"
+                                                    multiple // Enable multiple file selection
+                                                    // disabled={isViewed}
+                                                    onChange={(e) => {
+                                                        handleFileChange1(e);
+                                                    }}
+                                                />
+                                                <span style={{ color: "red", fontSize: "0.7em" }}>
+                                                    {<p className="text-red-600 text-xs pt-6 ">{iconImgErr}</p>}
+                                                </span>
+                                            </label>
+                                            {imgPreview && imgPreview.length > 0 && (
                                                 <div
-                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.update?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                    onClick={() => setShowAttachmentModal(true)}
+                                                    className="flex form-control flex-wrap gap-4 mt-3 px-2 py-2 justify-center border border-dashed border-lightHoverBgBtn dark:border-gray-600">
+                                                    {imgPreview.map((preview, index) => (
+                                                        <div key={index} className="flex justify-center items-center">
+                                                            <img
+                                                                src={preview}
+                                                                className="w-20 h-20 object-cover border-[#ffffff]"
+                                                                alt={`Preview ${index + 1}`}
+                                                            />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+
+                                    </div>
+
+                                    <div className="mt-4 border-dashed border-2   p-2 rounded-md">
+                                        <h5 className="px-4 py-2">Payment option</h5>
+
+                                        <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 px-4 gap-3">
+
+                                            <div>
+                                                <label htmlFor="">COD</label>
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.cod ? "bg-lightBtn" : "bg-gray-400"
                                                         }`}
-                                                    onClick={() => !item?.menuList?.update?.disabled && handleCheckBox(item?.menuList?.update?.id, item?.feature)}
-                                                >
+                                                    onClick={() => setPaymentOption((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            cod: !paymentOption?.cod
+                                                        }
+                                                    })}                                                    >
                                                     <div
-                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${item?.menuList?.update?.access ? "translate-x-4" : "translate-x-0"
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.cod ? "translate-x-4" : "translate-x-0"
                                                             }`}
                                                     ></div>
                                                 </div>
-                                            </td> */}
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="">Full Payment</label>
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.fullPayment ? "bg-lightBtn" : "bg-gray-400"
+                                                        }`}
+                                                    onClick={() => setPaymentOption((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            fullPayment: !paymentOption?.fullPayment
+                                                        }
+                                                    })}                                                    >
+                                                    <div
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.fullPayment ? "translate-x-4" : "translate-x-0"
+                                                            }`}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="">Wallet</label>
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.wallet ? "bg-lightBtn" : "bg-gray-400"
+                                                        }`}
+                                                    onClick={() => setPaymentOption((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            wallet: !paymentOption?.wallet
+                                                        }
+                                                    })}                                                    >
+                                                    <div
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.wallet ? "translate-x-4" : "translate-x-0"
+                                                            }`}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="">BNPL</label>
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.bnpl ? "bg-lightBtn" : "bg-gray-400"
+                                                        }`}
+                                                    onClick={() => setPaymentOption((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            bnpl: !paymentOption?.bnpl
+                                                        }
+                                                    })}                                                    >
+                                                    <div
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.bnpl ? "translate-x-4" : "translate-x-0"
+                                                            }`}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="">UPI</label>
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.upi ? "bg-lightBtn" : "bg-gray-400"
+                                                        }`}
+                                                    onClick={() => setPaymentOption((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            upi: !paymentOption?.upi
+                                                        }
+                                                    })}                                                    >
+                                                    <div
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.upi ? "translate-x-4" : "translate-x-0"
+                                                            }`}
+                                                    ></div>
+                                                </div>
+                                            </div>
+
+                                            <div>
+                                                <label htmlFor="">Multi Step</label>
+                                                <div
+                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${paymentOption.multiStep ? "bg-lightBtn" : "bg-gray-400"
+                                                        }`}
+                                                    onClick={() => setPaymentOption((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            multiStep: !paymentOption?.multiStep
+                                                        }
+                                                    })}
+                                                >
+                                                    <div
+                                                        className={`w-4 h-4 bg-white rounded-full shadow-md transform ${paymentOption?.multiStep ? "translate-x-4" : "translate-x-0"
+                                                            }`}
+                                                    ></div>
+                                                </div>
+                                            </div>
 
 
 
                                         </div>
 
-
-
-
-                                        <div className="lg:col-span-2 col-span-1">
-                                            <div className="ltr:text-right rtl:text-left p-5">
-                                                {showAddButton ? (
-                                                    <button
-                                                        onClick={onSubmit}
-                                                        disabled={loading}
-                                                        style={
-                                                            loading
-                                                                ? { opacity: "0.5", cursor: "not-allowed" }
-                                                                : { opacity: "1" }
-                                                        }
-                                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                        {paymentOption.multiStep ? (
+                                            <div className={`${isDark ? 'bg-darkSecondary text-white' : 'bg-white'} rounded-lg border-1 pb-4 my-4`}>
+                                                <h6 className="p-4">Add Multistep Payment</h6>
+                                                {paymentOption.paymentSteps.map((spec, specIndex) => (
+                                                    <div
+                                                        key={specIndex}
+                                                        className="border relative pt-4 mx-2 shadow-md border-1 p-3 rounded-md mb-2"
                                                     >
-                                                        {loading
-                                                            ? ""
-                                                            : isEditing
-                                                                ? "Update"
-                                                                : "Save & add more"}
-                                                        {loading && (
-                                                            <>
-                                                                <svg
-                                                                    className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
-                                                                    xmlns="http://www.w3.org/2000/svg"
-                                                                    fill="none"
-                                                                    viewBox="0 0 24 24"
-                                                                >
-                                                                    <circle
-                                                                        className="opacity-25"
-                                                                        cx="12"
-                                                                        cy="12"
-                                                                        r="10"
-                                                                        stroke="currentColor"
-                                                                        strokeWidth="4"
-                                                                    ></circle>
-                                                                    <path
-                                                                        className="opacity-75"
-                                                                        fill="currentColor"
-                                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                                    ></path>
-                                                                </svg>
-                                                                Loading..
-                                                            </>
+                                                        {paymentOption.paymentSteps.length > 1 && (
+                                                            <button
+                                                                onClick={() => handleDeleteStep(specIndex)}
+                                                                className="absolute border-[1px] p-1 rounded-md right-2 top-[10px]"
+                                                            >
+                                                                <FaRegTrashAlt className="text-red-500" />
+                                                            </button>
                                                         )}
+                                                        <div className="grid lg:grid-cols-2 mb-3 flex-col gap-3 mt-3">
+                                                            <div className="fromGroup">
+                                                                <label className="form-label">
+                                                                    <p>
+                                                                        Payment Name <span className="text-red-500">*</span>
+                                                                    </p>
+                                                                </label>
+                                                                <input
+                                                                    name="paymentName"
+                                                                    type="text"
+                                                                    placeholder="Enter payment name"
+                                                                    value={spec.name}
+                                                                    onChange={(e) => handleUpdateStep(specIndex, 'name', e.target.value)}
+                                                                    className="form-control py-2"
+                                                                />
+                                                            </div>
+                                                            <div className="fromGroup">
+                                                                <label className="form-label">
+                                                                    <p>
+                                                                        Payment Percentage <span className="text-red-500">*</span>
+                                                                    </p>
+                                                                </label>
+                                                                <input
+                                                                    name="percentage"
+                                                                    type="number"
+                                                                    placeholder="Enter payment percentage"
+                                                                    value={spec.percentage}
+                                                                    onChange={(e) => handleUpdateStep(specIndex, 'percentage', e.target.value)}
+                                                                    className="form-control py-2"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                <div className="flex justify-end px-2">
+                                                    <button
+                                                        onClick={handleAddStep}
+                                                        className="bg-lightBtn dark:bg-darkBtn p-2 my-2 rounded-md text-white"
+                                                    >
+                                                        + Add More Steps
                                                     </button>
-                                                ) : (
-                                                    ""
-                                                )}
+                                                </div>
+                                                <div className="px-4 text-sm text-gray-600">
+                                                    Current sum: {calculatePercentageSum(paymentOption.paymentSteps)}%
+                                                </div>
                                             </div>
+                                        ) : null}
+
+
+
+
+
+                                    </div>
+
+
+
+
+                                    <div className="lg:col-span-2 col-span-1">
+                                        <div className="ltr:text-right rtl:text-left p-5">
+
+                                            <button
+                                                onClick={onSubmit}
+                                                disabled={loading}
+                                                style={
+                                                    loading
+                                                        ? { opacity: "0.5", cursor: "not-allowed" }
+                                                        : { opacity: "1" }
+                                                }
+                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                            >
+                                                {loading
+                                                    ? ""
+                                                    : isEditing
+                                                        ? "Update"
+                                                        : "Save & add more"}
+                                                {loading && (
+                                                    <>
+                                                        <svg
+                                                            className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            fill="none"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <circle
+                                                                className="opacity-25"
+                                                                cx="12"
+                                                                cy="12"
+                                                                r="10"
+                                                                stroke="currentColor"
+                                                                strokeWidth="4"
+                                                            ></circle>
+                                                            <path
+                                                                className="opacity-75"
+                                                                fill="currentColor"
+                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                            ></path>
+                                                        </svg>
+                                                        Loading..
+                                                    </>
+                                                )}
+                                            </button>
                                         </div>
                                     </div>
-                                )}
-
+                                </div>
                             </div>
 
                             <hr />
