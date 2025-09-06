@@ -14,6 +14,31 @@ import Icons from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
 import productBlueprintService from "@/services/productBlueprint/productBlueprint.service";
 import CreateOption from "./CreateOption";
+import Select from 'react-select';
+
+const commonFileTypes = [
+    { value: 'image/jpeg', label: 'JPEG Image (.jpg, .jpeg)' },
+    { value: 'image/png', label: 'PNG Image (.png)' },
+    { value: 'image/gif', label: 'GIF Image (.gif)' },
+    { value: 'image/webp', label: 'WebP Image (.webp)' },
+    { value: 'image/bmp', label: 'BMP Image (.bmp)' },
+    { value: 'image/tiff', label: 'TIFF Image (.tiff, .tif)' },
+    { value: 'image/svg+xml', label: 'SVG Image (.svg)' },
+    { value: 'image/heic', label: 'HEIC Image (.heic)' },
+    { value: 'image/avif', label: 'AVIF Image (.avif)' },
+    { value: 'application/pdf', label: 'PDF (.pdf)' },
+    { value: 'text/csv', label: 'CSV (.csv)' },
+    { value: 'application/vnd.ms-excel', label: 'Excel (.xls)' },
+    { value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', label: 'Excel (.xlsx)' },
+    { value: 'application/msword', label: 'Word (.doc)' },
+    { value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', label: 'Word (.docx)' },
+    { value: 'text/plain', label: 'Plain Text (.txt)' },
+    { value: 'application/json', label: 'JSON (.json)' },
+    { value: 'application/zip', label: 'ZIP Archive (.zip)' },
+    { value: 'audio/mpeg', label: 'MP3 Audio (.mp3)' },
+    { value: 'video/mp4', label: 'MP4 Video (.mp4)' }
+];
+
 
 
 const CreateProductBluePrint = ({ noFade, scrollContent }) => {
@@ -41,8 +66,11 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
     const [customiseableFormData, setCustomiseableFormData] = useState({
         selectedField: "",
         labelName: "",
-        selectOptions: []
+        selectOptions: [],
+        validation: { fileTypes: [], maxSize: '' },
     });
+    console.log("customFormArray", customFormArray);
+    
     const [selectedOptionValue, setSelectedOptionValue] = useState([])
     useEffect(() => {
         if (selectedOptionValue && selectedOptionValue.length > 0) {
@@ -55,7 +83,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
 
     function handleSaveAndMore(e) {
         e.preventDefault()
-        const { selectedField, selectOptions, labelName } = customiseableFormData;
+        const { selectedField, selectOptions, labelName, validation } = customiseableFormData;
         if (!selectedField || !labelName || (selectedField == "select" && selectOptions.length === 0)) {
             toast.error("Please fill all data");
             setIsErrorInCustomForm(true)
@@ -66,14 +94,17 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
         setCustomFormArray((prev) => ([...prev, {
             selectedField: selectedField,
             labelName: labelName,
-            selectOptions: selectOptions
+            selectOptions: selectOptions,
+            validation: validation
         }]))
         setCustomiseableFormData({
             selectedField: "",
             labelName: "",
-            selectOptions: []
+            selectOptions: [],
+            validation: { fileTypes: [], maxSize: '' },
+
         });
-        setSelectedOptionValue([])
+        setSelectedOptionValue([]);
     }
 
     const [isDark] = useDarkMode();
@@ -486,12 +517,12 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
 
                 if (id) {
                     payload.append("productBlueprintId", id);
-                    const  response = await productBlueprintService.update(payload);
+                    const response = await productBlueprintService.update(payload);
                     // console.log("response kasif", response);
 
                     toast.success(response?.data?.message);
                 } else {
-                     const  response = await productBlueprintService.create(payload);
+                    const response = await productBlueprintService.create(payload);
 
                     toast.success(response?.data?.message);
                 }
@@ -533,7 +564,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                 setselectedFile(null);
                 setLoading(false);
 
-                
+
 
 
 
@@ -550,7 +581,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
     // useEffect(() => {
 
     //     console.log("coming hrer", baseAddress);
-        
+
 
     //     if (baseAddress) {
 
@@ -743,6 +774,26 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
     }
 
 
+    const handleFileTypesChange = (selectedOptions) => {
+        setCustomiseableFormData(prev => ({
+            ...prev,
+            validation: {
+                ...prev.validation,
+                fileTypes: selectedOptions ? selectedOptions.map(opt => opt.value) : []
+            }
+        }));
+    };
+
+
+    const handleRemoveFileType = (index) => {
+        setCustomiseableFormData(prev => ({
+            ...prev,
+            validation: {
+                ...prev.validation,
+                fileTypes: prev.validation.fileTypes.filter((_, i) => i !== index)
+            }
+        }));
+    };
 
 
 
@@ -1035,6 +1086,56 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
 
                                                             </div>
 
+                                                            {customiseableFormData.selectedField === 'file' && (
+                                                                <div className="px-2">
+                                                                    <label className="block text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">Accepted File Types</label>
+                                                                    <Select
+                                                                        isMulti
+                                                                        options={commonFileTypes}
+                                                                        value={commonFileTypes.filter(opt => customiseableFormData.validation.fileTypes.includes(opt.value))}
+                                                                        onChange={handleFileTypesChange}
+                                                                        className="basic-multi-select bg-white dark:bg-darkInput "
+                                                                        classNamePrefix="select"
+                                                                        placeholder="Select file types..."
+                                                                    />
+
+                                                                    <div className="space-y-2 mt-2">
+                                                                        {customiseableFormData.validation.fileTypes.map((fileType, index) => (
+                                                                            <div key={index} className="flex items-center border-[1px] justify-between p-2 bg-white dark:bg-darkInput rounded-md">
+                                                                                <span>{fileType}</span>
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={() => handleRemoveFileType(index)}
+                                                                                    className="text-red-500 hover:text-red-700"
+                                                                                >
+                                                                                    Remove
+                                                                                </button>
+                                                                            </div>
+                                                                        ))}
+                                                                    </div>
+                                                                    <div className="mt-4">
+                                                                        <label className="block text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">Max File Size (bytes)</label>
+                                                                        <input
+                                                                            type="number"
+                                                                            name="validation.maxSize"
+                                                                            value={customiseableFormData.validation.maxSize}
+                                                                            onChange={(e) => {
+                                                                                setCustomiseableFormData((prev) => ({
+                                                                                    ...prev,
+                                                                                    validation: {
+                                                                                        ...prev.validation,
+                                                                                        maxSize: e.target.value
+                                                                                    }
+                                                                                }));
+                                                                            }}
+                                                                            className="w-[100%] bg-transparent p-2 border border-gray-300 rounded-md"
+                                                                            placeholder="e.g. 5 for 5MB"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+
                                                             <div className="flex justify-end py-2 px-2 ">
                                                                 <button
                                                                     onClick={handleSaveAndMore}
@@ -1064,6 +1165,9 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                                                             <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
                                                                                 options
                                                                             </th>
+                                                                             <th scope="col" className="px-6 py-3 text-start text-xs font-semibold  tracking-wider">
+                                                                                File type
+                                                                            </th>
                                                                             <th scope="col" className="px-6 py-3 text-end text-xs font-semibold  tracking-wider">
                                                                                 Action
                                                                             </th>
@@ -1072,6 +1176,14 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                                                     <tbody className="bg-white dark:bg-darkAccent">
                                                                         {customFormArray && customFormArray.length > 0 ? (
                                                                             customFormArray.map((item, ind) => {
+                                                                                const fileType = item?.validation?.fileTypes;
+
+                                                                                const fileTypetring = fileType?.length > 0 ? fileType.join(", ") :  "N/A";
+
+
+                                                                                console.log("fileType", fileType);
+                                                                                
+
                                                                                 const newArr = item.selectOptions.map((items) => items.valueName)
                                                                                 const optionsString = newArr.join(", ");
                                                                                 return (
@@ -1084,6 +1196,9 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                                                                         </td>
                                                                                         <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
                                                                                             {optionsString ? optionsString : "N/A"}
+                                                                                        </td>
+                                                                                         <td className="px-6 py-4 whitespace-nowrap text-start text-sm text-tableTextColor dark:text-white">
+                                                                                            {fileTypetring}
                                                                                         </td>
                                                                                         <td className="px-6 py-4 whitespace-nowrap text-center text-sm text-tableTextColor">
                                                                                             <div className="flex justify-end text-lg space-x-5 rtl:space-x-reverse">
