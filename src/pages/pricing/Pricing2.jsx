@@ -514,8 +514,8 @@ function Pricing2({ centered, noFade, scrollContent }) {
 
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await subcategoryService.getAllList({ page, keyword: keyWord, perPage })
-            setPaginationData(response?.data?.subCategories)
+            const response = await priceService.getAllList({ page, keyword: keyWord, perPage })
+            setPaginationData(response?.data?.productRates)
             setTotalRows(response?.data?.count)
             setPerPage(perPage)
             setPending(false)
@@ -527,8 +527,8 @@ function Pricing2({ centered, noFade, scrollContent }) {
 
     const handlePageChange = async (page) => {
         try {
-            const response = await subcategoryService.getAllList({ page, keyword: keyWord, perPage })
-            setPaginationData(response?.data?.subCategories)
+            const response = await priceService.getAllList({ page, keyword: keyWord, perPage })
+            setPaginationData(response?.data?.productRates)
             setTotalRows(response?.data?.count)
             setPage(page)
             setPending(false)

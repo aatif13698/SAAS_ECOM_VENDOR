@@ -551,8 +551,8 @@ function Variant2({ centered, noFade, scrollContent }) {
 
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await subcategoryService.getAllList({ page, keyword: keyWord, perPage })
-            setPaginationData(response?.data?.subCategories)
+            const response = await variantService.getAllList({ page, keyword: keyWord, perPage })
+            setPaginationData(response?.data?.productVariant)
             setTotalRows(response?.data?.count)
             setPerPage(perPage)
             setPending(false)
@@ -564,8 +564,8 @@ function Variant2({ centered, noFade, scrollContent }) {
 
     const handlePageChange = async (page) => {
         try {
-            const response = await subcategoryService.getAllList({ page, keyword: keyWord, perPage })
-            setPaginationData(response?.data?.subCategories)
+            const response = await variantService.getAllList({ page, keyword: keyWord, perPage })
+            setPaginationData(response?.data?.productVariant)
             setTotalRows(response?.data?.count)
             setPage(page)
             setPending(false)
