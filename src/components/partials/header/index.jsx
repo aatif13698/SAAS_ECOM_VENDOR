@@ -120,7 +120,7 @@ const Header = ({ className = "custom-class" }) => {
             <GoogleLanguage />
             <SwitchDark />
             <MonoChrome />
-            {width >= breakpoints.md && <Notification />}
+            {/* {width >= breakpoints.md && <Notification />} */}
             {width >= breakpoints.md && <Profile />}
             {width <= breakpoints.md && (
               <div
