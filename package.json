@@ -73,7 +73,6 @@
     "react-transition-group": "^4.4.5",
     "recharts": "^2.3.2",
     "redux-persist": "^6.0.0",
-    "sass": "^1.56.1",
     "simplebar-react": "^2.4.3",
     "socket.io-client": "^4.7.5",
     "sort-by": "^1.2.0",
@@ -89,11 +88,12 @@
     "@faker-js/faker": "^8.0.2",
     "@types/react": "^18.0.24",
     "@types/react-dom": "^18.0.8",
-    "@vitejs/plugin-react": "^2.2.0",
+    "@vitejs/plugin-react": "^5.0.2",
     "autoprefixer": "^10.4.13",
     "miragejs": "^0.1.47",
     "postcss": "^8.4.19",
+    "sass-embedded": "^1.92.1",
     "tailwindcss": "^3.2.4",
-    "vite": "^3.2.3"
+    "vite": "^7.1.5"
   }
 }

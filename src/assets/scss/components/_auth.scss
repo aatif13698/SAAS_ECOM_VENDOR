@@ -1,3 +1,6 @@
+
+@layer components {
+
 .loginwrapper {
   @apply flex w-full items-center overflow-hidden;
   min-height: 100vh;
@@ -57,4 +60,7 @@
 }
 .auth-footer3 {
   @apply absolute bottom-0 lg:block hidden;
+}
+
+
 }

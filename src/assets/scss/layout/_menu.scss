@@ -1,3 +1,5 @@
+@layer components {
+
 .main-menu {
   > ul {
     > li {
@@ -49,4 +51,6 @@
   a {
     @apply dark:text-slate-300 dark:hover:text-primary-500 text-sm  py-[6px] block;
   }
+}
+
 }

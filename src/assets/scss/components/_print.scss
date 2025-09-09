@@ -1,3 +1,5 @@
+@layer components {
+
 @media print {
   .invocie-btn {
     display: none;
@@ -11,4 +13,6 @@
   .content-wrapper {
     @apply w-full ml-0;
   }
+}
+
 }

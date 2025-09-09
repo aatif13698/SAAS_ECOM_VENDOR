@@ -1,3 +1,6 @@
+
+@layer components {
+
 .table-th {
   @apply text-slate-600 dark:text-slate-300 text-xs  font-semibold  uppercase py-5 px-6 ltr:text-left rtl:text-right;
 }
@@ -14,4 +17,6 @@
     checked:before:ring-2 checked:before:ring-black-500
     checked:before:ring-offset-2 checked:before:dark:ring-slate-700 
     checked:before:dark:ring-offset-0;
+}
+
 }

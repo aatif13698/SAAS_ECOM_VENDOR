@@ -1,3 +1,6 @@
+
+@layer components {
+
 .alert {
   @apply py-[18px] px-6 font-normal text-sm rounded-md;
 }
@@ -78,4 +81,7 @@
 }
 .alert-outline-dark {
   @apply border border-slate-900 text-slate-900;
+}
+
+
 }

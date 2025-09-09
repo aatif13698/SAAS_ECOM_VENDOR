@@ -1,3 +1,6 @@
+
+@layer components {
+
 .breadcrumbs {
   @apply flex text-sm space-x-2 items-center;
   li {
@@ -6,4 +9,7 @@
       @apply text-lg text-secondary-500 dark:text-slate-500;
     }
   }
+}
+
+
 }

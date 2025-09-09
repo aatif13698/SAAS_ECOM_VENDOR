@@ -1,3 +1,5 @@
+@layer components {
+
 .card-title {
   @apply font-medium  capitalize md:text-xl md:leading-[28px] text-lg leading-[24px]  text-slate-900 dark:text-white;
 }
@@ -20,4 +22,7 @@
   .card {
     @apply h-min;
   }
+}
+
+
 }

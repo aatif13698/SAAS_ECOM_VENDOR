@@ -41,10 +41,48 @@
 // });
 
 
+// import { defineConfig } from 'vite';
+// import react from '@vitejs/plugin-react';
+// import path from 'path';
+// import replace from '@rollup/plugin-replace';
+
+// export default defineConfig({
+//   resolve: {
+//     alias: {
+//       '@': path.resolve(__dirname, './src'),
+//     },
+//   },
+//   plugins: [
+//     react({
+//       jsxImportSource: '@emotion/react', // Add this for MUI with Emotion
+//     }),
+//     replace({
+//       values: {
+//         __DEV__: 'true',
+//         'process.env.NODE_ENV': '"development"',
+//       },
+//       preventAssignment: true,
+//     }),
+//   ],
+//   server: {
+//     proxy: {
+//       '/customizations': {
+//         target: 'http://localhost:8088',
+//         changeOrigin: true,
+//         secure: false,
+//         rewrite: (path) => path,
+//       },
+//     },
+//   },
+//   build: {
+//     chunkSizeWarningLimit: 1600,
+//   },
+// });
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import replace from '@rollup/plugin-replace';
+import tailwindcss from 'tailwindcss';
 
 export default defineConfig({
   resolve: {
@@ -54,7 +92,7 @@ export default defineConfig({
   },
   plugins: [
     react({
-      jsxImportSource: '@emotion/react', // Add this for MUI with Emotion
+      jsxImportSource: '@emotion/react',
     }),
     replace({
       values: {
@@ -64,6 +102,27 @@ export default defineConfig({
       preventAssignment: true,
     }),
   ],
+  css: {
+    postcss: {
+      plugins: [tailwindcss()],
+    },
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler',
+        includePaths: [
+          path.resolve(__dirname, 'src/assets/scss'),
+          path.resolve(__dirname, 'src/assets/scss/layout'),
+          path.resolve(__dirname, 'src/assets/scss/components'),
+          path.resolve(__dirname, 'src/assets/scss/utility'),
+        ],
+      },
+    },
+  },
+  esbuild: {
+    logOverride: {
+      'module-directive': 'silent',
+    },
+  },
   server: {
     proxy: {
       '/customizations': {

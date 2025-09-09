@@ -1,3 +1,5 @@
+@layer utilities {
+
 .dashcode-app {
   .fc-toolbar-chunk button {
     height: 50px;
@@ -185,4 +187,7 @@
   .dark {
     @apply bg-[#222] border-none text-white text-center px-2 font-medium text-sm;
   }
+}
+
+
 }

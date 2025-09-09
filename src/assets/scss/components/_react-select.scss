@@ -1,4 +1,5 @@
 // InValid Select
+@layer components {
 .dashcode-app {
   .react-select.is-invalid {
     .select__control {
@@ -203,4 +204,6 @@ html[dir="rtl"] {
       flex-direction: row-reverse;
     }
   }
+}
+
 }
