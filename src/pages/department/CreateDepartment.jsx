@@ -18,15 +18,14 @@ import { Dialog, Transition } from "@headlessui/react";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
+import departmentService from "@/services/department/department.service";
 import Button from "@/components/ui/Button";
 
 
 
 const CreateDepartment = ({ noFade, scrollContent }) => {
-
-
+    const navigate = useNavigate();
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
-
     const [levelList, setLevelList] = useState([
         {
             name: "Vendor",
@@ -46,42 +45,25 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
         },
     ])
 
-
-
-
-
     const [isDark] = useDarkMode();
-    const dispatch = useDispatch();
     const location = useLocation();
     const row = location?.state?.row;
     const name = location?.state?.name;
     const id = location?.state?.id;
-
-    console.log("id", id);
-    console.log("id", location);
-
     const [pageLoading, setPageLoading] = useState(true);
-    const [showLoadingModal, setShowLoadingModal] = useState(false);
-
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
     const [levelResult, setLevelResult] = useState(0)
     const [activeBranches, setActiveBranches] = useState([]);
     const [activeWarehouse, setActiveWarehouse] = useState([]);
-    const [roleList, setRoleList] = useState([]);
-
-
-
 
     const [formData, setFormData] = useState({
         level: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-        // new
         departmentName: "",
         departmentCode: "",
         description: "",
-        employees: "",
         headcountLimit: "",
         status: "",
         notes: "",
@@ -152,16 +134,11 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
 
     }, [currentUser])
 
-
-    console.log("formData", formData);
-
-
     const [formDataErr, setFormDataErr] = useState({
         level: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-
         departmentName: "",
         departmentCode: "",
         description: "",
@@ -170,735 +147,93 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
         notes: "",
     });
 
-
-
-
-
-
-
     const {
         level,
         businessUnit,
         branch,
         warehouse,
-
         departmentName,
         departmentCode,
         description,
         headcountLimit,
         status,
         notes,
-
     } = formData;
 
-
-
-
-
-
-
-
-
-
-
-    const [countryData, setCountryData] = useState({
-        countryList: "",
-        countryName: "",
-        countryISOCode: "",
-        CountryISDCode: "",
-        stateList: "",
-        stateName: "",
-        stateISOCode: "",
-        cityList: "",
-        cityName: "",
-    });
-    const {
-        countryList,
-        countryName,
-        countryISOCode,
-        CountryISDCode,
-        stateList,
-        stateName,
-        stateISOCode,
-        cityList,
-        cityName,
-    } = countryData;
-
-    const [passwordErr, setPasswordErr] = useState("");
-    const [confirmPasswordErr, setConfirmPasswordErr] = useState("");
     const [isViewed, setIsViewed] = useState(false);
     const [showAddButton, setShowAddButton] = useState(true);
-    const [isPasswordVissible, setIsPasswordVissile] = useState(false);
     const [loading, setLoading] = useState(false)
-    const [isConfirmPasswordVissible, setConfirmIsPasswordVissile] = useState(false);
-    const [refresh, setRefresh] = useState(0);
 
-    const [imgPreview, setImgPreviwe] = useState(null);
-    const [ImgErr, setImgErr] = useState("");
-    const [selectedFile, setselectedFile] = useState(null);
-
-
-
-    const [imgPreview2, setImgPreviwe2] = useState(null);
-    const [ImgErr2, setImgErr2] = useState("");
-    const [selectedFile2, setSelectedFile2] = useState(null);
-
-
-
-
-
-
-
-
-
-
-
-    const navigate = useNavigate();
-    const [vehicleViewByNotification, setVehicleViewByNotification] = useState(false);
-
-
-
-
-
-
-    //------- Handling the VAlidation ------
-    function validationFunction() {
-        let errorCount = 0;
-
-        if (level == "") {
-            setFormDataErr((prev) => ({
-                ...prev,
-                level: "Level Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                level: "",
-            }));
-            errorCount++
+    const validationFunction = () => {
+        const { level, businessUnit, branch, warehouse } = formData;
+        let errors = {
+            departmentName: validateField("departmentName", departmentName),
+            departmentCode: validateField("departmentCode", departmentCode),
+            description: validateField("description", description),
+            headcountLimit: validateField("headcountLimit", headcountLimit),
+            status: validateField("status", status),
+            notes: validateField("notes", notes),
+        };
+        errors.level = validateField("level", level);
+        if (level === "business" || level === "branch" || level === "warehouse") {
+            errors.businessUnit = validateField("businessUnit", businessUnit);
         }
-
-        if (level == "business") {
-            if (!businessUnit) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "Business Unit Is Required.",
-                }));
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "",
-                }));
-            }
-
+        if (level === "branch" || level === "warehouse") {
+            errors.branch = validateField("branch", branch);
         }
-
-        if (level == "branch") {
-
-            if (!businessUnit) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "Business Unit Is Required.",
-                }));
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "",
-                }));
-            }
-
-            if (!branch) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: "Branch Is Required.",
-                }));
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: "",
-                }));
-            }
-
-
+        if (level === "warehouse") {
+            errors.warehouse = validateField("warehouse", warehouse);
         }
-
-        if (level == "warehouse") {
-            if (!businessUnit) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "Business Unit Is Required.",
-                }));
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "",
-                }));
-            }
-            if (!branch) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: "Branch Is Required.",
-                }));
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: "",
-                }));
-            }
-            if (!warehouse) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    warehouse: "Warehouse Is Required.",
-                }));
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    warehouse: "",
-                }));
-            }
-        }
-
-
-        if (!roleId) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                roleId: "Role is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                roleId: ""
-            }))
-
-        }
-
-
-
-
-        if (!firstName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                firstName: "First Name Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                firstName: "",
-            }));
-        }
-
-        if (!lastName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                lastName: "Last Name Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                lastName: "",
-            }));
-        }
-
-        if (!gender) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                gender: "Gender is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                gender: ""
-            }))
-        }
-
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!email) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                email: "Email is Required"
-            }))
-            errorCount++
-        } else if (!emailRegex.test(email)) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                email: "Enter valid Email "
-            }))
-            errorCount++
-        }
-        else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                email: ""
-            }))
-        }
-
-
-        const phoneRegex = /^[0-9]{10}$/;
-        if (!phone) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                phone: "Phone Number Is Required.",
-            }));
-            errorCount++
-        } else {
-            if (!phoneRegex.test(phone) || phone.length === 0) {
-                setFormDataErr((prev) => ({ ...prev, phone: "Enter a valid phone number." }));
-            } else {
-                setFormDataErr((prev) => ({ ...prev, phone: "" }));
-            }
-        }
-
-
-        if (!countryData?.countryName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                country: "Country is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                country: ""
-            }))
-        }
-        if (!countryData?.stateName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                state: "State is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                state: ""
-            }))
-        }
-        if (!countryData?.cityName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                city: "City is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                city: ""
-            }))
-        }
-
-        if (!ZipCode) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                ZipCode: "ZipCode Code Is Required.",
-            }));
-            errorCount++
-
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                ZipCode: "",
-            }));
-        }
-        if (!address) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                address: "Address Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                address: "",
-            }));
-        }
-
-        if (!id) {
-
-            if (!password) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    password: "Password is Required"
-                }))
-                errorCount++
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    password: ""
-                }))
-            }
-
-            if (!confirmPassword) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    confirmPassword: "Confirm Password is Required"
-                }))
-                errorCount++
-            } else if (confirmPassword !== password) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    confirmPassword: "Confirm Password is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    confirmPassword: ""
-                }))
-            }
-        }
-        if (ImgErr) {
-            errorCount++
-        }
-
-        // if (id == null) {
-        //     if (!selectedFile) {
-        //         setFormDataErr((prev) => ({
-        //             ...prev,
-        //             icon: "Logo is required."
-        //         }))
-        //         errorCount++
-        //     }
-        // }
-        if (errorCount > 0) {
-            return false
-        } else {
-            return true
-        }
-    }
-
-    const handleCountry = (e) => {
-        const { name, value } = e.target;
-        const selectedCountry = countryList.find(
-            (country) => country?.name === value
-        );
-        if (name == "country") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    country: "Country is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    country: "",
-                }));
-            }
-        }
-        if (selectedCountry) {
-            setCountryData((prev) => ({
-                ...prev,
-                countryName: selectedCountry?.name,
-                countryISOCode: selectedCountry?.isoCode,
-                CountryISDCode: selectedCountry?.contactNumbercode,
-            }));
-            setFormData((prev) => ({
-                ...prev,
-                country: selectedCountry?.name
-            }))
-        }
+        console.log("errors", errors);
+        
+        setFormDataErr((prev) => ({
+            ...prev,
+            ...errors
+        }));
+        return Object.values(errors).some((error) => error);
     };
 
-    // ----- Handling the state name as per the country name
-    const handleState = (e) => {
-        const { name, value } = e.target;
-        const selectedState = stateList.find((state) => state?.name === value);
-        if (name === "state") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    state: "State is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    state: "",
-                }));
-            }
-        }
-        if (selectedState) {
-            setCountryData((prev) => ({
-                ...prev,
-                stateName: selectedState?.name,
-                stateISOCode: selectedState?.isoCode,
-            }));
-            setFormData((prev) => ({
-                ...prev,
-                state: selectedState?.name
-            }))
-        }
+    const validateField = (name, value) => {
+        const rules = {
+            departmentName: [
+                [!value, "Department Name is Required"],
+                [value.length <= 3, "Minimum 3 characters required."]
+            ],
+            departmentCode: [
+                [!value, "Department Code is Required"],
+                [value.length <= 3, "Minimum 3 characters required."]
+            ],
+            description: [
+                [!value, "Description is Required"],
+                [value.length <= 3, "Minimum 3 characters required."]
+            ],
+            headcountLimit: [[!value, "Headcount Limit is Required"]],
+            status: [[!value, "Status is Required"]],
+            notes: [[!value, "Notes are Required"]],
+            level: [[!value, "Level is Required"]],
+            businessUnit: [[!value, "Business Unit is Required"]],
+            branch: [[!value, "Branch is Required"]],
+            warehouse: [[!value, "Warehouse is Required"]]
+        };
+        return (rules[name] || []).find(([condition]) => condition)?.[1] || "";
     };
-
-    // ----- Handling the city name as per the state name
-    const handleCity = (e) => {
-        const { name, value } = e.target;
-        if (name === "city") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    city: "City is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    city: "",
-                }));
-            }
-        }
-        setCountryData((prev) => ({
-            ...prev,
-            cityName: value,
-        }));
-        setFormData((prev) => ({
-            ...prev,
-            city: value
-        }))
-    };
-
-    //------ mounting the all country data -------
-    useEffect(() => {
-        setCountryData((prev) => ({
-            ...prev,
-            countryList: Country.getAllCountries(),
-        }));
-    }, []);
-
-    //------ mounting the all state data as per the country name -------
-    useEffect(() => {
-        setCountryData((prev) => ({
-            ...prev,
-            stateList: State.getStatesOfCountry(countryISOCode),
-        }));
-    }, [isViewed, countryISOCode, id]);
-    //------ mounting the all city data as per the state name -------
-    useEffect(() => {
-        setCountryData((prev) => ({
-            ...prev,
-            cityList: City.getCitiesOfState(countryISOCode, stateISOCode),
-        }));
-    }, [isViewed, countryISOCode, stateISOCode]);
-    // ------ HAndling the change in the form ---
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        if (name == "level") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    level: "Level Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    level: "",
-                }));
-            }
-        }
-
-
-
-        if (name == "businessUnit") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "Business Unit is Required"
-                }))
-            } else {
-                setActiveBranches([])
-                setFormData((prev) => ({
-                    ...prev,
-                    branchId: ""
-                }))
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: ""
-                }))
-            }
-        }
-
-        if (name == "branch") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: "Branch is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    branch: ""
-                }))
-            }
-        }
-
-        if (name == "warehouse") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    warehouse: "Warehouse is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    warehouse: ""
-                }))
-            }
-        }
-
-        if (name === "departmentName") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    departmentName: "Department Name Is Required.",
-                }));
-            } else if (value?.length <= 3) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    departmentName: "Minimum 3 characters required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    departmentName: "",
-                }));
-            }
-        }
-
-        if (name === "departmentCode") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    departmentCode: "Department Code Is Required.",
-                }));
-            } else if (value?.length <= 3) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    departmentCode: "Minimum 3 characters required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    departmentCode: "",
-                }));
-            }
-        }
-        if (name == "email") {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    email: "Email is Required"
-                }))
-            } else if (!emailRegex.test(value)) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    email: "Enter valid Email "
-                }))
-            }
-            else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    email: ""
-                }))
-            }
-        }
-        if (name === "phone") {
-            const phoneRegex = /^[0-9]{10}$/;
-            if (!phoneRegex.test(value) || value.length === 0) {
-                setFormDataErr((prev) => ({ ...prev, phone: "Enter a valid phone number." }));
-            } else {
-                setFormDataErr((prev) => ({ ...prev, phone: "" }));
-            }
-        }
-
-        if (name == "gender") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    gender: "gender is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    gender: ""
-                }))
-            }
-        }
-
-        if (name == "ZipCode") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    ZipCode: "Zip Code Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    ZipCode: "",
-                }));
-            }
-        }
-
-        if (name == "address") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    address: "Address Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    address: "",
-                }));
-            }
-        }
-
-        if (name == "password") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    password: "Password is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    password: ""
-                }))
-            }
-        }
-
-        if (name == "confirmPassword") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    confirmPassword: "Confirm Password is Required"
-                }))
-            } else if (password !== value) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    confirmPassword: "Password doesn't Match"
-                }))
-            }
-            else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    confirmPassword: ""
-                }))
-            }
-        }
-
         setFormData((prev) => ({
             ...prev,
-            [name]: value,
+            [name]: value
+        }));
+        if (name === "businessUnit" && value !== "") {
+            setActiveBranches([]);
+            setFormData((prev) => ({
+                ...prev,
+                branchId: ""
+            }));
+        }
+        setFormDataErr((prev) => ({
+            ...prev,
+            [name]: validateField(name, value)
         }));
     };
 
@@ -928,13 +263,9 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
     }, [businessUnit]);
 
     async function getBranchByBusiness(id) {
-
         try {
             const response = await warehouseService.getBranchByBusiness(id);
-
             setActiveBranches(response.data)
-
-
         } catch (error) {
             console.log("error while getting branch by business unit");
         }
@@ -955,110 +286,72 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
         }
     }
 
-
-
-
     //---------- Adding & Editing the Organiser ----------
 
     const onSubmit = async (e) => {
         e.preventDefault();
         setIsViewed(false);
         const error = validationFunction();
+        console.log("error", error);
+        
         setLoading(true);
         if (error) {
+            setLoading(false);
+
             return
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
+
                 const payload = new FormData();
                 payload.append("clientId", clientId);
                 payload.append("level", level);
                 payload.append("businessUnit", businessUnit);
                 payload.append("branch", branch);
                 payload.append("warehouse", warehouse);
-                payload.append("icon", selectedFile);
-                payload.append("roleId", roleId);
-                payload.append("firstName", firstName);
-                payload.append("lastName", lastName);
-                payload.append("gender", gender);
-                payload.append("email", email);
-                payload.append("phone", phone);
-                payload.append("country", countryData?.countryName);
-                payload.append("state", countryData?.stateName);
-                payload.append("city", countryData?.cityName);
-                payload.append("address", address);
-                payload.append("ZipCode", ZipCode);
 
-                console.log("form asd", formData);
-
-
-                if (password) {
-                    payload.append("password", password);
-                }
+                payload.append("departmentName", departmentName);
+                payload.append("departmentCode", departmentCode);
+                payload.append("description", description);
+                payload.append("headcountLimit", headcountLimit);
+                payload.append("status", status);
+                payload.append("notes", notes);
 
                 if (id) {
                     payload.append("employeeId", id);
                     const response = await employeeService.updateEmployee(payload)
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await employeeService.create(payload);
+                    const response = await departmentService.create({...formData, clientId: clientId });
                     toast.success(response?.data?.message);
                 }
-                setCountryData((prev) => ({
-                    ...prev,
-                    countryISOCode: "",
-                    countryName: "",
-                    stateISOCode: "",
-                    stateName: "",
-                    cityName: "",
-                }));
+
                 setFormData({
                     level: "",
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-                    roleId: "",
-                    firstName: "",
-                    lastName: "",
-                    email: "",
-                    phone: "",
-                    gender: "",
-                    password: "",
-                    confirmPassword: "",
-
-                    country: "",
-                    city: "",
-                    state: "",
-                    address: "",
-                    ZipCode: "",
+                    departmentName: "",
+                    departmentCode: "",
+                    description: "",
+                    headcountLimit: "",
+                    status: "",
+                    notes: "",
                 });
                 setFormDataErr({
                     level: "",
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-                    roleId: "",
-                    firstName: "",
-                    lastName: "",
-                    email: "",
-                    phone: "",
-
-                    gender: "",
-                    password: "",
-                    confirmPassword: "",
-
-                    country: "",
-                    city: "",
-                    state: "",
-                    address: "",
-                    ZipCode: "",
-
-                    icon: "",
+                    departmentName: "",
+                    departmentCode: "",
+                    description: "",
+                    headcountLimit: "",
+                    status: "",
+                    notes: "",
                 })
-                setImgPreviwe(null);
-                setselectedFile(null);
                 setLoading(false);
-                navigate("/employee-list");
+                navigate("/department-list");
 
             } catch (error) {
                 setLoading(false);
@@ -1116,7 +409,6 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
 
                     }));
 
-                    setImgPreviwe(`http://localhost:8088/warehouse/${baseAddress?.icon}`)
 
                     const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
                     const state = State.getStatesOfCountry(selectedCountry?.isoCode);
@@ -1125,15 +417,7 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
                         (item) => item?.name === baseAddress?.state
                     );
 
-                    setCountryData((prev) => ({
-                        ...prev,
-                        stateList: state,
-                        countryName: selectedCountry?.name,
-                        countryISOCode: selectedCountry?.isoCode,
-                        stateName: stateName?.name,
-                        stateISOCode: stateName?.isoCode,
-                        cityName: baseAddress?.city,
-                    }));
+
 
                     setPageLoading(false)
 
@@ -1146,16 +430,11 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
         } else {
             setPageLoading(false)
         }
-    }, [id, countryList]);
-
-
-
+    }, [id]);
 
 
     useEffect(() => {
         async function getActiveBusinessUnit() {
-            console.log("yess");
-
             try {
                 const response = await warehouseService.getActiveBusinessUnit();
                 console.log("respone active", response);
@@ -1164,150 +443,8 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
                 console.log("error while getting the active business unit", error);
             }
         }
-
         getActiveBusinessUnit()
-        getAllactiveRoles()
     }, [])
-
-    async function getAllactiveRoles() {
-        try {
-            const response = await employeeService.getActiveRoles();
-            setRoleList(response?.listOfRoles)
-        } catch (error) {
-            console.log("Error while getting active role list", error);
-        }
-    }
-
-
-    const [isUserClicked, setIsUserClicked] = useState(true);
-
-
-
-
-
-    //------------- Allow only Numbers in contact number -------------
-    const handleKeyPress = (e) => {
-        const value = e.target.value;
-        const cleanedValue = value.replace(/[^0-9]/g, '');
-        if (cleanedValue.trim() !== "") {
-            if ((cleanedValue.match(/\./g) || []).length <= 1) {
-                const formattedValue = cleanedValue.toLocaleString('en-US');
-                e.target.value = formattedValue;
-            } else {
-                e.target.value = cleanedValue.replace(/\.(?=.*\.)/g, '');
-            }
-        } else {
-            e.target.value = '';
-        }
-    }
-
-
-
-
-    const handleFileChange2 = (e) => {
-        const { name, value } = e.target;
-        setImgErr2("");
-        if (name === "tradeLicense") {
-            if (!selectedFile2 && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "Trade License is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
-        let errorCount = 0;
-
-        const file = e.target.files[0];
-
-        if (file) {
-            fileSize = file.size / 1024;
-
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr2("Only images are allowed");
-
-                errorCount++;
-            }
-
-            //check if filesize is not more than 1MB
-            if (fileSize > 1024) {
-                setImgErr2("Image size should not be more than 1MB.");
-
-                errorCount++;
-            }
-
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-
-                setSelectedFile2(file);
-
-                setImgPreviwe2(imageAsBase64);
-            }
-        }
-
-    };
-
-
-
-    // handle file change
-    const handleFileChange = (e) => {
-        const { name, value } = e.target;
-        setImgErr("");
-        if (name === "profileImage") {
-            if (!selectedFile && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "Logo is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
-        let errorCount = 0;
-
-        const file = e.target.files[0];
-
-        if (file) {
-            fileSize = file.size / 1024;
-
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr("Only images are allowed");
-                errorCount++;
-            }
-
-            //check if filesize is not more than 1MB
-            if (fileSize > 1024) {
-                setImgErr("Image size should not be more than 1MB.");
-                errorCount++;
-            }
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-                setselectedFile(file);
-                setImgPreviwe(imageAsBase64);
-            }
-        }
-    };
-
-
-
-    const handleCloseLoadingModal = () => {
-        setShowLoadingModal(false);
-    };
-
-
-
-
 
     return (
 
@@ -1483,7 +620,7 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
                                             }
                                         </label>
 
-                                         <label
+                                        <label
                                             className={`fromGroup   ${formDataErr?.departmentCode !== "" ? "has-error" : ""
                                                 } `}
                                         >
@@ -1506,7 +643,7 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
                                             }
                                         </label>
 
-                                         <label
+                                        <label
                                             className={`fromGroup   ${formDataErr?.headcountLimit !== "" ? "has-error" : ""
                                                 } `}
                                         >
