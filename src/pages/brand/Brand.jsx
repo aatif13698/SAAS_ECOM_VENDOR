@@ -237,7 +237,7 @@ function Brand({ centered, noFade, scrollContent }) {
             slug: row?.slug,
             description: row?.description,
         }));
-        setImgPreviwe(`http://localhost:8088/brand/${row?.icon}`)
+        setImgPreviwe(`${row?.icon}`)
         setFormDataErr((prev) => ({
             ...prev,
             name: "",
@@ -261,7 +261,7 @@ function Brand({ centered, noFade, scrollContent }) {
             description: row?.description,
 
         }))
-        setImgPreviwe(`http://localhost:8088/brand/${row?.icon}`)
+        setImgPreviwe(`${row?.icon}`)
         setFormDataErr((prev) => ({
             ...prev,
             name: "",
