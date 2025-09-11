@@ -247,7 +247,7 @@ function SubCategory({ centered, noFade, scrollContent }) {
             description: row?.description,
             categoryId: row?.categoryId
         }));
-        setImgPreviwe(`http://localhost:8088/icon/${row?.icon}`)
+        setImgPreviwe(`${row?.icon}`)
         setFormDataErr((prev) => ({
             ...prev,
             name: "",
@@ -273,7 +273,7 @@ function SubCategory({ centered, noFade, scrollContent }) {
             categoryId: row?.categoryId
 
         }))
-        setImgPreviwe(`http://localhost:8088/icon/${row?.icon}`)
+        setImgPreviwe(`${row?.icon}`)
         setFormDataErr((prev) => ({
             ...prev,
             name: "",
