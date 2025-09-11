@@ -656,7 +656,7 @@ const CreateBusinessUnit = ({ noFade, scrollContent }) => {
                         address: baseAddress?.address,
                     }));
 
-                    setImgPreviwe(`http://localhost:8088/business/${baseAddress?.icon}`)
+                    setImgPreviwe(`${baseAddress?.icon}`)
 
                     const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
                     const state = State.getStatesOfCountry(selectedCountry?.isoCode);

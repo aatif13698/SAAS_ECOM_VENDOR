@@ -388,7 +388,7 @@ function AssignPermission() {
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
                                                                 {/* <input className='w-4 h-4' type="checkbox" disabled={item?.menuList?.view?.disabled} checked={item?.menuList?.view?.access} onChange={() => handleCheckBox(item?.menuList?.view?.id, item?.feature)} /> */}
                                                                 <div
-                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.view?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.view?.access ? "bg-lightBtn" : "bg-gray-500"
                                                                         }`}
                                                                     onClick={() => !item?.menuList?.view?.disabled && handleCheckBox(item?.menuList?.view?.id, item?.feature)}
                                                                 >
@@ -401,7 +401,7 @@ function AssignPermission() {
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
                                                                 {/* <input className='w-4 h-4' type="checkbox" disabled={item?.menuList?.create?.disabled} checked={item?.menuList?.create?.access} onChange={() => handleCheckBox(item?.menuList?.create?.id, item?.feature)} /> */}
                                                                 <div
-                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer  ${item?.menuList?.create?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer  ${item?.menuList?.create?.access ? "bg-lightBtn" : "bg-gray-500"
                                                                         }`}
                                                                     onClick={() => !item?.menuList?.create?.disabled && handleCheckBox(item?.menuList?.create?.id, item?.feature)}
                                                                 >
@@ -414,7 +414,7 @@ function AssignPermission() {
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
                                                                 {/* <input className='w-4 h-4' type="checkbox" disabled={item?.menuList?.update?.disabled} checked={item?.menuList?.update?.access} onChange={() => handleCheckBox(item?.menuList?.update?.id, item?.feature)} /> */}
                                                                 <div
-                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.update?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.update?.access ? "bg-lightBtn" : "bg-gray-500"
                                                                         }`}
                                                                     onClick={() => !item?.menuList?.update?.disabled && handleCheckBox(item?.menuList?.update?.id, item?.feature)}
                                                                 >
@@ -427,7 +427,7 @@ function AssignPermission() {
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
                                                                 {/* <input className='w-4 h-4' type="checkbox" disabled={item?.menuList?.softDelete?.disabled} checked={item?.menuList?.softDelete?.access} onChange={() => handleCheckBox(item?.menuList?.softDelete?.id, item?.feature)} /> */}
                                                                 <div
-                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.softDelete?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.softDelete?.access ? "bg-lightBtn" : "bg-gray-500"
                                                                         }`}
                                                                     onClick={() => !item?.menuList?.softDelete?.disabled && handleCheckBox(item?.menuList?.softDelete?.id, item?.feature)}
                                                                 >
@@ -440,7 +440,7 @@ function AssignPermission() {
                                                             <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium text-tableTextColor dark:text-white">
                                                                 {/* <input className='w-4 h-4' type="checkbox" disabled={item?.menuList?.activeActive?.disabled} checked={item?.menuList?.activeActive?.access} onChange={() => handleCheckBox(item?.menuList?.activeActive?.id, item?.feature)} /> */}
                                                                 <div
-                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.activeActive?.access ? "bg-lightBtn" : "bg-darkBtn"
+                                                                    className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${item?.menuList?.activeActive?.access ? "bg-lightBtn" : "bg-gray-500"
                                                                         }`}
                                                                     onClick={() => !item?.menuList?.activeActive?.disabled && handleCheckBox(item?.menuList?.activeActive?.id, item?.feature)}
                                                                 >
