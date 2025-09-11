@@ -54,8 +54,11 @@ const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
 const Orders = lazy(() => import("./pages/orders/Orders"));
 const ViewOrder = lazy(() => import("./pages/orders/ViewOrder"));
 const CreateOrder = lazy(() => import("./pages/orders/CreateOrder"));
-const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"))
+const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 
+const Department = lazy(() => import("./pages/department/Department"));
+const CreateDepartment = lazy(() => import("./pages/department/CreateDepartment"));
+ 
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
@@ -152,6 +155,9 @@ function App() {
 
 
                 {/* vendor routes */}
+
+                <Route path="department-list" element={<Department/>} /> 
+                <Route path="create-department" element={<CreateDepartment />} />
 
                 <Route path="roles-permissions-list" element={<RoleList />} />
                 <Route path="assignPermission" element={<AssignPermission />} />

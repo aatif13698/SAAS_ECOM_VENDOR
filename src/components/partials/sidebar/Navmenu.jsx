@@ -86,7 +86,9 @@ const Navmenu = ({ menus }) => {
       });
 
       module.menu
-        .filter((menu) => menu.access)
+        .filter((menu) => (menu.access 
+          && menu.name !== "Department"
+        ))
         .forEach((menu) => {
           const normalizedMenuName = lowerCase(menu.name).replace(/\s+/g, "-");
           let childItems = [
