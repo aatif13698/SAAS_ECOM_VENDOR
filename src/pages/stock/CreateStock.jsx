@@ -627,7 +627,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
         }
         if (data.images) {
             setImgPreviwe(data.images.map((image) => {
-                return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+                return `${image}`
             }))
         }
     }
@@ -1466,10 +1466,10 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                 >
                                                     <div className="flex-shrink-0">
                                                         <img
-                                                            src={`${import.meta.env.VITE_BASE_URL}/productBluePrint/${item?.defaultImage}`}
+                                                            src={`${item?.defaultImage}`}
                                                             alt={item?.name}
                                                             className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm"
-                                                            onError={(e) => (e.target.src = 'https://via.placeholder.com/80')}
+                                                            // onError={(e) => (e.target.src = 'https://via.placeholder.com/80')}
                                                             loading="lazy"
                                                         />
                                                     </div>
