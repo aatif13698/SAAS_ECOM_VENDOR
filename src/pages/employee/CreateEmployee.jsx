@@ -1185,7 +1185,7 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
                     }));
 
-                    setImgPreviwe(`http://localhost:8088/warehouse/${baseAddress?.icon}`)
+                    setImgPreviwe(`${baseAddress?.profileImage}`)
 
                     const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
                     const state = State.getStatesOfCountry(selectedCountry?.isoCode);

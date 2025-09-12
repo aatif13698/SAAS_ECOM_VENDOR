@@ -643,7 +643,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
 
                     if (baseAddress.images) {
                         setImgPreviwe(baseAddress.images.map((image) => {
-                            return `${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`
+                            return `${image}`
                         }))
                     }
                     setPageLoading(false)
