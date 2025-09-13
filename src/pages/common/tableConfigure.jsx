@@ -46,7 +46,7 @@ const tableConfigure = () => {
                 fontWeight: "bold",
                 backgroundColor: isDark
                     ? "#007475"
-                    : "#C9FEFF",
+                    : "#04cbb6",
                 // FontFamily: "Inter, sans-serif",
                 lineHeight: "1rem",
                 textTransform: "uppercase",
@@ -64,7 +64,7 @@ const tableConfigure = () => {
                 backgroundColor: isDark ? "#059669" : "",  //its is darkAccent backgroundColor
                 color: isDark
                     ? "rgb(203 213 225 / var(--tw-text-opacity))"
-                    : "rgb(71 85 105 / var(--tw-text-opacity))",
+                    : "white",
 
                 fontWeight: "bold",
                 fontSize: "0.75rem",

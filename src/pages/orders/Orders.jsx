@@ -979,22 +979,26 @@ const Orders = ({ noFade, scrollContent }) => {
             <div className="flex justify-between items-center">
                 <div className="table-heading text-start">Orders List</div>
                 <div className="flex gap-2">
-                    <Button
+                    <button
+                        className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-3 py-2 rounded   `}
+
                         variant="contained"
                         color="primary"
                         onClick={exportToExcel}
                         disabled={!paginationData?.length}
                     >
                         Export to Excel
-                    </Button>
-                    <Button
+                    </button>
+                    <button
+                        className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-3 py-2 rounded   `}
+
                         variant="contained"
                         color="secondary"
                         onClick={preparePDFData}
                         disabled={!paginationData?.length}
                     >
                         Export to PDF
-                    </Button>
+                    </button>
                 </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-2 items-center">
