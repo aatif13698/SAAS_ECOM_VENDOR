@@ -25,6 +25,7 @@ import branchService from "@/services/branch/branch.service";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
+import departmentService from "@/services/department/department.service";
 
 
 // const FormValidationSchema = yup
@@ -209,45 +210,26 @@ const Department = ({ noFade, scrollContent }) => {
     const columns = [
         {
             name: "Name",
-            selector: (row) => row?.firstName + " " + row?.lastName,
+            selector: (row) => row?.departmentName ,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
          {
-            name: "Designation",
-            selector: (row) => row?.role?.name  ? row?.role?.name : "N/A",
+            name: "Code",
+            selector: (row) => row?.departmentCode,
             sortable: false,
 
         },
         {
-            name: "Email",
-            selector: (row) => row.email,
+            name: "Head Limit",
+            selector: (row) => row.headcountLimit,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
-
-        {
-            name: "Phone",
-            selector: (row) => row.phone,
-            sortable: true,
-            style: {
-                width: "20px", // Set the desired width here
-            },
-        },
-
-        {
-            name: "City",
-            selector: (row) => row.city,
-            sortable: true,
-            style: {
-                width: "20px", // Set the desired width here
-            },
-        },
-
         {
             name: "Status",
             sortable: true,
@@ -360,13 +342,13 @@ const Department = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await employeeService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await departmentService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.employees);
+            setPaginationData(response?.data?.department);
             setPending(false);
         } catch (error) {
             setPending(false);
-            console.log("error while fetching employees");
+            console.log("error while fetching department");
         }
     }
 
