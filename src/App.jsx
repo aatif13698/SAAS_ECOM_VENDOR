@@ -58,7 +58,10 @@ const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 
 const Department = lazy(() => import("./pages/department/Department"));
 const CreateDepartment = lazy(() => import("./pages/department/CreateDepartment"));
- 
+
+const Shift = lazy(() => import("./pages/shift/Shift"));
+const CreateShift = lazy(() => import("./pages/shift/CreateShift"));
+
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
@@ -156,7 +159,10 @@ function App() {
 
                 {/* vendor routes */}
 
-                <Route path="department-list" element={<Department/>} /> 
+                <Route path="shift-list" element={<Shift />} />
+                <Route path="create-shift" element={<CreateShift />} />
+
+                <Route path="department-list" element={<Department />} />
                 <Route path="create-department" element={<CreateDepartment />} />
 
                 <Route path="roles-permissions-list" element={<RoleList />} />
@@ -187,7 +193,7 @@ function App() {
 
                 <Route path="variant-list" element={<Variant2 />} />
 
-                
+
                 <Route path="pricing-list" element={<Pricing2 />} />
                 <Route path="supplier-list" element={<Supplier />} />
                 <Route path="create-supplier" element={<CreateSupplier />} />
