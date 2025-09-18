@@ -63,6 +63,10 @@ const Shift = lazy(() => import("./pages/shift/Shift"));
 const CreateShift = lazy(() => import("./pages/shift/CreateShift"));
 
 
+const CreateLedgerGrop = lazy(() => import("./pages/ledgerGroup/CreateLedgerGroup"));
+const LedgerGroup = lazy(() => import("./pages/ledgerGroup/LedgerGroup"));
+ 
+
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 
@@ -202,6 +206,10 @@ function App() {
                 <Route path="order-list" element={<Orders />} />
                 <Route path="order-view" element={<ViewOrder />} />
                 <Route path="create-order" element={<CreateOrder />} />
+
+
+                <Route path="create-group" element={<CreateLedgerGrop />} />
+                <Route path="group-list" element={<LedgerGroup />} />
 
 
 
