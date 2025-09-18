@@ -1,25 +1,33 @@
 import { Card } from "@mui/material";
-import React, { useState, Fragment, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Country, State, City } from "country-state-city";
 import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
-import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
 import "../../assets/scss/common.scss"
 
 import { useSelector } from "react-redux";
-import ProfileImage from "../../assets/images/users/user-4.jpg"
-import TradingLicense from "../../assets/images/tradingLicense.png"
-import vendorService from "@/services/vendor/vendor.service";
-import Fileinput from "@/components/ui/Fileinput";
 import { Dialog, Transition } from "@headlessui/react";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import departmentService from "@/services/department/department.service";
 import Button from "@/components/ui/Button";
+import Select from 'react-select';
+
+
+
+// Options for days multi-select
+const daysOptions = [
+    { value: 'Mon', label: 'Monday' },
+    { value: 'Tue', label: 'Tuesday' },
+    { value: 'Wed', label: 'Wednesday' },
+    { value: 'Thu', label: 'Thursday' },
+    { value: 'Fri', label: 'Friday' },
+    { value: 'Sat', label: 'Saturday' },
+    { value: 'Sun', label: 'Sunday' }
+];
+
 
 
 
@@ -65,15 +73,13 @@ const CreateShift = ({ noFade, scrollContent }) => {
         shiftName: "",
         startTime: "",
         endTime: "",
-        duration: "", 
+        duration: "",
         shiftType: "",
         status: "",
         requiredEmployees: "",
         notes: "",
-        recurring: {
-            frequency: "",
-            days: ""
-        },
+        frequency: "",
+        days: []
     });
 
     useEffect(() => {
@@ -146,12 +152,17 @@ const CreateShift = ({ noFade, scrollContent }) => {
         businessUnit: "",
         branch: "",
         warehouse: "",
-        departmentName: "",
-        departmentCode: "",
-        description: "",
-        headcountLimit: "",
+
+        shiftName: "",
+        startTime: "",
+        endTime: "",
+        duration: "",
+        shiftType: "",
         status: "",
+        requiredEmployees: "",
         notes: "",
+        frequency: "",
+        days: ""
     });
 
     const {
@@ -159,27 +170,52 @@ const CreateShift = ({ noFade, scrollContent }) => {
         businessUnit,
         branch,
         warehouse,
-        departmentName,
-        departmentCode,
-        description,
-        headcountLimit,
+
+        shiftName,
+        startTime,
+        endTime,
+        duration,
+        shiftType,
         status,
+        requiredEmployees,
         notes,
+        frequency,
+        days
     } = formData;
 
     const [isViewed, setIsViewed] = useState(false);
     const [showAddButton, setShowAddButton] = useState(true);
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+
+    const calculateDuration = (start, end) => {
+        if (!start || !end) return "";
+        const [startHours, startMinutes] = start.split(":").map(Number);
+        const [endHours, endMinutes] = end.split(":").map(Number);
+        const startDate = new Date(2000, 0, 1, startHours, startMinutes);
+        let endDate = new Date(2000, 0, 1, endHours, endMinutes);
+
+        // Handle case where endTime is on the next day (e.g., 22:00 to 02:00)
+        if (endDate <= startDate) {
+            endDate.setDate(endDate.getDate() + 1);
+        }
+
+        const diffInMinutes = (endDate - startDate) / (1000 * 60);
+        return diffInMinutes >= 0 ? diffInMinutes.toString() : "";
+    };
 
     const validationFunction = () => {
         const { level, businessUnit, branch, warehouse } = formData;
         let errors = {
-            departmentName: validateField("departmentName", departmentName),
-            departmentCode: validateField("departmentCode", departmentCode),
-            description: validateField("description", description),
-            headcountLimit: validateField("headcountLimit", headcountLimit),
+            shiftName: validateField("shiftName", shiftName),
+            startTime: validateField("startTime", startTime),
+            endTime: validateField("endTime", endTime),
+            duration: validateField("duration", duration),
+            shiftType: validateField("shiftType", shiftType),
             status: validateField("status", status),
+            requiredEmployees: validateField("requiredEmployees", requiredEmployees),
             notes: validateField("notes", notes),
+            frequency: validateField("frequency", frequency),
+            days: validateField("days", days),
         };
         errors.level = validateField("level", level);
         if (level === "business" || level === "branch" || level === "warehouse") {
@@ -192,7 +228,7 @@ const CreateShift = ({ noFade, scrollContent }) => {
             errors.warehouse = validateField("warehouse", warehouse);
         }
         console.log("errors", errors);
-        
+
         setFormDataErr((prev) => ({
             ...prev,
             ...errors
@@ -200,47 +236,89 @@ const CreateShift = ({ noFade, scrollContent }) => {
         return Object.values(errors).some((error) => error);
     };
 
-    const validateField = (name, value) => {
+    const validateField = (name, value, formData = {}) => {
         const rules = {
-            departmentName: [
-                [!value, "Department Name is Required"],
-                [value.length <= 3, "Minimum 3 characters required."]
+            shiftName: [
+                [!value, "Shift Name is required"],
+                [value && value.length < 3, "Minimum 3 characters required"]
             ],
-            departmentCode: [
-                [!value, "Department Code is Required"],
-                [value.length <= 3, "Minimum 3 characters required."]
+            startTime: [[!value, "Start time is required"]],
+            endTime: [[!value, "End time is required"]],
+            duration: [
+                [!value && formData.startTime && formData.endTime, "Invalid time range: End time must be after start time"],
+                [value && (isNaN(value) || value <= 0), "Duration must be a positive number"]
             ],
-            description: [
-                [!value, "Description is Required"],
-                [value.length <= 3, "Minimum 3 characters required."]
+            shiftType: [[!value, "Shift type is required"]],
+            status: [[!value, "Status is required"]],
+            requiredEmployees: [
+                [!value, "Employees limit is required"],
+                [value && (isNaN(value) || value <= 0), "Must be a positive number"]
             ],
-            headcountLimit: [[!value, "Headcount Limit is Required"]],
-            status: [[!value, "Status is Required"]],
-            notes: [[!value, "Notes are Required"]],
-            level: [[!value, "Level is Required"]],
-            businessUnit: [[!value, "Business Unit is Required"]],
-            branch: [[!value, "Branch is Required"]],
-            warehouse: [[!value, "Warehouse is Required"]]
+            notes: [[!value, "Notes are required"]],
+            frequency: [[!value, "Frequency is required"]],
+            days: [[!value || value.length === 0, "At least one day must be selected"]],
+            level: [[!value, "Level is required"]],
+            businessUnit: [[!value && levelResult > 1, "Business Unit is required"]],
+            branch: [[!value && levelResult > 2, "Branch is required"]],
+            warehouse: [[!value && levelResult > 3, "Warehouse is required"]]
         };
+
         return (rules[name] || []).find(([condition]) => condition)?.[1] || "";
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value
-        }));
-        if (name === "businessUnit" && value !== "") {
+        setFormData((prev) => {
+            const updatedFormData = { ...prev, [name]: value };
+
+            // Calculate duration if startTime or endTime changes
+            if (name === "startTime" || name === "endTime") {
+                updatedFormData.duration = calculateDuration(
+                    name === "startTime" ? value : prev.startTime,
+                    name === "endTime" ? value : prev.endTime
+                );
+            }
+
+            return updatedFormData;
+        });
+
+        if (name === "businessUnit" && value) {
             setActiveBranches([]);
             setFormData((prev) => ({
                 ...prev,
-                branchId: ""
+                branch: "",
+                warehouse: ""
+            }));
+            setFormDataErr((prev) => ({
+                ...prev,
+                branch: "",
+                warehouse: ""
             }));
         }
+
         setFormDataErr((prev) => ({
             ...prev,
-            [name]: validateField(name, value)
+            [name]: validateField(name, value, { startTime: formData.startTime, endTime: formData.endTime }),
+            ...(name === "startTime" || name === "endTime"
+                ? {
+                    duration: validateField("duration", calculateDuration(
+                        name === "startTime" ? value : formData.startTime,
+                        name === "endTime" ? value : formData.endTime
+                    ), { startTime: name === "startTime" ? value : formData.startTime, endTime: name === "endTime" ? value : formData.endTime })
+                }
+                : {})
+        }));
+    };
+
+    const handleDaysChange = (selectedOptions) => {
+        const selectedDays = selectedOptions ? selectedOptions.map(option => option.value) : [];
+        setFormData((prev) => ({
+            ...prev,
+            days: selectedDays
+        }));
+        setFormDataErr((prev) => ({
+            ...prev,
+            days: validateField("days", selectedDays)
         }));
     };
 
@@ -300,7 +378,7 @@ const CreateShift = ({ noFade, scrollContent }) => {
         setIsViewed(false);
         const error = validationFunction();
         console.log("error", error);
-        
+
         setLoading(true);
         if (error) {
             setLoading(false);
@@ -329,7 +407,7 @@ const CreateShift = ({ noFade, scrollContent }) => {
                     const response = await employeeService.updateEmployee(payload)
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await departmentService.create({...formData, clientId: clientId });
+                    const response = await departmentService.create({ ...formData, clientId: clientId });
                     toast.success(response?.data?.message);
                 }
 
@@ -605,95 +683,107 @@ const CreateShift = ({ noFade, scrollContent }) => {
                                         }
 
                                         <label
-                                            className={`fromGroup   ${formDataErr?.departmentName !== "" ? "has-error" : ""
+                                            className={`fromGroup   ${formDataErr?.shiftName !== "" ? "has-error" : ""
                                                 } `}
                                         >
                                             <p className="form-label">
-                                                Department Name <span className="text-red-500">*</span>
+                                                Shift Name <span className="text-red-500">*</span>
                                             </p>
                                             <input
-                                                name="departmentName"
+                                                name="shiftName"
                                                 type="text"
-                                                placeholder="Enter Name"
-                                                value={departmentName}
+                                                placeholder="Enter shift name"
+                                                value={shiftName}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
                                                 disabled={isViewed}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
-                                                    {formDataErr.departmentName}
+                                                    {formDataErr.shiftName}
                                                 </p>
                                             }
                                         </label>
 
                                         <label
-                                            className={`fromGroup   ${formDataErr?.departmentCode !== "" ? "has-error" : ""
+                                            className={`fromGroup   ${formDataErr?.startTime !== "" ? "has-error" : ""
                                                 } `}
                                         >
                                             <p className="form-label">
-                                                Department Code <span className="text-red-500">*</span>
+                                                Start Time <span className="text-red-500">*</span>
                                             </p>
                                             <input
-                                                name="departmentCode"
-                                                type="text"
-                                                placeholder="Enter Name"
-                                                value={departmentCode}
+                                                name="startTime"
+                                                type="time"
+                                                value={startTime}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
                                                 disabled={isViewed}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
-                                                    {formDataErr.departmentCode}
+                                                    {formDataErr.startTime}
                                                 </p>
                                             }
                                         </label>
 
                                         <label
-                                            className={`fromGroup   ${formDataErr?.headcountLimit !== "" ? "has-error" : ""
+                                            className={`fromGroup   ${formDataErr?.endTime !== "" ? "has-error" : ""
                                                 } `}
                                         >
                                             <p className="form-label">
-                                                Head Count Limit <span className="text-red-500">*</span>
+                                                End Time <span className="text-red-500">*</span>
                                             </p>
                                             <input
-                                                name="headcountLimit"
-                                                type="text"
-                                                placeholder="Enter Name"
-                                                value={headcountLimit}
+                                                name="endTime"
+                                                type="time"
+                                                value={endTime}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
                                                 disabled={isViewed}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
-                                                    {formDataErr.headcountLimit}
+                                                    {formDataErr.endTime}
                                                 </p>
                                             }
                                         </label>
 
-                                        <label
-                                            className={`fromGroup   ${formDataErr?.description !== "" ? "has-error" : ""
-                                                } `}
-                                        >
+                                        <label className={`fromGroup ${formDataErr?.duration ? "has-error" : ""}`}>
                                             <p className="form-label">
-                                                Description <span className="text-red-500">*</span>
+                                                Duration (minutes) <span className="text-red-500">*</span>
                                             </p>
                                             <input
-                                                name="description"
-                                                type="text"
-                                                placeholder="Enter Name"
-                                                value={description}
-                                                onChange={handleChange}
-                                                className="form-control py-2"
-                                                disabled={isViewed}
+                                                name="duration"
+                                                type="number"
+                                                placeholder="Auto-calculated"
+                                                value={duration}
+                                                className="form-control py-2 bg-gray-100 dark:bg-gray-700 cursor-not-allowed"
+                                                disabled
                                             />
-                                            {
-                                                <p className="text-sm text-red-500">
-                                                    {formDataErr.description}
-                                                </p>
-                                            }
+                                            {formDataErr?.duration && <p className="text-sm text-red-500">{formDataErr.duration}</p>}
+                                        </label>
+
+                                        <label className={`fromGroup   ${formDataErr?.shiftType !== "" ? "has-error" : ""
+                                            } `}>
+                                            <p className=" form-label">
+                                                Shift Type
+                                                <span className="text-red-500">*</span>
+                                            </p>
+                                            <select
+                                                name="shiftType"
+                                                value={shiftType}
+                                                className="form-control outline-none w-[100%] rounded-md px-4 py-2.5 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor dark:placeholder-darkPlaceholder bg-lightBgInputColor dark:bg-darkIconAndSearchBg dark:text-white"
+                                                onChange={handleChange}
+                                                disabled={isViewed}
+                                            >
+                                                <option value="">Select</option>
+                                                <option value="day"> Day</option>
+                                                <option value="night">Night</option>
+                                                <option value="rotating">Rotating</option>
+                                                <option value="on-call">On-call</option>
+                                            </select>
+                                            {<p className="text-red-600  text-xs">{formDataErr.shiftType}</p>}
                                         </label>
 
                                         <label className={`fromGroup   ${formDataErr?.status !== "" ? "has-error" : ""
@@ -710,12 +800,100 @@ const CreateShift = ({ noFade, scrollContent }) => {
                                                 disabled={isViewed}
                                             >
                                                 <option value="">Select</option>
-                                                <option value="active"> Active</option>
-                                                <option value="inactive">Inactive</option>
-                                                <option value="archived">Archived</option>
+                                                <option value="planned"> Planned</option>
+                                                <option value="active">Active</option>
+                                                <option value="completed">Completed</option>
+                                                <option value="canceled">Cancelled</option>
                                             </select>
                                             {<p className="text-red-600  text-xs">{formDataErr.status}</p>}
                                         </label>
+
+                                        <label
+                                            className={`fromGroup   ${formDataErr?.requiredEmployees !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <p className="form-label">
+                                                Employee Limit <span className="text-red-500">*</span>
+                                            </p>
+                                            <input
+                                                name="requiredEmployees"
+                                                type="number"
+                                                placeholder="Enter employee limit"
+                                                value={requiredEmployees}
+                                                onChange={handleChange}
+                                                className="form-control py-2"
+                                                disabled={isViewed}
+                                            />
+                                            {
+                                                <p className="text-sm text-red-500">
+                                                    {formDataErr.requiredEmployees}
+                                                </p>
+                                            }
+                                        </label>
+
+                                        <label className={`fromGroup   ${formDataErr?.frequency !== "" ? "has-error" : ""
+                                            } `}>
+                                            <p className=" form-label">
+                                                frequency
+                                                <span className="text-red-500">*</span>
+                                            </p>
+                                            <select
+                                                name="frequency"
+                                                value={frequency}
+                                                className="form-control outline-none w-[100%] rounded-md px-4 py-2.5 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor dark:placeholder-darkPlaceholder bg-lightBgInputColor dark:bg-darkIconAndSearchBg dark:text-white"
+                                                onChange={handleChange}
+                                                disabled={isViewed}
+                                            >
+                                                <option value="">Select</option>
+                                                <option value="daily"> Daily</option>
+                                                <option value="weekly">Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                            </select>
+                                            {<p className="text-red-600  text-xs">{formDataErr.frequency}</p>}
+                                        </label>
+
+                                        <label className={`fromGroup ${formDataErr?.days ? "has-error" : ""}`}>
+                                            <p className="form-label">
+                                                Days <span className="text-red-500">*</span>
+                                            </p>
+                                            <Select
+                                                isMulti
+                                                name="days"
+                                                options={daysOptions}
+                                                value={daysOptions.filter(option => days.includes(option.value))}
+                                                onChange={handleDaysChange}
+                                                isDisabled={isViewed}
+                                                className="react-select-container"
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    control: (base) => ({
+                                                        ...base,
+                                                        backgroundColor: isDark ? '#1a202c' : '#fff',
+                                                        borderColor: isDark ? '#4a5568' : '#e2e8f0',
+                                                        color: isDark ? '#fff' : '#000',
+                                                        padding: '0.5rem',
+                                                        borderRadius: '0.375rem'
+                                                    }),
+                                                    menu: (base) => ({
+                                                        ...base,
+                                                        backgroundColor: isDark ? '#1a202c' : '#fff',
+                                                        color: isDark ? '#fff' : '#000'
+                                                    }),
+                                                    multiValue: (base) => ({
+                                                        ...base,
+                                                        backgroundColor: isDark ? '#4a5568' : '#ff0d0d',
+                                                        color: isDark ? '#fff' : '#ff0d0d'
+                                                    }),
+                                                    multiValueLabel: (base) => ({
+                                                        ...base,
+                                                        color: isDark ? '#fff' : '#fff'
+                                                    })
+                                                }}
+                                                placeholder="Select Days"
+                                            />
+                                            {formDataErr?.days && <p className="text-red-600 text-xs">{formDataErr.days}</p>}
+                                        </label>
+
 
                                         <label
                                             className={`fromGroup   ${formDataErr?.notes !== "" ? "has-error" : ""
@@ -727,7 +905,7 @@ const CreateShift = ({ noFade, scrollContent }) => {
                                             <input
                                                 name="notes"
                                                 type="text"
-                                                placeholder="Enter Name"
+                                                placeholder="Enter notes"
                                                 value={notes}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
