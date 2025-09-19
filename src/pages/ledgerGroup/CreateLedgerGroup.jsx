@@ -15,6 +15,11 @@ import departmentService from "@/services/department/department.service";
 import Button from "@/components/ui/Button";
 import Select from 'react-select';
 import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
+import { FiPlus } from "react-icons/fi";
+import Tippy from "@tippyjs/react";
+import { RxCross2, RxValueNone } from "react-icons/rx";
+import { FaExclamationCircle } from "react-icons/fa";
+
 
 // Options for days multi-select
 const daysOptions = [
@@ -54,6 +59,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
     const row = location?.state?.row;
     const name = location?.state?.name;
     const id = location?.state?.id;
+
     const [pageLoading, setPageLoading] = useState(true);
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
     const [levelResult, setLevelResult] = useState(0)
@@ -62,6 +68,8 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
     const [currentLevel, setCurrentLevel] = useState("");
     const [levelId, setLevelId] = useState("");
     const [parentLedgers, setParentLedgers] = useState([]);
+    const [fields, setFields] = useState([]);
+    const [ledgerData, setLedgerData] = useState(null)
     const [formData, setFormData] = useState({
         level: "",
         businessUnit: "",
@@ -72,6 +80,9 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
         hasParent: false,
         parentGroup: "",
     });
+
+    console.log("ledgerData", ledgerData);
+    
 
     useEffect(() => {
         if (currentUser && isAuthenticated) {
@@ -295,42 +306,32 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                 const clientId = localStorage.getItem("saas_client_clientId");
 
                 if (id) {
-                    const response = await ledgerGroupService.update({ ...formData, clientId: clientId , groupId: id})
+                    const response = await ledgerGroupService.update({ ...formData, clientId: clientId, groupId: id })
                     toast.success(response?.data?.message);
                 } else {
                     const response = await ledgerGroupService.create({ ...formData, clientId: clientId });
                     toast.success(response?.data?.message);
+
+                    setLedgerData(response?.data?.data?.group)
+                    
+                    getCustomField(response?.data?.data?.group?._id);
                 }
-
-                setFormData({
-                    level: "",
-                    businessUnit: "",
-                    branch: "",
-                    warehouse: "",
-
-                    groupName: "",
-                    hasParent: false,
-                    parentGroup: "",
-                });
-                setFormDataErr({
-                    level: "",
-                    businessUnit: "",
-                    branch: "",
-                    warehouse: "",
-
-                    groupName: "",
-                    hasParent: "",
-                    parentGroup: "",
-                })
                 setLoading(false);
-                navigate("/group-list");
-
             } catch (error) {
                 setLoading(false);
                 console.log("error while creating ledger group", error);
             }
         }
     };
+
+    async function getCustomField(id) {
+        try {
+            const response = await ledgerGroupService.getAllField(id);
+            setFields(response?.data?.fields)
+        } catch (error) {
+            console.log("error in getting the fields", error);
+        }
+    }
     // -----setting the data if contain id ----------
     useEffect(() => {
         if (id) {
@@ -354,6 +355,8 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                         level = "branch"
                     }
 
+                    setLedgerData(baseAddress)
+
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
@@ -370,7 +373,8 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                     console.log("error in fetching vendor data");
                 }
             }
-            getBranch()
+            getBranch();
+            getCustomField(location?.state?.row?._id);
         } else {
             setPageLoading(false)
         }
@@ -384,8 +388,6 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
             console.log("error while fetching ledger group");
         }
     }
-
-
 
     useEffect(() => {
         async function getActiveBusinessUnit() {
@@ -427,7 +429,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
     }, [currentUser]);
 
 
-      const handleHasParentToggle = () => {
+    const handleHasParentToggle = () => {
         if (!isViewed) {
             setFormData((prev) => ({
                 ...prev,
@@ -437,6 +439,113 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                 ...prev,
                 hasParent: validateField("hasParent", !prev.hasParent)
             }));
+        }
+    };
+
+
+     const renderFieldPreview = (field) => {
+        const options = field?.options ? field?.options?.map((item) => ({ value: item, label: item })) : [];
+
+        // console.log("options", options);
+
+        const baseStyles = "w-[100%] bg-transparent   p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500";
+
+        switch (field.type) {
+            case 'text':
+            case 'number':
+            case 'email':
+            case 'hyperlink':
+                return (
+                    <input
+                        disabled={true}
+                        type={field?.type}
+                        placeholder={field?.placeholder}
+                        className={baseStyles}
+                    />
+                );
+            case 'textarea':
+                return (
+                    <textarea
+                        disabled={true}
+                        placeholder={field?.placeholder}
+                        className={`${baseStyles} min-h-[100px]`}
+                    />
+                );
+            case 'select':
+                return (
+                    // <select
+                    //     // disabled={true}
+
+                    //     className={baseStyles}>
+                    //     <option value="">{field?.placeholder || 'Select an option'}</option>
+                    //     {field?.options?.map((opt, idx) => (
+                    //         <option key={idx} value={opt}>{opt}</option>
+                    //     ))}
+                    // </select>
+                    <Select
+                        isDisabled={true}
+                        name="select"
+                        options={options}
+                        className="basic-multi-select"
+                        classNamePrefix="select"
+                    />
+                );
+            case 'multiselect':
+                return (
+                    <Select
+                        isDisabled={true}
+                        isMulti
+                        name="colors"
+                        options={options}
+                        className="basic-multi-select"
+                        classNamePrefix="select"
+                    />
+                );
+            case 'checkbox':
+                return (
+                    <input
+                        disabled={true}
+                        type="checkbox"
+                        className="h-5 w-5 text-blue-600"
+                    />
+                );
+            case 'file':
+                return (
+                    <input
+                        type="file"
+                        disabled={true}
+                        accept={field?.validation?.fileTypes?.join(',')}
+                        className={baseStyles}
+                    />
+                );
+            case 'date':
+                return (
+                    <input
+                        type="date"
+                        disabled={true}
+                        placeholder={field?.placeholder || 'Select a date'}
+                        className={baseStyles}
+                    />
+                );
+            case 'timepicker':
+                return (
+                    <input
+                        type="time"
+                        disabled={true}
+                        placeholder={field?.placeholder || 'Select a time'}
+                        className={baseStyles}
+                    />
+                );
+            case 'color':
+                return (
+                    <input
+                        type="color"
+                        disabled={true}
+                        className={`${baseStyles} h-10 cursor-not-allowed`}
+                    />
+                );
+            default:
+                return <div className={baseStyles}>{field?.type} (Preview not available)</div>;
         }
     };
 
@@ -677,6 +786,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
 
                                 </div>
+
                                 {
                                     isViewed && (
                                         <div className="lg:col-span-2 col-span-1">
@@ -744,7 +854,83 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                         </div>
                                     )
                                 }
+
+                               
                             </form>
+
+                             {
+
+                                   fields?.length > 0 &&
+
+                                    <div className=" border-2 border-dashed border-lightBtn dark:border-darkBtn px-2 py-4">
+
+                                        {
+                                            [...fields, ...fields].length > 0 ?
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
+                                                    {[...fields]
+                                                        .sort((a, b) => a.gridConfig?.order - b.gridConfig?.order)
+                                                        .map((field, index) => {
+                                                            return (
+                                                                <div
+                                                                    className='relative'
+                                                                    key={index}
+                                                                    style={{ order: field?.gridConfig?.order }}
+                                                                >
+
+                                                                    {
+                                                                        field?.isDeleteAble ?
+                                                                            <Tippy
+                                                                                content={"delete"}
+                                                                                placement="top"
+                                                                            >
+                                                                                <button
+                                                                                    // onClick={() => handleDeleteField(field?._id)}
+                                                                                    className={`bg-red-400/20 dark:bg-red-600 absolute right-0 text-[.90rem] font-bold text-black dark:text-white px-1 py-1 rounded-md`}
+                                                                                >
+                                                                                    <RxCross2 className='text-red-600 dark:text-red-200' />
+                                                                                </button>
+                                                                            </Tippy> :
+
+                                                                            <span className=' absolute right-0'>
+                                                                                <RxValueNone className='text-green-900 dark:text-green-200' />
+                                                                            </span>
+
+
+                                                                    }
+
+                                                                    <label className="block text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">
+                                                                        {field?.label}{field?.isRequired && <span className="text-red-500">*</span>}
+                                                                    </label>
+                                                                    {renderFieldPreview(field)}
+                                                                </div>
+                                                            )
+                                                        }
+                                                        )
+                                                    }
+                                                </div>
+                                                :
+                                                <div className="flex mt-4 flex-col justify-center items-center py-8 sm:py-12 bg-gray-100 dark:bg-gray-900 rounded-xl shadow-md">
+                                                    <FaExclamationCircle className="text-3xl sm:text-4xl text-gray-400 dark:text-gray-500 mb-3 sm:mb-4" />
+                                                    <p className="text-base sm:text-lg font-medium text-gray-600 dark:text-gray-300 mb-3 sm:mb-4">
+                                                        No Fields Found
+                                                    </p>
+                                                </div>
+                                        }
+
+                                        <div className="flex justify-start py-5 ">
+                                            <button
+                                                // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                className={`border-lightBtn border-2 w-[100%] dark:border-darkBtn p-3 rounded-md text-lightBtn dark:text-darkBtn  items-center flex justify-center`}
+                                                onClick={() => navigate("/group/custom-field", { state: { group: ledgerData } })}
+                                                isLoading={loading}
+                                            >
+                                                <span><FiPlus /></span>
+                                                <span>Add More Field</span>
+
+                                            </button>
+                                        </div>
+                                    </div>
+                                }
                         </div>
                     </div>
             }

@@ -78,6 +78,67 @@ const update = async (data) => {
 
 
 
+const getAllField = async (id) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/lg/all/field/ledgerGroup?clientId=${clientId}&groupId=${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+const createField = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/lg/create/field`, { ...data, clientId: clientId }, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+
+const deleteCustomField = async (groupId, fieldId) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.delete(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/lg/delete/field/${groupId}/${clientId}/${fieldId}`, {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+            }
+        });
+        return response;
+    } catch (error) {
+
+        if (error.response) {
+            return Promise.reject(error.response.data.error || "Invalid credentials");
+        } else if (error.request) {
+            return Promise.reject("Network error. Please try again.");
+        } else {
+            return Promise.reject("An error occurred. Please try again later.");
+        }
+    }
+}
+
+
+
 
 
 
@@ -148,7 +209,7 @@ const getOne = async (id) => {
 
     });
     return response.data
-    
+
 }
 
 
@@ -164,12 +225,12 @@ const getBranchByBusiness = async (id) => {
 
     });
     return response.data
-    
+
 }
 
 
 
-const getWarehouseByBranch= async (id) => {
+const getWarehouseByBranch = async (id) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clinetId = localStorage.getItem("saas_client_clientId");
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/warehouse/warehouseByBranch/${clinetId}/${id}`, {
@@ -179,7 +240,7 @@ const getWarehouseByBranch= async (id) => {
 
     });
     return response.data
-    
+
 }
 
 
@@ -210,7 +271,9 @@ export default {
     getAllParent,
     activeInactive,
     update,
-
+    getAllField,
+    createField,
+    deleteCustomField,
 
 
 
