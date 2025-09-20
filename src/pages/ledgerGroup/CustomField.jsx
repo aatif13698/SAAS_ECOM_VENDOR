@@ -499,9 +499,13 @@ function CustomField() {
             </div>
 
             {
-                isDataLoading ?
+                 isDataLoading ?
                     <>
-                        <div className="w-[100%] h-60 flex justify-center items-center mb-4 bg-cardBgLight dark:bg-cardBgDark shadow-lg rounded-lg p-6 ">
+                        <div 
+                        // className="w-[100%] h-60 flex justify-center items-center mb-4 bg-cardBgLight dark:bg-cardBgDark shadow-lg rounded-lg p-6 "
+                                                className={`${isDark ? "bg-darkSecondary text-white" : "bg-white text-black-900"} h-60   shadow-lg flex justify-center items-center transition-transform duration-300 mb-3 p-6`}
+
+                        >
                             <svg
                                 className={`animate-spin mr-2 h-10 w-10  text-black dark:text-white`}
                                 xmlns="http://www.w3.org/2000/svg"
@@ -535,8 +539,8 @@ function CustomField() {
                             <h3 className="text-xl font-bold text-formHeadingLight mb-2  dark:text-formHeadingDark">Custom Fields Preview</h3>
                             <div>
                                 <button
-                                    // disabled={isSubmitting}
-                                    onClick={() => navigate("/list/adjustOrder", { state: { organization: data?.organization, session: data?.session, } })}
+                                    disabled={isSubmitting}
+                                    onClick={() => navigate("/group/adjust-order", { state: {group: data?.group } })}
                                     className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
                                 >
 
@@ -684,7 +688,7 @@ function CustomField() {
                                     <button
                                         type="button"
                                         onClick={handleAddOption}
-                                        className="w-auto p-2 gap-2 text-sm text-white rounded-lg transition-all duration-300 ease-in-out bg-custom-gradient-button-dark dark:bg-custom-gradient-button-light hover:bg-custom-gradient-button-light dark:hover:bg-custom-gradient-button-dark flex items-center justify-center shadow-lg"
+                                            className={`bg-lightBtn dark:bg-darkBtn p-3 items-center rounded-md text-white  text-center btn btn inline-flex justify-center`}
                                     >
                                         <span><FiPlus /> </span>
                                         <span>Add</span>

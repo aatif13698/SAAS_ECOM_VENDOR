@@ -66,6 +66,7 @@ const CreateShift = lazy(() => import("./pages/shift/CreateShift"));
 const CreateLedgerGrop = lazy(() => import("./pages/ledgerGroup/CreateLedgerGroup"));
 const LedgerGroup = lazy(() => import("./pages/ledgerGroup/LedgerGroup"));
 const CustomField = lazy(() => import("./pages/ledgerGroup/CustomField"));
+const AdjustOrder = lazy(() => import("./pages/ledgerGroup/AdjustOrder"));
 
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
@@ -212,6 +213,7 @@ function App() {
                 <Route path="create-group" element={<CreateLedgerGrop />} />
                 <Route path="group-list" element={<LedgerGroup />} />
                 <Route path="group/custom-field" element={<CustomField />} />
+                <Route path="group/adjust-order" element={<AdjustOrder />} />
 
 
 

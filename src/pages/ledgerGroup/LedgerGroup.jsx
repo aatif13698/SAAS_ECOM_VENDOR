@@ -352,23 +352,23 @@ const LedgerGroup = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await warehouseService.getList(page, keyWord, perPage);
+            const response = await ledgerGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
+            setPaginationData(response?.data?.ledgerGroup);
             setPage(page);
         } catch (error) {
-            console.log("error while fetching warehouse");
+            console.log("error while fetching ledger group");
         }
     };
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await warehouseService.getList(page, keyWord, perPage);
+            const response = await ledgerGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
+            setPaginationData(response?.data?.ledgerGroup);
             setPerPage(perPage);
         } catch (error) {
-            console.log("error while fetching warehouse");
+            console.log("error while fetching ledger group");
         }
         setPerPage(perPage);
     };

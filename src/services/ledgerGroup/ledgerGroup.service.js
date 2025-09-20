@@ -112,8 +112,6 @@ const createField = async (data) => {
 };
 
 
-
-
 const deleteCustomField = async (groupId, fieldId) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -136,6 +134,43 @@ const deleteCustomField = async (groupId, fieldId) => {
         }
     }
 }
+
+
+const updateOrder = async (groupId, data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId"); try {
+        const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/lg/update/order/field/${groupId}/${clientId}`, { fields: data }, {
+            headers: {
+                Authorization: `Bearer ${authToken}`,
+                "Content-Type": "application/json",
+            }
+        });
+        return response;
+    } catch (error) {
+
+        if (error.response) {
+            return Promise.reject(error.response.data.error || "Invalid credentials");
+        } else if (error.request) {
+            return Promise.reject("Network error. Please try again.");
+        } else {
+            return Promise.reject("An error occurred. Please try again later.");
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -274,7 +309,7 @@ export default {
     getAllField,
     createField,
     deleteCustomField,
-
+    updateOrder,
 
 
 
