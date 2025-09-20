@@ -50,7 +50,7 @@ const Breadcrumbs = () => {
       {!isHide ? (
         <div className="md:mb-6 mb-4 flex space-x-3 rtl:space-x-reverse">
           <ul className="breadcrumbs">
-            <li className="text-primary-500">
+            <li className="text-lightBtn dark:text-darkBtn">
               <NavLink to="/dashboard" className="text-lg">
                 <Icon icon="heroicons-outline:home" />
               </NavLink>
@@ -59,7 +59,7 @@ const Breadcrumbs = () => {
               </span>
             </li>
             {groupTitle && (
-              <li className="text-primary-500">
+              <li className="text-lightBtn dark:text-darkBtn">
                 <button type="button" className="capitalize">
                   {groupTitle}
                 </button>

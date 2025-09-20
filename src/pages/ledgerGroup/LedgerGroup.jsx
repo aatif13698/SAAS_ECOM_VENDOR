@@ -317,9 +317,9 @@ const LedgerGroup = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await employeeService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await ledgerGroupService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.employees);
+                    setPaginationData(response?.data?.ledgerGroup);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }

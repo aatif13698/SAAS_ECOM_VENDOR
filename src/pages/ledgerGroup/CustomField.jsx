@@ -16,6 +16,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import useWidth from '@/hooks/useWidth';
 import useDarkmode from '@/hooks/useDarkMode';
 import ledgerGroupService from '@/services/ledgerGroup/ledgerGroup.service';
+import { RiDeleteBinLine } from "react-icons/ri";
 
 
 
@@ -574,13 +575,13 @@ function CustomField() {
                                                             >
                                                                 <button
                                                                     onClick={() => handleDeleteField(field?._id)}
-                                                                    className={`bg-red-400/20 dark:bg-red-600 absolute right-0 text-[.90rem] font-bold text-black dark:text-white px-1 py-1 rounded-md`}
+                                                                    className={`bg-red-400/20 dark:bg-red-200 absolute top-[2.1rem] right-2 text-[.90rem] font-bold text-black dark:text-white px-1 py-1 rounded-full`}
                                                                 >
-                                                                    <RxCross2 className='text-red-600 dark:text-red-200' />
+                                                                    <RiDeleteBinLine className='text-red-600 ' />
                                                                 </button>
                                                             </Tippy> :
 
-                                                            <span className=' absolute right-0'>
+                                                            <span className=' absolute top-[2.1rem] right-2'>
                                                                 <RxValueNone className='text-green-900 dark:text-green-200' />
                                                             </span>
 

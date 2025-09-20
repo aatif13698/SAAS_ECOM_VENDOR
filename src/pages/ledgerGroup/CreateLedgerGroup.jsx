@@ -870,7 +870,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                                 style={{ order: field?.gridConfig?.order }}
                                                             >
 
-                                                                {
+                                                                {/* {
                                                                     field?.isDeleteAble ?
                                                                         <Tippy
                                                                             content={"delete"}
@@ -889,7 +889,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                                         </span>
 
 
-                                                                }
+                                                                } */}
 
                                                                 <label className="block text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">
                                                                     {field?.label}{field?.isRequired && <span className="text-red-500">*</span>}

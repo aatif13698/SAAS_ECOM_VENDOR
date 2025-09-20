@@ -154,7 +154,7 @@ const Navmenu = ({ menus }) => {
             <NavLink
               to={item.link}
               className={({ isActive }) =>
-                `menu-link flex items-center py-2 px-4 rounded-md transition-colors duration-150 ${
+                `menu-link flex items-center py-0 px-4 rounded-md transition-colors duration-150 ${
                   isActive
                     ? "bg-lightBtn text-white dark:bg-lightBtn"
                     : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
@@ -176,7 +176,7 @@ const Navmenu = ({ menus }) => {
           {/* Menu label (header) */}
           {item.isHeadr && !item.child && (
             <div
-              className="menulabel py-2 px-4 text-sm font-semibold text-lightBtn dark:text-emerald-400"
+              className="menulabel py-0 px-4 text-sm font-semibold text-lightBtn dark:text-emerald-400"
             >
               {item.title}
             </div>
