@@ -68,6 +68,7 @@ const LedgerGroup = lazy(() => import("./pages/ledgerGroup/LedgerGroup"));
 const CustomField = lazy(() => import("./pages/ledgerGroup/CustomField"));
 const AdjustOrder = lazy(() => import("./pages/ledgerGroup/AdjustOrder"));
 const FinancialYear = lazy(() => import("./pages/financialYear/FinancialYear"));
+const Currency = lazy(() => import("./pages/currency/Currency"));
  
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
@@ -212,6 +213,7 @@ function App() {
 
 
                 <Route path="financial-year-list" element={<FinancialYear />} />
+                <Route path="currency-list" element={<Currency />} />
                 <Route path="create-group" element={<CreateLedgerGrop />} />
                 <Route path="group-list" element={<LedgerGroup />} />
                 <Route path="group/custom-field" element={<CustomField />} />
