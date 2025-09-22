@@ -26,6 +26,7 @@ import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
 import departmentService from "@/services/department/department.service";
+import shiftService from "@/services/shift/shift.service";
 
 
 // const FormValidationSchema = yup
@@ -210,21 +211,23 @@ const Shift = ({ noFade, scrollContent }) => {
     const columns = [
         {
             name: "Name",
-            selector: (row) => row?.departmentName ,
+            selector: (row) => row?.shiftName ,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
-         {
-            name: "Code",
-            selector: (row) => row?.departmentCode,
-            sortable: false,
-
+        {
+            name: "Shift Type",
+            selector: (row) => row?.shiftType ,
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
         },
         {
-            name: "Head Limit",
-            selector: (row) => row.headcountLimit,
+            name: "Emp Limit",
+            selector: (row) => row.requiredEmployees,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -342,13 +345,13 @@ const Shift = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await departmentService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await shiftService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.department);
+            setPaginationData(response?.data?.shifts);
             setPending(false);
         } catch (error) {
             setPending(false);
-            console.log("error while fetching department");
+            console.log("error while fetching shifts");
         }
     }
 

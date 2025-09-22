@@ -14,6 +14,7 @@ import employeeService from "@/services/employee/employee.service";
 import departmentService from "@/services/department/department.service";
 import Button from "@/components/ui/Button";
 import Select from 'react-select';
+import shiftService from "@/services/shift/shift.service";
 
 
 
@@ -81,6 +82,9 @@ const CreateShift = ({ noFade, scrollContent }) => {
         frequency: "",
         days: []
     });
+
+    console.log("formData", formData);
+
 
     useEffect(() => {
         if (currentUser && isAuthenticated) {
@@ -388,26 +392,50 @@ const CreateShift = ({ noFade, scrollContent }) => {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
 
-                const payload = new FormData();
-                payload.append("clientId", clientId);
-                payload.append("level", level);
-                payload.append("businessUnit", businessUnit);
-                payload.append("branch", branch);
-                payload.append("warehouse", warehouse);
+                // const payload = new FormData();
+                // payload.append("clientId", clientId);
+                // payload.append("level", level);
+                // payload.append("businessUnit", businessUnit);
+                // payload.append("branch", branch);
+                // payload.append("warehouse", warehouse);
 
-                payload.append("departmentName", departmentName);
-                payload.append("departmentCode", departmentCode);
-                payload.append("description", description);
-                payload.append("headcountLimit", headcountLimit);
-                payload.append("status", status);
-                payload.append("notes", notes);
+                // payload.append("shiftName", shiftName);
+                // payload.append("startTime", startTime);
+                // payload.append("endTime", endTime);
+                // payload.append("shiftType", shiftType);
+                // payload.append("status", status);
+                // payload.append("requiredEmployees", requiredEmployees);
+                // payload.append("recurring", {
+                //     frequency: frequency,
+                //     days: days
+                // });
+                // payload.append("notes", notes);
+                const dataObject = {
+                    clientId: clientId,
+                    level: level,
+                    businessUnit: businessUnit,
+                    branch: branch,
+                    warehouse: warehouse,
+                    shiftName: shiftName,
+                    startTime: startTime,
+                    shiftType: shiftType,
+                    duration: duration,
+                    endTime: endTime,
+                    status: status,
+                    requiredEmployees: requiredEmployees,
+                    recurring: {
+                        frequency: frequency,
+                        days: days
+                    },
+                    notes: notes
+                }
 
                 if (id) {
                     payload.append("employeeId", id);
-                    const response = await employeeService.updateEmployee(payload)
+                    const response = await employeeService.updateEmployee(dataObject)
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await departmentService.create({ ...formData, clientId: clientId });
+                    const response = await shiftService.create(dataObject);
                     toast.success(response?.data?.message);
                 }
 
@@ -416,27 +444,35 @@ const CreateShift = ({ noFade, scrollContent }) => {
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-                    departmentName: "",
-                    departmentCode: "",
-                    description: "",
-                    headcountLimit: "",
+                    shiftName: "",
+                    startTime: "",
+                    endTime: "",
+                    duration: "",
+                    shiftType: "",
                     status: "",
+                    requiredEmployees: "",
                     notes: "",
+                    frequency: "",
+                    days: []
                 });
                 setFormDataErr({
                     level: "",
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-                    departmentName: "",
-                    departmentCode: "",
-                    description: "",
-                    headcountLimit: "",
+                    shiftName: "",
+                    startTime: "",
+                    endTime: "",
+                    duration: "",
+                    shiftType: "",
                     status: "",
+                    requiredEmployees: "",
                     notes: "",
+                    frequency: "",
+                    days: ""
                 })
                 setLoading(false);
-                navigate("/department-list");
+                navigate("/shift-list");
 
             } catch (error) {
                 setLoading(false);
