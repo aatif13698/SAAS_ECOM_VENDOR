@@ -201,9 +201,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             setLoading(true);
             if (id) {
                 try {
-                    formData.append("subCategoryId", id)
-                    const response = await subcategoryService.update(dataObject)
-                    closeModal()
+                    const response = await financialYearService.update({...dataObject, financialYearId: id })
+                    closeModal();
                     toast.success(response.data.message)
                 } catch (error) {
                     setLoading(false);

@@ -36,6 +36,18 @@ const getList = async (page, keyWord, perPage) => {
 
 
 
+const update = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/update/financialYear`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 
 
 
@@ -43,4 +55,5 @@ const getList = async (page, keyWord, perPage) => {
 export default {
     create,
     getList,
+    update
 }
