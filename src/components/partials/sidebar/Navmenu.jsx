@@ -111,6 +111,7 @@ const Navmenu = ({ menus }) => {
             "Manufacturer",
             "Attribute",
             "Pricing",
+            "Financial Year"
           ];
           if (singleChildMenus.includes(menu.name)) {
             childItems = childItems.slice(0, 1);

@@ -67,7 +67,8 @@ const CreateLedgerGrop = lazy(() => import("./pages/ledgerGroup/CreateLedgerGrou
 const LedgerGroup = lazy(() => import("./pages/ledgerGroup/LedgerGroup"));
 const CustomField = lazy(() => import("./pages/ledgerGroup/CustomField"));
 const AdjustOrder = lazy(() => import("./pages/ledgerGroup/AdjustOrder"));
-
+const FinancialYear = lazy(() => import("./pages/financialYear/FinancialYear"));
+ 
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
@@ -210,6 +211,7 @@ function App() {
                 <Route path="create-order" element={<CreateOrder />} />
 
 
+                <Route path="financial-year-list" element={<FinancialYear />} />
                 <Route path="create-group" element={<CreateLedgerGrop />} />
                 <Route path="group-list" element={<LedgerGroup />} />
                 <Route path="group/custom-field" element={<CustomField />} />
