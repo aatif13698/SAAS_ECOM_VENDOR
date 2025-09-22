@@ -133,7 +133,7 @@ const Shift = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-employee", { state: { id, row, name } });
+        navigate("/create-shift", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -141,7 +141,7 @@ const Shift = ({ noFade, scrollContent }) => {
         const name = "edit"
         setUserId(id);
         setIsViewed(false);
-        navigate("/create-employee", { state: { id, row, name } });
+        navigate("/create-shift", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -194,10 +194,10 @@ const Shift = ({ noFade, scrollContent }) => {
                 id: id,
                 clientId: clinetId
             }
-            const response = await employeeService.activeInactive(dataObject);
+            const response = await shiftService.activeInactive(dataObject);
 
             setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
+            setPaginationData(response?.data?.data?.shifts);
             toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
             setShowLoadingModal(false)
 
@@ -390,7 +390,7 @@ const Shift = ({ noFade, scrollContent }) => {
 
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
-            <div className="table-heading text-start ">Department List</div>
+            <div className="table-heading text-start ">Shifts List</div>
             <div className="grid lg:justify-end md:justify-start">
                 <input
                     type="text"

@@ -32,7 +32,28 @@ const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
     }
 };
 
+const update = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
 
+    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/shift/update/shift`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+const activeInactive = async (data) => {
+
+    const authToken = await localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/shift/activeInactive/shift`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
 
 
 
@@ -70,18 +91,6 @@ const getActiveBusinessUnit = async (page, keyWord, perPage) => {
 
 
 
-
-const updateEmployee = async (data) => {
-    const authToken = localStorage.getItem("saas_client_token");
-    const clientId = localStorage.getItem("saas_client_clientId");
-
-    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/employee/updateEmployee`, data, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
-
-    });
-};
 
 const updatewarehouse = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
@@ -121,17 +130,6 @@ const getOne = async (id) => {
     
 }
 
-
-const activeInactive = async (data) => {
-
-    const authToken = await localStorage.getItem("saas_client_token");
-
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/employee/activeInactiveEmployee`, data, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
-    });
-};
 
 
 
@@ -188,15 +186,15 @@ const getActiveRoles = async () => {
 export default {
     create,
     getList,
+    update,
+    activeInactive,
 
 
 
     getActiveBusinessUnit,
     updatewarehouse,
-    updateEmployee,
     deleteOne,
     getOne,
-    activeInactive,
     getBranchByBusiness,
     getWarehouseByBranch,
     getActiveRoles

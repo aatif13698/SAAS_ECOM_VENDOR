@@ -391,25 +391,6 @@ const CreateShift = ({ noFade, scrollContent }) => {
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-
-                // const payload = new FormData();
-                // payload.append("clientId", clientId);
-                // payload.append("level", level);
-                // payload.append("businessUnit", businessUnit);
-                // payload.append("branch", branch);
-                // payload.append("warehouse", warehouse);
-
-                // payload.append("shiftName", shiftName);
-                // payload.append("startTime", startTime);
-                // payload.append("endTime", endTime);
-                // payload.append("shiftType", shiftType);
-                // payload.append("status", status);
-                // payload.append("requiredEmployees", requiredEmployees);
-                // payload.append("recurring", {
-                //     frequency: frequency,
-                //     days: days
-                // });
-                // payload.append("notes", notes);
                 const dataObject = {
                     clientId: clientId,
                     level: level,
@@ -431,8 +412,7 @@ const CreateShift = ({ noFade, scrollContent }) => {
                 }
 
                 if (id) {
-                    payload.append("employeeId", id);
-                    const response = await employeeService.updateEmployee(dataObject)
+                    const response = await shiftService.update({...dataObject, shiftId: id})
                     toast.success(response?.data?.message);
                 } else {
                     const response = await shiftService.create(dataObject);
@@ -488,16 +468,12 @@ const CreateShift = ({ noFade, scrollContent }) => {
             } else {
                 setIsViewed(false)
             }
-            async function getBranch() {
+            async function setData() {
                 try {
                     setPageLoading(true)
-                    const response = await employeeService.getOne(id);
-                    console.log('Response get employee', response?.data);
-                    const baseAddress = response?.data;
-
-
+                    const baseAddress = location?.state?.row;
+                    console.log("baseAddress", baseAddress);
                     let level = "";
-
                     if (baseAddress.isBuLevel) {
                         level = "business"
                     } else if (baseAddress.isVendorLevel) {
@@ -507,47 +483,30 @@ const CreateShift = ({ noFade, scrollContent }) => {
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
                     }
-
-
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
                         businessUnit: baseAddress.businessUnit,
                         branch: baseAddress.branch,
                         warehouse: baseAddress.warehouse,
-                        roleId: baseAddress.role,
-                        firstName: baseAddress.firstName,
-                        lastName: baseAddress.lastName,
-                        email: baseAddress.email,
-                        phone: baseAddress.phone,
-                        gender: baseAddress.gender,
-
-                        country: baseAddress.country,
-                        city: baseAddress.city,
-                        state: baseAddress.state,
-                        address: baseAddress.address,
-                        ZipCode: baseAddress.ZipCode,
-
+                        shiftName: baseAddress?.shiftName,
+                        startTime: baseAddress?.startTime,
+                        endTime: baseAddress?.endTime,
+                        duration: baseAddress?.duration,
+                        shiftType: baseAddress?.shiftType,
+                        status: baseAddress?.status,
+                        requiredEmployees: baseAddress?.requiredEmployees,
+                        notes: baseAddress?.notes,
+                        frequency: baseAddress?.recurring?.frequency,
+                        days: baseAddress?.recurring?.days
                     }));
-
-
-                    const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
-                    const state = State.getStatesOfCountry(selectedCountry?.isoCode);
-
-                    const stateName = state?.find(
-                        (item) => item?.name === baseAddress?.state
-                    );
-
-
-
                     setPageLoading(false)
-
                 } catch (error) {
                     setPageLoading(false)
-                    console.log("error in fetching vendor data");
+                    console.log("error in setting shift data", error);
                 }
             }
-            getBranch()
+            setData()
         } else {
             setPageLoading(false)
         }
