@@ -14,6 +14,8 @@ import useMobileMenu from "@/hooks/useMobileMenu";
 import MonoChrome from "./Tools/MonoChrome";
 import GoogleLanguage from "./Tools/GoogleLanguage";
 import logo from "../../../assets/images/logo/logo.png"
+import { FiAlignJustify } from "react-icons/fi";
+
 
 const Header = ({ className = "custom-class" }) => {
   const [collapsed, setMenuCollapsed] = useSidebar();
@@ -91,7 +93,9 @@ const Header = ({ className = "custom-class" }) => {
                   className="cursor-pointer text-slate-900 dark:text-white text-2xl"
                   onClick={handleOpenMobileMenu}
                 >
-                  <Icon icon="heroicons-outline:menu-alt-3" />
+                  {/* <Icon icon="heroicons-outline:menu-alt-3" /> */}
+                  <FiAlignJustify />
+
                 </div>
               )}
               <SearchModal />
@@ -100,7 +104,7 @@ const Header = ({ className = "custom-class" }) => {
           {/* For Horizontal  */}
           {menuType === "horizontal" && (
             <div className="flex items-center space-x-4 rtl:space-x-reverse">
-              
+
               <img src={logo} alt="" className="w-10" />
               {/* open mobile menu handlaer*/}
               {width <= breakpoints.xl && (
@@ -108,15 +112,17 @@ const Header = ({ className = "custom-class" }) => {
                   className="cursor-pointer text-slate-900 dark:text-white text-2xl"
                   onClick={handleOpenMobileMenu}
                 >
-                  <Icon icon="heroicons-outline:menu-alt-3" />
+                  {/* <Icon icon="heroicons-outline:menu-alt-3" /> */}
+                  <FiAlignJustify />
+
                 </div>
               )}
             </div>
           )}
-          
+
           {/* Nav Tools  */}
           <div className="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse">
-            
+
             <GoogleLanguage />
             <SwitchDark />
             <MonoChrome />
@@ -127,7 +133,8 @@ const Header = ({ className = "custom-class" }) => {
                 className="cursor-pointer text-slate-900 dark:text-white text-2xl"
                 onClick={handleOpenMobileMenu}
               >
-                <Icon icon="heroicons-outline:menu-alt-3" />
+                {/* <Icon icon="heroicons-outline:menu-alt-3" /> */}
+                   <FiAlignJustify />
               </div>
             )}
           </div>

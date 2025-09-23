@@ -855,22 +855,26 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
                                 fields?.length > 0 &&
 
-                                <div className=" border-2 border-dashed border-lightBtn dark:border-darkBtn px-2 py-4">
+                                <>
 
-                                    {
-                                        [...fields, ...fields].length > 0 ?
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
-                                                {[...fields]
-                                                    .sort((a, b) => a.gridConfig?.order - b.gridConfig?.order)
-                                                    .map((field, index) => {
-                                                        return (
-                                                            <div
-                                                                className='relative'
-                                                                key={index}
-                                                                style={{ order: field?.gridConfig?.order }}
-                                                            >
+                                <h4 className="mb-2">Dynamic Fields</h4>
 
-                                                                {/* {
+                                    <div className=" border-2 border-dashed border-lightBtn dark:border-darkBtn px-2 py-4">
+
+                                        {
+                                            [...fields, ...fields].length > 0 ?
+                                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 ">
+                                                    {[...fields]
+                                                        .sort((a, b) => a.gridConfig?.order - b.gridConfig?.order)
+                                                        .map((field, index) => {
+                                                            return (
+                                                                <div
+                                                                    className='relative'
+                                                                    key={index}
+                                                                    style={{ order: field?.gridConfig?.order }}
+                                                                >
+
+                                                                    {/* {
                                                                     field?.isDeleteAble ?
                                                                         <Tippy
                                                                             content={"delete"}
@@ -891,38 +895,42 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
                                                                 } */}
 
-                                                                <label className="block text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">
-                                                                    {field?.label}{field?.isRequired && <span className="text-red-500">*</span>}
-                                                                </label>
-                                                                {renderFieldPreview(field)}
-                                                            </div>
+                                                                    <label className="block text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">
+                                                                        {field?.label}{field?.isRequired && <span className="text-red-500">*</span>}
+                                                                    </label>
+                                                                    {renderFieldPreview(field)}
+                                                                </div>
+                                                            )
+                                                        }
                                                         )
                                                     }
-                                                    )
-                                                }
-                                            </div>
-                                            :
-                                            <div className="flex mt-4 flex-col justify-center items-center py-8 sm:py-12 bg-gray-100 dark:bg-gray-900 rounded-xl shadow-md">
-                                                <FaExclamationCircle className="text-3xl sm:text-4xl text-gray-400 dark:text-gray-500 mb-3 sm:mb-4" />
-                                                <p className="text-base sm:text-lg font-medium text-gray-600 dark:text-gray-300 mb-3 sm:mb-4">
-                                                    No Fields Found
-                                                </p>
-                                            </div>
-                                    }
+                                                </div>
+                                                :
+                                                <div className="flex mt-4 flex-col justify-center items-center py-8 sm:py-12 bg-gray-100 dark:bg-gray-900 rounded-xl shadow-md">
+                                                    <FaExclamationCircle className="text-3xl sm:text-4xl text-gray-400 dark:text-gray-500 mb-3 sm:mb-4" />
+                                                    <p className="text-base sm:text-lg font-medium text-gray-600 dark:text-gray-300 mb-3 sm:mb-4">
+                                                        No Fields Found
+                                                    </p>
+                                                </div>
+                                        }
 
-                                    <div className="flex justify-start py-5 ">
-                                        <button
-                                            // className="border bg-blue-gray-300 rounded px-5 py-2"
-                                            className={`border-lightBtn border-2 w-[100%] dark:border-darkBtn p-3 rounded-md text-lightBtn dark:text-darkBtn  items-center flex justify-center`}
-                                            onClick={() => navigate("/group/custom-field", { state: { group: ledgerData } })}
-                                            isLoading={loading}
-                                        >
-                                            <span><FiPlus /></span>
-                                            <span>Add More Field</span>
+                                        <div className="flex justify-start py-5 ">
+                                            <button
+                                                // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                className={`border-lightBtn border-2 w-[100%] dark:border-darkBtn p-3 rounded-md text-lightBtn dark:text-darkBtn  items-center flex justify-center`}
+                                                onClick={() => navigate("/group/custom-field", { state: { group: ledgerData } })}
+                                                isLoading={loading}
+                                            >
+                                                <span><FiPlus /></span>
+                                                <span>Add More Field</span>
 
-                                        </button>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+
+                                </>
+
+
                             }
                         </div>
                     </div>

@@ -5,7 +5,7 @@ import axios from "axios";
 const create = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
 
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/create/financialYear`, data, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/cu/create/currency`, data, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -20,7 +20,7 @@ const getList = async (page, keyWord, perPage) => {
 
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/list/financialYear?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/cu/list/currency?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -39,7 +39,7 @@ const getList = async (page, keyWord, perPage) => {
 const update = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
 
-    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/update/financialYear`, data, {
+    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/cu/update/currency`, data, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -49,11 +49,24 @@ const update = async (data) => {
 
 
 
+const activeInactive = async (data) => {
+
+    const authToken = await localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/cu/activeInactive/currency`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+
 
 
 
 export default {
     create,
     getList,
-    update
+    update,
+    activeInactive
 }

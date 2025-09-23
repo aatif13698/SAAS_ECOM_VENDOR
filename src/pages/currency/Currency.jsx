@@ -163,18 +163,22 @@ function Currency({ centered, noFade, scrollContent }) {
         setIsViewed(false)
         setFormData((prev) => ({
             ...prev,
-            startDate: "",
-            endDate: "",
-            isClosed: false,
-            notes: ""
+            code: "",
+            name: "",
+            decimalName: "",
+            decimaNumber: "",
+            symbol: "",
+            isBase: false
+
         }));
         setFormDataErr((prev) => ({
             ...prev,
+            code: "",
             name: "",
-            startDate: "",
-            endDate: "",
-            isClosed: "",
-            notes: ""
+            decimalName: "",
+            decimaNumber: "",
+            symbol: "",
+            isBase: ""
         }));
         setId(null)
     }
@@ -209,7 +213,7 @@ function Currency({ centered, noFade, scrollContent }) {
             setLoading(true);
             if (id) {
                 try {
-                    const response = await currencyService.update({ ...dataObject, financialYearId: id })
+                    const response = await currencyService.update({ ...dataObject, currencyId: id })
                     closeModal();
                     toast.success(response.data.message)
                 } catch (error) {
@@ -239,17 +243,21 @@ function Currency({ centered, noFade, scrollContent }) {
         setId(id)
         setFormData((prev) => ({
             ...prev,
-            startDate: formatDate(row?.startDate),
-            endDate: formatDate(row?.endDate),
-            notes: row?.notes,
-            isClosed: row?.isClosed
+            name: row?.name,
+            code: row?.code,
+            symbol: row?.symbol,
+            decimalName: row?.decimalName,
+            decimaNumber: row?.decimaNumber,
+            isBase: row?.isBase
+
         }));
         setFormDataErr((prev) => ({
             ...prev,
-            startDate: "",
-            endDate: "",
-            isClosed: "",
-            notes: ""
+            code: "",
+            name: "",
+            decimalName: "",
+            decimaNumber: "",
+            symbol: "",
         }))
         setShowLoadingModal(false)
         openModal()
@@ -262,27 +270,23 @@ function Currency({ centered, noFade, scrollContent }) {
         setId(id)
         setFormData((prev) => ({
             ...prev,
-            startDate: formatDate(row?.startDate),
-            endDate: formatDate(row?.endDate),
-            notes: row?.notes,
-            isClosed: row?.isClosed
+            name: row?.name,
+            code: row?.code,
+            symbol: row?.symbol,
+            decimalName: row?.decimalName,
+            decimaNumber: row?.decimaNumber,
+            isBase: row?.isBase
+
         }));
         setFormDataErr((prev) => ({
             ...prev,
-            startDate: "",
-            endDate: "",
-            isClosed: "",
-            notes: ""
+            code: "",
+            name: "",
+            decimalName: "",
+            decimaNumber: "",
+            symbol: "",
         }))
     };
-
-    function formatDate(isoDate) {
-        const date = new Date(isoDate);
-        const year = date.getUTCFullYear();
-        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-        const day = String(date.getUTCDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    }
 
     const handleDelete = (row) => {
         const id = row._id;
@@ -315,26 +319,57 @@ function Currency({ centered, noFade, scrollContent }) {
 
     const columns = [
         {
-            name: "Start Date",
-            selector: (row) => formatDate(row.startDate),
+            name: "Name",
+            selector: (row) => row?.name,
             sortable: true,
         },
         {
-            name: "End Date",
-            selector: (row) => formatDate(row.endDate),
-            sortable: true,
-        },
-        {
-            name: "Is Closed",
-            selector: (row) => row.isClosed ? "YES" : "NO",
-        },
-
-        {
-            name: "Notes",
-            selector: (row) => row.notes,
+            name: "CODE",
+            selector: (row) => row?.code,
             sortable: true,
         },
 
+        {
+            name: "Symbol",
+            selector: (row) => row?.symbol,
+            sortable: true,
+        },
+        {
+            name: "Decimal Name",
+            selector: (row) => row?.decimalName,
+            sortable: true,
+        },
+        {
+            name: "Is Base",
+            selector: (row) => row.isBase ? "YES" : "NO",
+        },
+        {
+            name: "Status",
+            sortable: true,
+
+            selector: (row) => {
+
+                return (
+                    <span className="block w-full">
+                        <span
+                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  ${row?.isActive == 1 ? "text-success-500 bg-success-500" : ""
+                                }
+            ${row?.isActive == 0 ? "text-warning-500 bg-warning-500" : ""}
+
+             `}
+                            title={
+                                row?.isActive == 1
+                                    ? "Click To Deactivate"
+                                    : "Click To Activate"
+                            }
+                            onClick={() => handleActive(row)}
+                        >
+                            {row.isActive == 1 ? "Active" : "Inactive"}
+                        </span>
+                    </span>
+                );
+            },
+        },
         {
             name: "Action",
             selector: (row) => {
@@ -409,8 +444,8 @@ function Currency({ centered, noFade, scrollContent }) {
 
     async function getAllList(data) {
         try {
-            const response = await financialYearService.getList(page, keyWord, perPage)
-            setPaginationData(response?.data?.financialYears)
+            const response = await currencyService.getList(page, keyWord, perPage)
+            setPaginationData(response?.data?.currencies)
             setTotalRows(response?.data?.count)
             setPending(false)
         } catch (error) {
@@ -418,6 +453,33 @@ function Currency({ centered, noFade, scrollContent }) {
             console.log("Error while getting list", error);
         }
     }
+
+    const handleActive = async (row) => {
+        setShowLoadingModal(true)
+        const id = row._id;
+        let status = 1;
+        row.isActive == 1 ? (status = 0) : (status = 1);
+        try {
+            const clinetId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                keyword: keyWord,
+                page: page,
+                perPage: perPage,
+                status: status,
+                id: id,
+                clientId: clinetId
+            }
+            const response = await currencyService.activeInactive(dataObject);
+            setTotalRows(response?.data?.data?.count);
+            setPaginationData(response?.data?.data?.currencies);
+            toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
+            setShowLoadingModal(false);
+        } catch (error) {
+            setShowLoadingModal(false);
+            toast.error(error?.response?.data?.message)
+            console.error("Error while activating:", error?.response?.data?.message);
+        }
+    };
 
     const handlePerRowChange = async (perPage) => {
         try {
