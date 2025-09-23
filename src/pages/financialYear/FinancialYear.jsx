@@ -47,6 +47,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
     };
 
     const [formData, setFormData] = useState({
+        name: "",
+        alias: "",
         startDate: "",
         endDate: "",
         isClosed: false,
@@ -55,33 +57,53 @@ function FinancialYear({ centered, noFade, scrollContent }) {
     console.log("formData financial year", formData);
 
     const [formDataErr, setFormDataErr] = useState({
+        name: "",
+        alias: "",
         startDate: "",
         endDate: "",
         isClosed: "",
         notes: ""
     });
     const {
+        name,
+        alias,
         startDate,
         endDate,
         isClosed,
         notes
     } = formData;
 
+
+    // Validation function with updated rules for name field
     const validateField = (name, value) => {
         const rules = {
-            startDate: [
-                [!value, "Start date is Required"],
+            name: [
+                [!value, 'Name is Required'],
+                [
+                    value && !/^\d{4}-\d{4}$/.test(value),
+                    'Please enter a valid year range (e.g., 2023-2024)',
+                ],
             ],
-            endDate: [[!value, "End date is required"]],
-            notes: [[!value, "Notes is required"]],
+            alias: [
+                [!value, 'Alias is Required'],
+                [
+                    value && !/^\d{4}-\d{2}$/.test(value),
+                    'Please enter a valid year range (e.g., 2023-24)',
+                ],
+            ],
+            startDate: [[!value, 'Start date is Required']],
+            endDate: [[!value, 'End date is required']],
+            notes: [[!value, 'Notes is required']],
         };
-        return (rules[name] || []).find(([condition]) => condition)?.[1] || "";
+        return (rules[name] || []).find(([condition]) => condition)?.[1] || '';
     };
 
 
 
     const validationFunction = () => {
         let errors = {
+            name: validateField("name", name),
+            alias: validateField("alias", alias),
             startDate: validateField("startDate", startDate),
             endDate: validateField("endDate", endDate),
             notes: validateField("notes", notes),
@@ -167,23 +189,21 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         setId(null)
     }
 
-    function handleChange(e) {
+
+
+    // Handle input change
+    const handleChange = (e) => {
         const { name, value } = e.target;
-        const errorMessages = {
-            name: "Subcategory name is Required",
-            slug: "Slug is Required",
-            description: "Description is Required",
-            categoryId: "Category is required"
-        };
+
         setFormDataErr((prev) => ({
             ...prev,
-            [name]: value === "" ? errorMessages[name] : "",
+            [name]: validateField(name, value),
         }));
         setFormData((prev) => ({
             ...prev,
             [name]: value,
         }));
-    }
+    };
 
     async function handleSubmit(e) {
         e.preventDefault();
@@ -192,6 +212,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             const clientId = localStorage.getItem("saas_client_clientId");
             const dataObject = {
                 clientId: clientId,
+                name: name,
+                alias: alias,
                 startDate: startDate,
                 endDate: endDate,
                 isClosed: isClosed,
@@ -201,7 +223,7 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             setLoading(true);
             if (id) {
                 try {
-                    const response = await financialYearService.update({...dataObject, financialYearId: id })
+                    const response = await financialYearService.update({ ...dataObject, financialYearId: id })
                     closeModal();
                     toast.success(response.data.message)
                 } catch (error) {
@@ -231,6 +253,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         setId(id)
         setFormData((prev) => ({
             ...prev,
+            name: row?.name,
+            alias: row?.alias,
             startDate: formatDate(row?.startDate),
             endDate: formatDate(row?.endDate),
             notes: row?.notes,
@@ -238,6 +262,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         }));
         setFormDataErr((prev) => ({
             ...prev,
+            name: "",
+            alias: "",
             startDate: "",
             endDate: "",
             isClosed: "",
@@ -254,6 +280,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         setId(id)
         setFormData((prev) => ({
             ...prev,
+            name: row?.name,
+            alias: row?.alias,
             startDate: formatDate(row?.startDate),
             endDate: formatDate(row?.endDate),
             notes: row?.notes,
@@ -261,6 +289,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         }));
         setFormDataErr((prev) => ({
             ...prev,
+            name: "",
+            alias: "",
             startDate: "",
             endDate: "",
             isClosed: "",
@@ -304,16 +334,26 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         }
     }
 
-  
+
     const columns = [
         {
+            name: "Name",
+            selector: (row) => row?.name,
+            sortable: true,
+        },
+        {
+            name: "Alias",
+            selector: (row) => row?.alias,
+            sortable: true,
+        },
+        {
             name: "Start Date",
-            selector: (row) => formatDate(row.startDate) ,
+            selector: (row) => formatDate(row.startDate),
             sortable: true,
         },
         {
             name: "End Date",
-            selector: (row) => formatDate(row.endDate) ,
+            selector: (row) => formatDate(row.endDate),
             sortable: true,
         },
         {
@@ -321,9 +361,9 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             selector: (row) => row.isClosed ? "YES" : "NO",
         },
 
-         {
+        {
             name: "Notes",
-            selector: (row) => row.notes ,
+            selector: (row) => row.notes,
             sortable: true,
         },
 
@@ -568,6 +608,46 @@ function FinancialYear({ centered, noFade, scrollContent }) {
 
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
+                                                <div className=" ">
+                                                    <label>
+                                                        <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                                            Name <span className="text-red-500">*</span>
+                                                        </p>
+                                                        <input
+                                                            name="name"
+                                                            type="text"
+                                                            placeholder="eg. 2023-2024"
+                                                            value={formData.name}
+                                                            onChange={handleChange}
+                                                            readOnly={isViewed}
+                                                            maxLength="9" // Restrict to 9 characters (YYYY-YYYY)
+                                                            pattern="\d{4}-\d{4}" // HTML5 pattern for basic validation
+                                                            title="Please enter a valid year range (e.g., 2023-2024)"
+                                                            className="form-control py-2"
+                                                        />
+                                                        {<p className="text-red-600  text-xs"> {formDataErr.name}</p>}
+                                                    </label>
+                                                </div>
+                                                <div className=" ">
+                                                    <label>
+                                                        <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                                            Alias <span className="text-red-500">*</span>
+                                                        </p>
+                                                        <input
+                                                            name="alias"
+                                                            type="text" // Changed from type="date" to allow custom format
+                                                            placeholder="e.g., 2023-24"
+                                                            value={formData.alias}
+                                                            onChange={handleChange}
+                                                            readOnly={isViewed}
+                                                            maxLength="7" // Restrict to 7 characters (YYYY-YY)
+                                                            pattern="\d{4}-\d{2}" // HTML5 pattern for basic validation
+                                                            title="Please enter a valid year range (e.g., 2023-24)"
+                                                            className="form-control py-2"
+                                                        />
+                                                        {<p className="text-red-600  text-xs"> {formDataErr.alias}</p>}
+                                                    </label>
+                                                </div>
 
                                                 <div className=" ">
                                                     <label>
