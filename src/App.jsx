@@ -69,6 +69,8 @@ const CustomField = lazy(() => import("./pages/ledgerGroup/CustomField"));
 const AdjustOrder = lazy(() => import("./pages/ledgerGroup/AdjustOrder"));
 const FinancialYear = lazy(() => import("./pages/financialYear/FinancialYear"));
 const Currency = lazy(() => import("./pages/currency/Currency"));
+const CreateVoucherGroup = lazy(() => import("./pages/voucherGroup/CreateVoucherGroup"));
+const VoucherGroup = lazy(() => import("./pages/voucherGroup/VoucherGroup"));
  
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
@@ -216,6 +218,9 @@ function App() {
                 <Route path="currency-list" element={<Currency />} />
                 <Route path="create-group" element={<CreateLedgerGrop />} />
                 <Route path="group-list" element={<LedgerGroup />} />
+                <Route path="voucher-group-list" element={<VoucherGroup />} />
+                <Route path="create-voucher-group" element={<CreateVoucherGroup />} />
+
                 <Route path="group/custom-field" element={<CustomField />} />
                 <Route path="group/adjust-order" element={<AdjustOrder />} />
 
