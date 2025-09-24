@@ -170,7 +170,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
             workDepartment: validateField("workDepartment", workDepartment),
             jobRole: validateField("jobRole", jobRole),
         };
-       
+
         errors.level = validateField("level", level);
         if (level === "business" || level === "branch" || level === "warehouse") {
             errors.businessUnit = validateField("businessUnit", businessUnit);
@@ -218,16 +218,16 @@ const CreateDocument = ({ noFade, scrollContent }) => {
 
             if (level === "vendor") {
                 setLevelResult(1);
-                getAllRespectiveDepartment(level)
+                // getAllRespectiveDepartment(level)
             } else if (level === "business") {
                 setLevelResult(2)
-                getAllRespectiveDepartment(level, currentUser?.businessUnit)
+                // getAllRespectiveDepartment(level, currentUser?.businessUnit)
             } else if (level === "branch") {
                 setLevelResult(3)
-                getAllRespectiveDepartment(level, currentUser?.branch)
+                // getAllRespectiveDepartment(level, currentUser?.branch)
             } else if (level === "warehouse") {
                 setLevelResult(4)
-                getAllRespectiveDepartment(level, currentUser?.warehouse)
+                // getAllRespectiveDepartment(level, currentUser?.warehouse)
             }
         } else {
             setLevelResult(0)
@@ -268,7 +268,10 @@ const CreateDocument = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (businessUnit) {
-            getBranchByBusiness(businessUnit)
+            getBranchByBusiness(businessUnit);
+            if (level === "business") {
+                getAllRespectiveDepartment(level, businessUnit);
+            }
         }
     }, [businessUnit]);
 
@@ -283,9 +286,20 @@ const CreateDocument = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (branch) {
-            getWarehouseByBranch(branch)
+            getWarehouseByBranch(branch);
+            if (level === "branch") {
+                getAllRespectiveDepartment(level, branch);
+            }
         }
     }, [branch]);
+
+    useEffect(() => {
+
+        if (warehouse && level === "warehouse") {
+            getAllRespectiveDepartment(level, warehouse);
+        }
+
+    }, [warehouse])
 
     async function getWarehouseByBranch(id) {
         try {
