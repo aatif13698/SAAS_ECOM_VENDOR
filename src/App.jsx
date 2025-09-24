@@ -71,7 +71,9 @@ const FinancialYear = lazy(() => import("./pages/financialYear/FinancialYear"));
 const Currency = lazy(() => import("./pages/currency/Currency"));
 const CreateVoucherGroup = lazy(() => import("./pages/voucherGroup/CreateVoucherGroup"));
 const VoucherGroup = lazy(() => import("./pages/voucherGroup/VoucherGroup"));
- 
+const Documents = lazy(() => import("./pages/documents/Documents"));
+const CreateDocument = lazy(() => import("./pages/documents/CreateDocuments"));
+  
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
@@ -177,6 +179,10 @@ function App() {
 
                 <Route path="roles-permissions-list" element={<RoleList />} />
                 <Route path="assignPermission" element={<AssignPermission />} />
+
+                <Route path="documents-list" element={<Documents />} />
+                <Route path="create-documents" element={<CreateDocument />} />
+
 
                 <Route path="employee-list" element={<Employee />} />
                 <Route path="create-employee" element={<CreateEmployee />} />

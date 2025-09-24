@@ -34,6 +34,33 @@ const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
 };
 
 
+const all = async (currentLevel, levelId) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/department/list/workingDepartment?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
+
+
+
+
+
+
 
 
 
@@ -109,7 +136,7 @@ const getOne = async (id) => {
 
     });
     return response.data
-    
+
 }
 
 
@@ -136,12 +163,12 @@ const getBranchByBusiness = async (id) => {
 
     });
     return response.data
-    
+
 }
 
 
 
-const getWarehouseByBranch= async (id) => {
+const getWarehouseByBranch = async (id) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clinetId = localStorage.getItem("saas_client_clientId");
     const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/warehouse/warehouseByBranch/${clinetId}/${id}`, {
@@ -151,7 +178,7 @@ const getWarehouseByBranch= async (id) => {
 
     });
     return response.data
-    
+
 }
 
 
@@ -179,7 +206,7 @@ const getActiveRoles = async () => {
 export default {
     create,
     getList,
-
+    all,
 
 
     getActiveBusinessUnit,
