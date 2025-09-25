@@ -1,24 +1,19 @@
 import { Card } from "@mui/material";
 import React, { useState, useEffect } from "react";
-import { Country, State, City } from "country-state-city";
 import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../assets/scss/common.scss"
-
 import { useSelector } from "react-redux";
-import { Dialog, Transition } from "@headlessui/react";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import departmentService from "@/services/department/department.service";
 import Button from "@/components/ui/Button";
 import Select from 'react-select';
-import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
 import { FiPlus } from "react-icons/fi";
-import Tippy from "@tippyjs/react";
-import { RxCross2, RxValueNone } from "react-icons/rx";
 import { FaExclamationCircle } from "react-icons/fa";
+import documentService from "@/services/document/document.service";
 
 
 // Options for days multi-select
@@ -70,7 +65,10 @@ const CreateDocument = ({ noFade, scrollContent }) => {
     const [currentlevelId, setCurrentLevelId] = useState("");
     const [parentLedgers, setParentLedgers] = useState([]);
     const [fields, setFields] = useState([]);
-    const [ledgerData, setLedgerData] = useState(null)
+    const [ledgerData, setLedgerData] = useState(null);
+    const [departments, setDepartments] = useState([]);
+    const [roleList, setRoleList] = useState([]);
+
     const [formData, setFormData] = useState({
         level: "",
         businessUnit: "",
@@ -137,6 +135,9 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         workDepartment,
         jobRole,
     } = formData;
+
+    console.log("formData", formData);
+
 
     const [isViewed, setIsViewed] = useState(false);
     const [showAddButton, setShowAddButton] = useState(true);
@@ -238,7 +239,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
     async function getAllRespectiveDepartment(level, currentlevelId) {
         try {
             const response = await departmentService.all(level, currentlevelId);
-            console.log("response respective department", response);
+            setDepartments(response?.data?.department)
         } catch (error) {
             console.log("error in getting respective department", error);
         }
@@ -271,6 +272,9 @@ const CreateDocument = ({ noFade, scrollContent }) => {
             getBranchByBusiness(businessUnit);
             if (level === "business") {
                 getAllRespectiveDepartment(level, businessUnit);
+                setFormData((prev) => {
+                    return { ...prev, workDepartment: "" }
+                })
             }
         }
     }, [businessUnit]);
@@ -289,17 +293,21 @@ const CreateDocument = ({ noFade, scrollContent }) => {
             getWarehouseByBranch(branch);
             if (level === "branch") {
                 getAllRespectiveDepartment(level, branch);
+                setFormData((prev) => {
+                    return { ...prev, workDepartment: "" }
+                })
             }
         }
     }, [branch]);
 
     useEffect(() => {
-
         if (warehouse && level === "warehouse") {
             getAllRespectiveDepartment(level, warehouse);
+            setFormData((prev) => {
+                return { ...prev, workDepartment: "" }
+            })
         }
-
-    }, [warehouse])
+    }, [warehouse]);
 
     async function getWarehouseByBranch(id) {
         try {
@@ -326,17 +334,16 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-
                 if (id) {
-                    const response = await ledgerGroupService.update({ ...formData, clientId: clientId, groupId: id })
+                    const response = await documentService.update({ ...formData, name: docName, clientId: clientId, groupId: id })
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await ledgerGroupService.create({ ...formData, clientId: clientId });
+                    const response = await documentService.create({ ...formData, name: docName, clientId: clientId });
                     toast.success(response?.data?.message);
 
-                    setLedgerData(response?.data?.data?.group)
+                    setLedgerData(response?.data?.data?.document)
 
-                    getCustomField(response?.data?.data?.group?._id);
+                    getCustomField(response?.data?.data?.document?._id);
                 }
                 setLoading(false);
             } catch (error) {
@@ -348,7 +355,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
 
     async function getCustomField(id) {
         try {
-            const response = await ledgerGroupService.getAllField(id);
+            const response = await documentService.getAllField(id);
             setFields(response?.data?.fields)
         } catch (error) {
             console.log("error in getting the fields", error);
@@ -404,7 +411,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
 
     async function getAllParent() {
         try {
-            const response = await ledgerGroupService.getAllParent(currentLevel, levelId);
+            const response = await documentService.getAllParent(currentLevel, levelId);
             setParentLedgers(response?.data?.ledgerGroup);
         } catch (error) {
             console.log("error while fetching ledger group");
@@ -423,6 +430,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         }
         getActiveBusinessUnit();
         getAllParent();
+        getAllactiveRoles();
     }, []);
 
 
@@ -451,18 +459,16 @@ const CreateDocument = ({ noFade, scrollContent }) => {
     }, [currentUser]);
 
 
-    const handleHasParentToggle = () => {
-        if (!isViewed) {
-            setFormData((prev) => ({
-                ...prev,
-                hasParent: !prev.hasParent
-            }));
-            setFormDataErr((prev) => ({
-                ...prev,
-                hasParent: validateField("hasParent", !prev.hasParent)
-            }));
+
+
+    async function getAllactiveRoles() {
+        try {
+            const response = await employeeService.getActiveRoles();
+            setRoleList(response?.listOfRoles)
+        } catch (error) {
+            console.log("Error while getting active role list", error);
         }
-    };
+    }
 
 
     const renderFieldPreview = (field) => {
@@ -720,6 +726,53 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                                                 {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
                                             </div>
                                     }
+
+                                    <label className={`fromGroup   ${formDataErr?.workDepartment !== "" ? "has-error" : ""
+                                        } `}>
+                                        <p className="form-label">
+                                            Department  <span className="text-red-500">*</span>
+                                        </p>
+                                        <select
+                                            value={formData?.workDepartment}
+                                            onChange={handleChange}
+                                            disabled={isViewed}
+                                            name="workDepartment" className="form-control outline-none w-[100%] rounded-md px-4 py-2.5 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor dark:placeholder-darkPlaceholder bg-lightBgInputColor dark:bg-darkIconAndSearchBg dark:text-white"
+                                        >
+                                            <option value="" >--Select department--</option>
+                                            {
+                                                departments && departments.length > 0 && departments.map((item) => {
+                                                    return (
+                                                        <option key={item._id} value={item._id}>{item?.departmentName}</option>
+                                                    )
+                                                })
+                                            }
+                                        </select>
+                                        {<p className="text-red-600  text-xs">{formDataErr.workDepartment}</p>}
+                                    </label>
+                                    <label className={`fromGroup   ${formDataErr?.jobRole !== "" ? "has-error" : ""
+                                        } `}>
+                                        <p className="form-label">
+                                            Job Role  <span className="text-red-500">*</span>
+                                        </p>
+                                        <select
+                                            value={formData?.jobRole}
+                                            onChange={handleChange}
+                                            disabled={isViewed}
+                                            name="jobRole" className="form-control outline-none w-[100%] rounded-md px-4 py-2.5 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor dark:placeholder-darkPlaceholder bg-lightBgInputColor dark:bg-darkIconAndSearchBg dark:text-white"
+                                        >
+                                            <option value="" >--Select Job Role--</option>
+                                            {
+                                                roleList && roleList.length > 0 && roleList.map((item) => {
+                                                    return (
+                                                        <option key={item._id} value={item._id}>{item?.name}</option>
+                                                    )
+                                                })
+                                            }
+
+                                        </select>
+                                        {<p className="text-red-600  text-xs">{formDataErr.roleId}</p>}
+                                    </label>
+
 
                                     <label
                                         className={`fromGroup   ${formDataErr?.docName !== "" ? "has-error" : ""
