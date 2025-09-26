@@ -91,7 +91,7 @@ const OtpVerify = () => {
             <div className="auth-footer text-center">
               Powered By
               <a href="" target="_blank">
-                <span className="text-blue-500"> SPK Technosoft &reg;</span>{" "}
+                <span className="text-blue-500"> Aestree Webnet Pvt.Ltd &reg;</span>{" "}
               </a>
             </div>
           </div>
