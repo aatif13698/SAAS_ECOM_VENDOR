@@ -16,6 +16,8 @@ import useDarkmode from "@/hooks/useDarkMode";
 import { useSelector } from "react-redux";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
+import Loading from "@/components/Loading";
+import FormLoader from "@/Common/formLoader/FormLoader";
 
 // Bind modal to app element for accessibility
 Modal.setAppElement("#root");
@@ -31,7 +33,7 @@ function CreateLedger() {
   const navigate = useNavigate();
   const [existingFields, setExistingFields] = useState([]);
   const [errors, setErrors] = useState({});
-  const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isPageLoading, setIsPageLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customizationValues, setCustomizationValues] = useState({});
   const [ledgerGroups, setLedgerGroups] = useState([]);
@@ -1120,7 +1122,7 @@ function CreateLedger() {
             <input
               name="openingBalance"
               type="number"
-              placeholder="Enter credit days"
+              placeholder="Enter opening balance"
               value={openingBalance}
               onChange={handleChange}
               className="form-control py-2"
@@ -1164,37 +1166,51 @@ function CreateLedger() {
 
 
 
-        {existingFields?.length > 0 ? (
-          <>
+        {
+          isPageLoading ?
 
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {[...existingFields]
-                .sort((a, b) => a.gridConfig?.order - b.gridConfig?.order)
-                .map((field, index) => (
-                  <div
-                    key={index}
-                    style={{ order: field?.gridConfig?.order }}
-                    className={`min-w-0 ${field?.type === "checkbox" ? "flex items-center gap-2" : ""
-                      }`}
-                  >
-                    <label className="block text-xs sm:text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">
-                      {field?.label}
-                      {field?.isRequired && <span className="text-red-500">*</span>}
-                    </label>
-                    {renderFieldPreview(field)}
+            <div className="h-32 flex flex-col justify-center items-center">
+             <FormLoader />
+             <p>Loading field</p>
+            </div> :
+            <>
+              {existingFields?.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {[...existingFields]
+                      .sort((a, b) => a.gridConfig?.order - b.gridConfig?.order)
+                      .map((field, index) => (
+                        <div
+                          key={index}
+                          style={{ order: field?.gridConfig?.order }}
+                          className={`min-w-0 ${field?.type === "checkbox" ? "flex items-center gap-2" : ""
+                            }`}
+                        >
+                          <label className="block text-xs sm:text-sm font-medium text-formLabelLight dark:text-formLabelDark mb-1">
+                            {field?.label}
+                            {field?.isRequired && <span className="text-red-500">*</span>}
+                          </label>
+                          {renderFieldPreview(field)}
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
+                </>
+              ) : (
+                <div className="flex justify-center items-center">
+                  <h2 className="text-lg sm:text-2xl md:text-4xl font-bold mb-2 drop-shadow-md">
+                    {/* No Fields Have Been Added */}
+                  </h2>
+                </div>
+              )}
 
-          </>
-        ) : (
-          <div className="flex justify-center items-center">
-            {/* <h2 className="text-lg sm:text-2xl md:text-4xl font-bold mb-2 drop-shadow-md">
-              No Fields Have Been Added
-            </h2> */}
-          </div>
-        )}
+
+            </>
+
+
+        }
+
+
 
         <div className="flex justify-end mt-4 col-span-1 sm:col-span-2 md:col-span-3">
           <button
