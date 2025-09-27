@@ -80,16 +80,20 @@ const Navmenu = ({ menus }) => {
     const accessedMenu = vendorPermissionsList.filter((module) => module.access);
 
     accessedMenu.forEach((module) => {
-      result.push({
-        isHeadr: true,
-        title: module.name,
-      });
+
+      if (module.name !== "Human resources") {
+        result.push({
+          isHeadr: true,
+          title: module.name,
+        });
+      }
 
       module.menu
-        .filter((menu) => (menu.access 
+        .filter((menu) => (menu.access
           && menu.name !== "Department"
           && menu.name !== "Shift"
           && menu.name !== "Documents"
+          && menu.name !== "Assets & Tools"
         ))
         .forEach((menu) => {
           const normalizedMenuName = lowerCase(menu.name).replace(/\s+/g, "-");
@@ -146,21 +150,18 @@ const Navmenu = ({ menus }) => {
       {sideNavItems.map((item, i) => (
         <li
           key={i}
-          className={`single-sidebar-menu ${
-            item.child ? "item-has-children" : ""
-          } ${activeSubmenu === i ? "open" : ""} ${
-            isParentActive(item) ? "bg-emerald-100 dark:bg-lightBtn" : ""
-          } rounded-md`}
+          className={`single-sidebar-menu ${item.child ? "item-has-children" : ""
+            } ${activeSubmenu === i ? "open" : ""} ${isParentActive(item) ? "bg-emerald-100 dark:bg-lightBtn" : ""
+            } rounded-md`}
         >
           {/* Single menu with no children */}
           {!item.child && !item.isHeadr && (
             <NavLink
               to={item.link}
               className={({ isActive }) =>
-                `menu-link flex items-center py-0 px-4 rounded-md transition-colors duration-150 ${
-                  isActive
-                    ? "bg-lightBtn text-white dark:bg-lightBtn"
-                    : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                `menu-link flex items-center py-0 px-4 rounded-md transition-colors duration-150 ${isActive
+                  ? "bg-lightBtn text-white dark:bg-lightBtn"
+                  : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                 }`
               }
             >
@@ -189,11 +190,10 @@ const Navmenu = ({ menus }) => {
           {item.child && (
             <button
               type="button"
-              className={`menu-link flex items-center justify-between py-2 px-4 rounded-md w-full text-left transition-colors duration-150 ${
-                isParentActive(item)
+              className={`menu-link flex items-center justify-between py-2 px-4 rounded-md w-full text-left transition-colors duration-150 ${isParentActive(item)
                   ? "bg-lightBtn text-white dark:bg-emerald-600"
                   : "text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              }`}
+                }`}
               onClick={() => toggleSubmenu(i)}
               aria-expanded={activeSubmenu === i}
             >
@@ -204,9 +204,8 @@ const Navmenu = ({ menus }) => {
                 <div className="text-box">{item.title}</div>
               </div>
               <div
-                className={`menu-arrow transform transition-transform duration-300 ${
-                  activeSubmenu === i ? "rotate-90" : ""
-                }`}
+                className={`menu-arrow transform transition-transform duration-300 ${activeSubmenu === i ? "rotate-90" : ""
+                  }`}
               >
                 <Icon icon="heroicons-outline:chevron-right" />
               </div>
