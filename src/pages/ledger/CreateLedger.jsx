@@ -57,16 +57,16 @@ function CreateLedger() {
     alias: "",
     ledgerGroupId: "",
     ledgerType: "",
-    isCustomer: "",
-    isSupplier: "",
-    isEmployee: "",
-    isCredit: "",
-    isDebit: "",
+    isCustomer: false,
+    isSupplier: false,
+    isEmployee: false,
+    isNone: true,
+    isCredit: false,
+    isDebit: true,
     creditLimit: "",
     creditDays: "",
     openingBalance: "",
     openingDate: "",
-    status: ""
   });
 
   const {
@@ -82,13 +82,13 @@ function CreateLedger() {
     isCustomer,
     isSupplier,
     isEmployee,
+    isNone,
     isCredit,
     isDebit,
     creditLimit,
     creditDays,
     openingBalance,
     openingDate,
-    status
   } = formData;
 
   const [formDataErr, setFormDataErr] = useState({
@@ -104,13 +104,13 @@ function CreateLedger() {
     isCustomer: "",
     isSupplier: "",
     isEmployee: "",
+    isNone: "",
     isCredit: "",
     isDebit: "",
     creditLimit: "",
     creditDays: "",
     openingBalance: "",
     openingDate: "",
-    status: ""
   });
 
 
@@ -475,13 +475,16 @@ function CreateLedger() {
           }
         }
       });
-      if (Object.keys(newErrors).length > 0) {
+
+      const error = validationFunction();
+
+      if (Object.keys(newErrors).length > 0 || error) {
         setErrors(newErrors);
         setIsSubmitting(false);
         Swal.fire({
           icon: "error",
           title: "Validation Error",
-          text: "Please correct the errors in the form before submitting.",
+          text: "Please correct the validation in the form before submitting.",
         });
         return;
       }
@@ -633,10 +636,34 @@ function CreateLedger() {
 
   const validateField = (name, value) => {
     const rules = {
-      groupName: [
-        [!value, "Gruop Name is Required"],
+      ledgerName: [
+        [!value, "Ledger Name is Required"],
         [value.length <= 3, "Minimum 3 characters required."]
       ],
+      alias: [
+        [!value, "Alias is Required"],
+        [value.length <= 3, "Minimum 3 characters required."]
+      ],
+      ledgerGroupId: [
+        [!value, "Grup is Required"],
+      ],
+      ledgerType: [
+        [!value, "Ledger type is Required"],
+      ],
+      creditLimit: [
+        [!value, "Credit limit is Required"],
+      ],
+      creditDays: [
+        [!value, "Credit days is Required"],
+      ],
+      openingBalance: [
+        [!value, "Opening balance is Required"],
+      ],
+      openingDate: [
+        [!value, "Opening date is Required"],
+      ],
+     
+
       level: [[!value, "Level is required"]],
       businessUnit: [[!value && levelResult > 1, "Business Unit is required"]],
       branch: [[!value && levelResult > 2, "Branch is required"]],
@@ -648,12 +675,23 @@ function CreateLedger() {
 
   const validationFunction = () => {
     const { level, businessUnit, branch, warehouse } = formData;
+
     let errors = {
-      groupName: validateField("groupName", groupName),
+      ledgerName: validateField("ledgerName", ledgerName),
+      alias: validateField("alias", alias),
+      ledgerGroupId: validateField("ledgerGroupId", ledgerGroupId),
+      ledgerType: validateField("ledgerType", ledgerType),
+      isCustomer: validateField("isCustomer", isCustomer),
+      isSupplier: validateField("isSupplier", isSupplier),
+      isEmployee: validateField("isEmployee", isEmployee),
+      isCredit: validateField("isCredit", isCredit),
+      isDebit: validateField("isDebit", isDebit),
+      creditLimit: validateField("creditLimit", creditLimit),
+      creditDays: validateField("creditDays", creditDays),
+      openingBalance: validateField("openingBalance", openingBalance),
+      openingDate: validateField("openingDate", openingDate),
     };
-    if (hasParent && parentGroup == "") {
-      errors.parentGroup = "Parent group is required"
-    }
+
     errors.level = validateField("level", level);
     if (level === "business" || level === "branch" || level === "warehouse") {
       errors.businessUnit = validateField("businessUnit", businessUnit);
@@ -672,7 +710,6 @@ function CreateLedger() {
     }));
     return Object.values(errors).some((error) => error);
   };
-
 
 
 
@@ -800,7 +837,6 @@ function CreateLedger() {
     async function getActiveBusinessUnit() {
       try {
         const response = await warehouseService.getActiveBusinessUnit();
-        console.log("respone active", response);
         setActiveBusinessUnits(response?.data?.businessUnits)
       } catch (error) {
         console.log("error while getting the active business unit", error);
@@ -1157,6 +1193,149 @@ function CreateLedger() {
               </p>
             }
           </label>
+          <div className="form-group">
+            <p className="form-label">
+              Entity Type <span className="text-red-500">*</span>
+            </p>
+            <div className="flex gap-2 flex-wrap ">
+              <label className="flex  items-center space-x-2">
+                <input
+                  type="radio"
+                  name="entityType"
+                  value="isNone"
+                  checked={isNone}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCustomer: false,
+                      isSupplier: false,
+                      isEmployee: false,
+                      isNone: true
+                    }))
+                  }
+                  disabled={isViewed}
+                  className="form-radio text-blue-600"
+                  aria-label="Customer"
+                />
+                <span>None of these</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="entityType"
+                  value="isCustomer"
+                  checked={isCustomer}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCustomer: true,
+                      isSupplier: false,
+                      isEmployee: false,
+                      isNone: false
+                    }))
+                  }
+                  disabled={isViewed}
+                  className="form-radio text-blue-600"
+                  aria-label="Customer"
+                />
+                <span>Customer</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="entityType"
+                  value="isSupplier"
+                  checked={isSupplier}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCustomer: false,
+                      isSupplier: true,
+                      isEmployee: false,
+                      isNone: false
+                    }))
+                  }
+                  disabled={isViewed}
+                  className="form-radio text-blue-600"
+                  aria-label="Supplier"
+                />
+                <span>Supplier</span>
+              </label>
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  name="entityType"
+                  value="isEmployee"
+                  checked={isEmployee}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCustomer: false,
+                      isSupplier: false,
+                      isEmployee: true,
+                      isNone: false
+                    }))
+                  }
+                  disabled={isViewed}
+                  className="form-radio text-blue-600"
+                  aria-label="Employee"
+                />
+                <span>Employee</span>
+              </label>
+            </div>
+            {formDataErr?.entityType && (
+              <p className="text-sm text-red-500">{formDataErr.entityType}</p>
+            )}
+          </div>
+
+           <div className="form-group">
+            <p className="form-label">
+              Type <span className="text-red-500">*</span>
+            </p>
+            <div className="flex gap-2 flex-wrap ">
+              <label className="flex  items-center space-x-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="isCredit"
+                  checked={isCredit}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCredit: true,
+                      isDebit: false,
+                    }))
+                  }
+                  disabled={isViewed}
+                  className="form-radio text-blue-600"
+                  aria-label="Customer"
+                />
+                <span>Credit</span>
+              </label>
+              <label className="flex  items-center space-x-2">
+                <input
+                  type="radio"
+                  name="type"
+                  value="isDebit"
+                  checked={isDebit}
+                  onChange={() =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isCredit: false,
+                      isDebit: true,
+                    }))
+                  }
+                  disabled={isViewed}
+                  className="form-radio text-blue-600"
+                  aria-label="Customer"
+                />
+                <span>Debit</span>
+              </label>
+            </div>
+            {formDataErr?.entityType && (
+              <p className="text-sm text-red-500">{formDataErr.entityType}</p>
+            )}
+          </div>
 
         </div>
 
@@ -1171,8 +1350,8 @@ function CreateLedger() {
 
 
             <div className="h-32 flex flex-col justify-center items-center">
-             <FormLoader />
-             <p>Loading field</p>
+              <FormLoader />
+              <p>Loading field</p>
             </div> :
             <>
               {existingFields?.length > 0 ? (
