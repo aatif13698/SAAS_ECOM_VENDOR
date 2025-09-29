@@ -653,7 +653,7 @@ function ViewOrder() {
                       <div className="flex flex-col md:flex-row items-start gap-4 p-4 rounded-md border border-gray-200 dark:border-gray-100 hover:bg-gray-50 dark:hover:bg-darkSecondary/30 transition-colors">
                         <div className="flex-shrink-0">
                           <img
-                            src={`${import.meta.env.VITE_BASE_URL}/productBluePrint/${image}`}
+                            src={`${image}`}
                             alt={name}
                             className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-md border border-gray-300"
                             onError={(e) => (e.target.src = 'https://via.placeholder.com/80')}
@@ -703,7 +703,7 @@ function ViewOrder() {
                         </div>
                         <div className="flex flex-col items-end gap-2 w-full md:w-auto">
                           <div className="text-lg font-bold text-gray-800 dark:text-white/90">
-                            Total: ${subtotal.toFixed(2)}
+                            Total: ${priceOption?.price?.toFixed(2)}
                           </div>
                           <div className="flex gap-2">
                             <button
@@ -813,7 +813,7 @@ function ViewOrder() {
             <span>
               $
               {orders
-                .reduce((acc, item) => acc + (item?.priceOption?.unitPrice || 0) * (item?.quantity || 1), 0)
+                .reduce((acc, item) => acc + (item?.priceOption?.price || 0) , 0)
                 .toFixed(2)}
             </span>
           </div>
@@ -826,7 +826,7 @@ function ViewOrder() {
             <span>
               $
               {orders
-                .reduce((acc, item) => acc + (item?.priceOption?.unitPrice || 0) * (item?.quantity || 1), 0)
+                .reduce((acc, item) => acc + (item?.priceOption?.price || 0) , 0)
                 .toFixed(2)}
             </span>
           </div>

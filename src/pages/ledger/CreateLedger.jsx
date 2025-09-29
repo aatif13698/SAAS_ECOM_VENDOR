@@ -18,6 +18,7 @@ import warehouseService from "@/services/warehouse/warehouse.service";
 import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
 import Loading from "@/components/Loading";
 import FormLoader from "@/Common/formLoader/FormLoader";
+import ledgerService from "@/services/ledger/ledger.service";
 
 // Bind modal to app element for accessibility
 Modal.setAppElement("#root");
@@ -38,6 +39,9 @@ function CreateLedger() {
   const [customizationValues, setCustomizationValues] = useState({});
   const [ledgerGroups, setLedgerGroups] = useState([]);
 
+  // console.log("customizationValues", customizationValues);
+  
+
   // Cropper states
   const [cropModalOpen, setCropModalOpen] = useState(false);
   const [imageSrc, setImageSrc] = useState(null);
@@ -46,6 +50,11 @@ function CreateLedger() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
   const [currentFieldName, setCurrentFieldName] = useState(null);
   const [currentAspectRation, setCurrentAspectRation] = useState(null);
+  const [customData, setCustomData] = useState(null);
+
+  // console.log("customData", customData);
+  
+
 
   const [formData, setFormData] = useState({
     level: "",
@@ -488,12 +497,28 @@ function CreateLedger() {
         });
         return;
       }
+      const clientId = localStorage.getItem("saas_client_clientId");
       const formData = new FormData();
-      formData.append("sessionId", decryptedId);
-      formData.append("userId", sessionData?.userId || organizationData?.userId);
-      formData.append("organizationId", organizationData?._id);
-      formData.append("phone", customizationValues?.phone);
-      formData.append("firstName", customizationValues?.firstName);
+      formData.append("clientId", clientId);
+      formData.append("level", level);
+      formData.append("businessUnit", businessUnit);
+      formData.append("branch", branch);
+      formData.append("warehouse", warehouse);
+      formData.append("ledgerName", ledgerName);
+      formData.append("alias", alias);
+      formData.append("ledgerGroupId", ledgerGroupId);
+      formData.append("ledgerType", ledgerType);
+      formData.append("creditLimit", creditLimit);
+      formData.append("creditDays", creditDays);
+      formData.append("openingBalance", openingBalance);
+      formData.append("openingDate", openingDate);
+      formData.append("isCustomer", isCustomer);
+      formData.append("isSupplier", isSupplier);
+      formData.append("isEmployee", isEmployee);
+      formData.append("isNone", isNone);
+      formData.append("isCredit", isCredit);
+      formData.append("isDebit", isDebit);
+
       existingFields.forEach((field) => {
         const fieldName = field.name;
         const label = field.label;
@@ -512,7 +537,7 @@ function CreateLedger() {
           }
         }
       });
-      const response = await customFieldService.submitFormData(formData);
+      const response = await ledgerService.submitFormData(formData);
       Swal.fire({
         position: "top-end",
         icon: "success",
@@ -526,33 +551,14 @@ function CreateLedger() {
       });
       setCustomizationValues({});
       setErrors({});
-      setTimeout(() => {
-        Swal.fire({
-          title: "Please Note",
-          html: `
-            <p>If you need to edit the form, you can use this credential.</p>
-            <p><strong>ID:</strong> ${response?.data?.data?.data?.serialNumber}</p>
-            <p><strong>Password:</strong> ${response?.data?.data?.data?.password}</p>
-          `,
-          icon: "info",
-        }).then((result) => {
-          if (result.isConfirmed) {
-            window.location.reload();
-          }
-        });
-      }, 700);
     } catch (error) {
       setIsSubmitting(false);
-      console.error("Error submitting form:", error);
+      console.error("Error submitting form:", error?.response?.data?.error);
       Swal.fire({
         icon: "error",
         title: "Error",
         text:
-          error === "A form with this phone, first name, and session already exists"
-            ? "This form has already been submitted with the same phone, first name, and session."
-            : error === "Invalid email format"
-              ? "Please enter a valid email address"
-              : error || "Failed to submit form",
+          error?.response?.data?.error,
       });
     } finally {
       setIsSubmitting(false);
@@ -662,7 +668,7 @@ function CreateLedger() {
       openingDate: [
         [!value, "Opening date is Required"],
       ],
-     
+
 
       level: [[!value, "Level is required"]],
       businessUnit: [[!value && levelResult > 1, "Business Unit is required"]],
@@ -782,11 +788,90 @@ function CreateLedger() {
   //---------- Adding & Editing the Organiser ----------
 
 
+  const fetchFormData = async (decryptedFormId) => {
+    try {
+      setIsPageLoading(true);
+      const response = await ledgerService.getFormData(decryptedFormId);
+      console.log("response cutom data", response?.data);
 
+      const fieldsData = response?.data?.data || null;
+      const otherThanFile = fieldsData?.otherThanFiles;
+      const files = fieldsData?.files;
+      console.log("files", files);
+
+      const fieldArray = Object.entries(otherThanFile).map(([key, value]) => ({
+        key,
+        value
+      }));
+      const fileArray = files.map((item) => {
+        return {
+          key: item?.fieldName,
+          value: item?.fileUrl
+        }
+      });
+
+      console.log("fileArray", fileArray);
+
+
+      const resultantDataArray = [...fieldArray, ...fileArray]
+      setCustomData(resultantDataArray);
+      setIsPageLoading(false);
+    } catch (error) {
+      console.error("Error fetching form data:", error);
+      setIsPageLoading(false);
+      setErrors({ general: "Failed to fetch form data" });
+    }
+  };
+
+
+  useEffect(() => {
+    if (existingFields && customData) {
+      let dataObject = {};
+      for (let index = 0; index < existingFields.length; index++) {
+        const element = existingFields[index];
+        const type = element?.type;
+        const filedLabel = element?.label;
+        const fieldName = element?.name;
+        if (type == "select") {
+          for (let j = 0; j < customData.length; j++) {
+            const data = customData[j];
+            if (data?.key == filedLabel) {
+              dataObject[fieldName] = { value: data?.value, label: data?.value }
+            }
+          }
+        } else if (type == "multiselect") {
+          for (let j = 0; j < customData.length; j++) {
+            const data = customData[j];
+            if (data?.key == filedLabel) {
+              const parse = JSON.parse(data?.value);
+              dataObject[fieldName] = parse
+            }
+          }
+        } else if (type == "file") {
+          for (let j = 0; j < customData.length; j++) {
+            const data = customData[j];
+            if (data?.key == fieldName) {
+              dataObject[fieldName] = data?.value
+            }
+          }
+        } else {
+          for (let j = 0; j < customData.length; j++) {
+            const data = customData[j];
+            if (data?.key == filedLabel) {
+              dataObject[fieldName] = data?.value
+            }
+          }
+        }
+      }
+      setCustomizationValues(dataObject)
+    }
+  }, [existingFields, customData]);
 
   // -----setting the data if contain id ----------
   useEffect(() => {
     if (id) {
+
+      fetchFormData(id)
       if (name == "view") {
         setIsViewed(true)
       } else {
@@ -815,9 +900,21 @@ function CreateLedger() {
             businessUnit: baseAddress.businessUnit,
             branch: baseAddress.branch,
             warehouse: baseAddress.warehouse,
-            groupName: baseAddress.groupName,
-            hasParent: baseAddress.hasParent,
-            parentGroup: baseAddress.parentGroup?._id
+            ledgerName: baseAddress.ledgerName,
+            alias: baseAddress.alias,
+            ledgerGroupId: baseAddress.ledgerGroupId?._id,
+            ledgerType: baseAddress.ledgerType,
+            isCustomer: baseAddress.isCustomer,
+            isSupplier: baseAddress.isSupplier,
+            isEmployee: baseAddress.isEmployee,
+            isNone: baseAddress.isNone,
+            isCredit: baseAddress.isCredit,
+            isDebit: baseAddress.isDebit,
+            creditLimit: baseAddress.creditLimit,
+            creditDays: baseAddress.creditDays,
+            openingBalance: baseAddress.openingBalance,
+            openingDate: baseAddress.openingDate,
+
           }));
           setPageLoading(false)
         } catch (error) {
@@ -1288,7 +1385,7 @@ function CreateLedger() {
             )}
           </div>
 
-           <div className="form-group">
+          <div className="form-group">
             <p className="form-label">
               Type <span className="text-red-500">*</span>
             </p>
