@@ -299,7 +299,6 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
         }
     }
 
-    //---------- Adding & Editing the Organiser ----------
 
     const onSubmit = async (e) => {
         e.preventDefault();

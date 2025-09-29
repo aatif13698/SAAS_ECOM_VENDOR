@@ -52,9 +52,7 @@ export const ViewParticularAuth = createAsyncThunk(
   }
 );
 
-// For Organiser
 
-// ----------- View Particular Organiser --------
 export const ViewParticularOrganiser = createAsyncThunk(
   "ViewParticularOrganiser",
   async () => {
