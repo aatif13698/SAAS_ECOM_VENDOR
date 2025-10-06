@@ -185,7 +185,7 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
             errors.warehouse = validateField("warehouse", warehouse);
         }
         console.log("errors", errors);
-        
+
         setFormDataErr((prev) => ({
             ...prev,
             ...errors
@@ -292,7 +292,7 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
         setIsViewed(false);
         const error = validationFunction();
         console.log("error", error);
-        
+
         setLoading(true);
         if (error) {
             setLoading(false);
@@ -301,27 +301,11 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-
-                const payload = new FormData();
-                payload.append("clientId", clientId);
-                payload.append("level", level);
-                payload.append("businessUnit", businessUnit);
-                payload.append("branch", branch);
-                payload.append("warehouse", warehouse);
-
-                payload.append("departmentName", departmentName);
-                payload.append("departmentCode", departmentCode);
-                payload.append("description", description);
-                payload.append("headcountLimit", headcountLimit);
-                payload.append("status", status);
-                payload.append("notes", notes);
-
                 if (id) {
-                    payload.append("employeeId", id);
-                    const response = await employeeService.updateEmployee(payload)
+                    const response = await departmentService.update({ ...formData, clientId: clientId, workingDepartmentId: id })
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await departmentService.create({...formData, clientId: clientId });
+                    const response = await departmentService.create({ ...formData, clientId: clientId });
                     toast.success(response?.data?.message);
                 }
 
@@ -369,9 +353,11 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
             async function getBranch() {
                 try {
                     setPageLoading(true)
-                    const response = await employeeService.getOne(id);
-                    console.log('Response get employee', response?.data);
-                    const baseAddress = response?.data;
+                    // const response = await employeeService.getOne(id);
+                    // console.log('Response get employee', response?.data);
+                    // const baseAddress = response?.data;
+                    const baseAddress = location?.state?.row;
+
 
 
                     let level = "";
@@ -393,30 +379,14 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
                         businessUnit: baseAddress.businessUnit,
                         branch: baseAddress.branch,
                         warehouse: baseAddress.warehouse,
-                        roleId: baseAddress.role,
-                        firstName: baseAddress.firstName,
-                        lastName: baseAddress.lastName,
-                        email: baseAddress.email,
-                        phone: baseAddress.phone,
-                        gender: baseAddress.gender,
-
-                        country: baseAddress.country,
-                        city: baseAddress.city,
-                        state: baseAddress.state,
-                        address: baseAddress.address,
-                        ZipCode: baseAddress.ZipCode,
+                        departmentName: baseAddress.departmentName,
+                        departmentCode: baseAddress.departmentCode,
+                        description: baseAddress.description,
+                        headcountLimit: baseAddress.headcountLimit,
+                        status: baseAddress.status,
+                        notes: baseAddress.status,
 
                     }));
-
-
-                    const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
-                    const state = State.getStatesOfCountry(selectedCountry?.isoCode);
-
-                    const stateName = state?.find(
-                        (item) => item?.name === baseAddress?.state
-                    );
-
-
 
                     setPageLoading(false)
 

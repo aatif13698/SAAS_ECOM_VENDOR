@@ -65,9 +65,9 @@ const CreateDocument = ({ noFade, scrollContent }) => {
     const [currentlevelId, setCurrentLevelId] = useState("");
     const [parentLedgers, setParentLedgers] = useState([]);
     const [fields, setFields] = useState([]);
-    const [ledgerData, setLedgerData] = useState(null);
     const [departments, setDepartments] = useState([]);
     const [roleList, setRoleList] = useState([]);
+    const [documentData, setDocumentData] = useState(null)
 
     const [formData, setFormData] = useState({
         level: "",
@@ -80,7 +80,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         docName: "",
     });
 
-    console.log("ledgerData", ledgerData);
+    console.log("departments", departments);
 
 
     useEffect(() => {
@@ -340,7 +340,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                     const response = await documentService.create({ ...formData, name: docName, clientId: clientId });
                     toast.success(response?.data?.message);
 
-                    setLedgerData(response?.data?.data?.document)
+                    setDocumentData(response?.data?.data?.document)
 
                     getCustomField(response?.data?.data?.document?._id);
                 }
@@ -383,7 +383,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                         level = "branch"
                     }
 
-                    setLedgerData(baseAddress)
+                    setDocumentData(baseAddress)
 
                     setFormData((prev) => ({
                         ...prev,
@@ -391,9 +391,9 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                         businessUnit: baseAddress.businessUnit,
                         branch: baseAddress.branch,
                         warehouse: baseAddress.warehouse,
-                        groupName: baseAddress.groupName,
-                        hasParent: baseAddress.hasParent,
-                        parentGroup: baseAddress.parentGroup?._id
+                        workDepartment: baseAddress.workDepartment,
+                        jobRole: baseAddress.jobRole,
+                        docName: baseAddress.name,
                     }));
                     setPageLoading(false)
                 } catch (error) {
@@ -406,7 +406,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         } else {
             setPageLoading(false)
         }
-    }, [id, parentLedgers]);
+    }, [id]);
 
     async function getAllParent() {
         try {
@@ -928,7 +928,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                                             <button
                                                 // className="border bg-blue-gray-300 rounded px-5 py-2"
                                                 className={`border-lightBtn border-2 w-[100%] dark:border-darkBtn p-3 rounded-md text-lightBtn dark:text-darkBtn  items-center flex justify-center`}
-                                                onClick={() => navigate("/group/custom-field", { state: { group: ledgerData } })}
+                                                onClick={() => navigate("/documents/custom-field", { state: { group: documentData } })}
                                                 isLoading={loading}
                                             >
                                                 <span><FiPlus /></span>

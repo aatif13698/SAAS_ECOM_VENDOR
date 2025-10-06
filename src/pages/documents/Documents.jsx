@@ -27,6 +27,7 @@ import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
 import departmentService from "@/services/department/department.service";
 import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
+import documentService from "@/services/document/document.service";
 
 
 // const FormValidationSchema = yup
@@ -133,7 +134,7 @@ const Documents = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-group", { state: { id, row, name } });
+        navigate("/create-documents", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -209,17 +210,11 @@ const Documents = ({ noFade, scrollContent }) => {
     const columns = [
         {
             name: "Name",
-            selector: (row) => row?.groupName,
+            selector: (row) => row?.name,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
-        },
-        {
-            name: "Parent",
-            selector: (row) => row?.parentGroup ? row?.parentGroup?.groupName : "NO",
-            sortable: false,
-
         },
         {
             name: "Status",
@@ -332,13 +327,13 @@ const Documents = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await ledgerGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await documentService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.ledgerGroup);
+            setPaginationData(response?.data?.documentRequirements);
             setPending(false);
         } catch (error) {
             setPending(false);
-            console.log("error while fetching department");
+            console.log("error while fetching documents");
         }
     }
 

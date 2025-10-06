@@ -73,6 +73,8 @@ const CreateVoucherGroup = lazy(() => import("./pages/voucherGroup/CreateVoucher
 const VoucherGroup = lazy(() => import("./pages/voucherGroup/VoucherGroup"));
 const Documents = lazy(() => import("./pages/documents/Documents"));
 const CreateDocument = lazy(() => import("./pages/documents/CreateDocuments"));
+const DocCustomField = lazy(() => import("./pages/documents/DocCustomField"));
+const DocAdjustOrder = lazy(() => import("./pages/documents/DocAdjustOrder"));
 const Ledger = lazy(() => import("./pages/ledger/Ledger"));
 const CreateLedger = lazy(() => import("./pages/ledger/CreateLedger"));
   
@@ -184,6 +186,9 @@ function App() {
 
                 <Route path="documents-list" element={<Documents />} />
                 <Route path="create-documents" element={<CreateDocument />} />
+                <Route path="documents/custom-field" element={<DocCustomField />} />
+                <Route path="documents/adjust-order" element={<DocAdjustOrder />} />
+
 
 
                 <Route path="employee-list" element={<Employee />} />

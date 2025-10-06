@@ -90,10 +90,10 @@ const Navmenu = ({ menus }) => {
 
       module.menu
         .filter((menu) => (menu.access
-          && menu.name !== "Department"
-          && menu.name !== "Shift"
-          && menu.name !== "Documents"
-          && menu.name !== "Assets & Tools"
+          // && menu.name !== "Department"
+          // && menu.name !== "Shift"
+          // && menu.name !== "Documents"
+          // && menu.name !== "Assets & Tools"
         ))
         .forEach((menu) => {
           const normalizedMenuName = lowerCase(menu.name).replace(/\s+/g, "-");

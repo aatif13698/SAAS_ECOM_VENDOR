@@ -132,7 +132,7 @@ const Department = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-employee", { state: { id, row, name } });
+        navigate("/create-department", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -140,7 +140,7 @@ const Department = ({ noFade, scrollContent }) => {
         const name = "edit"
         setUserId(id);
         setIsViewed(false);
-        navigate("/create-employee", { state: { id, row, name } });
+        navigate("/create-department", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -193,10 +193,10 @@ const Department = ({ noFade, scrollContent }) => {
                 id: id,
                 clientId: clinetId
             }
-            const response = await employeeService.activeInactive(dataObject);
+            const response = await departmentService.activeInactive(dataObject);
 
             setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
+            setPaginationData(response?.data?.data?.department);
             toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
             setShowLoadingModal(false)
 
