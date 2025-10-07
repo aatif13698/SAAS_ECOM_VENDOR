@@ -142,7 +142,7 @@ const Documents = ({ noFade, scrollContent }) => {
         const name = "edit"
         setUserId(id);
         setIsViewed(false);
-        navigate("/create-group", { state: { id, row, name } });
+        navigate("/create-documents", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -372,7 +372,7 @@ const Documents = ({ noFade, scrollContent }) => {
 
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
-            <div className="table-heading text-start ">Ledger Group List</div>
+            <div className="table-heading text-start ">Documents List</div>
             <div className="grid lg:justify-end md:justify-start">
                 <input
                     type="text"
