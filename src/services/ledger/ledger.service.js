@@ -49,6 +49,27 @@ const getFormData = async (id) => {
 
 
 
+const getAll = async ( currentLevel, levelId) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/l/all/ledger?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
 
 
 const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
@@ -248,7 +269,7 @@ export default {
     submitFormData,
     getList,
     getFormData,
-
+    getAll,
 
 
 
