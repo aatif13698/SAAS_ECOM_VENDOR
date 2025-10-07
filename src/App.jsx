@@ -71,6 +71,9 @@ const FinancialYear = lazy(() => import("./pages/financialYear/FinancialYear"));
 const Currency = lazy(() => import("./pages/currency/Currency"));
 const CreateVoucherGroup = lazy(() => import("./pages/voucherGroup/CreateVoucherGroup"));
 const VoucherGroup = lazy(() => import("./pages/voucherGroup/VoucherGroup"));
+const Voucher = lazy(() => import("./pages/voucher/Voucher"));
+const CreateVoucher = lazy(() => import("./pages/voucher/CreateVoucher"));
+ 
 const Documents = lazy(() => import("./pages/documents/Documents"));
 const CreateDocument = lazy(() => import("./pages/documents/CreateDocuments"));
 const DocCustomField = lazy(() => import("./pages/documents/DocCustomField"));
@@ -233,6 +236,9 @@ function App() {
                 <Route path="group-list" element={<LedgerGroup />} />
                 <Route path="voucher-group-list" element={<VoucherGroup />} />
                 <Route path="create-voucher-group" element={<CreateVoucherGroup />} />
+                <Route path="voucher-list" element={<Voucher />} />
+                <Route path="create-voucher" element={<CreateVoucher />} />
+
 
                 <Route path="group/custom-field" element={<CustomField />} />
                 <Route path="group/adjust-order" element={<AdjustOrder />} />
