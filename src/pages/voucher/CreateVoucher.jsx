@@ -1,5 +1,7 @@
 import useDarkmode from '@/hooks/useDarkMode';
 import ledgerService from '@/services/ledger/ledger.service';
+import ledgerGroupService from '@/services/ledgerGroup/ledgerGroup.service';
+import voucherService from '@/services/voucher/voucher.service';
 import voucherGroupService from '@/services/voucherGroup/voucherGroup.service';
 import warehouseService from '@/services/warehouse/warehouse.service';
 import React, { useState, useEffect } from 'react';
@@ -7,10 +9,14 @@ import { Item } from 'react-contexify';
 import toast from 'react-hot-toast';
 import { useSelector } from 'react-redux';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment } from 'react';
+import Icon from "@/components/ui/Icon";
+import { MdOutlineSettings } from "react-icons/md";
 
-function CreateVoucher() {
-
+function CreateVoucher({ noFade, scrollContent }) {
     const navigate = useNavigate();
+    const [isDark] = useDarkmode();
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
     const [levelList, setLevelList] = useState([
@@ -37,16 +43,65 @@ function CreateVoucher() {
     const name = location?.state?.name;
     const id = location?.state?.id;
 
+    const [showModal, setShowModal] = useState(false);
     const [pageLoading, setPageLoading] = useState(true);
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
+    const [financialYears, setFinancialYear] = useState([]);
+    const [currencies, setCurrencies] = useState([]);
     const [levelResult, setLevelResult] = useState(0)
     const [activeBranches, setActiveBranches] = useState([]);
     const [activeWarehouse, setActiveWarehouse] = useState([]);
     const [currentLevel, setCurrentLevel] = useState("");
     const [levelId, setLevelId] = useState("");
-    const [parentLedgers, setParentLedgers] = useState([]);
-    const [fields, setFields] = useState([]);
-    const [ledgerData, setLedgerData] = useState(null)
+    const [totals, setTotals] = useState({ debit: 0, credit: 0 });
+    const [selectedFinancialYear, setSelectedFinancialYear] = useState(null);
+    const [selectedCurrency, setSelectedCurrency] = useState(null);
+
+    console.log("selectedFinancialYear", selectedFinancialYear);
+
+    const [formData, setFormData] = useState({
+        level: "",
+        businessUnit: "",
+        branch: "",
+        warehouse: "",
+
+        voucherGroup: '',
+        entries: [
+            { ledger: '', credit: '', debit: '', type: 'credit' }, // First row: Credit
+            { ledger: '', credit: '', debit: '', type: 'debit' },  // Second row: Debit
+        ],
+        narration: '',
+        financialYear: '',
+        currency: ''
+    });
+    const [formDataErr, setFormDataErr] = useState({
+        level: "",
+        businessUnit: "",
+        branch: "",
+        warehouse: "",
+        voucherGroup: "",
+        narration: "",
+        financialYear: "",
+        currency: ""
+    });
+    console.log("formData", formData);
+    console.log("financialYears", financialYears);
+
+
+    const {
+        level,
+        businessUnit,
+        branch,
+        warehouse,
+
+    } = formData;
+
+    const [isViewed, setIsViewed] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const closeModal = () => {
+        setShowModal(false);
+    };
 
 
     useEffect(() => {
@@ -114,52 +169,21 @@ function CreateVoucher() {
 
     }, [currentUser]);
 
-    const [formData, setFormData] = useState({
-        level: "",
-        businessUnit: "",
-        branch: "",
-        warehouse: "",
-
-        voucherGroup: '',
-        entries: [
-            { ledger: '', credit: '', debit: '', type: 'credit' }, // First row: Credit
-            { ledger: '', credit: '', debit: '', type: 'debit' },  // Second row: Debit
-        ],
-        narration: '',
-    });
-
-    const [formDataErr, setFormDataErr] = useState({
-        level: "",
-        businessUnit: "",
-        branch: "",
-        warehouse: "",
-
-        groupName: "",
-        hasParent: "",
-        parentGroup: "",
-    });
-
-    console.log("formData", formData);
 
 
-    const {
-        level,
-        businessUnit,
-        branch,
-        warehouse,
-
-    } = formData;
-
-    const [isViewed, setIsViewed] = useState(false);
-    const [loading, setLoading] = useState(false);
 
     const validateField = (name, value) => {
         const rules = {
-            groupName: [
-                [!value, "Gruop Name is Required"],
-                [value.length <= 3, "Minimum 3 characters required."]
+            voucherGroup: [
+                [!value, "Gruop is Required"],
             ],
-            level: [[!value, "Level is required"]],
+            narration: [
+                [!value, "Narration is Required"],
+            ],
+            financialYear: [
+                [!value, "Financial year is Required"],
+            ],
+            level: [[!value, "Level is required."]],
             businessUnit: [[!value && levelResult > 1, "Business Unit is required"]],
             branch: [[!value && levelResult > 2, "Branch is required"]],
             warehouse: [[!value && levelResult > 3, "Warehouse is required"]]
@@ -171,12 +195,20 @@ function CreateVoucher() {
     const validationFunction = () => {
         const { level, businessUnit, branch, warehouse } = formData;
         let errors = {
-            groupName: validateField("groupName", groupName),
+            voucherGroup: validateField("voucherGroup", formData.voucherGroup),
+            narration: validateField("narration", formData.narration),
         };
-        if (hasParent && parentGroup == "") {
-            errors.parentGroup = "Parent group is required"
+        if (formData.entries.some(entry => !entry.ledger)) {
+            alert('Please select a ledger for all entries.');
         }
-        errors.level = validateField("level", level);
+        if (formData.entries.map((entry, index) => {
+            if (index == 0 && !entry.credit) {
+                alert('Please fill credit.');
+            } else if (index == 1 && !entry.debit) {
+                alert('Please fill debit.');
+            }
+        }))
+            errors.level = validateField("level", level);
         if (level === "business" || level === "branch" || level === "warehouse") {
             errors.businessUnit = validateField("businessUnit", businessUnit);
         }
@@ -202,14 +234,14 @@ function CreateVoucher() {
         const { name, value } = e.target;
         if (index || index == 0 && name !== "credit" && name !== "debit") {
             const existInEntries = formData?.entries?.find((item) => {
-                if(item?.ledger == value){
+                if (item?.ledger == value) {
 
                     return item
 
                 }
             });
             console.log("existInEntries", existInEntries);
-            
+
             if (existInEntries) {
                 toast.error("same ledger can not be repeated")
             } else {
@@ -232,9 +264,30 @@ function CreateVoucher() {
                     }
                 }),
             }));
-        }
-        else {
+        } else {
             setFormData(prev => ({ ...prev, [name]: value }));
+        }
+
+        if (name == "financialYear" && financialYears.length > 0) {
+            const year = financialYears.find((item) => {
+                if (item?._id == value) {
+                    return item
+                }
+            });
+            if (year) {
+                setSelectedFinancialYear(year)
+            }
+        }
+
+        if (name == "currency" && currencies.length > 0) {
+            const currency = currencies.find((item) => {
+                if (item?._id == value) {
+                    return item
+                }
+            });
+            if (currency) {
+                setSelectedCurrency(currency)
+            }
         }
 
         if (name === "businessUnit" && value !== "") {
@@ -301,31 +354,32 @@ function CreateVoucher() {
         e.preventDefault();
         setIsViewed(false);
         const error = validationFunction();
-        console.log("error", error);
-
         setLoading(true);
         if (error) {
             setLoading(false);
-
             return
         } else {
             try {
                 const clientId = localStorage.getItem("saas_client_clientId");
-
                 if (id) {
-                    const response = await ledgerGroupService.update({ ...formData, clientId: clientId, groupId: id })
+                    const response = await voucherService.update({ ...formData, clientId: clientId, groupId: id })
                     toast.success(response?.data?.message);
                 } else {
-                    const response = await ledgerGroupService.create({ ...formData, clientId: clientId });
+                    const response = await voucherService.create({ ...formData, clientId: clientId, isSingleEntry: false });
                     toast.success(response?.data?.message);
-
-                    setLedgerData(response?.data?.data?.group)
-
                 }
                 setLoading(false);
+                setFormData({
+                    voucherGroup: '',
+                    entries: [
+                        { ledger: '', credit: '', debit: '', type: 'credit' },
+                        { ledger: '', credit: '', debit: '', type: 'debit' },
+                    ],
+                    narration: '',
+                });
             } catch (error) {
                 setLoading(false);
-                console.log("error while creating ledger group", error);
+                console.log("error while creating voucher", error);
             }
         }
     };
@@ -352,9 +406,6 @@ function CreateVoucher() {
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
                     }
-
-                    setLedgerData(baseAddress)
-
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
@@ -376,21 +427,53 @@ function CreateVoucher() {
         } else {
             setPageLoading(false)
         }
-    }, [id, parentLedgers]);
+    }, [id]);
 
 
     useEffect(() => {
-        async function getActiveBusinessUnit() {
-            try {
-                const response = await warehouseService.getActiveBusinessUnit();
-                console.log("respone active", response);
-                setActiveBusinessUnits(response?.data?.businessUnits)
-            } catch (error) {
-                console.log("error while getting the active business unit", error);
-            }
-        }
         getActiveBusinessUnit();
+        getCurrencies();
+        getFinancialYears()
     }, []);
+
+    async function getActiveBusinessUnit() {
+        try {
+            const response = await warehouseService.getActiveBusinessUnit();
+            console.log("respone active", response);
+            setActiveBusinessUnits(response?.data?.businessUnits)
+        } catch (error) {
+            console.log("error while getting the active business unit", error);
+        }
+    }
+
+    async function getFinancialYears() {
+        try {
+            const response = await voucherService.getAllFinancialYear();
+            console.log("respone fy ", response);
+            setFinancialYear(response?.data?.financialYears);
+            setSelectedFinancialYear(response?.data?.financialYears[0])
+            setFormData((prev) => {
+                return { ...prev, financialYear: response?.data?.financialYears[0]?._id }
+            })
+        } catch (error) {
+            console.log("error while getting the active business unit", error);
+        }
+    }
+
+    async function getCurrencies() {
+        try {
+            const response = await voucherService.getAllCurrencies();
+            console.log("respone cu ", response);
+            setCurrencies(response?.data?.currencies);
+            setSelectedCurrency(response?.data?.currencies[0])
+            setFormData((prev) => {
+                return { ...prev, currency: response?.data?.currencies[0]?._id }
+            })
+        } catch (error) {
+            console.log("error while getting the active business unit", error);
+        }
+    }
+
 
     useEffect(() => {
 
@@ -444,6 +527,9 @@ function CreateVoucher() {
         try {
             const response = await voucherGroupService.getAll(level, levelId);
             setVoucherGroups(response?.data?.voucherGroups);
+            setFormData((prev) => {
+                return { ...prev, voucherGroup: "" }
+            })
         } catch (error) {
             console.log("error while fetching voucher groups");
         }
@@ -453,8 +539,16 @@ function CreateVoucher() {
         try {
             const response = await ledgerService.getAll(level, levelId);
             console.log("response lll", response);
-            setLedgers(response?.data?.ledgers
-            )
+            setLedgers(response?.data?.ledgers);
+
+            setFormData((prev) => {
+                const entries = prev.entries.map((item) => {
+                    return { ...item, ledger: "" }
+                })
+                return {
+                    ...prev, entries: entries
+                }
+            })
         } catch (error) {
             console.log("error while fetching ledger account");
         }
@@ -463,15 +557,6 @@ function CreateVoucher() {
     // -----------------------------------------------------------------------
 
 
-    const [isDark] = useDarkmode();
-
-
-
-
-    // State management
-
-
-    const [totals, setTotals] = useState({ debit: 0, credit: 0 });
 
     // Update totals when entries change
     useEffect(() => {
@@ -484,60 +569,28 @@ function CreateVoucher() {
         setTotals({ debit: debitTotal, credit: creditTotal });
     }, [formData.entries]);
 
-    // Handle input changes
-    const handleInputChange = (field, value, index = null) => {
-        if (index !== null) {
-            setFormData(prev => ({
-                ...prev,
-                entries: prev.entries.map((entry, i) =>
-                    i === index ? { ...entry, [field]: value } : entry
-                ),
-            }));
-        } else {
-            setFormData(prev => ({ ...prev, [field]: value }));
-        }
-    };
-
-    // Handle form submission
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!formData.voucherGroup) {
-            alert('Please select a voucher group.');
-            return;
-        }
-        if (formData.entries.some(entry => !entry.ledger)) {
-            alert('Please select a ledger for all entries.');
-            return;
-        }
-        if (totals.debit !== totals.credit || totals.debit === 0) {
-            alert('Debit and Credit totals must balance and be non-zero.');
-            return;
-        }
-        // API call placeholder (replace with actual API call)
-        console.log('Submitting voucher:', {
-            ...formData,
-            clientId: 'demoClientId', // Replace with actual clientId
-            level: 'vendor', // Replace with actual level
-        });
-        // Reset form after submission
-        setFormData({
-            voucherGroup: '',
-            entries: [
-                { ledger: '', credit: '', debit: '', type: 'credit' },
-                { ledger: '', credit: '', debit: '', type: 'debit' },
-            ],
-            narration: '',
-        });
-    };
-
     return (
         <div>
 
-            <div className={`${isDark ? "bg-darkSecondary text-white" : "bg-white text-black-900"} p-5 shadow-lg`}>
+            <div className={`${isDark ? "bg-darkSecondary text-white" : "bg-white text-black-900"} p-5 shadow-lg relative`}>
                 <h2 className="text-2xl font-bold text-gray-800 mb-6 ">
                     Voucher Entry
                 </h2>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form onSubmit={onSubmit} className="space-y-6 ">
+
+
+
+                    <div className='absolute  top-2 right-2 flex justify-center items-center gap-2'>
+                        <div className='flex gap-2'>
+                            <span>{selectedFinancialYear?.name}</span> _
+                            <span>{selectedCurrency?.code}</span>
+                        </div>
+                        <span onClick={() => setShowModal(!showModal)} >
+                            <MdOutlineSettings className='text-lg cursor-pointer' />
+                        </span>
+                    </div>
+
+
                     {/* Voucher Group Dropdown */}
                     <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
 
@@ -663,7 +716,7 @@ function CreateVoucher() {
                         }
 
                         <div
-                            className={`fromGroup   ${formDataErr?.level !== "" ? "has-error" : ""
+                            className={`fromGroup   ${formDataErr?.voucherGroup !== "" ? "has-error" : ""
                                 } `}
                         >
                             <label
@@ -683,11 +736,12 @@ function CreateVoucher() {
                             >
                                 <option value="">Select Voucher Group</option>
                                 {voucherGroups && voucherGroups?.length > 0 && voucherGroups.map(group => (
-                                    <option key={group.id} value={group.id}>
+                                    <option key={group._id} value={group._id}>
                                         {group.name}
                                     </option>
                                 ))}
                             </select>
+                            {<p className="text-sm text-red-500">{formDataErr.voucherGroup}</p>}
 
                         </div>
                     </div>
@@ -775,23 +829,32 @@ function CreateVoucher() {
                     </div>
 
                     {/* Narration */}
-                    <div>
-                        <label
-                            htmlFor="narration"
-                            className="block form-label text-sm font-medium text-gray-700 mb-1"
-                        >
-                            Narration
-                        </label>
+
+                    <label
+                        className={`block form-label text-sm font-medium text-gray-700 mb-1  ${formDataErr?.narration !== "" ? "has-error" : ""
+                            } `}
+
+
+                    >
+                        <p className="form-label">
+                            Narration<span className="text-red-500">*</span>
+                        </p>
                         <textarea
                             id="narration"
+                            name='narration'
                             value={formData.narration}
-                            onChange={(e) => handleInputChange('narration', e.target.value)}
+                            onChange={(e) => handleChange(e)}
                             className="w-full form-control p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             rows="4"
                             placeholder="Enter narration..."
                             aria-label="Narration"
                         />
-                    </div>
+                        {
+                            <p className="text-sm text-red-500">
+                                {formDataErr.narration}
+                            </p>
+                        }
+                    </label>
 
                     {/* Submit Button */}
                     <div className="flex justify-end">
@@ -799,10 +862,152 @@ function CreateVoucher() {
                             type="submit"
                             className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
                         >
-                            Save Voucher
+                            {loading ? (
+                                <>
+                                    <svg
+                                        className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <circle
+                                            className="opacity-25"
+                                            cx="12"
+                                            cy="12"
+                                            r="10"
+                                            stroke="currentColor"
+                                            strokeWidth="4"
+                                        ></circle>
+                                        <path
+                                            className="opacity-75"
+                                            fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                        ></path>
+                                    </svg>
+                                    Loading..
+                                </>
+                            ) : "Save Voucher"}
                         </button>
                     </div>
                 </form>
+
+
+                <Transition appear show={showModal} as={Fragment}>
+                    <Dialog
+                        as="div"
+                        className="relative z-[99999]"
+                        onClose={closeModal}
+                    >
+                        {(
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300 ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0"}
+                                enterTo={noFade ? "" : "opacity-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100"}
+                                leaveTo={noFade ? "" : "opacity-0"}
+                            >
+                                <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                            </Transition.Child>
+                        )}
+                        <div className="fixed inset-0 overflow-y-auto">
+                            <div
+                                className={`flex min-h-full justify-center text-center p-6 items-center "
+                                    }`}
+                            >
+                                <Transition.Child
+                                    as={Fragment}
+                                    enter={noFade ? "" : "duration-300  ease-out"}
+                                    enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                    enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                    leave={noFade ? "" : "duration-200 ease-in"}
+                                    leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                    leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                                >
+                                    <Dialog.Panel
+                                        className={`w-full transform overflow-hidden rounded-md
+                                        text-left align-middle shadow-xl transition-alll max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                    >
+                                        <div
+                                            className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                                        >
+                                            <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                                                set Financial Year
+                                            </h2>
+                                            <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                                                <Icon icon="heroicons-outline:x" />
+                                            </button>
+                                        </div>
+
+                                        <div
+                                            className={`px-0 py-8 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
+                                                }`}
+                                        >
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
+
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.financialYear !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Financial year <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="financialYear"
+                                                        value={formData.financialYear}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {financialYears &&
+                                                            financialYears?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.financialYear}</p>}
+                                                </div>
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.currency !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Currency <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="currency"
+                                                        value={formData.currency}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+                                                        {currencies &&
+                                                            currencies?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.code}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.currency}</p>}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Dialog.Panel>
+                                </Transition.Child>
+                            </div>
+                        </div>
+                    </Dialog>
+                </Transition>
+
+
+
+
+
             </div>
         </div>
 

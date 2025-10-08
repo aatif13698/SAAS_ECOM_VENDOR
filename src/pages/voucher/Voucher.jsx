@@ -27,6 +27,7 @@ import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
 import departmentService from "@/services/department/department.service";
 import voucherGroupService from "@/services/voucherGroup/voucherGroup.service";
+import voucherService from "@/services/voucher/voucher.service";
 
 
 // const FormValidationSchema = yup
@@ -123,7 +124,7 @@ const Voucher = ({ noFade, scrollContent }) => {
             behavior: "smooth", // This makes the scrolling smooth
         });
     };
-   
+
     const handleView = (row) => {
         scrollToTop();
         const id = row._id;
@@ -205,41 +206,50 @@ const Voucher = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
-            name: "Name",
-            selector: (row) => row?.name,
+            name: "Ledger Accout",
+            selector: (row) => row?.ledger?.ledgerName,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "Code",
-            selector: (row) => row?.code,
+            name: "Ledger Type",
+            selector: (row) => row?.ledger?.ledgerType,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "Category",
-            selector: (row) => row?.category,
+            name: "Credit",
+            selector: (row) => row?.credit,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
-
-        {
-            name: "Frequency",
-            selector: (row) => row?.resetFrequency,
-            sortable: true,
-            style: {
-                width: "20px", // Set the desired width here
-            }
-
-        },
-
          {
+            name: "Debit",
+            selector: (row) => row?.debit,
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Currency",
+            selector: (row) => row?.currency?.code,
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+       
+
+        
+
+        {
             name: "Financial Year",
             selector: (row) => row?.financialYear?.name,
             sortable: true,
@@ -247,33 +257,6 @@ const Voucher = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             }
 
-        },
-
-        {
-            name: "Status",
-            sortable: true,
-
-            selector: (row) => {
-
-                return (
-                    <span className="block w-full">
-                        <span
-                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  ${row?.isActive == 1 ? "text-success-500 bg-success-500" : ""
-                                }
-            ${row?.isActive == 0 ? "text-warning-500 bg-warning-500" : ""}
-             `}
-                            title={
-                                row?.isActive == 1
-                                    ? "Click To Deactivate"
-                                    : "Click To Activate"
-                            }
-                            onClick={() => handleActive(row)}
-                        >
-                            {row.isActive == 1 ? "Active" : "Inactive"}
-                        </span>
-                    </span>
-                );
-            },
         },
         {
             name: "Action",
@@ -360,13 +343,13 @@ const Voucher = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await voucherGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await voucherService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.voucherGroups);
+            setPaginationData(response?.data?.vouchers);
             setPending(false);
         } catch (error) {
             setPending(false);
-            console.log("error while fetching voucher group");
+            console.log("error while fetching voucher");
         }
     }
 
