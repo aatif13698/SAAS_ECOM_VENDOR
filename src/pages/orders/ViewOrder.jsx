@@ -741,7 +741,7 @@ function ViewOrder() {
                             <div className="flex flex-col md:flex-row flex-wrap items-start gap-4 p-4 rounded-md border border-gray-200 dark:border-gray-100 hover:bg-gray-50 dark:hover:bg-darkSecondary/30 transition-colors">
                               {item.customizationFiles.map((img, index) => {
                                 const imgUrlHalf = removePublicPrefix(img?.fileUrl);
-                                const fullUrl = `${import.meta.env.VITE_BASE_URL}${imgUrlHalf}`;
+                                const fullUrl = `${imgUrlHalf}`;
 
                                 return (
                                   <div key={index} className="relative flex flex-col gap-2 w-full md:w-1/3">

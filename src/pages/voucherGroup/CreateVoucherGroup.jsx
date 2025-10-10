@@ -86,6 +86,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
         approvalRequired: false,
         relatedToInventory: false,
         gstApplicable: false,
+        isSingleEntryType: false,
         resetFrequency: "",
         financialYear: ""
     });
@@ -159,6 +160,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
         resetFrequency,
         financialYear,
         isTaxable,
+        isSingleEntryType,
         approvalRequired,
         relatedToInventory,
         gstApplicable
@@ -370,7 +372,8 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                         isTaxable: baseAddress?.isTaxable,
                         approvalRequired: baseAddress?.approvalRequired,
                         relatedToInventory: baseAddress?.relatedToInventory,
-                        gstApplicable: baseAddress?.gstApplicable
+                        gstApplicable: baseAddress?.gstApplicable,
+                        isSingleEntryType: baseAddress?.isSingleEntryType
 
                     }));
                     setPageLoading(false)
@@ -467,6 +470,16 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
             }));
         }
     };
+
+     const handleIsSingleEntryType = () => {
+        if (!isViewed) {
+            setFormData((prev) => ({
+                ...prev,
+                isSingleEntryType: !prev.isSingleEntryType
+            }));
+        }
+    };
+
 
     return (
 
@@ -807,6 +820,21 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                             ></div>
                                         </div>
                                     </label>
+
+                                      <label className={`fromGroup `}>
+                                        <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
+                                            Is Single Entry Type
+                                        </p>
+                                        <div
+                                            className={`w-10 h-5 flex items-center rounded-full p-1 ${isViewed ? "opacity-50 cursor-not-allowed" : "cursor-pointer"} ${isSingleEntryType ? "bg-lightBtn dark:bg-darkBtn" : "bg-gray-300 dark:bg-gray-600"}`}
+                                            onClick={handleIsSingleEntryType}
+                                        >
+                                            <div
+                                                className={`w-4 h-4 bg-white rounded-full shadow-md transform ${isSingleEntryType ? "translate-x-4" : "translate-x-0"}`}
+                                            ></div>
+                                        </div>
+                                    </label>
+
 
 
 
