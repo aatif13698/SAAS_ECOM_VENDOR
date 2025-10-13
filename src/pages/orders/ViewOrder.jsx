@@ -381,6 +381,7 @@ import React, { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { FaDownload } from 'react-icons/fa';
+import { HiViewfinderCircle } from "react-icons/hi2";
 
 function ViewOrder() {
   const navigate = useNavigate();
@@ -430,17 +431,18 @@ function ViewOrder() {
       toast.error('Invalid file URL');
       return;
     }
-    setDownloadingFile(fieldName);
+    setDownloadingFile(fileUrl);
     try {
       const cleanUrl = removePublicPrefix(fileUrl);
-      const fullUrl = `${import.meta.env.VITE_BASE_URL}${cleanUrl}`;
+      const fullUrl = `${cleanUrl}`;  // Ensure this is the full HTTPS URL
       console.log('Attempting to download:', fullUrl);
 
       const response = await fetch(fullUrl, {
         method: 'GET',
-        // headers: {
-        //   'Accept': 'application/octet-stream',
-        // },
+        headers: {
+          'Accept': 'application/octet-stream',
+        },
+        // No need for mode: 'cors' explicitly; it's default
       });
 
       if (!response.ok) {
@@ -460,17 +462,22 @@ function ViewOrder() {
       toast.success('File downloaded successfully');
     } catch (error) {
       console.error('Error downloading file:', error);
-      toast.error(
-        error.message.includes('Failed to fetch')
-          ? 'Unable to download file due to server restrictions. Try opening the file directly.'
-          : `Failed to download file: ${error.message}`
-      );
-      // Fallback: Open file in new tab
+      toast.error('Failed to download file. Opening in new tab as fallback.');
+      // Fallback: Open directly (user can save from browser)
       window.open(fileUrl, '_blank');
     } finally {
       setDownloadingFile(null);
     }
   };
+
+  const handleViewFile = async (fileUrl) => {
+    if (!fileUrl) {
+      toast.error('Invalid file URL');
+      return;
+    }
+     window.open(fileUrl, '_blank');
+  };
+
 
   useEffect(() => {
     if (data && data?.items?.length > 0) {
@@ -740,6 +747,9 @@ function ViewOrder() {
                           {item?.customizationFiles && item?.customizationFiles?.length > 0 && (
                             <div className="flex flex-col md:flex-row flex-wrap items-start gap-4 p-4 rounded-md border border-gray-200 dark:border-gray-100 hover:bg-gray-50 dark:hover:bg-darkSecondary/30 transition-colors">
                               {item.customizationFiles.map((img, index) => {
+
+                                console.log("custom image", img);
+
                                 const imgUrlHalf = removePublicPrefix(img?.fileUrl);
                                 const fullUrl = `${imgUrlHalf}`;
 
@@ -747,7 +757,7 @@ function ViewOrder() {
                                   <div key={index} className="relative flex flex-col gap-2 w-full md:w-1/3">
                                     <strong className="text-sm text-gray-800 dark:text-white/80">{img?.fieldName}</strong>
                                     <div className="relative flex justify-center items-center">
-                                      <img
+                                      <iframe
                                         className="h-[150px] w-full max-w-[200px] object-contain rounded-md border border-gray-200"
                                         src={fullUrl}
                                         alt={`${img?.fieldName} customization`}
@@ -756,13 +766,13 @@ function ViewOrder() {
                                       />
                                       <button
                                         onClick={() => handleDownloadFile(img?.fileUrl, img?.fieldName)}
-                                        disabled={downloadingFile === img?.fieldName}
-                                        className={`absolute top-2 right-2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${downloadingFile === img?.fieldName ? 'opacity-50 cursor-not-allowed' : ''
+                                        disabled={downloadingFile === img?.fileUrl}
+                                        className={`absolute top-1 right-2 p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${downloadingFile === img?.fieldName ? 'opacity-50 cursor-not-allowed' : ''
                                           }`}
-                                        aria-label={`Download ${img?.fieldName} file`}
-                                        title={`Download ${img?.fieldName}`}
+                                        aria-label={`Download ${img?.fileUrl} file`}
+                                        title={`Download ${img?.fileUrl}`}
                                       >
-                                        {downloadingFile === img?.fieldName ? (
+                                        {downloadingFile === img?.fileUrl ? (
                                           <svg
                                             className="animate-spin h-4 w-4 text-white"
                                             xmlns="http://www.w3.org/2000/svg"
@@ -785,6 +795,39 @@ function ViewOrder() {
                                           </svg>
                                         ) : (
                                           <FaDownload size={16} />
+                                        )}
+                                      </button>
+                                      <button
+                                        onClick={() => handleViewFile(img?.fileUrl)}
+                                        disabled={downloadingFile === img?.fileUrl}
+                                        className={`absolute top-10 right-2 p-2 bg-gray-200 text-gray-600 rounded-full hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 ${downloadingFile === img?.fieldName ? 'opacity-50 cursor-not-allowed' : ''
+                                          }`}
+                                        aria-label={`Download ${img?.fileUrl} file`}
+                                        title={`Download ${img?.fileUrl}`}
+                                      >
+                                        {downloadingFile === img?.fileUrl ? (
+                                          <svg
+                                            className="animate-spin h-4 w-4 text-white"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <circle
+                                              className="opacity-25"
+                                              cx="12"
+                                              cy="12"
+                                              r="10"
+                                              stroke="currentColor"
+                                              strokeWidth="4"
+                                            />
+                                            <path
+                                              className="opacity-75"
+                                              fill="currentColor"
+                                              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                            />
+                                          </svg>
+                                        ) : (
+                                          <HiViewfinderCircle size={16} />
                                         )}
                                       </button>
                                     </div>
@@ -813,7 +856,7 @@ function ViewOrder() {
             <span>
               $
               {orders
-                .reduce((acc, item) => acc + (item?.priceOption?.price || 0) , 0)
+                .reduce((acc, item) => acc + (item?.priceOption?.price || 0), 0)
                 .toFixed(2)}
             </span>
           </div>
@@ -826,7 +869,7 @@ function ViewOrder() {
             <span>
               $
               {orders
-                .reduce((acc, item) => acc + (item?.priceOption?.price || 0) , 0)
+                .reduce((acc, item) => acc + (item?.priceOption?.price || 0), 0)
                 .toFixed(2)}
             </span>
           </div>
