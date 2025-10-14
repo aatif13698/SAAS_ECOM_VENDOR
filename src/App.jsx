@@ -59,10 +59,10 @@ const Dashboard = lazy(() => import("./pages/dashboard/Dashboard"));
 const Department = lazy(() => import("./pages/department/Department"));
 const CreateDepartment = lazy(() => import("./pages/department/CreateDepartment"));
 
-const Shift = lazy(() => import("./pages/shift/Shift"));
-const CreateShift = lazy(() => import("./pages/shift/CreateShift"));
 const Asset = lazy(() => import("./pages/assets/Asset"));
 const CreateAsset = lazy(() => import("./pages/assets/CreateAsset"));
+const Shifts = lazy(() => import("./pages/shift/Shifts"));
+const CreateShifts = lazy(() => import("./pages/shift/CreateShifts"));
 
 
 const CreateLedgerGrop = lazy(() => import("./pages/ledgerGroup/CreateLedgerGroup"));
@@ -180,8 +180,8 @@ function App() {
 
                 {/* vendor routes */}
 
-                <Route path="shift-list" element={<Shift />} />
-                <Route path="create-shift" element={<CreateShift />} />
+                <Route path="shift-list" element={<Shifts />} />
+                <Route path="create-shift" element={<CreateShifts />} />
 
                 <Route path="department-list" element={<Department />} />
                 <Route path="create-department" element={<CreateDepartment />} />
