@@ -80,7 +80,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         docName: "",
     });
 
-    console.log("departments", departments);
+    console.log("formData", formData);
 
 
     useEffect(() => {
@@ -272,6 +272,9 @@ const CreateDocument = ({ noFade, scrollContent }) => {
             getBranchByBusiness(businessUnit);
             if (level === "business") {
                 getAllRespectiveDepartment(level, businessUnit);
+            }
+
+            if (!id) {
                 setFormData((prev) => {
                     return { ...prev, workDepartment: "" }
                 })
@@ -293,6 +296,8 @@ const CreateDocument = ({ noFade, scrollContent }) => {
             getWarehouseByBranch(branch);
             if (level === "branch") {
                 getAllRespectiveDepartment(level, branch);
+            }
+            if (!id) {
                 setFormData((prev) => {
                     return { ...prev, workDepartment: "" }
                 })
@@ -303,6 +308,8 @@ const CreateDocument = ({ noFade, scrollContent }) => {
     useEffect(() => {
         if (warehouse && level === "warehouse") {
             getAllRespectiveDepartment(level, warehouse);
+        }
+        if (!id) {
             setFormData((prev) => {
                 return { ...prev, workDepartment: "" }
             })
@@ -408,14 +415,6 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         }
     }, [id]);
 
-    async function getAllParent() {
-        try {
-            const response = await documentService.getAllParent(currentLevel, levelId);
-            setParentLedgers(response?.data?.ledgerGroup);
-        } catch (error) {
-            console.log("error while fetching ledger group");
-        }
-    }
 
     useEffect(() => {
         async function getActiveBusinessUnit() {
@@ -428,7 +427,6 @@ const CreateDocument = ({ noFade, scrollContent }) => {
             }
         }
         getActiveBusinessUnit();
-        getAllParent();
         getAllactiveRoles();
     }, []);
 
