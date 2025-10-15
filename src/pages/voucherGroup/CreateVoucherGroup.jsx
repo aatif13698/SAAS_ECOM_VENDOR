@@ -38,22 +38,22 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
     const navigate = useNavigate();
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
     const [levelList, setLevelList] = useState([
-        {
-            name: "Vendor",
-            value: "vendor"
-        },
+        // {
+        //     name: "Vendor",
+        //     value: "vendor"
+        // },
         {
             name: "Business",
             value: "business"
         },
-        // {
-        //     name: "Branch",
-        //     value: "branch"
-        // },
-        // {
-        //     name: "Warehouse",
-        //     value: "warehouse"
-        // },
+        {
+            name: "Branch",
+            value: "branch"
+        },
+        {
+            name: "Warehouse",
+            value: "warehouse"
+        },
     ])
 
     const [isDark] = useDarkMode();
@@ -360,9 +360,9 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
-                        businessUnit: baseAddress.businessUnit,
-                        branch: baseAddress.branch,
-                        warehouse: baseAddress.warehouse,
+                        businessUnit: baseAddress.businessUnit?._id,
+                        branch: baseAddress.branch?._id,
+                        warehouse: baseAddress.warehouse?._id,
                         VoucherGroupName: baseAddress?.name,
                         code: baseAddress?.code,
                         category: baseAddress?.category,

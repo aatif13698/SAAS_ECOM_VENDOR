@@ -195,9 +195,9 @@ const Ledger = ({ noFade, scrollContent }) => {
         id: id,
         clientId: clinetId
       }
-      const response = await ledgerGroupService.activeInactive(dataObject);
+      const response = await ledgerService.activeInactive(dataObject);
       setTotalRows(response?.data?.data?.count);
-      setPaginationData(response?.data?.data?.ledgerGroup);
+      setPaginationData(response?.data?.data?.ledgers);
       toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
       setShowLoadingModal(false)
     } catch (error) {
@@ -208,6 +208,24 @@ const Ledger = ({ noFade, scrollContent }) => {
   };
   //   ------- Data Table Columns ---
   const columns = [
+    {
+      name: "Level",
+      selector: (row) => {
+        if (row?.isBuLevel) {
+          return row?.businessUnit?.name
+        } else if (row?.isBranchLevel) {
+          return row?.branch?.name
+        } else if (row?.isWarehouseLevel) {
+          return row?.warehouse?.name
+        } else {
+          return "Invalid Level"
+        }
+      },
+      sortable: true,
+      style: {
+        width: "20px", // Set the desired width here
+      },
+    },
     {
       name: "Name",
       selector: (row) => row?.ledgerName,
@@ -326,9 +344,9 @@ const Ledger = ({ noFade, scrollContent }) => {
     debounceFunction(
       async (nextValue) => {
         try {
-          const response = await ledgerGroupService.getList(page, nextValue, perPage, currentLevel, levelId);
+          const response = await ledgerService.getList(page, nextValue, perPage, currentLevel, levelId);
           setTotalRows(response?.data?.count);
-          setPaginationData(response?.data?.ledgerGroup);
+          setPaginationData(response?.data?.ledgers);
         } catch (error) {
           console.error("Error while fetching:", error);
         }
@@ -361,23 +379,23 @@ const Ledger = ({ noFade, scrollContent }) => {
   // ------Performing Action when page change -----------
   const handlePageChange = async (page) => {
     try {
-      const response = await ledgerGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
+      const response = await ledgerService.getList(page, keyWord, perPage, currentLevel, levelId);
       setTotalRows(response?.data?.count);
-      setPaginationData(response?.data?.ledgerGroup);
+      setPaginationData(response?.data?.ledgers);
       setPage(page);
     } catch (error) {
-      console.log("error while fetching ledger group");
+      console.log("error while fetching ledger");
     }
   };
   // ------Handling Action after the perPage data change ---------
   const handlePerRowChange = async (perPage) => {
     try {
-      const response = await ledgerGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
+      const response = await ledgerService.getList(page, keyWord, perPage, currentLevel, levelId);
       setTotalRows(response?.data?.count);
-      setPaginationData(response?.data?.ledgerGroup);
+      setPaginationData(response?.data?.ledgers);
       setPerPage(perPage);
     } catch (error) {
-      console.log("error while fetching ledger group");
+      console.log("error while fetching ledger");
     }
     setPerPage(perPage);
   };

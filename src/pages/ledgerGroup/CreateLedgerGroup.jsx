@@ -36,22 +36,22 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
     const navigate = useNavigate();
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
     const [levelList, setLevelList] = useState([
-        {
-            name: "Vendor",
-            value: "vendor"
-        },
+        // {
+        //     name: "Vendor",
+        //     value: "vendor"
+        // },
         {
             name: "Business",
             value: "business"
         },
-        // {
-        //     name: "Branch",
-        //     value: "branch"
-        // },
-        // {
-        //     name: "Warehouse",
-        //     value: "warehouse"
-        // },
+        {
+            name: "Branch",
+            value: "branch"
+        },
+        {
+            name: "Warehouse",
+            value: "warehouse"
+        },
     ])
 
     const [isDark] = useDarkMode();
@@ -81,29 +81,27 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
         parentGroup: "",
     });
 
-    console.log("ledgerData", ledgerData);
-
 
     useEffect(() => {
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
                 setLevelList([
-                    {
-                        name: "Vendor",
-                        value: "vendor"
-                    },
+                    // {
+                    //     name: "Vendor",
+                    //     value: "vendor"
+                    // },
                     {
                         name: "Business",
                         value: "business"
                     },
-                    // {
-                    //     name: "Branch",
-                    //     value: "branch"
-                    // },
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ])
             } else if (currentUser.isBuLevel) {
                 setLevelList([
@@ -111,34 +109,34 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                         name: "Business",
                         value: "business"
                     },
-                    // {
-                    //     name: "Branch",
-                    //     value: "branch"
-                    // },
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ]);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
             } else if (currentUser.isBranchLevel) {
                 setLevelList([
-                    // {
-                    //     name: "Branch",
-                    //     value: "branch"
-                    // },
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ]);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
             } else if (currentUser.isWarehouseLevel) {
                 setLevelList([
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ])
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
             }
@@ -260,7 +258,18 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (businessUnit) {
-            getBranchByBusiness(businessUnit)
+            getBranchByBusiness(businessUnit);
+            if (level === "business") {
+                console.log("level a",level );
+                console.log("businessUnit a",businessUnit );
+                
+                getAllParent(level, businessUnit);
+            }
+            if (!id) {
+                setFormData((prev) => {
+                    return { ...prev, parentGroup: "" }
+                })
+            }
         }
     }, [businessUnit]);
 
@@ -275,7 +284,15 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (branch) {
-            getWarehouseByBranch(branch)
+            getWarehouseByBranch(branch);
+            if (level === "branch") {
+                getAllParent(level, branch);
+            }
+            if (!id) {
+                setFormData((prev) => {
+                    return { ...prev, parentGroup: "" }
+                })
+            }
         }
     }, [branch]);
 
@@ -287,6 +304,17 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
             console.log("error while getting warehouse by branch");
         }
     }
+
+    useEffect(() => {
+        if (warehouse && level === "warehouse") {
+            getAllParent(level, warehouse);
+        }
+        if (!id) {
+            setFormData((prev) => {
+                return { ...prev, parentGroup: "" }
+            })
+        }
+    }, [warehouse]);
 
 
     const onSubmit = async (e) => {
@@ -359,9 +387,9 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
-                        businessUnit: baseAddress.businessUnit,
-                        branch: baseAddress.branch,
-                        warehouse: baseAddress.warehouse,
+                        businessUnit: baseAddress.businessUnit?._id,
+                        branch: baseAddress.branch?._id,
+                        warehouse: baseAddress.warehouse?._id,
                         groupName: baseAddress.groupName,
                         hasParent: baseAddress.hasParent,
                         parentGroup: baseAddress.parentGroup?._id
@@ -379,9 +407,9 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
         }
     }, [id, parentLedgers]);
 
-    async function getAllParent() {
+    async function getAllParent(level, levelId) {
         try {
-            const response = await ledgerGroupService.getAllParent(currentLevel, levelId);
+            const response = await ledgerGroupService.getAllParent(level, levelId);
             setParentLedgers(response?.data?.ledgerGroup);
         } catch (error) {
             console.log("error while fetching ledger group");
@@ -399,7 +427,6 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
             }
         }
         getActiveBusinessUnit();
-        getAllParent();
     }, []);
 
 
@@ -856,7 +883,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
                                 <>
 
-                                <h4 className="mb-2">Dynamic Fields</h4>
+                                    <h4 className="mb-2">Dynamic Fields</h4>
 
                                     <div className=" border-2 border-dashed border-lightBtn dark:border-darkBtn px-2 py-4">
 

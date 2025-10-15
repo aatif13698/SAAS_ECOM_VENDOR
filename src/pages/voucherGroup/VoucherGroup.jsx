@@ -123,7 +123,7 @@ const VoucherGroup = ({ noFade, scrollContent }) => {
             behavior: "smooth", // This makes the scrolling smooth
         });
     };
-   
+
     const handleView = (row) => {
         scrollToTop();
         const id = row._id;
@@ -205,6 +205,24 @@ const VoucherGroup = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
+            name: "Level",
+            selector: (row) => {
+                if (row?.isBuLevel) {
+                    return row?.businessUnit?.name
+                } else if (row?.isBranchLevel) {
+                    return row?.branch?.name
+                } else if (row?.isWarehouseLevel) {
+                    return row?.warehouse?.name
+                } else {
+                    return "Invalid Level"
+                }
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Name",
             selector: (row) => row?.name,
             sortable: true,
@@ -239,7 +257,7 @@ const VoucherGroup = ({ noFade, scrollContent }) => {
 
         },
 
-         {
+        {
             name: "Financial Year",
             selector: (row) => row?.financialYear?.name,
             sortable: true,
@@ -347,7 +365,7 @@ const VoucherGroup = ({ noFade, scrollContent }) => {
                 try {
                     const response = await voucherGroupService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.ledgerGroup);
+                    setPaginationData(response?.data?.voucherGroups);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }

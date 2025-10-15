@@ -571,22 +571,22 @@ function CreateLedger() {
 
   const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
   const [levelList, setLevelList] = useState([
-    {
-      name: "Vendor",
-      value: "vendor"
-    },
+    // {
+    //   name: "Vendor",
+    //   value: "vendor"
+    // },
     {
       name: "Business",
       value: "business"
     },
-    // {
-    //     name: "Branch",
-    //     value: "branch"
-    // },
-    // {
-    //     name: "Warehouse",
-    //     value: "warehouse"
-    // },
+    {
+      name: "Branch",
+      value: "branch"
+    },
+    {
+      name: "Warehouse",
+      value: "warehouse"
+    },
   ])
 
   const location = useLocation();
@@ -610,13 +610,21 @@ function CreateLedger() {
     if (currentUser && isAuthenticated) {
       if (currentUser.isVendorLevel) {
         setLevelList([
-          {
-            name: "Vendor",
-            value: "vendor"
-          },
+          // {
+          //     name: "Vendor",
+          //     value: "vendor"
+          // },
           {
             name: "Business",
             value: "business"
+          },
+          {
+            name: "Branch",
+            value: "branch"
+          },
+          {
+            name: "Warehouse",
+            value: "warehouse"
           },
         ])
       } else if (currentUser.isBuLevel) {
@@ -625,13 +633,35 @@ function CreateLedger() {
             name: "Business",
             value: "business"
           },
+          {
+            name: "Branch",
+            value: "branch"
+          },
+          {
+            name: "Warehouse",
+            value: "warehouse"
+          },
         ]);
         setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
       } else if (currentUser.isBranchLevel) {
-        setLevelList([]);
+        setLevelList([
+          {
+            name: "Branch",
+            value: "branch"
+          },
+          {
+            name: "Warehouse",
+            value: "warehouse"
+          },
+        ]);
         setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
       } else if (currentUser.isWarehouseLevel) {
-        setLevelList([])
+        setLevelList([
+          {
+            name: "Warehouse",
+            value: "warehouse"
+          },
+        ])
         setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
       }
     }
@@ -757,7 +787,15 @@ function CreateLedger() {
 
   useEffect(() => {
     if (businessUnit) {
-      getBranchByBusiness(businessUnit)
+      getBranchByBusiness(businessUnit);
+      if (level === "business") {
+        getLedgerGroups(level, businessUnit);
+      }
+      if (!id) {
+        setFormData((prev) => {
+          return { ...prev, ledgerGroupId: "" }
+        })
+      }
     }
   }, [businessUnit]);
 
@@ -772,7 +810,15 @@ function CreateLedger() {
 
   useEffect(() => {
     if (branch) {
-      getWarehouseByBranch(branch)
+      getWarehouseByBranch(branch);
+      if (level === "branch") {
+        getLedgerGroups(level, branch);
+      }
+      if (!id) {
+        setFormData((prev) => {
+          return { ...prev, ledgerGroupId: "" }
+        })
+      }
     }
   }, [branch]);
 
@@ -784,6 +830,17 @@ function CreateLedger() {
       console.log("error while getting warehouse by branch");
     }
   }
+
+  useEffect(() => {
+    if (warehouse && level === "warehouse") {
+      getLedgerGroups(level, warehouse);
+    }
+    if (!id) {
+      setFormData((prev) => {
+        return { ...prev, ledgerGroupId: "" }
+      })
+    }
+  }, [warehouse]);
 
 
 
@@ -896,9 +953,9 @@ function CreateLedger() {
           setFormData((prev) => ({
             ...prev,
             level: level,
-            businessUnit: baseAddress.businessUnit,
-            branch: baseAddress.branch,
-            warehouse: baseAddress.warehouse,
+            businessUnit: baseAddress.businessUnit?._id,
+            branch: baseAddress.branch?._id,
+            warehouse: baseAddress.warehouse?._id,
             ledgerName: baseAddress.ledgerName,
             alias: baseAddress.alias,
             ledgerGroupId: baseAddress.ledgerGroupId?._id,
@@ -939,12 +996,11 @@ function CreateLedger() {
       }
     }
     getActiveBusinessUnit();
-    getLedgerGroups();
   }, []);
 
-  async function getLedgerGroups() {
+  async function getLedgerGroups(level, levelId) {
     try {
-      const response = await ledgerGroupService.getAllLedgerGroup(currentLevel, levelId);
+      const response = await ledgerGroupService.getAllLedgerGroup(level, levelId);
       setLedgerGroups(response?.data?.ledgerGroup)
     } catch (error) {
       console.log("error while getting ledger groups", error);

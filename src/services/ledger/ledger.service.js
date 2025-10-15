@@ -69,6 +69,14 @@ const getAll = async ( currentLevel, levelId) => {
     }
 };
 
+const activeInactive = async (data) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/l/activeInactive/ledger`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
 
 
 
@@ -144,14 +152,7 @@ const create = async (data) => {
     });
 };
 
-const activeInactive = async (data) => {
-    const authToken = await localStorage.getItem("saas_client_token");
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/lg/activeInactive/ledgerGroup`, data, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
-    });
-};
+
 
 const update = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");

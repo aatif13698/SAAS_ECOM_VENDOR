@@ -208,6 +208,24 @@ const LedgerGroup = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
+            name: "Level",
+            selector: (row) => {
+                if (row?.isBuLevel) {
+                    return row?.businessUnit?.name
+                } else if (row?.isBranchLevel) {
+                    return row?.branch?.name
+                } else if (row?.isWarehouseLevel) {
+                    return row?.warehouse?.name
+                } else {
+                    return "Invalid Level"
+                }
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Name",
             selector: (row) => row?.groupName,
             sortable: true,
