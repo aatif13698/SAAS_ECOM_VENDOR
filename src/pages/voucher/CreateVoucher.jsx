@@ -20,22 +20,22 @@ function CreateVoucher({ noFade, scrollContent }) {
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
     const [levelList, setLevelList] = useState([
-        {
-            name: "Vendor",
-            value: "vendor"
-        },
+        // {
+        //     name: "Vendor",
+        //     value: "vendor"
+        // },
         {
             name: "Business",
             value: "business"
         },
-        // {
-        //     name: "Branch",
-        //     value: "branch"
-        // },
-        // {
-        //     name: "Warehouse",
-        //     value: "warehouse"
-        // },
+        {
+            name: "Branch",
+            value: "branch"
+        },
+        {
+            name: "Warehouse",
+            value: "warehouse"
+        },
     ])
 
     const location = useLocation();
@@ -57,7 +57,6 @@ function CreateVoucher({ noFade, scrollContent }) {
     const [selectedFinancialYear, setSelectedFinancialYear] = useState(null);
     const [selectedCurrency, setSelectedCurrency] = useState(null);
 
-    console.log("selectedFinancialYear", selectedFinancialYear);
 
     const [formData, setFormData] = useState({
         level: "",
@@ -74,6 +73,9 @@ function CreateVoucher({ noFade, scrollContent }) {
         financialYear: '',
         currency: ''
     });
+
+    console.log("formData", formData);
+
     const [formDataErr, setFormDataErr] = useState({
         level: "",
         businessUnit: "",
@@ -84,8 +86,6 @@ function CreateVoucher({ noFade, scrollContent }) {
         financialYear: "",
         currency: ""
     });
-    console.log("formData", formData);
-    console.log("financialYears", financialYears);
 
 
     const {
@@ -108,22 +108,22 @@ function CreateVoucher({ noFade, scrollContent }) {
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
                 setLevelList([
-                    {
-                        name: "Vendor",
-                        value: "vendor"
-                    },
+                    // {
+                    //     name: "Vendor",
+                    //     value: "vendor"
+                    // },
                     {
                         name: "Business",
                         value: "business"
                     },
-                    // {
-                    //     name: "Branch",
-                    //     value: "branch"
-                    // },
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ])
             } else if (currentUser.isBuLevel) {
                 setLevelList([
@@ -131,34 +131,34 @@ function CreateVoucher({ noFade, scrollContent }) {
                         name: "Business",
                         value: "business"
                     },
-                    // {
-                    //     name: "Branch",
-                    //     value: "branch"
-                    // },
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ]);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
             } else if (currentUser.isBranchLevel) {
                 setLevelList([
-                    // {
-                    //     name: "Branch",
-                    //     value: "branch"
-                    // },
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ]);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
             } else if (currentUser.isWarehouseLevel) {
                 setLevelList([
-                    // {
-                    //     name: "Warehouse",
-                    //     value: "warehouse"
-                    // },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
                 ])
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
             }
@@ -218,7 +218,6 @@ function CreateVoucher({ noFade, scrollContent }) {
         if (level === "warehouse") {
             errors.warehouse = validateField("warehouse", warehouse);
         }
-        console.log("errors", errors);
 
         setFormDataErr((prev) => ({
             ...prev,
@@ -240,8 +239,6 @@ function CreateVoucher({ noFade, scrollContent }) {
 
                 }
             });
-            console.log("existInEntries", existInEntries);
-
             if (existInEntries) {
                 toast.error("same ledger can not be repeated")
             } else {
@@ -396,6 +393,8 @@ function CreateVoucher({ noFade, scrollContent }) {
                 try {
                     setPageLoading(true)
                     const baseAddress = location?.state?.row;
+                    console.log("baseAddress", baseAddress);
+
                     let level = "";
                     if (baseAddress.isBuLevel) {
                         level = "business"
@@ -406,15 +405,46 @@ function CreateVoucher({ noFade, scrollContent }) {
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
                     }
+
+                    const response = await voucherService.getLinkedVoucher(baseAddress?.voucherLinkId);
+
+                    console.log("response voucher linked", response);
+
+                    // {
+                    //     level: "",
+                    //         businessUnit: "",
+                    //             branch: "",
+                    //                 warehouse: "",
+
+                    //                     voucherGroup: '',
+                    //                         entries: [
+                    //                             { ledger: '', credit: '', debit: '', type: 'credit' }, // First row: Credit
+                    //                             { ledger: '', credit: '', debit: '', type: 'debit' },  // Second row: Debit
+                    //                         ],
+                    //                             narration: '',
+                    //                                 financialYear: '',
+                    //                                     currency: ''
+                    // }
+                    const entries = response?.data?.vouchers?.map((item) => {
+                        if (item?.credit !== 0) {
+                            return { ledger: item.ledger, credit: item?.credit, debit: "", type: 'credit' }
+                        } else if (item?.debit !== 0) {
+                            return { ledger: item.ledger, credit: "", debit: item?.debit, type: 'debit' }
+
+                        }
+                    });
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
                         businessUnit: baseAddress.businessUnit,
                         branch: baseAddress.branch,
                         warehouse: baseAddress.warehouse,
-                        groupName: baseAddress.groupName,
-                        hasParent: baseAddress.hasParent,
-                        parentGroup: baseAddress.parentGroup?._id
+                        voucherGroup: baseAddress?.voucherGroup,
+                        narration: baseAddress?.narration,
+                        financialYear: baseAddress?.financialYear?._id,
+                        currency: baseAddress?.currency?._id,
+                        entries: entries
+
                     }));
                     setPageLoading(false)
                 } catch (error) {
@@ -439,7 +469,6 @@ function CreateVoucher({ noFade, scrollContent }) {
     async function getActiveBusinessUnit() {
         try {
             const response = await warehouseService.getActiveBusinessUnit();
-            console.log("respone active", response);
             setActiveBusinessUnits(response?.data?.businessUnits)
         } catch (error) {
             console.log("error while getting the active business unit", error);
@@ -449,7 +478,6 @@ function CreateVoucher({ noFade, scrollContent }) {
     async function getFinancialYears() {
         try {
             const response = await voucherService.getAllFinancialYear();
-            console.log("respone fy ", response);
             setFinancialYear(response?.data?.financialYears);
             setSelectedFinancialYear(response?.data?.financialYears[0])
             setFormData((prev) => {
@@ -463,7 +491,6 @@ function CreateVoucher({ noFade, scrollContent }) {
     async function getCurrencies() {
         try {
             const response = await voucherService.getAllCurrencies();
-            console.log("respone cu ", response);
             setCurrencies(response?.data?.currencies);
             setSelectedCurrency(response?.data?.currencies[0])
             setFormData((prev) => {
@@ -502,9 +529,6 @@ function CreateVoucher({ noFade, scrollContent }) {
     const [voucherGroups, setVoucherGroups] = useState([]);
     const [ledgers, setLedgers] = useState([])
 
-    console.log("voucherGroups", voucherGroups);
-
-
     useEffect(() => {
         if (level) {
             if (level == "vendor") {
@@ -527,9 +551,11 @@ function CreateVoucher({ noFade, scrollContent }) {
         try {
             const response = await voucherGroupService.getAll(level, levelId);
             setVoucherGroups(response?.data?.voucherGroups);
-            setFormData((prev) => {
-                return { ...prev, voucherGroup: "" }
-            })
+            if (!id) {
+                setFormData((prev) => {
+                    return { ...prev, voucherGroup: "" }
+                })
+            }
         } catch (error) {
             console.log("error while fetching voucher groups");
         }
@@ -540,15 +566,16 @@ function CreateVoucher({ noFade, scrollContent }) {
             const response = await ledgerService.getAll(level, levelId);
             console.log("response lll", response);
             setLedgers(response?.data?.ledgers);
-
-            setFormData((prev) => {
-                const entries = prev.entries.map((item) => {
-                    return { ...item, ledger: "" }
+            if (!id) {
+                setFormData((prev) => {
+                    const entries = prev.entries.map((item) => {
+                        return { ...item, ledger: "" }
+                    })
+                    return {
+                        ...prev, entries: entries
+                    }
                 })
-                return {
-                    ...prev, entries: entries
-                }
-            })
+            }
         } catch (error) {
             console.log("error while fetching ledger account");
         }

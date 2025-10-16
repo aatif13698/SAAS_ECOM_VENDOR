@@ -131,7 +131,7 @@ const Voucher = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-voucher-group", { state: { id, row, name } });
+        navigate("/create-voucher", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -139,7 +139,7 @@ const Voucher = ({ noFade, scrollContent }) => {
         const name = "edit"
         setUserId(id);
         setIsViewed(false);
-        navigate("/create-voucher-group", { state: { id, row, name } });
+        navigate("/create-voucher", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
