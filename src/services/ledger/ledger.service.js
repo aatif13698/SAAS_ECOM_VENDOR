@@ -14,6 +14,16 @@ const submitFormData = async (data) => {
 };
 
 
+const updateFormData = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/l/update/ledger`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+
 
 
 const getFormData = async (id) => {
@@ -49,7 +59,7 @@ const getFormData = async (id) => {
 
 
 
-const getAll = async ( currentLevel, levelId) => {
+const getAll = async (currentLevel, levelId) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
@@ -271,7 +281,7 @@ export default {
     getList,
     getFormData,
     getAll,
-
+    updateFormData,
 
 
     create,

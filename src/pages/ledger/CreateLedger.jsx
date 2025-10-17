@@ -30,6 +30,10 @@ const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
 
 function CreateLedger() {
   const [isDark] = useDarkmode();
+  const location = useLocation();
+  const row = location?.state?.row;
+  const name = location?.state?.name;
+  const id = location?.state?.id;
 
   const navigate = useNavigate();
   const [existingFields, setExistingFields] = useState([]);
@@ -39,7 +43,6 @@ function CreateLedger() {
   const [customizationValues, setCustomizationValues] = useState({});
   const [ledgerGroups, setLedgerGroups] = useState([]);
 
-  // console.log("customizationValues", customizationValues);
 
 
   // Cropper states
@@ -51,8 +54,8 @@ function CreateLedger() {
   const [currentFieldName, setCurrentFieldName] = useState(null);
   const [currentAspectRation, setCurrentAspectRation] = useState(null);
   const [customData, setCustomData] = useState(null);
+  const [customDataId, setCustomDataId] = useState(null);
 
-  // console.log("customData", customData);
 
 
 
@@ -99,6 +102,8 @@ function CreateLedger() {
     openingBalance,
     openingDate,
   } = formData;
+
+
 
   const [formDataErr, setFormDataErr] = useState({
     level: "",
@@ -277,7 +282,13 @@ function CreateLedger() {
   }
 
 
-
+  function formatDate(isoDate) {
+    const date = new Date(isoDate);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 
 
 
@@ -333,6 +344,7 @@ function CreateLedger() {
               name="select"
               options={options}
               classNamePrefix="select"
+              value={customizationValues[fieldName] || ""}
               onChange={(selected) => handleInputChange(fieldName, selected, field)}
             />
             {errors[fieldName] && (
@@ -537,7 +549,16 @@ function CreateLedger() {
           }
         }
       });
-      const response = await ledgerService.submitFormData(formData);
+
+      if (id) {
+        formData.append("ledgerId", id);
+        formData.append("ledgerCustomDataId", customDataId);
+        const response = await ledgerService.updateFormData(formData);
+      } else {
+        const response = await ledgerService.submitFormData(formData);
+      }
+
+
       Swal.fire({
         position: "top-end",
         icon: "success",
@@ -589,10 +610,7 @@ function CreateLedger() {
     },
   ])
 
-  const location = useLocation();
-  const row = location?.state?.row;
-  const name = location?.state?.name;
-  const id = location?.state?.id;
+
 
   const [pageLoading, setPageLoading] = useState(true);
   const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
@@ -848,7 +866,8 @@ function CreateLedger() {
     try {
       setIsPageLoading(true);
       const response = await ledgerService.getFormData(decryptedFormId);
-      console.log("response cutom data", response?.data);
+
+      setCustomDataId(response?.data?.data?._id)
 
       const fieldsData = response?.data?.data || null;
       const otherThanFile = fieldsData?.otherThanFiles;
@@ -947,9 +966,7 @@ function CreateLedger() {
           } else if (baseAddress.isBranchLevel) {
             level = "branch"
           }
-
           setLedgerData(baseAddress)
-
           setFormData((prev) => ({
             ...prev,
             level: level,
@@ -970,7 +987,6 @@ function CreateLedger() {
             creditDays: baseAddress.creditDays,
             openingBalance: baseAddress.openingBalance,
             openingDate: baseAddress.openingDate,
-
           }));
           setPageLoading(false)
         } catch (error) {
@@ -1334,7 +1350,7 @@ function CreateLedger() {
               name="openingDate"
               type="date"
               placeholder="Enter credit days"
-              value={openingDate}
+              value={id ? formatDate(openingDate) : openingDate}
               onChange={handleChange}
               className="form-control py-2"
               disabled={isViewed}
