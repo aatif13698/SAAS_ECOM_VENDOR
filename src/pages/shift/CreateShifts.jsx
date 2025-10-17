@@ -757,6 +757,50 @@ const CreateShifts = ({ noFade, scrollContent }) => {
                                             />
                                             {formDataErr?.duration && <p className="text-sm text-red-500">{formDataErr.duration}</p>}
                                         </label>
+                                           <label className={`fromGroup ${formDataErr?.days ? "has-error" : ""}`}>
+                                            <p className="form-label">
+                                                Days <span className="text-red-500">*</span>
+                                            </p>
+                                            <Select
+                                                isMulti
+                                                name="days"
+                                                options={daysOptions}
+                                                value={daysOptions.filter(option => days.includes(option.value))}
+                                                onChange={handleDaysChange}
+                                                isDisabled={isViewed}
+                                                // className="react-select-container"
+                                                classNamePrefix="react-select"
+                                                styles={{
+                                                    control: (base) => ({
+                                                        ...base,
+                                                        backgroundColor: isDark ? '#385151' : '#fff',
+                                                        borderColor: isDark ? '#4a5568' : '#e2e8f0',
+                                                        color: isDark ? '#fff' : '#000',
+                                                        // padding: '0.5rem',
+                                                        borderRadius: '0.375rem',
+                                                    }),
+                                                    menu: (base) => ({
+                                                        ...base,
+                                                        backgroundColor: isDark ? '#385151' : '#fff',
+                                                        color: isDark ? '#fff' : '#000',
+                                                        zIndex: 9999
+
+                                                    }),
+                                                    multiValue: (base) => ({
+                                                        ...base,
+                                                        backgroundColor: isDark ? '#4a5568' : '#ff0d0d',
+                                                        color: isDark ? '#fff' : '#ff0d0d'
+                                                    }),
+                                                    multiValueLabel: (base) => ({
+                                                        ...base,
+                                                        color: isDark ? '#fff' : '#fff'
+                                                    })
+                                                }}
+                                                placeholder="Select Days"
+                                            />
+                                            {formDataErr?.days && <p className="text-red-600 text-xs">{formDataErr.days}</p>}
+                                        </label>
+
 
                                         <label className={`fromGroup   ${formDataErr?.shiftType !== "" ? "has-error" : ""
                                             } `}>
@@ -846,48 +890,7 @@ const CreateShifts = ({ noFade, scrollContent }) => {
                                             {<p className="text-red-600  text-xs">{formDataErr.frequency}</p>}
                                         </label>
 
-                                        <label className={`fromGroup ${formDataErr?.days ? "has-error" : ""}`}>
-                                            <p className="form-label">
-                                                Days <span className="text-red-500">*</span>
-                                            </p>
-                                            <Select
-                                                isMulti
-                                                name="days"
-                                                options={daysOptions}
-                                                value={daysOptions.filter(option => days.includes(option.value))}
-                                                onChange={handleDaysChange}
-                                                isDisabled={isViewed}
-                                                className="react-select-container"
-                                                classNamePrefix="react-select"
-                                                styles={{
-                                                    control: (base) => ({
-                                                        ...base,
-                                                        backgroundColor: isDark ? '#1a202c' : '#fff',
-                                                        borderColor: isDark ? '#4a5568' : '#e2e8f0',
-                                                        color: isDark ? '#fff' : '#000',
-                                                        padding: '0.5rem',
-                                                        borderRadius: '0.375rem'
-                                                    }),
-                                                    menu: (base) => ({
-                                                        ...base,
-                                                        backgroundColor: isDark ? '#1a202c' : '#fff',
-                                                        color: isDark ? '#fff' : '#000'
-                                                    }),
-                                                    multiValue: (base) => ({
-                                                        ...base,
-                                                        backgroundColor: isDark ? '#4a5568' : '#ff0d0d',
-                                                        color: isDark ? '#fff' : '#ff0d0d'
-                                                    }),
-                                                    multiValueLabel: (base) => ({
-                                                        ...base,
-                                                        color: isDark ? '#fff' : '#fff'
-                                                    })
-                                                }}
-                                                placeholder="Select Days"
-                                            />
-                                            {formDataErr?.days && <p className="text-red-600 text-xs">{formDataErr.days}</p>}
-                                        </label>
-
+                                     
 
                                         <label
                                             className={`fromGroup   ${formDataErr?.notes !== "" ? "has-error" : ""
