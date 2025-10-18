@@ -93,6 +93,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 
 
+const PuchaseOrder = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"))
 
 
 
@@ -102,6 +103,7 @@ import { useDispatch } from "react-redux";
 import ForgotPassword from "./Common/forgotPassword/ForgotPassword";
 import ResetPassword from "./Common/resetPassword/ResetPassword";
 import Error from "./pages/404";
+import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
 
@@ -166,6 +168,9 @@ function App() {
                 />
 
                 <Route path="dashboard" element={<Dashboard />} />
+                <Route path="purchase/order" element={<PurchaseOrderPage />} />
+
+
 
 
 
