@@ -64,6 +64,9 @@ const CreateAsset = lazy(() => import("./pages/assets/CreateAsset"));
 const Shifts = lazy(() => import("./pages/shift/Shifts"));
 const CreateShifts = lazy(() => import("./pages/shift/CreateShifts"));
 
+const LeaveCategory = lazy(() => import("./pages/leaveCategory/LeaveCategory"));
+const CreateLeaveCategory = lazy(() => import("./pages/leaveCategory/CreateLeaveCategory"));
+
 
 const CreateLedgerGrop = lazy(() => import("./pages/ledgerGroup/CreateLedgerGroup"));
 const LedgerGroup = lazy(() => import("./pages/ledgerGroup/LedgerGroup"));
@@ -93,7 +96,7 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 
 
-const PuchaseOrder = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"))
+const PurchaseOrderPage = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"))
 
 
 
@@ -103,7 +106,7 @@ const PuchaseOrder = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"))
 import ForgotPassword from "./Common/forgotPassword/ForgotPassword";
 import ResetPassword from "./Common/resetPassword/ResetPassword";
 import Error from "./pages/404";
-import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
+// import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
 
@@ -201,6 +204,8 @@ function App() {
 
                 <Route path="/assets-tools-list" element={<Asset />} />
                 <Route path="create-assets-tools" element={<CreateAsset />} />
+                <Route path="leave-category-list" element={<LeaveCategory />} />
+                <Route path="create-leave-category" element={<CreateLeaveCategory />} />
 
 
 
