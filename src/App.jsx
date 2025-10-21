@@ -38,6 +38,8 @@ const Manufacturer = lazy(() => import("./pages/manufacturer/Manufacturer"));
 const Attribute = lazy(() => import("./pages/attribute/Attributes"));
 const ProductBluePrint = lazy(() => import("./pages/productBlueprint/ProductBluePrint"))
 const CreateProductBluePrint = lazy(() => import("./pages/productBlueprint/createProductBluePrint"));
+const Holiday = lazy(() => import("./pages/holiday/Holiday"));
+const CreateHoliday = lazy(() => import("./pages/holiday/CreateHoliday"));
 
 const Variant2 = lazy(() => import("./pages/variant/Variant2"))
 
@@ -206,6 +208,8 @@ function App() {
                 <Route path="create-assets-tools" element={<CreateAsset />} />
                 <Route path="leave-category-list" element={<LeaveCategory />} />
                 <Route path="create-leave-category" element={<CreateLeaveCategory />} />
+                <Route path="holiday-list" element={<Holiday />} />
+                <Route path="create-holiday" element={<CreateHoliday />} />
 
 
 
