@@ -94,6 +94,8 @@ const Navmenu = ({ menus }) => {
           // && menu.name !== "Shift"
           // && menu.name !== "Documents"
           // && menu.name !== "Assets & Tools"
+          && menu.name !== "Leave Category"
+          && menu.name !== "Holiday"
         ))
         .forEach((menu) => {
           const normalizedMenuName = lowerCase(menu.name).replace(/\s+/g, "-");
