@@ -88,7 +88,7 @@ const PurchaseOrderPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
+      <div className=" mx-auto bg-white shadow-lg rounded-lg p-6">
         <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-800">Purchase Order</h1>
         
         <form onSubmit={handleSubmit}>
