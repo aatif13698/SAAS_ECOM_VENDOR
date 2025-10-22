@@ -1002,7 +1002,7 @@ const CreateProductBluePrint = ({ noFade, scrollContent }) => {
                                         <label className={`fromGroup   ${formDataErr?.isCustomizable !== "" ? "has-error" : ""
                                             } `}>
                                             <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
-                                                Is Customiseabl
+                                                Is Customisable
                                             </p>
                                             <div
                                                 className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${isCustomizable ? "bg-lightBtn" : "bg-darkBtn"

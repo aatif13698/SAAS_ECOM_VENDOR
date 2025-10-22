@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, Fragment, useState } from 'react';
 import { BsPlus } from "react-icons/bs";
-import { Card, Modal, Box, Typography, Button, IconButton } from "@mui/material";
+import { Card, Modal, Box, Typography, IconButton } from "@mui/material";
 import useDarkmode from '@/hooks/useDarkMode';
 import { GoTrash, GoCheck } from "react-icons/go";
 import supplierService from '@/services/supplier/supplier.service';
+import { Dialog, Transition } from "@headlessui/react";
+import Icon from "@/components/ui/Icon";
+import Button from '../../components/ui/Button';
 
-const PurchaseOrderPage = () => {
+const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const [isDark] = useDarkmode();
   const [formData, setFormData] = useState({
     supplier: null, // Changed to store supplier object
@@ -133,14 +136,20 @@ const PurchaseOrderPage = () => {
                   <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
                     <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
                     {formData.supplier && (
+                      // <Button
+                      //   variant="outlined"
+                      //   size="small"
+                      //   onClick={() => setOpenModal(true)}
+                      //   className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
+                      // >
+                      //   Change Party
+                      // </Button>
+
                       <Button
-                        variant="outlined"
-                        size="small"
-                        onClick={() => setOpenModal(true)}
-                        className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
-                      >
-                        Change Party
-                      </Button>
+                        text=" Change Party"
+                        // className="border bg-red-300 rounded px-5 py-2"
+                        className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                        onClick={() => setOpenModal(true)} />
                     )}
                   </div>
                   <div className='h-[80%] p-4'>
@@ -173,9 +182,9 @@ const PurchaseOrderPage = () => {
                   <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg'>
                     <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
                   </div>
-                  <div className="h-[80%] p-2 grid grid-cols-1 gap-4">
+                  <div className="h-[80%] p-2 grid grid-cols-2 gap-2">
                     <div>
-                      <label className="formGroup">Purchase Order Number</label>
+                      <label className="text-sm">Purchase Inv No</label>
                       <input
                         type="text"
                         name="poNumber"
@@ -186,7 +195,7 @@ const PurchaseOrderPage = () => {
                       />
                     </div>
                     <div>
-                      <label className="formGroup">Purchase Order Date</label>
+                      <label className="text-sm">Purchase Inv Date</label>
                       <input
                         type="date"
                         name="poDate"
@@ -195,6 +204,37 @@ const PurchaseOrderPage = () => {
                         className="form-control py-2"
                         required
                       />
+                    </div>
+
+                    <div className='  md:col-span-2 1 border-dashed border-2 p-[3px] '>
+
+                      <div className='flex md:flex-row flex-col gap-2 justify-between'>
+                        <div className=''>
+                          <label className="text-sm">Due Date</label>
+                          <input
+                            type="date"
+                            name="poDate"
+                            value={formData.poDate}
+                            onChange={handleInputChange}
+                            className="form-control w-full py-2"
+                            required
+                          />
+                        </div>
+
+                        <div className=''>
+                          <label className="text-sm">Due Days</label>
+                          <input
+                            type="date"
+                            name="poDate"
+                            value={formData.poDate}
+                            onChange={handleInputChange}
+                            className="form-control w-full py-2"
+                            required
+                          />
+                        </div>
+                      </div>
+
+
                     </div>
                   </div>
                 </div>
@@ -371,8 +411,118 @@ const PurchaseOrderPage = () => {
         </div>
       </Card>
 
+
+
       {/* Supplier Selection Modal */}
-      <Modal
+      <Transition appear show={openModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-[99999]"
+          onClose={() => setOpenModal(false)}
+        >
+          {(
+            <Transition.Child
+              as={Fragment}
+              enter={noFade ? "" : "duration-300 ease-out"}
+              enterFrom={noFade ? "" : "opacity-0"}
+              enterTo={noFade ? "" : "opacity-100"}
+              leave={noFade ? "" : "duration-200 ease-in"}
+              leaveFrom={noFade ? "" : "opacity-100"}
+              leaveTo={noFade ? "" : "opacity-0"}
+            >
+              <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+            </Transition.Child>
+          )}
+          <div
+            className="fixed inset-0 "
+          >
+            <div
+              className={`flex min-h-full justify-center text-center p-6 items-center "
+                                    }`}
+            >
+              <Transition.Child
+                as={Fragment}
+                enter={noFade ? "" : "duration-300  ease-out"}
+                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                leave={noFade ? "" : "duration-200 ease-in"}
+                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+              >
+                <Dialog.Panel
+                  className={`w-full transform  rounded-md
+                                        text-left align-middle shadow-xl transition-alll max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                >
+                  <div
+                    className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                  >
+                    <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                      Select Party
+                    </h2>
+                    <button onClick={() => setOpenModal(false)} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                      <Icon icon="heroicons-outline:x" />
+                    </button>
+                  </div>
+
+                  {suppliers.length > 0 ? (
+                    suppliers.map((supplier) => (
+                      <div
+                        key={supplier._id}
+                        className={`p-2 my-2 mx-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
+                          }`}
+                        onClick={() => handleSelectSupplier(supplier)}
+                      >
+                        <div>
+                          <p className="font-medium ">{supplier.name}</p>
+                          <p className="text-sm ">{supplier.contactPerson} - {supplier.emailContact}</p>
+                        </div>
+                        {formData.supplier?._id === supplier._id && (
+                          <GoCheck className="text-green-500" />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <Typography className={isDark ? 'text-gray-300' : 'text-gray-500'}>
+                      No suppliers available
+                    </Typography>
+                  )}
+
+
+                  {(
+                    <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
+                      <div className="flex gap-2">
+                        <Button
+                          text="Cancel"
+                          // className="border bg-red-300 rounded px-5 py-2"
+                          className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
+                          onClick={() => setOpenModal(false)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+    </div>
+  );
+};
+
+export default PurchaseOrderPage;
+
+
+
+
+
+
+
+
+
+
+
+{/* <Modal
         open={openModal}
         onClose={() => setOpenModal(false)}
         aria-labelledby="supplier-modal-title"
@@ -384,31 +534,25 @@ const PurchaseOrderPage = () => {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: 400,
-          bgcolor: isDark ? '#1d3736' : 'white',
+          bgcolor: isDark ? 'rgb(31, 41, 55)' : 'white',
           border: '1px solid',
-          borderColor: isDark ? 'white' : 'rgb(209, 213, 219)',
+          borderColor: isDark ? 'rgb(75, 85, 99)' : 'rgb(209, 213, 219)',
           boxShadow: 24,
           borderRadius: 2,
           maxHeight: '80vh',
           display: 'flex',
           flexDirection: 'column',
         }}>
-          {/* Header */}
-          <Box sx={{
-            p: 2,
-            borderBottom: `1px solid ${isDark ? 'white' : 'rgb(209, 213, 219)'}`,
-          }}>
-            <Typography
-              id="supplier-modal-title"
-              variant="h6"
-              component="h2"
-              className={isDark ? 'text-white' : 'text-gray-700'}
-            >
-              Select Supplier
-            </Typography>
-          </Box>
-
-          {/* Main Content */}
+          <div
+            className={`relative overflow-hidden rounded-t-lg py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+          >
+            <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+              Select Party
+            </h2>
+            <button onClick={() => setOpenModal(false)} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+              <Icon icon="heroicons-outline:x" />
+            </button>
+          </div>
           <Box sx={{
             p: 2,
             flex: 1,
@@ -418,13 +562,13 @@ const PurchaseOrderPage = () => {
               suppliers.map((supplier) => (
                 <div
                   key={supplier._id}
-                  className={`p-2 mb-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
+                  className={`p-2 mb-2 rounded cursor-pointer hover:bg-indigo-100 flex justify-between items-center ${formData.supplier?._id === supplier._id ? 'bg-indigo-50' : ''
                     }`}
                   onClick={() => handleSelectSupplier(supplier)}
                 >
                   <div>
-                    <p className="font-medium ">{supplier.name}</p>
-                    <p className="text-sm ">{supplier.contactPerson} - {supplier.emailContact}</p>
+                    <p className="font-medium">{supplier.name}</p>
+                    <p className="text-sm text-gray-500">{supplier.contactPerson} - {supplier.emailContact}</p>
                   </div>
                   {formData.supplier?._id === supplier._id && (
                     <GoCheck className="text-green-500" />
@@ -437,26 +581,17 @@ const PurchaseOrderPage = () => {
               </Typography>
             )}
           </Box>
-
-          {/* Footer */}
-          <Box sx={{
-            p: 2,
-            borderTop: `1px solid ${isDark ? 'white' : 'rgb(209, 213, 219)'}`,
-            display: 'flex',
-            justifyContent: 'flex-end',
-          }}>
-            <Button
-              onClick={() => setOpenModal(false)}
-              variant="outlined"
-              className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
-            >
-              Close
-            </Button>
-          </Box>
+          {(
+            <div className="px-4 py-3 rounded-b-lg flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
+              <div className="flex gap-2">
+                <Button
+                  text="Close"
+                  // className="border bg-red-300 rounded px-5 py-2"
+                  className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
+                  onClick={() => setOpenModal(false)}
+                />
+              </div>
+            </div>
+          )}
         </Box>
-      </Modal>
-    </div>
-  );
-};
-
-export default PurchaseOrderPage;
+      </Modal> */}

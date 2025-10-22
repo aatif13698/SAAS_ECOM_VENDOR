@@ -769,7 +769,7 @@ function Variant2({ centered, noFade, scrollContent }) {
 
                                                 <label className={`fromGroup   `}>
                                                     <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
-                                                        unit <span className="text-red-500">*</span>
+                                                      Measuring Unit <span className="text-red-500">*</span>
                                                     </p>
                                                     <input
                                                         name="unit"
