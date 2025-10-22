@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { BsPlus } from "react-icons/bs";
+import { Card, Modal, Box, Typography, Button, IconButton } from "@mui/material";
+import useDarkmode from '@/hooks/useDarkMode';
+import { GoTrash, GoCheck } from "react-icons/go";
+import supplierService from '@/services/supplier/supplier.service';
 
 const PurchaseOrderPage = () => {
+  const [isDark] = useDarkmode();
   const [formData, setFormData] = useState({
-    supplier: '',
+    supplier: null, // Changed to store supplier object
     shippingAddress: {
       street: '',
       city: '',
@@ -21,12 +27,8 @@ const PurchaseOrderPage = () => {
       branch: '',
     },
   });
-
-  const [suppliers] = useState([
-    { id: '1', name: 'Supplier A' },
-    { id: '2', name: 'Supplier B' },
-    // Add more suppliers or fetch from API
-  ]);
+  const [suppliers, setSuppliers] = useState([]);
+  const [openModal, setOpenModal] = useState(false);
 
   const handleInputChange = (e, section) => {
     const { name, value } = e.target;
@@ -81,291 +83,378 @@ const PurchaseOrderPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!formData.supplier) {
+      alert('Please select a supplier before submitting.');
+      return;
+    }
     console.log('Purchase Order Data:', formData);
     // Submit to API here
     alert('Purchase Order submitted successfully!');
   };
 
+  const handleSelectSupplier = (supplier) => {
+    setFormData({
+      ...formData,
+      supplier,
+      shippingAddress: {
+        street: supplier.address || '',
+        city: supplier.city || '',
+        state: supplier.state || '',
+        zip: supplier.ZipCode || '',
+        country: supplier.country || '',
+      },
+    });
+    setOpenModal(false);
+  };
+
+  useEffect(() => {
+    const getParties = async () => {
+      try {
+        const response = await supplierService.getAllActive();
+        setSuppliers(response?.data || []);
+      } catch (error) {
+        console.error("Error fetching suppliers:", error);
+      }
+    };
+    getParties();
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
-      <div className=" mx-auto bg-white shadow-lg rounded-lg p-6">
-        <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center text-gray-800">Purchase Order</h1>
-        
-        <form onSubmit={handleSubmit}>
-          {/* Section 1: Supplier, PO Details, and Shipping Address (Three Cards) */}
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Order Details</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Card 1: Supplier */}
-              <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-                <h3 className="text-lg font-medium mb-2 text-gray-700">Supplier</h3>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Select Supplier</label>
-                  <select
-                    name="supplier"
-                    value={formData.supplier}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  >
-                    <option value="">Select Supplier</option>
-                    {suppliers.map((supplier) => (
-                      <option key={supplier.id} value={supplier.id}>
-                        {supplier.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Card 2: Purchase Order Details */}
-              <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-                <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Purchase Order Number</label>
-                    <input
-                      type="text"
-                      name="poNumber"
-                      value={formData.poNumber}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                    />
+    <div>
+      <Card>
+        <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
+          <form onSubmit={handleSubmit}>
+            {/* Section 1: Supplier, PO Details, and Shipping Address */}
+            <section className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">Purchase Invoice</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Card 1: Supplier */}
+                <div className="bg-white dark:bg-transparent col-span-2 rounded-lg border border-gray-200">
+                  <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
+                    <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
+                    {formData.supplier && (
+                      <Button
+                        variant="outlined"
+                        size="small"
+                        onClick={() => setOpenModal(true)}
+                        className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
+                      >
+                        Change Party
+                      </Button>
+                    )}
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">Purchase Order Date</label>
-                    <input
-                      type="date"
-                      name="poDate"
-                      value={formData.poDate}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                      required
-                    />
+                  <div className='h-[80%] p-4'>
+                    {formData.supplier ? (
+                      <div className="text-sm">
+                        <p><strong>Name:</strong> {formData.supplier.name}</p>
+                        <p><strong>Contact Person:</strong> {formData.supplier.contactPerson}</p>
+                        <p><strong>Email:</strong> {formData.supplier.emailContact}</p>
+                        <p><strong>Contact Number:</strong> {formData.supplier.contactNumber}</p>
+                        <p><strong>Address:</strong> {formData.supplier.address}, {formData.supplier.city}, {formData.supplier.state}, {formData.supplier.ZipCode}, {formData.supplier.country}</p>
+                        <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber}</p>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => setOpenModal(true)}
+                        className='flex items-center p-4 hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+                      >
+                        <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
+                        <span className='text-lightHoverBgBtn dark:text-darkBtn'>
+                          Add Party
+                        </span>
+                      </button>
+                    )}
                   </div>
                 </div>
-              </div>
 
-              {/* Card 3: Shipping Address */}
-              <div className="bg-white shadow-md rounded-lg p-4 border border-gray-200">
-                <h3 className="text-lg font-medium mb-2 text-gray-700">Shipping Address</h3>
-                <div className="grid grid-cols-1 gap-4">
-                  <input
-                    type="text"
-                    name="street"
-                    placeholder="Street"
-                    value={formData.shippingAddress.street}
-                    onChange={(e) => handleInputChange(e, 'shippingAddress')}
-                    className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="City"
-                    value={formData.shippingAddress.city}
-                    onChange={(e) => handleInputChange(e, 'shippingAddress')}
-                    className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="state"
-                    placeholder="State"
-                    value={formData.shippingAddress.state}
-                    onChange={(e) => handleInputChange(e, 'shippingAddress')}
-                    className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="zip"
-                    placeholder="ZIP Code"
-                    value={formData.shippingAddress.zip}
-                    onChange={(e) => handleInputChange(e, 'shippingAddress')}
-                    className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
-                  <input
-                    type="text"
-                    name="country"
-                    placeholder="Country"
-                    value={formData.shippingAddress.country}
-                    onChange={(e) => handleInputChange(e, 'shippingAddress')}
-                    className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-                    required
-                  />
+                {/* Card 2: PO Details */}
+                <div className="bg-white dark:bg-transparent rounded-lg border border-gray-200">
+                  <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg'>
+                    <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
+                  </div>
+                  <div className="h-[80%] p-2 grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="formGroup">Purchase Order Number</label>
+                      <input
+                        type="text"
+                        name="poNumber"
+                        value={formData.poNumber}
+                        onChange={handleInputChange}
+                        className="form-control py-2"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="formGroup">Purchase Order Date</label>
+                      <input
+                        type="date"
+                        name="poDate"
+                        value={formData.poDate}
+                        onChange={handleInputChange}
+                        className="form-control py-2"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          {/* Section 2: Items Table */}
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Items</h2>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-300">
-                <thead>
-                  <tr className="bg-gray-200">
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">SR. NO</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Item Name</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">MRP</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Discount</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Taxable Amount</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Tax Percent (%)</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Tax Amount</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Total Amount</th>
-                    <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {formData.items.map((item, index) => (
-                    <tr key={index}>
-                      <td className="py-2 px-4 border border-gray-300">{item.srNo}</td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        <input
-                          type="text"
-                          name="itemName"
-                          value={item.itemName}
-                          onChange={(e) => handleItemChange(index, e)}
-                          className="w-full rounded-md border border-gray-300 p-1 focus:ring-indigo-500 focus:border-indigo-500"
-                          required
-                        />
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        <input
-                          type="number"
-                          name="mrp"
-                          value={item.mrp}
-                          onChange={(e) => handleItemChange(index, e)}
-                          className="w-full rounded-md border border-gray-300 p-1 focus:ring-indigo-500 focus:border-indigo-500"
-                          min="0"
-                          step="0.01"
-                          required
-                        />
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        <input
-                          type="number"
-                          name="discount"
-                          value={item.discount}
-                          onChange={(e) => handleItemChange(index, e)}
-                          className="w-full rounded-md border border-gray-300 p-1 focus:ring-indigo-500 focus:border-indigo-500"
-                          min="0"
-                          step="0.01"
-                        />
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300 text-right">{item.taxableAmount.toFixed(2)}</td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        <input
-                          type="number"
-                          name="taxPercent"
-                          value={item.taxPercent}
-                          onChange={(e) => handleItemChange(index, e)}
-                          className="w-full rounded-md border border-gray-300 p-1 focus:ring-indigo-500 focus:border-indigo-500"
-                          min="0"
-                          step="0.01"
-                        />
-                      </td>
-                      <td className="py-2 px-4 border border-gray-300 text-right">{item.tax.toFixed(2)}</td>
-                      <td className="py-2 px-4 border border-gray-300 text-right">{item.totalAmount.toFixed(2)}</td>
-                      <td className="py-2 px-4 border border-gray-300">
-                        <button
-                          type="button"
-                          onClick={() => removeItem(index)}
-                          className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 disabled:opacity-50"
-                          disabled={formData.items.length === 1}
-                        >
-                          Remove
-                        </button>
-                      </td>
+            {/* Section 2: Items Table */}
+            <section className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">Items</h2>
+              <div className="overflow-x-auto">
+                <table className="min-w-full bg-white dark:bg-transparent border border-gray-300">
+                  <thead>
+                    <tr className="bg-gray-200 dark:bg-transparent">
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">SR. NO</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Item Name</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">MRP</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Discount</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white w-[10rem]">Taxable Amount</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Tax Percent (%)</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white w-[10rem]">Tax Amount</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white w-[10rem]">Total Amount</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-                <tfoot>
-                  <tr className="bg-gray-100">
-                    <td colSpan={3} className="py-2 px-4 border border-gray-300"></td>
-                    <td className="py-2 px-4 border border-gray-300 text-right font-medium">Total Discount: {totals.totalDiscount.toFixed(2)}</td>
-                    <td className="py-2 px-4 border border-gray-300 text-right font-medium">Total Taxable: {totals.totalTaxable.toFixed(2)}</td>
-                    <td className="py-2 px-4 border border-gray-300"></td>
-                    <td className="py-2 px-4 border border-gray-300 text-right font-medium">Total Taxes: {totals.totalTaxes.toFixed(2)}</td>
-                    <td className="py-2 px-4 border border-gray-300 text-right font-bold">Grand Total: {totals.grandTotal.toFixed(2)}</td>
-                    <td className="py-2 px-4 border border-gray-300"></td>
-                  </tr>
-                </tfoot>
-              </table>
+                  </thead>
+                  <tbody>
+                    {formData.items.map((item, index) => (
+                      <tr key={index}>
+                        <td className="py-2 px-4 border border-gray-300">{item.srNo}</td>
+                        <td className="py-2 px-4 border border-gray-300">
+                          <input
+                            type="text"
+                            name="itemName"
+                            value={item.itemName}
+                            onChange={(e) => handleItemChange(index, e)}
+                            className="form-control py-2"
+                            required
+                          />
+                        </td>
+                        <td className="py-2 px-4 border border-gray-300">
+                          <input
+                            type="number"
+                            name="mrp"
+                            value={item.mrp}
+                            onChange={(e) => handleItemChange(index, e)}
+                            className="form-control py-2"
+                            min="0"
+                            step="0.01"
+                            required
+                          />
+                        </td>
+                        <td className="py-2 px-4 border border-gray-300">
+                          <input
+                            type="number"
+                            name="discount"
+                            value={item.discount}
+                            onChange={(e) => handleItemChange(index, e)}
+                            className="form-control py-2"
+                            min="0"
+                            step="0.01"
+                          />
+                        </td>
+                        <td className="py-2 px-4 border border-gray-300 text-right">{item.taxableAmount.toFixed(2)}</td>
+                        <td className="py-2 px-4 border border-gray-300 w-[10rem]">
+                          <input
+                            type="number"
+                            name="taxPercent"
+                            value={item.taxPercent}
+                            onChange={(e) => handleItemChange(index, e)}
+                            className="form-control py-2"
+                            min="0"
+                            step="0.01"
+                          />
+                        </td>
+                        <td className="py-2 px-4 border border-gray-300 text-right w-[10rem]">{item.tax.toFixed(2)}</td>
+                        <td className="py-2 px-4 border border-gray-300 text-right w-[10rem]">{item.totalAmount.toFixed(2)}</td>
+                        <td className="py-2 px-4 border border-gray-300 text-center">
+                          <button
+                            type="button"
+                            onClick={() => removeItem(index)}
+                            className="bg-gray-100 text-white px-2 py-1 rounded hover:bg-gray-200 disabled:opacity-50"
+                            disabled={formData.items.length === 1}
+                          >
+                            <GoTrash className='text-gray-500' />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot>
+                    <tr className="bg-gray-100 dark:bg-transparent">
+                      <td colSpan={3} className="py-2 px-4 border border-gray-300"></td>
+                      <td className="py-2 px-4 border border-gray-300 text-left font-medium text-sm">Total Discount: {totals.totalDiscount.toFixed(2)}</td>
+                      <td className="py-2 px-4 border border-gray-300 text-left font-medium text-sm">Total Taxable: {totals.totalTaxable.toFixed(2)}</td>
+                      <td className="py-2 px-4 border border-gray-300"></td>
+                      <td className="py-2 px-4 border border-gray-300 text-left font-medium text-sm">Total Taxes: {totals.totalTaxes.toFixed(2)}</td>
+                      <td className="py-2 px-4 border border-gray-300 text-left font-bold text-sm">Grand Total: {totals.grandTotal.toFixed(2)}</td>
+                      <td className="py-2 px-4 border border-gray-300"></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <button
+                type="button"
+                onClick={addItem}
+                className='mt-2 flex items-center p-2 hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+              >
+                <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
+                <span className='text-lightHoverBgBtn dark:text-darkBtn'>
+                  Add Item
+                </span>
+              </button>
+            </section>
+
+            {/* Section 3: Notes */}
+            <section className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">Notes</h2>
+              <textarea
+                name="notes"
+                value={formData.notes}
+                onChange={handleInputChange}
+                className="form-control py-2"
+                rows="4"
+              />
+            </section>
+
+            {/* Section 4: Bank Details */}
+            <section className="mb-8">
+              <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  name="bankName"
+                  placeholder="Bank Name"
+                  value={formData.bankDetails.bankName}
+                  onChange={(e) => handleInputChange(e, 'bankDetails')}
+                  className="form-control py-2"
+                />
+                <input
+                  type="text"
+                  name="accountNumber"
+                  placeholder="Account Number"
+                  value={formData.bankDetails.accountNumber}
+                  onChange={(e) => handleInputChange(e, 'bankDetails')}
+                  className="form-control py-2"
+                />
+                <input
+                  type="text"
+                  name="ifscCode"
+                  placeholder="IFSC Code"
+                  value={formData.bankDetails.ifscCode}
+                  onChange={(e) => handleInputChange(e, 'bankDetails')}
+                  className="form-control py-2"
+                />
+                <input
+                  type="text"
+                  name="branch"
+                  placeholder="Branch"
+                  value={formData.bankDetails.branch}
+                  onChange={(e) => handleInputChange(e, 'bankDetails')}
+                  className="form-control py-2"
+                />
+              </div>
+            </section>
+
+            <div className="text-right">
+              <button
+                type="submit"
+                className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
+              >
+                Submit Purchase Order
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={addItem}
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          </form>
+        </div>
+      </Card>
+
+      {/* Supplier Selection Modal */}
+      <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        aria-labelledby="supplier-modal-title"
+        aria-describedby="supplier-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: isDark ? '#1d3736' : 'white',
+          border: '1px solid',
+          borderColor: isDark ? 'white' : 'rgb(209, 213, 219)',
+          boxShadow: 24,
+          borderRadius: 2,
+          maxHeight: '80vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {/* Header */}
+          <Box sx={{
+            p: 2,
+            borderBottom: `1px solid ${isDark ? 'white' : 'rgb(209, 213, 219)'}`,
+          }}>
+            <Typography
+              id="supplier-modal-title"
+              variant="h6"
+              component="h2"
+              className={isDark ? 'text-white' : 'text-gray-700'}
             >
-              Add Item
-            </button>
-          </section>
+              Select Supplier
+            </Typography>
+          </Box>
 
-          {/* Section 3: Notes */}
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Notes</h2>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleInputChange}
-              className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              rows="4"
-            />
-          </section>
+          {/* Main Content */}
+          <Box sx={{
+            p: 2,
+            flex: 1,
+            overflowY: 'auto',
+          }}>
+            {suppliers.length > 0 ? (
+              suppliers.map((supplier) => (
+                <div
+                  key={supplier._id}
+                  className={`p-2 mb-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
+                    }`}
+                  onClick={() => handleSelectSupplier(supplier)}
+                >
+                  <div>
+                    <p className="font-medium ">{supplier.name}</p>
+                    <p className="text-sm ">{supplier.contactPerson} - {supplier.emailContact}</p>
+                  </div>
+                  {formData.supplier?._id === supplier._id && (
+                    <GoCheck className="text-green-500" />
+                  )}
+                </div>
+              ))
+            ) : (
+              <Typography className={isDark ? 'text-gray-300' : 'text-gray-500'}>
+                No suppliers available
+              </Typography>
+            )}
+          </Box>
 
-          {/* Section 4: Bank Details */}
-          <section className="mb-8">
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input
-                type="text"
-                name="bankName"
-                placeholder="Bank Name"
-                value={formData.bankDetails.bankName}
-                onChange={(e) => handleInputChange(e, 'bankDetails')}
-                className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <input
-                type="text"
-                name="accountNumber"
-                placeholder="Account Number"
-                value={formData.bankDetails.accountNumber}
-                onChange={(e) => handleInputChange(e, 'bankDetails')}
-                className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <input
-                type="text"
-                name="ifscCode"
-                placeholder="IFSC Code"
-                value={formData.bankDetails.ifscCode}
-                onChange={(e) => handleInputChange(e, 'bankDetails')}
-                className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-              <input
-                type="text"
-                name="branch"
-                placeholder="Branch"
-                value={formData.bankDetails.branch}
-                onChange={(e) => handleInputChange(e, 'bankDetails')}
-                className="block w-full rounded-md border border-gray-300 shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
-          </section>
-
-          <div className="text-center">
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
+          {/* Footer */}
+          <Box sx={{
+            p: 2,
+            borderTop: `1px solid ${isDark ? 'white' : 'rgb(209, 213, 219)'}`,
+            display: 'flex',
+            justifyContent: 'flex-end',
+          }}>
+            <Button
+              onClick={() => setOpenModal(false)}
+              variant="outlined"
+              className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
             >
-              Submit Purchase Order
-            </button>
-          </div>
-        </form>
-      </div>
+              Close
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 };

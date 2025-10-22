@@ -87,6 +87,22 @@ const activeInActive = async ({ id, status, page, keyword: keyWord, perPage }) =
 
 
 
+const getAllActive = async () => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/get/active/supplier/${clinetId}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+    
+}
+
+
+
+
 
 
 
@@ -105,4 +121,5 @@ export default {
     deleteOne,
     activeInActive,
     update,
+    getAllActive
 }
