@@ -771,34 +771,34 @@ const Orders = ({ noFade, scrollContent }) => {
             sortable: true,
             style: { width: "auto" },
         },
-        {
-            name: "Status",
-            sortable: true,
-            selector: (row) => (
-                <span className="block w-full">
-                    <span
-                        className={`inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${row?.status === "PENDING"
-                            ? "text-yellow-500 bg-yellow-500"
-                            : row?.status === "APPROVED"
-                                ? "text-green-500 bg-green-500"
-                                : row?.status === "DISAPPROVED"
-                                    ? "text-red-500 bg-red-500"
-                                    : row?.status === "IN_PRODUCTION"
-                                        ? "text-blue-500 bg-blue-500"
-                                        : row?.status === "SHIPPED"
-                                            ? "text-purple-500 bg-purple-500"
-                                            : row?.status === "DELIVERED"
-                                                ? "text-teal-500 bg-teal-500"
-                                                : row?.status === "CANCELLED"
-                                                    ? "text-gray-500 bg-gray-500"
-                                                    : ""
-                            }`}
-                    >
-                        {row.status}
-                    </span>
-                </span>
-            ),
-        },
+        // {
+        //     name: "Status",
+        //     sortable: true,
+        //     selector: (row) => (
+        //         <span className="block w-full">
+        //             <span
+        //                 className={`inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 ${row?.status === "PENDING"
+        //                     ? "text-yellow-500 bg-yellow-500"
+        //                     : row?.status === "APPROVED"
+        //                         ? "text-green-500 bg-green-500"
+        //                         : row?.status === "DISAPPROVED"
+        //                             ? "text-red-500 bg-red-500"
+        //                             : row?.status === "IN_PRODUCTION"
+        //                                 ? "text-blue-500 bg-blue-500"
+        //                                 : row?.status === "SHIPPED"
+        //                                     ? "text-purple-500 bg-purple-500"
+        //                                     : row?.status === "DELIVERED"
+        //                                         ? "text-teal-500 bg-teal-500"
+        //                                         : row?.status === "CANCELLED"
+        //                                             ? "text-gray-500 bg-gray-500"
+        //                                             : ""
+        //                     }`}
+        //             >
+        //                 {row.status}
+        //             </span>
+        //         </span>
+        //     ),
+        // },
         {
             name: "Action",
             selector: (row) => (
