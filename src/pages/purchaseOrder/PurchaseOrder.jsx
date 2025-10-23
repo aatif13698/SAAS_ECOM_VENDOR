@@ -377,9 +377,13 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
             <hr className="my-8 border-gray-300" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Two-column layout with vertical divider */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+              {/* Vertical divider */}
+              <div className="hidden md:block absolute top-0 bottom-0 left-1/2 transform -translate-x-1/2 w-px bg-gray-300"></div>
+
               {/* Left Side: Notes and Bank Details */}
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6 pr-4">
                 {/* Notes Section */}
                 <section>
                   {showNotesInput ? (
@@ -488,7 +492,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
               </div>
 
               {/* Right Side: Payment Description */}
-              <div className="flex flex-col gap-6">
+              <div className="flex flex-col gap-6 pl-4">
                 {/* Detailed Payment Summary */}
                 <section>
                   <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Summary</h2>
@@ -614,8 +618,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
             className="fixed inset-0 "
           >
             <div
-              className={`flex min-h-full justify-center text-center p-6 items-center "}
-                                    }`}
+              className={`flex min-h-full justify-center text-center p-6 items-center `}
             >
               <Transition.Child
                 as={Fragment}
@@ -627,16 +630,15 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                 leaveTo={noFade ? "" : "opacity-0 scale-95"}
               >
                 <Dialog.Panel
-                  className={`w-full transform  rounded-md
-                                        text-left align-middle shadow-xl transition-alll max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                  className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
                 >
                   <div
                     className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                   >
-                    <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                    <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
                       Select Party
                     </h2>
-                    <button onClick={() => setOpenModal(false)} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                    <button onClick={() => setOpenModal(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                       <Icon icon="heroicons-outline:x" />
                     </button>
                   </div>
@@ -652,8 +654,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                           onClick={() => handleSelectSupplier(supplier)}
                         >
                           <div>
-                            <p className="font-medium ">{supplier.name}</p>
-                            <p className="text-sm ">{supplier.contactPerson} - {supplier.emailContact}</p>
+                            <p className="font-medium">{supplier.name}</p>
+                            <p className="text-sm">{supplier.contactPerson} - {supplier.emailContact}</p>
                           </div>
                           {formData.supplier?._id === supplier._id && (
                             <GoCheck className="text-green-500" />
@@ -667,17 +669,13 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     )}
                   </div>
 
-                  {(
-                    <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
-                      <div className="flex gap-2">
-                        <Button
-                          text="Cancel"
-                          className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
-                          onClick={() => setOpenModal(false)}
-                        />
-                      </div>
-                    </div>
-                  )}
+                  <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary bg-white dark:bg-darkInput">
+                    <Button
+                      text="Cancel"
+                      className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText px-4 py-2 rounded"
+                      onClick={() => setOpenModal(false)}
+                    />
+                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
@@ -689,7 +687,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 };
 
 export default PurchaseOrderPage;
-
 
 
 
