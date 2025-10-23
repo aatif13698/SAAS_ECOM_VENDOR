@@ -1,6 +1,6 @@
 import React, { useEffect, Fragment, useState } from 'react';
 import { BsPlus } from "react-icons/bs";
-import { Card, Modal, Box, Typography, IconButton } from "@mui/material";
+import { Card } from "@mui/material";
 import useDarkmode from '@/hooks/useDarkMode';
 import { GoTrash, GoCheck } from "react-icons/go";
 import supplierService from '@/services/supplier/supplier.service';
@@ -10,8 +10,9 @@ import Button from '../../components/ui/Button';
 
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const [isDark] = useDarkmode();
+  const buyerState = "West Bengal"; // Assuming buyer's state; adjust as needed
   const [formData, setFormData] = useState({
-    supplier: null, // Changed to store supplier object
+    supplier: null,
     shippingAddress: {
       street: '',
       city: '',
@@ -21,7 +22,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     },
     poNumber: '',
     poDate: new Date().toISOString().split('T')[0],
-    items: [{ srNo: 1, itemName: '', mrp: 0, discount: 0, taxableAmount: 0, taxPercent: 0, tax: 0, totalAmount: 0 }],
+    items: [{ srNo: 1, itemName: '', mrp: 0, discount: 0, taxableAmount: 0, gstPercent: 0, cgstPercent: 0, sgstPercent: 0, igstPercent: 0, cgst: 0, sgst: 0, igst: 0, tax: 0, totalAmount: 0 }],
     notes: '',
     bankDetails: {
       bankName: '',
@@ -29,9 +30,16 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       ifscCode: '',
       branch: '',
     },
+    isInterState: false,
+    roundOff: false,
+    paymentMethod: '',
+    paidAmount: 0,
+    balance: 0,
   });
   const [suppliers, setSuppliers] = useState([]);
   const [openModal, setOpenModal] = useState(false);
+  const [showNotesInput, setShowNotesInput] = useState(false);
+  const [showBankInput, setShowBankInput] = useState(false);
 
   const handleInputChange = (e, section) => {
     const { name, value } = e.target;
@@ -45,16 +53,35 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     }
   };
 
+  const calculateTaxes = (item) => {
+    const rate = item.gstPercent;
+    if (formData.isInterState) {
+      item.igstPercent = rate;
+      item.cgstPercent = 0;
+      item.sgstPercent = 0;
+      item.igst = item.taxableAmount * rate / 100;
+      item.cgst = 0;
+      item.sgst = 0;
+    } else {
+      item.cgstPercent = rate / 2;
+      item.sgstPercent = rate / 2;
+      item.igstPercent = 0;
+      item.cgst = item.taxableAmount * (rate / 2) / 100;
+      item.sgst = item.cgst;
+      item.igst = 0;
+    }
+    item.tax = item.cgst + item.sgst + item.igst;
+    item.totalAmount = item.taxableAmount + item.tax;
+  };
+
   const handleItemChange = (index, e) => {
     const { name, value } = e.target;
     const newItems = [...formData.items];
     newItems[index] = { ...newItems[index], [name]: name === 'itemName' ? value : parseFloat(value) || 0 };
 
-    // Calculate taxableAmount, tax, and totalAmount
     const item = newItems[index];
     item.taxableAmount = item.mrp - item.discount;
-    item.tax = item.taxableAmount * (item.taxPercent / 100);
-    item.totalAmount = item.taxableAmount + item.tax;
+    calculateTaxes(item);
 
     setFormData({ ...formData, items: newItems });
   };
@@ -63,7 +90,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     const newSrNo = formData.items.length + 1;
     setFormData({
       ...formData,
-      items: [...formData.items, { srNo: newSrNo, itemName: '', mrp: 0, discount: 0, taxableAmount: 0, taxPercent: 0, tax: 0, totalAmount: 0 }],
+      items: [...formData.items, { srNo: newSrNo, itemName: '', mrp: 0, discount: 0, taxableAmount: 0, gstPercent: 0, cgstPercent: 0, sgstPercent: 0, igstPercent: 0, cgst: 0, sgst: 0, igst: 0, tax: 0, totalAmount: 0 }],
     });
   };
 
@@ -78,11 +105,20 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     const totalTaxable = formData.items.reduce((sum, item) => sum + item.taxableAmount, 0);
     const totalTaxes = formData.items.reduce((sum, item) => sum + item.tax, 0);
     const totalDiscount = formData.items.reduce((sum, item) => sum + item.discount, 0);
-    const grandTotal = formData.items.reduce((sum, item) => sum + item.totalAmount, 0);
-    return { totalTaxable, totalTaxes, totalDiscount, grandTotal };
+    const totalCGST = formData.items.reduce((sum, item) => sum + item.cgst, 0);
+    const totalSGST = formData.items.reduce((sum, item) => sum + item.sgst, 0);
+    const totalIGST = formData.items.reduce((sum, item) => sum + item.igst, 0);
+    const grandTotal = totalTaxable + totalTaxes;
+    const roundOffAmount = formData.roundOff ? Math.round(grandTotal) - grandTotal : 0;
+    const finalTotal = grandTotal + roundOffAmount;
+    return { totalTaxable, totalTaxes, totalDiscount, totalCGST, totalSGST, totalIGST, grandTotal, roundOffAmount, finalTotal };
   };
 
   const totals = calculateTotals();
+
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
+  }, [totals.finalTotal, formData.paidAmount]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -99,6 +135,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     setFormData({
       ...formData,
       supplier,
+      isInterState: supplier.state !== buyerState,
       shippingAddress: {
         street: supplier.address || '',
         city: supplier.city || '',
@@ -122,6 +159,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     getParties();
   }, []);
 
+  const isBankFilled = Object.values(formData.bankDetails).some(value => value !== '');
+
   return (
     <div>
       <Card>
@@ -136,20 +175,11 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                   <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
                     <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
                     {formData.supplier && (
-                      // <Button
-                      //   variant="outlined"
-                      //   size="small"
-                      //   onClick={() => setOpenModal(true)}
-                      //   className="text-indigo-600 border-indigo-600 hover:bg-indigo-50"
-                      // >
-                      //   Change Party
-                      // </Button>
-
                       <Button
                         text=" Change Party"
-                        // className="border bg-red-300 rounded px-5 py-2"
                         className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
-                        onClick={() => setOpenModal(true)} />
+                        onClick={() => setOpenModal(true)}
+                      />
                     )}
                   </div>
                   <div className='h-[80%] p-4'>
@@ -182,7 +212,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                   <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg'>
                     <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
                   </div>
-                  <div className="h-[80%] p-2 grid grid-cols-2 gap-2">
+                  <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="text-sm">Purchase Inv No</label>
                       <input
@@ -206,10 +236,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                       />
                     </div>
 
-                    <div className='  md:col-span-2 1 border-dashed border-2 p-[3px] '>
-
+                    <div className='col-span-1 md:col-span-2 border-dashed border-2 p-[3px]'>
                       <div className='flex md:flex-row flex-col gap-2 justify-between'>
-                        <div className=''>
+                        <div className='w-full'>
                           <label className="text-sm">Due Date</label>
                           <input
                             type="date"
@@ -221,7 +250,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                           />
                         </div>
 
-                        <div className=''>
+                        <div className='w-full'>
                           <label className="text-sm">Due Days</label>
                           <input
                             type="date"
@@ -233,8 +262,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                           />
                         </div>
                       </div>
-
-
                     </div>
                   </div>
                 </div>
@@ -253,7 +280,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                       <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">MRP</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Discount</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white w-[10rem]">Taxable Amount</th>
-                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Tax Percent (%)</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">GST (%)</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white w-[10rem]">Tax Amount</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white w-[10rem]">Total Amount</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-sm font-medium text-gray-700 dark:text-white">Actions</th>
@@ -300,8 +327,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                         <td className="py-2 px-4 border border-gray-300 w-[10rem]">
                           <input
                             type="number"
-                            name="taxPercent"
-                            value={item.taxPercent}
+                            name="gstPercent"
+                            value={item.gstPercent}
                             onChange={(e) => handleItemChange(index, e)}
                             className="form-control py-2"
                             min="0"
@@ -348,58 +375,210 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
               </button>
             </section>
 
-            {/* Section 3: Notes */}
-            <section className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">Notes</h2>
-              <textarea
-                name="notes"
-                value={formData.notes}
-                onChange={handleInputChange}
-                className="form-control py-2"
-                rows="4"
-              />
-            </section>
+            <hr className="my-8 border-gray-300" />
 
-            {/* Section 4: Bank Details */}
-            <section className="mb-8">
-              <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="bankName"
-                  placeholder="Bank Name"
-                  value={formData.bankDetails.bankName}
-                  onChange={(e) => handleInputChange(e, 'bankDetails')}
-                  className="form-control py-2"
-                />
-                <input
-                  type="text"
-                  name="accountNumber"
-                  placeholder="Account Number"
-                  value={formData.bankDetails.accountNumber}
-                  onChange={(e) => handleInputChange(e, 'bankDetails')}
-                  className="form-control py-2"
-                />
-                <input
-                  type="text"
-                  name="ifscCode"
-                  placeholder="IFSC Code"
-                  value={formData.bankDetails.ifscCode}
-                  onChange={(e) => handleInputChange(e, 'bankDetails')}
-                  className="form-control py-2"
-                />
-                <input
-                  type="text"
-                  name="branch"
-                  placeholder="Branch"
-                  value={formData.bankDetails.branch}
-                  onChange={(e) => handleInputChange(e, 'bankDetails')}
-                  className="form-control py-2"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left Side: Notes and Bank Details */}
+              <div className="flex flex-col gap-6">
+                {/* Notes Section */}
+                <section>
+                  {showNotesInput ? (
+                    <div>
+                      <h2 className="text-xl font-semibold mb-4 text-gray-700">Notes</h2>
+                      <textarea
+                        name="notes"
+                        value={formData.notes}
+                        onChange={handleInputChange}
+                        className="form-control py-2 w-full"
+                        rows="4"
+                      />
+                      <Button
+                        text="Save"
+                        className="mt-2 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                        onClick={() => setShowNotesInput(false)}
+                      />
+                    </div>
+                  ) : formData.notes ? (
+                    <div>
+                      <h2 className="text-xl font-semibold mb-4 text-gray-700">Notes</h2>
+                      <p className="text-gray-700">{formData.notes}</p>
+                      <Button
+                        text="Edit Notes"
+                        className="mt-2 text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                        onClick={() => setShowNotesInput(true)}
+                      />
+                    </div>
+                  ) : (
+                    <Button
+                      text="Add Notes"
+                      className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                      onClick={() => setShowNotesInput(true)}
+                    />
+                  )}
+                </section>
+
+                {/* Bank Details Section */}
+                <section>
+                  {showBankInput ? (
+                    <div className="bg-white dark:bg-transparent rounded-lg border border-gray-200 p-4">
+                      <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input
+                          type="text"
+                          name="bankName"
+                          placeholder="Bank Name"
+                          value={formData.bankDetails.bankName}
+                          onChange={(e) => handleInputChange(e, 'bankDetails')}
+                          className="form-control py-2"
+                        />
+                        <input
+                          type="text"
+                          name="accountNumber"
+                          placeholder="Account Number"
+                          value={formData.bankDetails.accountNumber}
+                          onChange={(e) => handleInputChange(e, 'bankDetails')}
+                          className="form-control py-2"
+                        />
+                        <input
+                          type="text"
+                          name="ifscCode"
+                          placeholder="IFSC Code"
+                          value={formData.bankDetails.ifscCode}
+                          onChange={(e) => handleInputChange(e, 'bankDetails')}
+                          className="form-control py-2"
+                        />
+                        <input
+                          type="text"
+                          name="branch"
+                          placeholder="Branch"
+                          value={formData.bankDetails.branch}
+                          onChange={(e) => handleInputChange(e, 'bankDetails')}
+                          className="form-control py-2"
+                        />
+                      </div>
+                      <Button
+                        text="Save"
+                        className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                        onClick={() => setShowBankInput(false)}
+                      />
+                    </div>
+                  ) : isBankFilled ? (
+                    <div className="bg-white dark:bg-transparent rounded-lg border border-gray-200 p-4">
+                      <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
+                      <div className="text-sm">
+                        <p><strong>Bank Name:</strong> {formData.bankDetails.bankName}</p>
+                        <p><strong>Account Number:</strong> {formData.bankDetails.accountNumber}</p>
+                        <p><strong>IFSC Code:</strong> {formData.bankDetails.ifscCode}</p>
+                        <p><strong>Branch:</strong> {formData.bankDetails.branch}</p>
+                      </div>
+                      <Button
+                        text="Edit Bank Details"
+                        className="mt-4 text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                        onClick={() => setShowBankInput(true)}
+                      />
+                    </div>
+                  ) : (
+                    <Button
+                      text="Add Bank Detail"
+                      className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                      onClick={() => setShowBankInput(true)}
+                    />
+                  )}
+                </section>
               </div>
-            </section>
 
-            <div className="text-right">
+              {/* Right Side: Payment Description */}
+              <div className="flex flex-col gap-6">
+                {/* Detailed Payment Summary */}
+                <section>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Summary</h2>
+                  <div className="bg-white dark:bg-transparent rounded-lg border border-gray-200 p-4">
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span>Total Taxable Amount:</span>
+                      <span>{totals.totalTaxable.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span>Total CGST:</span>
+                      <span>{totals.totalCGST.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span>Total SGST:</span>
+                      <span>{totals.totalSGST.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span>Total IGST:</span>
+                      <span>{totals.totalIGST.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between mb-2 text-sm">
+                      <span>Total Tax Amount:</span>
+                      <span>{totals.totalTaxes.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-bold text-sm">
+                      <span>Grand Total:</span>
+                      <span>{totals.grandTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </section>
+
+                {/* Round Off Option */}
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="roundOff"
+                    checked={formData.roundOff}
+                    onChange={(e) => setFormData({ ...formData, roundOff: e.target.checked })}
+                  />
+                  <label className="text-sm text-gray-700">Round Off</label>
+                  {formData.roundOff && (
+                    <span className="text-sm text-gray-700">Round Off Amount: {totals.roundOffAmount.toFixed(2)}</span>
+                  )}
+                </div>
+
+                {/* Payment Options */}
+                <section>
+                  <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Options</h2>
+                  <div className="grid grid-cols-1 gap-4">
+                    <div>
+                      <label className="text-sm">Payment Method</label>
+                      <select
+                        name="paymentMethod"
+                        value={formData.paymentMethod}
+                        onChange={handleInputChange}
+                        className="form-control py-2 w-full"
+                      >
+                        <option value="">Select Method</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-sm">Paid Amount</label>
+                      <input
+                        type="number"
+                        name="paidAmount"
+                        value={formData.paidAmount}
+                        onChange={handleInputChange}
+                        className="form-control py-2 w-full"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span>Balance:</span>
+                      <span>{formData.balance.toFixed(2)}</span>
+                    </div>
+                    <Button
+                      text="Full Payment"
+                      className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                      onClick={() => setFormData({ ...formData, paidAmount: totals.finalTotal, balance: 0 })}
+                    />
+                  </div>
+                </section>
+              </div>
+            </div>
+
+            <div className="text-right mt-8">
               <button
                 type="submit"
                 className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700"
@@ -410,8 +589,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
           </form>
         </div>
       </Card>
-
-
 
       {/* Supplier Selection Modal */}
       <Transition appear show={openModal} as={Fragment}>
@@ -437,7 +614,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
             className="fixed inset-0 "
           >
             <div
-              className={`flex min-h-full justify-center text-center p-6 items-center "
+              className={`flex min-h-full justify-center text-center p-6 items-center "}
                                     }`}
             >
               <Transition.Child
@@ -464,36 +641,37 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     </button>
                   </div>
 
-                  {suppliers.length > 0 ? (
-                    suppliers.map((supplier) => (
-                      <div
-                        key={supplier._id}
-                        className={`p-2 my-2 mx-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
+                  <div className="p-4 overflow-y-auto max-h-[50vh]">
+                    {suppliers.length > 0 ? (
+                      suppliers.map((supplier) => (
+                        <div
+                          key={supplier._id}
+                          className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${
+                            formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
                           }`}
-                        onClick={() => handleSelectSupplier(supplier)}
-                      >
-                        <div>
-                          <p className="font-medium ">{supplier.name}</p>
-                          <p className="text-sm ">{supplier.contactPerson} - {supplier.emailContact}</p>
+                          onClick={() => handleSelectSupplier(supplier)}
+                        >
+                          <div>
+                            <p className="font-medium ">{supplier.name}</p>
+                            <p className="text-sm ">{supplier.contactPerson} - {supplier.emailContact}</p>
+                          </div>
+                          {formData.supplier?._id === supplier._id && (
+                            <GoCheck className="text-green-500" />
+                          )}
                         </div>
-                        {formData.supplier?._id === supplier._id && (
-                          <GoCheck className="text-green-500" />
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <Typography className={isDark ? 'text-gray-300' : 'text-gray-500'}>
-                      No suppliers available
-                    </Typography>
-                  )}
-
+                      ))
+                    ) : (
+                      <p className={isDark ? 'text-gray-300' : 'text-gray-500'}>
+                        No suppliers available
+                      </p>
+                    )}
+                  </div>
 
                   {(
                     <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
                       <div className="flex gap-2">
                         <Button
                           text="Cancel"
-                          // className="border bg-red-300 rounded px-5 py-2"
                           className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
                           onClick={() => setOpenModal(false)}
                         />
@@ -511,7 +689,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 };
 
 export default PurchaseOrderPage;
-
 
 
 
