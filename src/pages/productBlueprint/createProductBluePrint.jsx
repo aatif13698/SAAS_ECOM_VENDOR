@@ -17,6 +17,7 @@ import CreateOption from "./CreateOption";
 import Select from 'react-select';
 
 const commonFileTypes = [
+    { value: '*/*', label: 'Accept All (*.*)' },
     { value: 'image/jpeg', label: 'JPEG Image (.jpg, .jpeg)' },
     { value: 'image/png', label: 'PNG Image (.png)' },
     { value: 'image/gif', label: 'GIF Image (.gif)' },

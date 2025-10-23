@@ -173,7 +173,7 @@ function App() {
                 />
 
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="purchase/order" element={<PurchaseOrderPage />} />
+                <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
 
 
 
