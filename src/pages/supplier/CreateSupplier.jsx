@@ -1375,6 +1375,17 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                     </div>
                                 </form>
 
+                                 {
+                                    id ?
+                                        <button
+                                            onClick={() => navigate("/create-supplier/add/address", { state: { customerId: id } })}
+                                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                        >
+                                            Add Address
+                                        </button>
+                                        : ""
+                                }
+
 
                             </div>
                         </Card>

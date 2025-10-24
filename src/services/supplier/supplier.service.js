@@ -100,6 +100,50 @@ const getAllActive = async () => {
     
 }
 
+const getSupplierAddress = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/getAddresses/${clinetId}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response
+}
+
+
+
+const addAddress = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/addNewAddress`, {...data, clientId : clinetId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+const updateAddress = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/updateAddress`, {...data, clientId : clinetId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+const deleteAddress = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/deleteAddress`, {...data, clientId : clinetId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
 
 
 
@@ -121,5 +165,10 @@ export default {
     deleteOne,
     activeInActive,
     update,
-    getAllActive
+    getAllActive,
+    getSupplierAddress,
+    addAddress,
+    updateAddress,
+    deleteAddress
+
 }
