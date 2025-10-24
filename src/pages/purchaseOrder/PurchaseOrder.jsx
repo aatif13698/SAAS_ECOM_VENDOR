@@ -169,20 +169,20 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
             {/* Section 1: Supplier, PO Details, and Shipping Address */}
             <section className="mb-8">
               <h2 className="text-xl font-semibold mb-4 text-gray-700">Purchase Invoice</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* Card 1: Supplier */}
-                <div className="bg-white dark:bg-transparent col-span-2 rounded-lg border border-gray-200">
-                  <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
+                <div className={`bg-white dark:bg-transparent ${formData.supplier ? "lg:col-span-1 md:col-span-1" : "lg:col-span-2 md:col-span-2 "}   rounded-lg border border-gray-200`}>
+                  <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white lg:h-[20%] md:h-[30%] p-2 rounded-t-lg flex justify-between items-center'>
                     <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
                     {formData.supplier && (
                       <Button
                         text=" Change Party"
-                        className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                        className="text-indigo-600 border py-0 border-indigo-600 hover:bg-indigo-50"
                         onClick={() => setOpenModal(true)}
                       />
                     )}
                   </div>
-                  <div className='h-[80%] p-4'>
+                  <div className='lg:h-[80%] md:h-[88%] p-4'>
                     {formData.supplier ? (
                       <div className="text-sm">
                         <p><strong>Name:</strong> {formData.supplier.name}</p>
@@ -207,9 +207,48 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                   </div>
                 </div>
 
-                {/* Card 2: PO Details */}
-                <div className="bg-white dark:bg-transparent rounded-lg border border-gray-200">
-                  <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white h-[20%] p-2 rounded-t-lg'>
+                {/* card 2 */}
+                {formData.supplier && (
+                  <div className="bg-white dark:bg-transparent lg:col-span-1 md:col-span-1  rounded-lg border border-gray-200">
+                    <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white md:h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
+                      <h3 className="text-lg font-medium text-gray-700">Ship From</h3>
+                      {formData.supplier && (
+                        <Button
+                          text=" Change Shipping"
+                          className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
+                          onClick={() => setOpenModal(true)}
+                        />
+                      )}
+                    </div>
+                    <div className='h-[80%] p-4'>
+                      {formData.supplier ? (
+                        <div className="text-sm">
+                          <p><strong>Name:</strong> {formData.supplier.name}</p>
+                          <p><strong>Contact Person:</strong> {formData.supplier.contactPerson}</p>
+                          <p><strong>Email:</strong> {formData.supplier.emailContact}</p>
+                          <p><strong>Contact Number:</strong> {formData.supplier.contactNumber}</p>
+                          <p><strong>Address:</strong> {formData.supplier.address}, {formData.supplier.city}, {formData.supplier.state}, {formData.supplier.ZipCode}, {formData.supplier.country}</p>
+                          <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber}</p>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setOpenModal(true)}
+                          className='flex items-center p-4 hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+                        >
+                          <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
+                          <span className='text-lightHoverBgBtn dark:text-darkBtn'>
+                            Add Party
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Card 3: PO Details */}
+                <div className="bg-white dark:bg-transparent lg:col-span-1 md:col-span-2 rounded-lg border border-gray-200">
+                  <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white md:h-[20%] h-[12%] p-2 rounded-t-lg'>
                     <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
                   </div>
                   <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -648,9 +687,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                       suppliers.map((supplier) => (
                         <div
                           key={supplier._id}
-                          className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${
-                            formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
-                          }`}
+                          className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
+                            }`}
                           onClick={() => handleSelectSupplier(supplier)}
                         >
                           <div>
