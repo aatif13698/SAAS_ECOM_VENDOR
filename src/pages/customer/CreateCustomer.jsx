@@ -983,7 +983,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
 
                     }));
 
-                    setImgPreviwe(`http://localhost:8088/profile/${baseAddress?.profileImage}`)
+                    setImgPreviwe(`${baseAddress?.profileImage}`)
 
                     const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
                     const state = State.getStatesOfCountry(selectedCountry?.isoCode);
