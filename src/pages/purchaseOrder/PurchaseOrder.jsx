@@ -11,14 +11,26 @@ import Button from '../../components/ui/Button';
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const [isDark] = useDarkmode();
   const buyerState = "West Bengal"; // Assuming buyer's state; adjust as needed
+  const [addresses, setAddresses] = useState([]);
+
+  console.log("addresses", addresses);
+
+
   const [formData, setFormData] = useState({
     supplier: null,
     shippingAddress: {
-      street: '',
-      city: '',
-      state: '',
-      zip: '',
-      country: '',
+      fullName: "",
+      phone: "",
+      alternamtivePhone: "",
+      country: "",
+      state: "",
+      city: "",
+      ZipCode: "",
+      address: "",
+      roadName:"",
+      nearbyLandmark: "",
+      houseNumber: "",
+      _id: ""
     },
     poNumber: '',
     poDate: new Date().toISOString().split('T')[0],
@@ -36,6 +48,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     paidAmount: 0,
     balance: 0,
   });
+  console.log("formData", formData);
+  
   const [suppliers, setSuppliers] = useState([]);
   const [openModal, setOpenModal] = useState(false);
   const [showNotesInput, setShowNotesInput] = useState(false);
@@ -120,6 +134,30 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
   }, [totals.finalTotal, formData.paidAmount]);
 
+
+  useEffect(() => {
+    if (formData?.supplier) {
+      getShippingAddress(formData?.supplier?._id)
+    }
+  }, [formData?.supplier]);
+
+  async function getShippingAddress(id) {
+    try {
+      const response = await supplierService.getSupplierAddress(id);
+      setAddresses(response?.data?.addresses);
+      if (response?.data?.addresses?.length > 0) {
+        setFormData((prev) => {
+          return {
+            ...prev,
+            shippingAddress: response?.data?.addresses[0]
+        }
+        })
+      }
+    } catch (error) {
+      console.log("error while getttinf shipping address", error);
+    }
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.supplier) {
@@ -136,13 +174,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       ...formData,
       supplier,
       isInterState: supplier.state !== buyerState,
-      shippingAddress: {
-        street: supplier.address || '',
-        city: supplier.city || '',
-        state: supplier.state || '',
-        zip: supplier.ZipCode || '',
-        country: supplier.country || '',
-      },
     });
     setOpenModal(false);
   };
@@ -212,7 +243,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                   <div className="bg-white dark:bg-transparent lg:col-span-1 md:col-span-1  rounded-lg border border-gray-200">
                     <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white md:h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
                       <h3 className="text-lg font-medium text-gray-700">Ship From</h3>
-                      {formData.supplier && (
+                      {addresses && addresses?.length > 0 && (
                         <Button
                           text=" Change Shipping"
                           className="text-indigo-600 border py-1 border-indigo-600 hover:bg-indigo-50"
