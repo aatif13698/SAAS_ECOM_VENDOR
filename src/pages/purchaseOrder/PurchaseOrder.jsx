@@ -8,6 +8,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import Icon from "@/components/ui/Icon";
 import Button from '../../components/ui/Button';
 import AddAddressModel from './AddAddressModel';
+import ProductListModel from './ProductListModel';
 
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const [isDark] = useDarkmode();
@@ -56,6 +57,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const [openModal, setOpenModal] = useState(false);
   const [openModal2, setOpenModal2] = useState(false);
   const [openModal3, setOpenModal3] = useState(false);
+  const [openModal4, setOpenModal4] = useState(false);
   const [showNotesInput, setShowNotesInput] = useState(false);
   const [showBankInput, setShowBankInput] = useState(false);
 
@@ -387,14 +389,25 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                       <tr key={index}>
                         <td className="py-2 px-4 border border-gray-300">{item.srNo}</td>
                         <td className="py-2 px-4 border border-gray-300">
-                          <input
+
+                          <button
+                            type="button"
+                            onClick={() => setOpenModal4(true)}
+                            className='flex w-[100%] items-center p-1 hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+                          >
+                            <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
+                            <span className='text-lightHoverBgBtn dark:text-darkBtn'>
+                              Item
+                            </span>
+                          </button>
+                          {/* <input
                             type="text"
                             name="itemName"
                             value={item.itemName}
                             onChange={(e) => handleItemChange(index, e)}
                             className="form-control py-2"
                             required
-                          />
+                          /> */}
                         </td>
                         <td className="py-2 px-4 border border-gray-300">
                           <input
@@ -887,7 +900,11 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       </Transition>
 
       {/* add address  */}
-      <AddAddressModel openModal3={openModal3} setOpenModal3={setOpenModal3} getShippingAddress={getShippingAddress} currentSupplierId={currentSupplierId}  />
+      <AddAddressModel openModal3={openModal3} setOpenModal3={setOpenModal3} getShippingAddress={getShippingAddress} currentSupplierId={currentSupplierId} />
+
+      {/* product list */}
+      <ProductListModel openModal3={openModal4} setOpenModal3={setOpenModal4} getShippingAddress={getShippingAddress} currentSupplierId={currentSupplierId} />
+
     </div>
   );
 };

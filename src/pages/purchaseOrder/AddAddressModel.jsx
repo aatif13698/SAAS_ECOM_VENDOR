@@ -9,7 +9,6 @@ import Button from '../../components/ui/Button';
 
 function AddAddressModel({ noFade, openModal3, setOpenModal3, getShippingAddress, currentSupplierId }) {
 
-    console.log("supplierId", currentSupplierId);
     
     
     const [isDark] = useDarkmode();
@@ -570,7 +569,6 @@ function AddAddressModel({ noFade, openModal3, setOpenModal3, getShippingAddress
 
     return (
         <div>
-            <span>Add address</span>
 
             <Transition appear show={openModal3} as={Fragment}>
                 <Dialog
