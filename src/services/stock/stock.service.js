@@ -97,6 +97,21 @@ const getAllStocks = async ( ) => {
 
 
 
+const getStockByProduct = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/stockbyproduct/${clientId}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
+
+
 const getParticularStocks = async ( id) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -124,5 +139,6 @@ export default {
     update,
     getAllStocks,
     getParticularStocks,
-    getStockList
+    getStockList,
+    getStockByProduct
 }

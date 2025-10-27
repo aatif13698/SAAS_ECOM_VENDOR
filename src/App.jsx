@@ -53,6 +53,7 @@ const AddSupplierAddress = lazy(() => import("./pages/supplier/AddSupplierAddres
 
 const Stock = lazy(() => import("./pages/stock/Srock"));
 const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
+const AddProductQA = lazy(() => import("./pages/productQA/AddProductQA"));
 
 const Orders = lazy(() => import("./pages/orders/Orders"));
 const ViewOrder = lazy(() => import("./pages/orders/ViewOrder"));
@@ -250,6 +251,8 @@ function App() {
                 <Route path="order-list" element={<Orders />} />
                 <Route path="order-view" element={<ViewOrder />} />
                 <Route path="create-order" element={<CreateOrder />} />
+                <Route path="create-product-qa" element={<AddProductQA />} />
+
 
 
                 <Route path="financial-year-list" element={<FinancialYear />} />
