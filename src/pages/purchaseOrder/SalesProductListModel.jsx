@@ -1,6 +1,4 @@
 
-
-// new
 import supplierService from '@/services/supplier/supplier.service';
 import React, {
     Fragment,
@@ -18,9 +16,28 @@ import stockService from '@/services/stock/stock.service';
 import categoryService from '@/services/category/category.service';
 
 /* --------------------------------------------------------------
+   Helper – pick the correct price tier for a given quantity
+   -------------------------------------------------------------- */
+function getPriceTier(variant, qty) {
+    const prices = [...variant.variant.priceId.price].sort(
+        (a, b) => a.quantity - b.quantity
+    );
+    let tier = prices[0] || {
+        unitPrice: 0,
+        hasDiscount: false,
+        discountPercent: 0,
+    };
+    for (const p of prices) {
+        if (qty >= p.quantity) tier = p;
+        else break;
+    }
+    return tier;
+}
+
+/* --------------------------------------------------------------
    Main Component
    -------------------------------------------------------------- */
-function ProductListModel({
+function SalesProductListModel({
     noFade,
     openModal3,
     setOpenModal3,
@@ -46,8 +63,8 @@ function ProductListModel({
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedSubCategory, setSelectedSubCategory] = useState('');
 
-    /* ---------------------- selected variants (qty only) ---------------------- */
-    const [selectedVariants, setSelectedVariants] = useState({}); // { variantId: {variant, stock, qty} }
+    /* ---------------------- selected variants (with qty) ---------------------- */
+    const [selectedVariants, setSelectedVariants] = useState({}); // { variantId: {variant, stock, qty, priceTier} }
 
     /* ---------------------- debounce search ---------------------- */
     useEffect(() => {
@@ -67,7 +84,7 @@ function ProductListModel({
     useEffect(() => {
         const load = async () => {
             try {
-                const res = await categoryService.getCategories();
+                const res = await categoryService.getCategories(); // { data: [{_id,name}] }
                 setCategories(res?.data || []);
             } catch (e) {
                 console.error(e);
@@ -167,19 +184,19 @@ function ProductListModel({
         fetchStockData,
     ]);
 
-    /* ---------------------- toggle selection (checkbox) ---------------------- */
+    /* ---------------------- toggle selection ---------------------- */
     const toggleSelect = (variant, stock) => {
         const id = variant._id;
         setSelectedVariants((prev) => {
             if (prev[id]) {
-                // uncheck → remove
                 const { [id]: _, ...rest } = prev;
                 return rest;
             }
-            // check → add with qty = 1
+            const qty = 1;
+            const priceTier = getPriceTier(variant, qty);
             return {
                 ...prev,
-                [id]: { variant, stock, qty: 1 },
+                [id]: { variant, stock, qty, priceTier },
             };
         });
     };
@@ -189,10 +206,12 @@ function ProductListModel({
         const id = variant._id;
         setSelectedVariants((prev) => {
             const cur = prev[id];
-            if (!cur && delta <= 0) return prev; // ignore "-" when not selected
+            if (!cur && delta <= 0) return prev; // nothing selected → ignore “-”
 
-            // "+" when not selected → select with qty = 1
+            // add if not present and “+” pressed
             if (!cur && delta > 0) {
+                const qty = 1;
+                const priceTier = getPriceTier(variant, qty);
                 return {
                     ...prev,
                     [id]: {
@@ -200,70 +219,33 @@ function ProductListModel({
                         stock: paginationData.find((s) =>
                             s.normalSaleStock.some((v) => v._id === id)
                         ),
-                        qty: 1,
+                        qty,
+                        priceTier,
                     },
                 };
             }
 
-            const newQty = cur.qty + delta;
+            let newQty = cur.qty + delta;
             if (newQty < 1) {
                 const { [id]: _, ...rest } = prev;
                 return rest;
             }
-            return { ...prev, [id]: { ...cur, qty: newQty } };
+            const priceTier = getPriceTier(variant, newQty);
+            return { ...prev, [id]: { ...cur, qty: newQty, priceTier } };
         });
     };
 
     /* ---------------------- SAVE ---------------------- */
     const handleSave = () => {
-        const selected = Object.values(selectedVariants).filter((v) => v.qty > 0);
+        const selected = Object.values(selectedVariants);
         console.log('Selected variants →', selected);
         toast.success(`Selected ${selected.length} variant(s)`);
         setOpenModal3(false);
+        // optional: clear selection after save
+        // setSelectedVariants({});
     };
 
     const totalPages = Math.ceil(totalRows / perPage);
-
-
-    // Update quantity (only if selected)
-    const updateQty = (variantId, newQty) => {
-        if (newQty < 1) {
-            // Remove if qty becomes 0
-            setSelectedVariants((prev) => {
-                const { [variantId]: _, ...rest } = prev;
-                return rest;
-            });
-        } else {
-            setSelectedVariants((prev) => ({
-                ...prev,
-                [variantId]: { ...prev[variantId], qty: newQty }
-            }));
-        }
-    };
-
-     const handleQtyInput = (variantId, value) => {
-        const num = parseInt(value, 10);
-        if (value === '' || isNaN(num)) {
-            // Allow empty temporarily
-            setSelectedVariants((prev) => ({
-                ...prev,
-                [variantId]: { ...prev[variantId], qty: 0 }
-            }));
-        } else {
-            updateQty(variantId, num);
-        }
-    };
-
-    // On blur: if qty is 0 → uncheck
-    const handleQtyBlur = (variantId, value) => {
-        const num = parseInt(value, 10);
-        if (value === '' || isNaN(num) || num < 1) {
-            setSelectedVariants((prev) => {
-                const { [variantId]: _, ...rest } = prev;
-                return rest;
-            });
-        }
-    };
 
     /* --------------------------------------------------------------
        Render
@@ -271,7 +253,7 @@ function ProductListModel({
     return (
         <div>
             <Transition appear show={openModal3} as={Fragment}>
-                <Dialog as="div" className="relative z-[9999]" onClose={() => {}}>
+                <Dialog as="div" className="relative z-[9999]" onClose={() => { }}>
                     <Transition.Child
                         as={Fragment}
                         enter={noFade ? '' : 'duration-300 ease-out'}
@@ -296,9 +278,8 @@ function ProductListModel({
                                 leaveTo={noFade ? '' : 'opacity-0 scale-95'}
                             >
                                 <Dialog.Panel
-                                    className={`w-full relative transform rounded-md text-left align-middle shadow-xl transition-all max-w-5xl ${
-                                        isDark ? 'bg-darkSecondary text-white' : 'bg-light'
-                                    }`}
+                                    className={`w-full relative transform rounded-md text-left align-middle shadow-xl transition-all max-w-5xl ${isDark ? 'bg-darkSecondary text-white' : 'bg-light'
+                                        }`}
                                 >
                                     {/* ----- Header ----- */}
                                     <div
@@ -339,11 +320,10 @@ function ProductListModel({
                                                         placeholder="Search by name..."
                                                         value={searchInput}
                                                         onChange={(e) => setSearchInput(e.target.value)}
-                                                        className={`flex-1 min-w-[200px] px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                            isDark
+                                                        className={`flex-1 min-w-[200px] px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark
                                                                 ? 'bg-darkInput border-darkSecondary text-white'
                                                                 : 'bg-white border-gray-300'
-                                                        }`}
+                                                            }`}
                                                     />
                                                     <select
                                                         value={selectedCategory}
@@ -351,11 +331,10 @@ function ProductListModel({
                                                             setSelectedCategory(e.target.value);
                                                             setSelectedSubCategory('');
                                                         }}
-                                                        className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                            isDark
+                                                        className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark
                                                                 ? 'bg-darkInput border-darkSecondary text-white'
                                                                 : 'bg-white border-gray-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <option value="">All Categories</option>
                                                         {categories.map((c) => (
@@ -368,11 +347,10 @@ function ProductListModel({
                                                         value={selectedSubCategory}
                                                         onChange={(e) => setSelectedSubCategory(e.target.value)}
                                                         disabled={!selectedCategory}
-                                                        className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${
-                                                            isDark
+                                                        className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${isDark
                                                                 ? 'bg-darkInput border-darkSecondary text-white'
                                                                 : 'bg-white border-gray-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         <option value="">All Subcategories</option>
                                                         {subCategories.map((s) => (
@@ -384,11 +362,10 @@ function ProductListModel({
                                                     <select
                                                         value={perPage}
                                                         onChange={(e) => setPerPage(Number(e.target.value))}
-                                                        className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                                                            isDark
+                                                        className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark
                                                                 ? 'bg-darkInput border-darkSecondary text-white'
                                                                 : 'bg-white border-gray-300'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {[10, 25, 50, 100].map((v) => (
                                                             <option key={v} value={v}>
@@ -403,11 +380,10 @@ function ProductListModel({
                                                     {paginationData.map((stock) => (
                                                         <div
                                                             key={stock._id}
-                                                            className={`border rounded-lg p-5 ${
-                                                                isDark
+                                                            className={`border rounded-lg p-5 ${isDark
                                                                     ? 'border-darkSecondary bg-darkInput/50'
-                                                                    : 'border-gray-200 bg-gray-50'
-                                                            }`}
+                                                                    : '120border-gray-200 bg-gray-50'
+                                                                }`}
                                                         >
                                                             <h3 className="text-lg font-semibold mb-3 flex items-center justify-between">
                                                                 {stock.product.name}
@@ -423,7 +399,10 @@ function ProductListModel({
                                                                         <tr className="text-left text-sm font-medium">
                                                                             <th className="px-4 py-2">Select</th>
                                                                             <th className="px-4 py-2">Item</th>
-                                                                            <th className="px-4 py-2 text-center">Quantity</th>
+                                                                            <th className="px-4 py-2">Unit Price</th>
+                                                                            <th className="px-4 py-2">Has Discount</th>
+                                                                            <th className="px-4 py-2">Discount %</th>
+                                                                            <th className="px-4 py-2">Quantity</th>
                                                                         </tr>
                                                                     </thead>
 
@@ -432,16 +411,17 @@ function ProductListModel({
                                                                             const id = variant._id;
                                                                             const sel = selectedVariants[id];
                                                                             const qty = sel ? sel.qty : 0;
+                                                                            const tier = sel ? sel.priceTier : getPriceTier(variant, 1);
                                                                             const isSelected = !!sel;
+                                                                            const btnDisabled = !isSelected;
 
                                                                             return (
                                                                                 <tr
                                                                                     key={id}
-                                                                                    className={`${
-                                                                                        isSelected
+                                                                                    className={`${isSelected
                                                                                             ? 'bg-blue-50 dark:bg-blue-900/20'
                                                                                             : ''
-                                                                                    }`}
+                                                                                        }`}
                                                                                 >
                                                                                     {/* SELECT */}
                                                                                     <td className="px-4 py-2">
@@ -488,56 +468,44 @@ function ProductListModel({
                                                                                         </div>
                                                                                     </td>
 
+                                                                                    {/* UNIT PRICE */}
+                                                                                    <td className="px-4 py-2">{tier.unitPrice}</td>
+
+                                                                                    {/* HAS DISCOUNT */}
+                                                                                    <td className="px-4 py-2">
+                                                                                        {tier.hasDiscount ? 'Yes' : 'No'}
+                                                                                    </td>
+
+                                                                                    {/* DISCOUNT % */}
+                                                                                    <td className="px-4 py-2">{tier.discountPercent}%</td>
+
                                                                                     {/* QUANTITY */}
                                                                                     <td className="px-4 py-2">
                                                                                         <div className="flex items-center justify-center space-x-2">
                                                                                             <button
                                                                                                 onClick={() => changeQty(variant, -1)}
-                                                                                                disabled={!isSelected || qty <= 0}
-                                                                                                className={`px-2 py-1 border rounded ${
-                                                                                                    !isSelected || qty <= 0
+                                                                                                disabled={btnDisabled || qty <= 0}
+                                                                                                className={`px-2 py-1 border rounded ${btnDisabled
                                                                                                         ? 'opacity-50 cursor-not-allowed'
                                                                                                         : 'hover:bg-gray-100 dark:hover:bg-darkSecondary'
-                                                                                                } ${
-                                                                                                    isDark
+                                                                                                    } ${isDark
                                                                                                         ? 'border-darkSecondary'
                                                                                                         : 'border-gray-300'
-                                                                                                }`}
+                                                                                                    }`}
                                                                                             >
                                                                                                 -
                                                                                             </button>
-                                                                                            {/* <input className="w-8 text-center " type="number" value={qty} /> */}
-                                                                                             <input
-                                                                                                type="text"
-                                                                                                inputMode="numeric"
-                                                                                                pattern="[0-9]*"
-                                                                                                value={qty}
-                                                                                                onChange={(e) => handleQtyInput(id, e.target.value)}
-                                                                                                onBlur={(e) => handleQtyBlur(id, e.target.value)}
-                                                                                                disabled={!isSelected}
-                                                                                                className={`w-16 text-center border rounded-md py-1 ${
-                                                                                                    !isSelected
-                                                                                                        ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800'
-                                                                                                        : ''
-                                                                                                } ${
-                                                                                                    isDark
-                                                                                                        ? 'bg-darkInput border-darkSecondary text-white'
-                                                                                                        : 'bg-white border-gray-300 text-gray-900'
-                                                                                                } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-                                                                                            />
-                                                                                            {/* <input className="w-8 text-center">{qty}</span> */}
+                                                                                            <span className="w-8 text-center">{qty}</span>
                                                                                             <button
                                                                                                 onClick={() => changeQty(variant, 1)}
-                                                                                                disabled={!isSelected}
-                                                                                                className={`px-2 py-1 border rounded ${
-                                                                                                    !isSelected
+                                                                                                disabled={btnDisabled}
+                                                                                                className={`px-2 py-1 border rounded ${btnDisabled
                                                                                                         ? 'opacity-50 cursor-not-allowed'
                                                                                                         : 'hover:bg-gray-100 dark:hover:bg-darkSecondary'
-                                                                                                } ${
-                                                                                                    isDark
+                                                                                                    } ${isDark
                                                                                                         ? 'border-darkSecondary'
                                                                                                         : 'border-gray-300'
-                                                                                                }`}
+                                                                                                    }`}
                                                                                             >
                                                                                                 +
                                                                                             </button>
@@ -556,37 +524,41 @@ function ProductListModel({
                                                 {/* ----- Pagination ----- */}
                                                 {totalPages > 1 && (
                                                     <div
-                                                        className={`flex justify-between items-center mt-6 pt-4 border-t sticky bottom-0 bg-white dark:bg-darkInput ${
-                                                            isDark ? 'border-darkSecondary' : 'border-gray-200'
-                                                        }`}
+                                                        className={`flex justify-between items-center mt-6 pt-4 border-t sticky bottom-0 bg-white dark:bg-darkInput ${isDark
+                                                                ? 'border-darkSecondary'
+                                                                : 'border-gray-200'
+                                                            }`}
                                                     >
                                                         <button
-                                                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                                                            onClick={() =>
+                                                                setPage((p) => Math.max(1, p - 1))
+                                                            }
                                                             disabled={page === 1 || pending}
-                                                            className={`px-4 py-2 rounded-md border transition-colors ${
-                                                                page === 1 || pending
+                                                            className={`px-4 py-2 rounded-md border transition-colors ${page === 1 || pending
                                                                     ? 'opacity-50 cursor-not-allowed'
                                                                     : 'hover:bg-gray-100 dark:hover:bg-darkSecondary'
-                                                            } ${
-                                                                isDark ? 'border-darkSecondary' : 'border-gray-300'
-                                                            }`}
+                                                                } ${isDark
+                                                                    ? 'border-darkSecondary'
+                                                                    : 'border-gray-300'
+                                                                }`}
                                                         >
                                                             Previous
                                                         </button>
                                                         <span className="text-sm">
                                                             Page <strong>{page}</strong> of{' '}
-                                                            <strong>{totalPages}</strong> ({totalRows} total)
+                                                            <strong>{totalPages}</strong> ({totalRows}{' '}
+                                                            total)
                                                         </span>
                                                         <button
                                                             onClick={() => setPage((p) => p + 1)}
                                                             disabled={page >= totalPages || pending}
-                                                            className={`px-4 py-2 rounded-md border transition-colors ${
-                                                                page >= totalPages || pending
+                                                            className={`px-4 py-2 rounded-md border transition-colors ${page >= totalPages || pending
                                                                     ? 'opacity-50 cursor-not-allowed'
                                                                     : 'hover:bg-gray-100 dark:hover:bg-darkSecondary'
-                                                            } ${
-                                                                isDark ? 'border-darkSecondary' : 'border-gray-300'
-                                                            }`}
+                                                                } ${isDark
+                                                                    ? 'border-darkSecondary'
+                                                                    : 'border-gray-300'
+                                                                }`}
                                                         >
                                                             Next
                                                         </button>
@@ -605,11 +577,10 @@ function ProductListModel({
                                         />
                                         <Button
                                             text="Save"
-                                            className={`bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900 px-4 py-2 rounded ${
-                                                Object.keys(selectedVariants).length === 0
+                                            className={`bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900 px-4 py-2 rounded ${Object.keys(selectedVariants).length === 0
                                                     ? 'opacity-50 cursor-not-allowed'
                                                     : ''
-                                            }`}
+                                                }`}
                                             onClick={handleSave}
                                             disabled={Object.keys(selectedVariants).length === 0}
                                         />
@@ -624,5 +595,4 @@ function ProductListModel({
     );
 }
 
-export default ProductListModel;
-
+export default SalesProductListModel;
