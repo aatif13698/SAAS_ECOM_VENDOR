@@ -11,6 +11,7 @@ import warehouseService from "@/services/warehouse/warehouse.service";
 import productBlueprintService from "@/services/productBlueprint/productBlueprint.service";
 import stockService from "@/services/stock/stock.service";
 import { FaRegTrashAlt } from "react-icons/fa";
+import productQaService from "@/services/productQa/productQa.service";
 
 const AddProductQA = () => {
 
@@ -33,21 +34,20 @@ const AddProductQA = () => {
 
     const [normalStocks, setNormalStocks] = useState([]);
 
-    console.log("normalStocks", normalStocks);
-    console.log("activeProductBlueprint", activeProductBlueprint);
-    
+    const [questionAndAnswerArray, setQuestionAndAnswerArray] = useState([{ question: "", answer: "", _id: "" }]);
+
+    console.log("questionAndAnswerArray", questionAndAnswerArray);
+
+
+    const [questionAnswer, setQuestionAnswer] = useState({ question: "", answer: "" });
 
     const [formData, setFormData] = useState({
         product: "",
-        variant: "",
+        productStock: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-
         productMainStockId: "",
-        questionAndAnswer: [
-            { question: "", answer: "" }
-        ]
     });
 
     const [formDataErr, setFormDataErr] = useState({
@@ -58,6 +58,9 @@ const AddProductQA = () => {
         productMainStockId: "",
     });
 
+    console.log("formDataErr", formDataErr);
+
+
     const {
         product,
         businessUnit,
@@ -66,23 +69,21 @@ const AddProductQA = () => {
         productMainStockId,
     } = formData;
 
+    console.log("formData", formData);
+
+
     const [isViewed, setIsViewed] = useState(false);
     const [loading, setLoading] = useState(false)
 
     const handleChange = (e) => {
         const { name, value } = e.target;
+        console.log("namename", name);
+
         const requiredFields = [
             "businessUnit",
             "branch",
             "warehouse",
             "product",
-            "name",
-            "description",
-            "totalStock",
-            "onlineStock",
-            "offlineStock",
-            "lowStockThreshold",
-            "restockQuantity",
             "productMainStockId"
         ];
 
@@ -105,24 +106,12 @@ const AddProductQA = () => {
                 setActiveBranches([]);
                 setFormData(prev => ({
                     ...prev,
-                    branchId: ""
+                    branch: "",
+                    warehouse: ""
                 }));
             }
         }
 
-        if (name === "variant") {
-            if (value === "") {
-                setFormDataErr(prev => ({
-                    ...prev,
-                    variant: "Variant is Required"
-                }));
-            } else {
-                setFormDataErr(prev => ({
-                    ...prev,
-                    variant: ""
-                }));
-            }
-        }
 
         // Update form data
         setFormData(prev => ({
@@ -162,49 +151,172 @@ const AddProductQA = () => {
         });
     };
 
-    const onSubmit = async () => {
+    function validationFunction() {
+        let errorCount = 0;
+
         if (!productMainStockId) {
             setFormDataErr(prev => ({ ...prev, productMainStockId: "Item is Required" }));
-            return;
-        }
-
-        // Additional validation can be added here for QA pairs if needed
-
-        setLoading(true);
-        const newQAList = [...formData.questionAndAnswer];
-        for (let i = 0; i < newQAList.length; i++) {
-            const qa = newQAList[i];
-            if (!qa.question.trim() || !qa.answer.trim()) {
-                continue; // Skip empty QA pairs
-            }
-            try {
-                if (qa._id) {
-                    await stockService.updateQuestionAndAnswer(qa._id, {
-                        question: qa.question,
-                        answer: qa.answer
-                    });
-                } else {
-                    const response = await stockService.addQuestionAndAnswer(productMainStockId, {
-                        question: qa.question,
-                        answer: qa.answer
-                    });
-                    newQAList[i] = response.data; // Assume response.data contains the created QA with _id
-                }
-            } catch (error) {
-                console.log("error while saving QA", error);
-                // Optionally handle errors per QA, e.g., toast notification
-            }
-        }
-        setFormData({ ...formData, questionAndAnswer: newQAList });
-
-        if (!isEditing) {
-            setFormData(prev => ({
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
                 ...prev,
-                questionAndAnswer: [...newQAList, { question: "", answer: "" }]
+                productMainStockId: "",
             }));
         }
 
-        setLoading(false);
+
+        if (!businessUnit) {
+            setFormDataErr((prev) => ({
+                ...prev,
+                businessUnit: "Business Unit Is Required.",
+            }));
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                businessUnit: "",
+            }));
+        }
+
+        if (!branch) {
+            setFormDataErr((prev) => ({
+                ...prev,
+                branch: "Branch Is Required.",
+            }));
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                branch: "",
+            }));
+        }
+
+
+        if (!warehouse) {
+            setFormDataErr((prev) => ({
+                ...prev,
+                warehouse: "Warehouse Is Required.",
+            }));
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                warehouse: "",
+            }));
+        }
+
+        if (!product) {
+            setFormDataErr((prev) => ({
+                ...prev,
+                product: "Product Is Required.",
+            }));
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                product: "",
+            }));
+        }
+
+        console.log("errorCount", errorCount);
+
+
+        if (errorCount > 0) {
+            return true
+        } else {
+            return false
+        }
+    }
+
+    const onSubmit = async () => {
+
+        console.log("one");
+
+
+        const error = validationFunction();
+        setLoading(true);
+        if (error) {
+            return
+        } else {
+
+            setLoading(true);
+            // const newQAList = [...questionAndAnswerArray.questionAndAnswer];
+            // for (let i = 0; i < newQAList.length; i++) {
+            //     const qa = newQAList[i];
+            //     if (!qa.question.trim() || !qa.answer.trim()) {
+            //         continue; // Skip empty QA pairs
+            //     }
+            //     try {
+            //         if (qa._id) {
+            //             await stockService.updateQuestionAndAnswer(qa._id, {
+            //                 question: qa.question,
+            //                 answer: qa.answer
+            //             });
+            //         } else {
+            //             const response = await stockService.addQuestionAndAnswer(productMainStockId, {
+            //                 question: qa.question,
+            //                 answer: qa.answer
+            //             });
+            //             newQAList[i] = response.data; // Assume response.data contains the created QA with _id
+            //         }
+            //     } catch (error) {
+            //         console.log("error while saving QA", error);
+            //         // Optionally handle errors per QA, e.g., toast notification
+            //     }
+            // }
+            // setFormData({ ...formData, questionAndAnswer: newQAList });
+
+            // if (!isEditing) {
+            //     setFormData(prev => ({
+            //         ...prev,
+            //         questionAndAnswer: [...newQAList, { question: "", answer: "" }]
+            //     }));
+            // }
+
+            setLoading(false);
+
+        }
+
+    };
+
+    const firstSubmit = async () => {
+        console.log("two");
+        const error = validationFunction();
+        setLoading(true);
+
+        console.log("error", error);
+
+
+        if (error) {
+            setLoading(false);
+
+            return
+        } else {
+            try {
+                const clientId = localStorage.getItem("saas_client_clientId");
+
+
+                const dataObject = {
+                    clientId: clientId,
+                    businessUnit: businessUnit,
+                    branch: branch,
+                    warehouse: warehouse,
+                    product: formData?.product,
+                    productStock: formData?.productStock,
+                    productMainStockId: formData?.productMainStockId,
+                    question: questionAnswer?.question,
+                    answer: questionAnswer?.answer,
+                };
+                console.log("dataObject", dataObject);
+                const respone = await productQaService.create(dataObject);
+                console.log("response qa", respone);
+                setLoading(false);
+
+            } catch (error) {
+                setLoading(false);
+                console.log("error while adding the question & answer", error);
+            }
+        }
     };
 
     useEffect(() => {
@@ -253,8 +365,8 @@ const AddProductQA = () => {
                 lowStockThreshold: baseAddress?.lowStockThreshold || "",
                 restockQuantity: baseAddress?.restockQuantity || "",
                 productMainStockId: baseAddress?._id || "",
-                questionAndAnswer: baseAddress?.questionAndAnswer?.length > 0 
-                    ? baseAddress.questionAndAnswer 
+                questionAndAnswer: baseAddress?.questionAndAnswer?.length > 0
+                    ? baseAddress.questionAndAnswer
                     : [{ question: "", answer: "" }]
             }));
             setNormalStocks(baseAddress?.normalSaleStock || []);
@@ -302,7 +414,7 @@ const AddProductQA = () => {
         try {
             const response = await productBlueprintService.getActive();
             console.log("response blue", response);
-            
+
             setActiveProductBlueprint(response.data.roductBluePrints) // Fixed typo: roductBluePrints -> productBluePrints
         } catch (error) {
             console.log("error in getting active", error);
@@ -318,10 +430,46 @@ const AddProductQA = () => {
     async function getStockByProduct(product) {
         try {
             const response = await stockService.getStockByProduct(product);
-            setNormalStocks(response?.data[0]?.normalSaleStock)
+            setNormalStocks(response?.data[0]?.normalSaleStock);
+            setFormData((prev) => {
+                return { ...prev, productStock: response?.data[0]?._id }
+            })
         } catch (error) {
             console.log("error while getting the stock by product", error);
         }
+    }
+
+    useEffect(() => {
+        if (productMainStockId) {
+            getQuestionAnsByProductMainStockId(productMainStockId)
+        }
+    }, [productMainStockId]);
+
+    async function getQuestionAnsByProductMainStockId(id) {
+
+        try {
+
+            const response = await productQaService.getByProductMainStockId(id);
+
+            if (response?.data?.length > 0) {
+                setQuestionAndAnswerArray(response?.data)
+            } else {
+                setQuestionAndAnswerArray([{ question: "", answer: "", _id: "" }])
+
+            }
+
+
+
+            console.log("list", response);
+
+
+        } catch (error) {
+
+            console.log("error while getting the question", error);
+
+
+        }
+
     }
 
     useEffect(() => {
@@ -338,7 +486,7 @@ const AddProductQA = () => {
         }
     }, [currentUser])
 
-    const disableItemSelect = formData.questionAndAnswer.some(qa => !!qa._id);
+    // const disableItemSelect = formData.questionAndAnswer.some(qa => !!qa._id);
 
     return (
         <>
@@ -481,7 +629,7 @@ const AddProductQA = () => {
                                                 name="productMainStockId"
                                                 value={productMainStockId}
                                                 onChange={handleChange}
-                                                disabled={disableItemSelect || isViewed}
+                                                disabled={isViewed}
                                                 className="form-control py-2  appearance-none relative flex-1"
                                             >
                                                 <option value="">None</option>
@@ -498,7 +646,7 @@ const AddProductQA = () => {
                                     <div className="mt-5">
                                         <h4 className="text-lg font-bold">Questions and Answers</h4>
                                         <div className="space-y-4 mt-3">
-                                            {formData.questionAndAnswer.map((qa, index) => (
+                                            {questionAndAnswerArray.map((qa, index) => (
                                                 <div
                                                     key={index}
                                                     className={`p-4 relative border rounded ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
@@ -507,8 +655,26 @@ const AddProductQA = () => {
                                                         <label className="form-label">Question</label>
                                                         <input
                                                             className="form-control py-2"
-                                                            value={qa.question}
-                                                            onChange={(e) => handleQAChange(index, 'question', e.target.value)}
+                                                            value={qa?._id ? qa?.question : questionAnswer?.question}
+                                                            // onChange={(e) => handleQAChange(index, 'question', e.target.value)}
+                                                            // onChange={(e) => setQuestionAnswer((prev) => {
+                                                            //     return { ...prev, question: e.target.value }
+                                                            // })}
+
+                                                            onChange={(e) => {
+
+                                                                if (qa._id) {
+
+                                                                } else {
+                                                                    setQuestionAnswer((prev) => {
+                                                                        return { ...prev, question: e.target.value }
+                                                                    })
+
+                                                                }
+
+                                                            }}
+
+
                                                             placeholder="Enter question"
                                                         />
                                                     </div>
@@ -517,17 +683,20 @@ const AddProductQA = () => {
                                                         <textarea
                                                             className="form-control py-2"
                                                             rows={3}
-                                                            value={qa.answer}
-                                                            onChange={(e) => handleQAChange(index, 'answer', e.target.value)}
+                                                            value={qa?._id ? qa?.answer : questionAnswer?.answer}
+                                                            // onChange={(e) => handleQAChange(index, 'answer', e.target.value)}
+                                                            onChange={(e) => setQuestionAnswer((prev) => {
+                                                                return { ...prev, answer: e.target.value }
+                                                            })}
                                                             placeholder="Enter answer"
                                                         />
                                                     </div>
-                                                    { (
+                                                    {(
                                                         <button
                                                             onClick={() => handleDeleteQA(index)}
                                                             className="bg-red-500 absolute top-0 right-4 text-white p-2 rounded mt-2"
                                                         >
-                                                            <FaRegTrashAlt/>
+                                                            <FaRegTrashAlt />
                                                         </button>
                                                     )}
                                                 </div>
@@ -538,7 +707,7 @@ const AddProductQA = () => {
                                     <div className="lg:col-span-2 col-span-1">
                                         <div className="ltr:text-right rtl:text-left p-5">
                                             <button
-                                                onClick={onSubmit}
+                                                onClick={(questionAndAnswerArray?.length == 1 && questionAndAnswerArray[0]?._id == "") ? firstSubmit : onSubmit}
                                                 disabled={loading}
                                                 style={
                                                     loading
