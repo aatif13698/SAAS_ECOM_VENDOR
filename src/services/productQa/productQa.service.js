@@ -12,6 +12,48 @@ const create = async (data) => {
     });
 };
 
+const update = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/product/qa/update/productQa`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+const deleteOne = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.delete(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/product/qa/delete/productQa/${id}`,
+            {
+                data: { clientId }, // Send clientId in body (if backend expects it)
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                    "Content-Type": "application/json",
+                },
+            }
+        );
+
+        return response.data;
+    } catch (error) {
+        // Improve error handling
+        const message =
+            error.response?.data?.message ||
+            error.message ||
+            "Failed to delete Q&A";
+        throw new Error(message);
+    }
+}
+
+
+
 
 const getByProductMainStockId = async (id) => {
     const authToken = localStorage.getItem("saas_client_token");
@@ -48,31 +90,8 @@ const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
     }
 };
 
-const update = async (data) => {
-    const authToken = localStorage.getItem("saas_client_token");
-    const clientId = localStorage.getItem("saas_client_clientId");
-
-    return await axios.put(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/asset/update/asset`, data, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
-
-    });
-};
 
 
-
-const deleteOne = async (data) => {
-    const authToken = localStorage.getItem("saas_client_token");
-    const clientId = localStorage.getItem("saas_client_clientId");
-
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/employee/softDeleteEmployee`, { ...data, clientId: clientId, softDelete: "0" }, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
-
-    });
-};
 
 
 
@@ -89,11 +108,11 @@ const deleteOne = async (data) => {
 
 export default {
     create,
+    update,
+    deleteOne,
     getByProductMainStockId,
 
 
 
     getList,
-    update,
-    deleteOne,
 }

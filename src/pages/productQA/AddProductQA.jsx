@@ -1,46 +1,50 @@
-import { Card } from "@mui/material";
-import React, { useState, Fragment, useEffect } from "react";
-import useDarkMode from "@/hooks/useDarkMode";
-import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
-import "../../assets/scss/common.scss"
 
-import { useSelector } from "react-redux";
+
+import React, { useEffect, useState, useCallback, Fragment } from "react";
+import { Card } from "@mui/material";
+import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { Dialog, Transition } from "@headlessui/react";
+
+import useDarkMode from "@/hooks/useDarkMode";
 import FormLoader from "@/Common/formLoader/FormLoader";
+
 import warehouseService from "@/services/warehouse/warehouse.service";
 import productBlueprintService from "@/services/productBlueprint/productBlueprint.service";
 import stockService from "@/services/stock/stock.service";
-import { FaRegTrashAlt } from "react-icons/fa";
 import productQaService from "@/services/productQa/productQa.service";
 
-const AddProductQA = () => {
+import "../../assets/scss/common.scss";
+import toast from "react-hot-toast";
+
+const AddProductQA = ({ noFade, scrollContent }) => {
+
+    const [showLoadingModal, setShowLoadingModal] = useState(false);
+    const handleCloseLoadingModal = () => {
+        setShowLoadingModal(false);
+    };
+
+    const [canOpenNewForm, setCanOpeNewForm] = useState(false);
 
     const [isDark] = useDarkMode();
     const dispatch = useDispatch();
     const location = useLocation();
-    const row = location?.state?.row;
-    const id = location?.state?.id;
-
-    const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
+    const { user: currentUser, isAuth: isAuthenticated } = useSelector(
+        (state) => state.auth
+    );
 
     const [pageLoading, setPageLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    const [activeBusinessUnits, setActiveBusinessUnits] = useState([])
+    // Dropdown Data
+    const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
     const [activeBranches, setActiveBranches] = useState([]);
     const [activeWarehouses, setActiveWarehouses] = useState([]);
-    const [activeProductBlueprint, setActiveProductBlueprint] = useState([])
-
-    const [isEditing, setIsEditing] = useState(false);
-
+    const [activeProductBlueprints, setActiveProductBlueprints] = useState([]);
     const [normalStocks, setNormalStocks] = useState([]);
 
-    const [questionAndAnswerArray, setQuestionAndAnswerArray] = useState([{ question: "", answer: "", _id: "" }]);
-
-    console.log("questionAndAnswerArray", questionAndAnswerArray);
-
-
-    const [questionAnswer, setQuestionAnswer] = useState({ question: "", answer: "" });
-
+    // Form State
     const [formData, setFormData] = useState({
         product: "",
         productStock: "",
@@ -50,7 +54,7 @@ const AddProductQA = () => {
         productMainStockId: "",
     });
 
-    const [formDataErr, setFormDataErr] = useState({
+    const [formErrors, setFormErrors] = useState({
         product: "",
         businessUnit: "",
         branch: "",
@@ -58,704 +62,538 @@ const AddProductQA = () => {
         productMainStockId: "",
     });
 
-    console.log("formDataErr", formDataErr);
+    // Q&A List
+    const [qaList, setQaList] = useState([{ question: "", answer: "", _id: "" }]);
 
+    // Helper: Format label
+    const formatLabel = (field) => {
+        return field
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase());
+    };
 
-    const {
-        product,
-        businessUnit,
-        branch,
-        warehouse,
-        productMainStockId,
-    } = formData;
-
-    console.log("formData", formData);
-
-
-    const [isViewed, setIsViewed] = useState(false);
-    const [loading, setLoading] = useState(false)
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        console.log("namename", name);
-
-        const requiredFields = [
+    // Validation
+    const validateForm = useCallback(() => {
+        const required = [
+            "productMainStockId",
             "businessUnit",
             "branch",
             "warehouse",
             "product",
-            "productMainStockId"
         ];
+        let hasError = false;
+        const newErrors = {};
 
-        // Validation for required fields
-        if (requiredFields.includes(name)) {
-            setFormDataErr(prev => ({
-                ...prev,
-                [name]: value === "" ? `${formatLabel(name)} is Required.` : ""
-            }));
-        }
-
-        // Handle special logic for businessUnit
-        if (name === "businessUnit") {
-            if (value === "") {
-                setFormDataErr(prev => ({
-                    ...prev,
-                    businessUnit: "Business Unit is Required"
-                }));
-            } else {
-                setActiveBranches([]);
-                setFormData(prev => ({
-                    ...prev,
-                    branch: "",
-                    warehouse: ""
-                }));
+        required.forEach((field) => {
+            if (!formData[field]) {
+                newErrors[field] = `${formatLabel(field)} is Required.`;
+                hasError = true;
             }
-        }
+        });
 
+        setFormErrors((prev) => ({ ...prev, ...newErrors }));
+        return hasError;
+    }, [formData]);
 
-        // Update form data
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
+    // Handle Select Change
+    const handleSelectChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
-    // Helper function to format camelCase to Title Case for labels
-    const formatLabel = (fieldName) => {
-        return fieldName
-            .replace(/([A-Z])/g, ' $1')
-            .replace(/^./, str => str.toUpperCase());
-    };
-
+    // Handle Q&A Input Change
     const handleQAChange = (index, field, value) => {
-        const newQA = [...formData.questionAndAnswer];
-        newQA[index][field] = value;
-        setFormData({ ...formData, questionAndAnswer: newQA });
-    };
-
-    const handleDeleteQA = async (index) => {
-        const qa = formData.questionAndAnswer[index];
-        if (qa._id) {
-            try {
-                await stockService.deleteQuestionAndAnswer(qa._id);
-            } catch (error) {
-                console.log("error while deleting QA", error);
-                return;
-            }
-        }
-        const newQA = [...formData.questionAndAnswer];
-        newQA.splice(index, 1);
-        setFormData({
-            ...formData,
-            questionAndAnswer: newQA.length === 0 ? [{ question: "", answer: "" }] : newQA
+        setQaList((prev) => {
+            const updated = [...prev];
+            updated[index][field] = value;
+            return updated;
         });
     };
 
-    function validationFunction() {
-        let errorCount = 0;
-
-        if (!productMainStockId) {
-            setFormDataErr(prev => ({ ...prev, productMainStockId: "Item is Required" }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                productMainStockId: "",
-            }));
-        }
-
-
-        if (!businessUnit) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                businessUnit: "Business Unit Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                businessUnit: "",
-            }));
-        }
-
-        if (!branch) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                branch: "Branch Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                branch: "",
-            }));
-        }
-
-
-        if (!warehouse) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                warehouse: "Warehouse Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                warehouse: "",
-            }));
-        }
-
-        if (!product) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                product: "Product Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                product: "",
-            }));
-        }
-
-        console.log("errorCount", errorCount);
-
-
-        if (errorCount > 0) {
-            return true
-        } else {
-            return false
-        }
-    }
-
-    const onSubmit = async () => {
-
-        console.log("one");
-
-
-        const error = validationFunction();
-        setLoading(true);
-        if (error) {
-            return
-        } else {
-
-            setLoading(true);
-            // const newQAList = [...questionAndAnswerArray.questionAndAnswer];
-            // for (let i = 0; i < newQAList.length; i++) {
-            //     const qa = newQAList[i];
-            //     if (!qa.question.trim() || !qa.answer.trim()) {
-            //         continue; // Skip empty QA pairs
-            //     }
-            //     try {
-            //         if (qa._id) {
-            //             await stockService.updateQuestionAndAnswer(qa._id, {
-            //                 question: qa.question,
-            //                 answer: qa.answer
-            //             });
-            //         } else {
-            //             const response = await stockService.addQuestionAndAnswer(productMainStockId, {
-            //                 question: qa.question,
-            //                 answer: qa.answer
-            //             });
-            //             newQAList[i] = response.data; // Assume response.data contains the created QA with _id
-            //         }
-            //     } catch (error) {
-            //         console.log("error while saving QA", error);
-            //         // Optionally handle errors per QA, e.g., toast notification
-            //     }
-            // }
-            // setFormData({ ...formData, questionAndAnswer: newQAList });
-
-            // if (!isEditing) {
-            //     setFormData(prev => ({
-            //         ...prev,
-            //         questionAndAnswer: [...newQAList, { question: "", answer: "" }]
-            //     }));
-            // }
-
-            setLoading(false);
-
-        }
-
+    // Add New Empty Q&A Row
+    const addNewQARow = () => {
+        setQaList((prev) => [...prev, { question: "", answer: "", _id: "" }]);
+        setCanOpeNewForm(false)
     };
 
-    const firstSubmit = async () => {
-        console.log("two");
-        const error = validationFunction();
-        setLoading(true);
-
-        console.log("error", error);
-
-
-        if (error) {
-            setLoading(false);
-
-            return
-        } else {
+    // Delete Q&A
+    const deleteQA = async (index) => {
+        const qa = qaList[index];
+        if (qa._id) {
             try {
-                const clientId = localStorage.getItem("saas_client_clientId");
+                setShowLoadingModal(true);
+                await productQaService.deleteOne(qa._id);
+                setShowLoadingModal(false);
 
-
-                const dataObject = {
-                    clientId: clientId,
-                    businessUnit: businessUnit,
-                    branch: branch,
-                    warehouse: warehouse,
-                    product: formData?.product,
-                    productStock: formData?.productStock,
-                    productMainStockId: formData?.productMainStockId,
-                    question: questionAnswer?.question,
-                    answer: questionAnswer?.answer,
-                };
-                console.log("dataObject", dataObject);
-                const respone = await productQaService.create(dataObject);
-                console.log("response qa", respone);
-                setLoading(false);
+                fetchQA()
 
             } catch (error) {
-                setLoading(false);
-                console.log("error while adding the question & answer", error);
+                console.error("Delete failed:", error);
+                setShowLoadingModal(false);
+                alert("Failed to delete Q&A");
+                return;
             }
+        }
+        setQaList((prev) => prev.filter((_, i) => i !== index));
+    };
+
+    // Save or Update Q&A
+    const saveOrUpdateQA = async (index) => {
+        if (validateForm()) return;
+        const qa = qaList[index];
+        if (!qa.question.trim() || !qa.answer.trim()) {
+            alert("Both Question and Answer are required.");
+            return;
+        }
+
+        setLoading(true);
+        setShowLoadingModal(true);
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const payload = {
+                clientId,
+                businessUnit: formData.businessUnit,
+                branch: formData.branch,
+                warehouse: formData.warehouse,
+                product: formData.product,
+                productStock: formData.productStock,
+                productMainStockId: formData.productMainStockId,
+                question: qa.question,
+                answer: qa.answer,
+            };
+            let saved;
+            if (qa._id) {
+                saved = await productQaService.update({ ...payload, qaId: qa._id, });
+                toast.success("updated successfully.");
+            } else {
+                saved = await productQaService.create(payload);
+                toast.success("Saved successfully.");
+
+            }
+            const newId = saved?._id || saved?.data?.workingDepartmentId || saved?.id;
+            fetchQA()
+
+        } catch (error) {
+            console.error("Save/Update failed:", error);
+            alert("Failed to save Q&A. Please try again.");
+        } finally {
+            setLoading(false);
+            setShowLoadingModal(false);
+            setCanOpeNewForm(true);
+
         }
     };
 
+    // Load Business Units
     useEffect(() => {
-        if (businessUnit) {
-            getBranchByBusiness(businessUnit)
-        }
-    }, [businessUnit]);
+        const fetchBusinessUnits = async () => {
+            try {
+                const res = await warehouseService.getActiveBusinessUnit();
+                setActiveBusinessUnits(res?.data?.businessUnits || []);
+            } catch (error) {
+                console.error("Failed to load business units", error);
+            }
+        };
+        fetchBusinessUnits();
+    }, []);
 
-    async function getBranchByBusiness(id) {
+    // Load Branches
+    useEffect(() => {
+        if (!formData.businessUnit) {
+            setActiveBranches([]);
+            return;
+        }
+        const fetchBranches = async () => {
+            try {
+                const res = await warehouseService.getBranchByBusiness(formData.businessUnit);
+                setActiveBranches(res?.data || []);
+            } catch (error) {
+                console.error("Failed to load branches", error);
+            }
+        };
+        fetchBranches();
+    }, [formData.businessUnit]);
+
+    // Load Warehouses
+    useEffect(() => {
+        if (!formData.branch) {
+            setActiveWarehouses([]);
+            return;
+        }
+        const fetchWarehouses = async () => {
+            try {
+                const res = await warehouseService.getWarehouseByBranch(formData.branch);
+                setActiveWarehouses(res?.data || []);
+            } catch (error) {
+                console.error("Failed to load warehouses", error);
+            }
+        };
+        fetchWarehouses();
+    }, [formData.branch]);
+
+    // Load Product Blueprints
+    useEffect(() => {
+        const fetchBlueprints = async () => {
+            try {
+                const res = await productBlueprintService.getActive();
+                setActiveProductBlueprints(res?.data?.roductBluePrints || []);
+            } catch (error) {
+                console.error("Failed to load product blueprints", error);
+            }
+        };
+        fetchBlueprints();
+    }, []);
+
+    // Load Normal Stocks
+    useEffect(() => {
+        if (!formData.product) {
+            setNormalStocks([]);
+            return;
+        }
+        const fetchStocks = async () => {
+            try {
+                const res = await stockService.getStockByProduct(formData.product);
+                const stockList = res?.data?.[0]?.normalSaleStock || [];
+                setNormalStocks(stockList);
+                if (stockList.length > 0) {
+                    setFormData((prev) => ({
+                        ...prev,
+                        productStock: res?.data?.[0]?._id || "",
+                    }));
+                }
+            } catch (error) {
+                console.error("Failed to load stocks", error);
+            }
+        };
+        fetchStocks();
+    }, [formData.product]);
+
+    // Load Existing Q&A
+    useEffect(() => {
+        if (!formData.productMainStockId) {
+            setQaList([{ question: "", answer: "", _id: "" }]);
+            return;
+        }
+
+        fetchQA();
+    }, [formData.productMainStockId]);
+
+    const fetchQA = async () => {
         try {
-            const response = await warehouseService.getBranchByBusiness(id);
-            setActiveBranches(response.data)
+            const res = await productQaService.getByProductMainStockId(
+                formData.productMainStockId
+            );
+            const data = res?.data || [];
+            setQaList(data.length > 0 ? data : [{ question: "", answer: "", _id: "" }]);
         } catch (error) {
-            console.log("error while getting branch by business unit");
+            console.error("Failed to load Q&A", error);
+            setQaList([{ question: "", answer: "", _id: "" }]);
         }
-    }
+    };
 
+    // Auto-fill based on user level
     useEffect(() => {
-        if (branch) {
-            getWarehouseByBranch(branch)
-        }
-    }, [branch]);
+        if (!currentUser || !isAuthenticated) return;
 
-    async function getWarehouseByBranch(id) {
-        try {
-            const response = await warehouseService.getWarehouseByBranch(id);
-            setActiveWarehouses(response.data)
-        } catch (error) {
-            console.log("error while getting warehouse by branch");
-        }
-    }
-
-    const [baseAddress, setBaseAddress] = useState(null);
-
-    useEffect(() => {
-        if (baseAddress) {
+        if (currentUser.isBuLevel) {
+            setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }));
+        } else if (currentUser.isBranchLevel) {
             setFormData((prev) => ({
                 ...prev,
-                product: baseAddress?.product || "",
-                businessUnit: baseAddress?.businessUnit || "",
-                branch: baseAddress?.branch || "",
-                warehouse: baseAddress?.warehouse || "",
-                totalStock: baseAddress?.totalStock || "",
-                onlineStock: baseAddress?.onlineStock || "",
-                offlineStock: baseAddress?.offlineStock || "",
-                lowStockThreshold: baseAddress?.lowStockThreshold || "",
-                restockQuantity: baseAddress?.restockQuantity || "",
-                productMainStockId: baseAddress?._id || "",
-                questionAndAnswer: baseAddress?.questionAndAnswer?.length > 0
-                    ? baseAddress.questionAndAnswer
-                    : [{ question: "", answer: "" }]
+                businessUnit: currentUser
+
+                    .businessUnit,
+                branch: currentUser.branch,
             }));
-            setNormalStocks(baseAddress?.normalSaleStock || []);
+        } else if (currentUser.isWarehouseLevel) {
+            setFormData((prev) => ({
+                ...prev,
+                businessUnit: currentUser.businessUnit,
+                branch: currentUser.branch,
+                warehouse: currentUser.warehouse,
+            }));
         }
-    }, [baseAddress]);
+    }, [currentUser, isAuthenticated]);
+
+    // Page ready
+    useEffect(() => {
+        setPageLoading(false);
+    }, []);
 
     useEffect(() => {
-        if (id) {
-            async function getBranch() {
-                try {
-                    setPageLoading(true)
-                    const response = await stockService.getParticularStocks(id);
-                    console.log('Response stock data', response?.data);
-                    const baseAddress = response?.data;
-                    setBaseAddress(response?.data)
-                    setPageLoading(false)
-                } catch (error) {
-                    setPageLoading(false)
-                    console.log("error in fetching stock data");
+
+        if (qaList?.length > 0) {
+            let count = 0;
+            for (let index = 0; index < qaList.length; index++) {
+                const element = qaList[index];
+                if (element._id == "") {
+                    count++
                 }
             }
-            getBranch();
-            setIsViewed(true);
-            setIsEditing(true); // Enable edit mode if id is present
-        } else {
-            setPageLoading(false);
-            setIsViewed(false);
-        }
-    }, [id]);
 
-    useEffect(() => {
-        async function getActiveBusinessUnit() {
-            try {
-                const response = await warehouseService.getActiveBusinessUnit();
-                setActiveBusinessUnits(response?.data?.businessUnits)
-            } catch (error) {
-                console.log("error while getting the active business unit", error);
+            if(count > 0){
+                setCanOpeNewForm(false)
+
+            }else{
+                setCanOpeNewForm(true)
             }
         }
-        getActiveBusinessUnit()
-        getActiveProducctBlueprint()
-    }, [])
 
-    async function getActiveProducctBlueprint() {
-        try {
-            const response = await productBlueprintService.getActive();
-            console.log("response blue", response);
+    }, [qaList])
 
-            setActiveProductBlueprint(response.data.roductBluePrints) // Fixed typo: roductBluePrints -> productBluePrints
-        } catch (error) {
-            console.log("error in getting active", error);
-        }
+    if (pageLoading) {
+        return (
+            <div className="flex h-screen items-center justify-center">
+                <FormLoader />
+            </div>
+        );
     }
-
-    useEffect(() => {
-        if (product) {
-            getStockByProduct(product)
-        }
-    }, [product]);
-
-    async function getStockByProduct(product) {
-        try {
-            const response = await stockService.getStockByProduct(product);
-            setNormalStocks(response?.data[0]?.normalSaleStock);
-            setFormData((prev) => {
-                return { ...prev, productStock: response?.data[0]?._id }
-            })
-        } catch (error) {
-            console.log("error while getting the stock by product", error);
-        }
-    }
-
-    useEffect(() => {
-        if (productMainStockId) {
-            getQuestionAnsByProductMainStockId(productMainStockId)
-        }
-    }, [productMainStockId]);
-
-    async function getQuestionAnsByProductMainStockId(id) {
-
-        try {
-
-            const response = await productQaService.getByProductMainStockId(id);
-
-            if (response?.data?.length > 0) {
-                setQuestionAndAnswerArray(response?.data)
-            } else {
-                setQuestionAndAnswerArray([{ question: "", answer: "", _id: "" }])
-
-            }
-
-
-
-            console.log("list", response);
-
-
-        } catch (error) {
-
-            console.log("error while getting the question", error);
-
-
-        }
-
-    }
-
-    useEffect(() => {
-        if (currentUser && isAuthenticated) {
-            if (currentUser.isVendorLevel) {
-
-            } else if (currentUser.isBuLevel) {
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
-            } else if (currentUser.isBranchLevel) {
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
-            } else if (currentUser.isWarehouseLevel) {
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
-            }
-        }
-    }, [currentUser])
-
-    // const disableItemSelect = formData.questionAndAnswer.some(qa => !!qa._id);
 
     return (
-        <>
-            {
-                pageLoading ?
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            height: "100vh",
-                            alignItems: "center",
-                            flexDirection: "column",
-                        }}
-                    >
-                        <div className="flex flex-col justify-center mt-5 items-center gap-2">
-                            <FormLoader />
+        <div className="p-4">
+            <Card className={`${isDark ? "bg-darkSecondary text-white" : ""}`}>
+                <div className="p-5">
+                    {/* Dropdowns */}
+                    <div className="grid lg:grid-cols-3 gap-4 mb-6">
+                        {/* Business Unit */}
+                        <div className={`formGroup ${formErrors.businessUnit ? "has-error" : ""}`}>
+                            <label className="form-label">
+                                Business Unit <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                name="businessUnit"
+                                value={formData.businessUnit}
+                                onChange={handleSelectChange}
+                                disabled={
+                                    currentUser?.isBuLevel ||
+                                    currentUser?.isBranchLevel ||
+                                    currentUser?.isWarehouseLevel
+                                }
+                                className="form-control py-2"
+                            >
+                                <option value="">None</option>
+                                {activeBusinessUnits.map((bu) => (
+                                    <option key={bu._id} value={bu._id}>
+                                        {bu.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-sm text-red-500">{formErrors.businessUnit}</p>
+                        </div>
+
+                        {/* Branch */}
+                        <div className={`formGroup ${formErrors.branch ? "has-error" : ""}`}>
+                            <label className="form-label">
+                                Branch <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                name="branch"
+                                value={formData.branch}
+                                onChange={handleSelectChange}
+                                disabled={currentUser?.isBranchLevel || currentUser?.isWarehouseLevel}
+                                className="form-control py-2"
+                            >
+                                <option value="">None</option>
+                                {activeBranches.map((b) => (
+                                    <option key={b._id} value={b._id}>
+                                        {b.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-sm text-red-500">{formErrors.branch}</p>
+                        </div>
+
+                        {/* Warehouse */}
+                        <div className={`formGroup ${formErrors.warehouse ? "has-error" : ""}`}>
+                            <label className="form-label">
+                                Warehouse <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                name="warehouse"
+                                value={formData.warehouse}
+                                onChange={handleSelectChange}
+                                disabled={currentUser?.isWarehouseLevel}
+                                className="form-control py-2"
+                            >
+                                <option value="">None</option>
+                                {activeWarehouses.map((w) => (
+                                    <option key={w._id} value={w._id}>
+                                        {w.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-sm text-red-500">{formErrors.warehouse}</p>
+                        </div>
+
+                        {/* Product */}
+                        <div className={`formGroup ${formErrors.product ? "has-error" : ""}`}>
+                            <label className="form-label">
+                                Product <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                name="product"
+                                value={formData.product}
+                                onChange={handleSelectChange}
+                                className="form-control py-2"
+                            >
+                                <option value="">None</option>
+                                {activeProductBlueprints.map((p) => (
+                                    <option key={p._id} value={p._id}>
+                                        {p.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-sm text-red-500">{formErrors.product}</p>
+                        </div>
+
+                        {/* Item */}
+                        <div className={`formGroup ${formErrors.productMainStockId ? "has-error" : ""}`}>
+                            <label className="form-label">
+                                Item <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                name="productMainStockId"
+                                value={formData.productMainStockId}
+                                onChange={handleSelectChange}
+                                className="form-control py-2"
+                            >
+                                <option value="">None</option>
+                                {normalStocks.map((s) => (
+                                    <option key={s._id} value={s._id}>
+                                        {s.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="text-sm text-red-500">{formErrors.productMainStockId}</p>
                         </div>
                     </div>
 
-                    :
-                    <div>
-                        <Card>
-                            <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
-                                <div>
-                                    <div className="grid lg:grid-cols-3 flex-col gap-3">
+                    {/* Q&A Section */}
 
-                                        <div
-                                            className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
-                                                } `}
-                                        >
-                                            <label htmlFor=" hh" className="form-label ">
-                                                <p className="form-label">
-                                                    Business Unit <span className="text-red-500">*</span>
-                                                </p>
-                                            </label>
-                                            <select
-                                                name="businessUnit"
-                                                value={businessUnit}
-                                                onChange={handleChange}
-                                                disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
+                    {
+                        formData?.productMainStockId && <div className="mt-8">
+                            <h4 className="text-lg font-bold mb-4">Questions & Answers</h4>
 
-                                                {activeBusinessUnits &&
-                                                    activeBusinessUnits?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
-                                        </div>
-
-                                        <div
-                                            className={`fromGroup   ${formDataErr?.branch !== "" ? "has-error" : ""
-                                                } `}
-                                        >
-                                            <label htmlFor=" hh" className="form-label ">
-                                                <p className="form-label">
-                                                    Branch <span className="text-red-500">*</span>
-                                                </p>
-                                            </label>
-                                            <select
-                                                name="branch"
-                                                value={branch}
-                                                onChange={handleChange}
-                                                disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
-
-                                                {activeBranches &&
-                                                    activeBranches?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-sm text-red-500">{formDataErr.branch}</p>}
-                                        </div>
-
-                                        <div
-                                            className={`fromGroup   ${formDataErr?.warehouse !== "" ? "has-error" : ""
-                                                } `}
-                                        >
-                                            <label htmlFor=" hh" className="form-label ">
-                                                <p className="form-label">
-                                                    Warehouse <span className="text-red-500">*</span>
-                                                </p>
-                                            </label>
-                                            <select
-                                                name="warehouse"
-                                                value={warehouse}
-                                                onChange={handleChange}
-                                                disabled={isViewed || currentUser.isWarehouseLevel}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
-
-                                                {activeWarehouses &&
-                                                    activeWarehouses?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
-                                        </div>
-
-                                        <div
-                                            className={`fromGroup   ${formDataErr?.product !== "" ? "has-error" : ""
-                                                } `}
-                                        >
-                                            <label htmlFor=" hh" className="form-label ">
-                                                <p className="form-label">
-                                                    Product <span className="text-red-500">*</span>
-                                                </p>
-                                            </label>
-                                            <select
-                                                name="product"
-                                                value={product}
-                                                onChange={handleChange}
-                                                disabled={isViewed}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
-
-                                                {activeProductBlueprint &&
-                                                    activeProductBlueprint?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-sm text-red-500">{formDataErr.product}</p>}
-                                        </div>
-                                        <div
-                                            className={`fromGroup   ${formDataErr?.productMainStockId !== "" ? "has-error" : ""
-                                                } `}
-                                        >
-                                            <label htmlFor=" hh" className="form-label ">
-                                                <p className="form-label">
-                                                    Items <span className="text-red-500">*</span>
-                                                </p>
-                                            </label>
-                                            <select
-                                                name="productMainStockId"
-                                                value={productMainStockId}
-                                                onChange={handleChange}
-                                                disabled={isViewed}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
-
-                                                {normalStocks &&
-                                                    normalStocks?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-sm text-red-500">{formDataErr.productMainStockId}</p>}
-                                        </div>
+                            {qaList.map((qa, index) => (
+                                <div
+                                    key={qa._id || index}
+                                    className={`p-4 mb-4 border rounded relative ${isDark ? "border-gray-700" : "border-gray-200"
+                                        }`}
+                                >
+                                    <div className="mb-3">
+                                        <label className="form-label">Question</label>
+                                        <input
+                                            className="form-control py-2 w-full"
+                                            placeholder="Enter question"
+                                            value={qa.question}
+                                            onChange={(e) => handleQAChange(index, "question", e.target.value)}
+                                        />
                                     </div>
 
-                                    <div className="mt-5">
-                                        <h4 className="text-lg font-bold">Questions and Answers</h4>
-                                        <div className="space-y-4 mt-3">
-                                            {questionAndAnswerArray.map((qa, index) => (
-                                                <div
-                                                    key={index}
-                                                    className={`p-4 relative border rounded ${isDark ? 'border-gray-700' : 'border-gray-200'}`}
-                                                >
-                                                    <div className="fromGroup">
-                                                        <label className="form-label">Question</label>
-                                                        <input
-                                                            className="form-control py-2"
-                                                            value={qa?._id ? qa?.question : questionAnswer?.question}
-                                                            // onChange={(e) => handleQAChange(index, 'question', e.target.value)}
-                                                            // onChange={(e) => setQuestionAnswer((prev) => {
-                                                            //     return { ...prev, question: e.target.value }
-                                                            // })}
-
-                                                            onChange={(e) => {
-
-                                                                if (qa._id) {
-
-                                                                } else {
-                                                                    setQuestionAnswer((prev) => {
-                                                                        return { ...prev, question: e.target.value }
-                                                                    })
-
-                                                                }
-
-                                                            }}
-
-
-                                                            placeholder="Enter question"
-                                                        />
-                                                    </div>
-                                                    <div className="fromGroup mt-2">
-                                                        <label className="form-label">Answer</label>
-                                                        <textarea
-                                                            className="form-control py-2"
-                                                            rows={3}
-                                                            value={qa?._id ? qa?.answer : questionAnswer?.answer}
-                                                            // onChange={(e) => handleQAChange(index, 'answer', e.target.value)}
-                                                            onChange={(e) => setQuestionAnswer((prev) => {
-                                                                return { ...prev, answer: e.target.value }
-                                                            })}
-                                                            placeholder="Enter answer"
-                                                        />
-                                                    </div>
-                                                    {(
-                                                        <button
-                                                            onClick={() => handleDeleteQA(index)}
-                                                            className="bg-red-500 absolute top-0 right-4 text-white p-2 rounded mt-2"
-                                                        >
-                                                            <FaRegTrashAlt />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            ))}
-                                        </div>
+                                    <div className="mb-3">
+                                        <label className="form-label">Answer</label>
+                                        <textarea
+                                            className="form-control py-2 w-full"
+                                            rows={3}
+                                            placeholder="Enter answer"
+                                            value={qa.answer}
+                                            onChange={(e) => handleQAChange(index, "answer", e.target.value)}
+                                        />
                                     </div>
 
-                                    <div className="lg:col-span-2 col-span-1">
-                                        <div className="ltr:text-right rtl:text-left p-5">
+                                    <div className="flex gap-2 justify-end">
+                                        <button
+                                            onClick={() => saveOrUpdateQA(index)}
+                                            disabled={loading}
+                                            className={`px-4 py-2 rounded text-white transition ${qa._id
+                                                ? "bg-blue-600 hover:bg-blue-700"
+                                                : "bg-green-600 hover:bg-green-700"
+                                                }`}
+                                        >
+                                            {qa._id ? "Update" : "Save"}
+                                        </button>
+
+                                        {qaList.length > 1 && (
                                             <button
-                                                onClick={(questionAndAnswerArray?.length == 1 && questionAndAnswerArray[0]?._id == "") ? firstSubmit : onSubmit}
-                                                disabled={loading}
-                                                style={
-                                                    loading
-                                                        ? { opacity: "0.5", cursor: "not-allowed" }
-                                                        : { opacity: "1" }
-                                                }
-                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                                onClick={() => deleteQA(index)}
+                                                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded"
                                             >
-                                                {loading
-                                                    ? ""
-                                                    : isEditing
-                                                        ? "Update"
-                                                        : "Save & add more"}
-                                                {loading && (
-                                                    <>
-                                                        <svg
-                                                            className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                        >
-                                                            <circle
-                                                                className="opacity-25"
-                                                                cx="12"
-                                                                cy="12"
-                                                                r="10"
-                                                                stroke="currentColor"
-                                                                strokeWidth="4"
-                                                            ></circle>
-                                                            <path
-                                                                className="opacity-75"
-                                                                fill="currentColor"
-                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                            ></path>
-                                                        </svg>
-                                                        Loading..
-                                                    </>
-                                                )}
+                                                <FaRegTrashAlt />
                                             </button>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
-                            </div>
-                        </Card>
-                    </div>
-            }
-        </>
+                            ))}
 
+                            {/* Add More Button */}
+                            {
+                                canOpenNewForm &&
+                                <div className="text-right mt-4">
+                                    <button
+                                        onClick={addNewQARow}
+                                        className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded"
+                                    >
+                                        + Add Another Q&A
+                                    </button>
+                                </div>
+                            }
+
+                        </div>
+                    }
+
+                </div>
+            </Card>
+
+
+            <Transition appear show={showLoadingModal} as={Fragment}>
+                <Dialog
+                    as="div"
+                    className="relative z-[99999]"
+                    onClose={handleCloseLoadingModal}
+                >
+                    {(
+                        <Transition.Child
+                            as={Fragment}
+                            enter={noFade ? "" : "duration-300 ease-out"}
+                            enterFrom={noFade ? "" : "opacity-0"}
+                            enterTo={noFade ? "" : "opacity-100"}
+                            leave={noFade ? "" : "duration-200 ease-in"}
+                            leaveFrom={noFade ? "" : "opacity-100"}
+                            leaveTo={noFade ? "" : "opacity-0"}
+                        >
+                            <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                        </Transition.Child>
+                    )}
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div
+                            className={`flex min-h-full justify-center text-center p-6 items-center "
+                                    }`}
+                        >
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300  ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                            >
+                                <Dialog.Panel
+                                    className={`w-full transform overflow-hidden rounded-md
+                                       bg-white dark:bg-darkSecondary text-left align-middle shadow-xl transition-alll max-w-[17rem] py-10 `}
+                                >
+                                    <div className="flex flex-col justify-center mt-5 items-center gap-2">
+                                        <FormLoader />
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+        </div>
     );
 };
 
