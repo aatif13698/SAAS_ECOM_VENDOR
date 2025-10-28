@@ -714,196 +714,196 @@
 //       </Card>
 
 //       {/* Supplier Selection Modal */}
-      // <Transition appear show={openModal} as={Fragment}>
-      //   <Dialog
-      //     as="div"
-      //     className="relative z-[999]"
-      //     onClose={() => { }}
-      //   >
-      //     {(
-      //       <Transition.Child
-      //         as={Fragment}
-      //         enter={noFade ? "" : "duration-300 ease-out"}
-      //         enterFrom={noFade ? "" : "opacity-0"}
-      //         enterTo={noFade ? "" : "opacity-100"}
-      //         leave={noFade ? "" : "duration-200 ease-in"}
-      //         leaveFrom={noFade ? "" : "opacity-100"}
-      //         leaveTo={noFade ? "" : "opacity-0"}
-      //       >
-      //         <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
-      //       </Transition.Child>
-      //     )}
-      //     <div
-      //       className="fixed inset-0 "
-      //     >
-      //       <div
-      //         className={`flex min-h-full justify-center text-center p-6 items-center `}
-      //       >
-      //         <Transition.Child
-      //           as={Fragment}
-      //           enter={noFade ? "" : "duration-300  ease-out"}
-      //           enterFrom={noFade ? "" : "opacity-0 scale-95"}
-      //           enterTo={noFade ? "" : "opacity-100 scale-100"}
-      //           leave={noFade ? "" : "duration-200 ease-in"}
-      //           leaveFrom={noFade ? "" : "opacity-100 scale-100"}
-      //           leaveTo={noFade ? "" : "opacity-0 scale-95"}
-      //         >
-      //           <Dialog.Panel
-      //             className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
-      //           >
-      //             <div
-      //               className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
-      //             >
-      //               <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-      //                 Select Party
-      //               </h2>
-      //               <button onClick={() => setOpenModal(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
-      //                 <Icon icon="heroicons-outline:x" />
-      //               </button>
-      //             </div>
+// <Transition appear show={openModal} as={Fragment}>
+//   <Dialog
+//     as="div"
+//     className="relative z-[999]"
+//     onClose={() => { }}
+//   >
+//     {(
+//       <Transition.Child
+//         as={Fragment}
+//         enter={noFade ? "" : "duration-300 ease-out"}
+//         enterFrom={noFade ? "" : "opacity-0"}
+//         enterTo={noFade ? "" : "opacity-100"}
+//         leave={noFade ? "" : "duration-200 ease-in"}
+//         leaveFrom={noFade ? "" : "opacity-100"}
+//         leaveTo={noFade ? "" : "opacity-0"}
+//       >
+//         <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+//       </Transition.Child>
+//     )}
+//     <div
+//       className="fixed inset-0 "
+//     >
+//       <div
+//         className={`flex min-h-full justify-center text-center p-6 items-center `}
+//       >
+//         <Transition.Child
+//           as={Fragment}
+//           enter={noFade ? "" : "duration-300  ease-out"}
+//           enterFrom={noFade ? "" : "opacity-0 scale-95"}
+//           enterTo={noFade ? "" : "opacity-100 scale-100"}
+//           leave={noFade ? "" : "duration-200 ease-in"}
+//           leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+//           leaveTo={noFade ? "" : "opacity-0 scale-95"}
+//         >
+//           <Dialog.Panel
+//             className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+//           >
+//             <div
+//               className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+//             >
+//               <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+//                 Select Party
+//               </h2>
+//               <button onClick={() => setOpenModal(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+//                 <Icon icon="heroicons-outline:x" />
+//               </button>
+//             </div>
 
-      //             <div className="p-4 overflow-y-auto max-h-[50vh]">
-      //               {suppliers.length > 0 ? (
-      //                 suppliers.map((supplier) => (
-      //                   <div
-      //                     key={supplier._id}
-      //                     className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
-      //                       }`}
-      //                     onClick={() => handleSelectSupplier(supplier)}
-      //                   >
-      //                     <div>
-      //                       <p className="font-medium">{supplier.name}</p>
-      //                       <p className="text-sm">{supplier.contactPerson} - {supplier.emailContact}</p>
-      //                     </div>
-      //                     {formData.supplier?._id === supplier._id && (
-      //                       <GoCheck className="text-green-500" />
-      //                     )}
-      //                   </div>
-      //                 ))
-      //               ) : (
-      //                 <p className={isDark ? 'text-gray-300' : 'text-gray-500'}>
-      //                   No suppliers available
-      //                 </p>
-      //               )}
-      //             </div>
+//             <div className="p-4 overflow-y-auto max-h-[50vh]">
+//               {suppliers.length > 0 ? (
+//                 suppliers.map((supplier) => (
+//                   <div
+//                     key={supplier._id}
+//                     className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${formData.supplier?._id === supplier._id ? 'bg-indigo-50 text-gray-500' : ''
+//                       }`}
+//                     onClick={() => handleSelectSupplier(supplier)}
+//                   >
+//                     <div>
+//                       <p className="font-medium">{supplier.name}</p>
+//                       <p className="text-sm">{supplier.contactPerson} - {supplier.emailContact}</p>
+//                     </div>
+//                     {formData.supplier?._id === supplier._id && (
+//                       <GoCheck className="text-green-500" />
+//                     )}
+//                   </div>
+//                 ))
+//               ) : (
+//                 <p className={isDark ? 'text-gray-300' : 'text-gray-500'}>
+//                   No suppliers available
+//                 </p>
+//               )}
+//             </div>
 
-      //             <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary bg-white dark:bg-darkInput">
-      //               <Button
-      //                 text="Cancel"
-      //                 className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText px-4 py-2 rounded"
-      //                 onClick={() => setOpenModal(false)}
-      //               />
-      //             </div>
-      //           </Dialog.Panel>
-      //         </Transition.Child>
-      //       </div>
-      //     </div>
-      //   </Dialog>
-      // </Transition>
+//             <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary bg-white dark:bg-darkInput">
+//               <Button
+//                 text="Cancel"
+//                 className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText px-4 py-2 rounded"
+//                 onClick={() => setOpenModal(false)}
+//               />
+//             </div>
+//           </Dialog.Panel>
+//         </Transition.Child>
+//       </div>
+//     </div>
+//   </Dialog>
+// </Transition>
 
 //       {/* List address */}
-      // <Transition appear show={openModal2} as={Fragment}>
-      //   <Dialog
-      //     as="div"
-      //     className="relative z-[999]"
-      //     onClose={() => { }}
-      //   >
-      //     {(
-      //       <Transition.Child
-      //         as={Fragment}
-      //         enter={noFade ? "" : "duration-300 ease-out"}
-      //         enterFrom={noFade ? "" : "opacity-0"}
-      //         enterTo={noFade ? "" : "opacity-100"}
-      //         leave={noFade ? "" : "duration-200 ease-in"}
-      //         leaveFrom={noFade ? "" : "opacity-100"}
-      //         leaveTo={noFade ? "" : "opacity-0"}
-      //       >
-      //         <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
-      //       </Transition.Child>
-      //     )}
-      //     <div
-      //       className="fixed inset-0 "
-      //     >
-      //       <div
-      //         className={`flex min-h-full justify-center text-center p-6 items-center `}
-      //       >
-      //         <Transition.Child
-      //           as={Fragment}
-      //           enter={noFade ? "" : "duration-300  ease-out"}
-      //           enterFrom={noFade ? "" : "opacity-0 scale-95"}
-      //           enterTo={noFade ? "" : "opacity-100 scale-100"}
-      //           leave={noFade ? "" : "duration-200 ease-in"}
-      //           leaveFrom={noFade ? "" : "opacity-100 scale-100"}
-      //           leaveTo={noFade ? "" : "opacity-0 scale-95"}
-      //         >
-      //           <Dialog.Panel
-      //             className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
-      //           >
-      //             <div
-      //               className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
-      //             >
-      //               <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-      //                 Select Address
-      //               </h2>
-      //               <button onClick={() => setOpenModal2(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
-      //                 <Icon icon="heroicons-outline:x" />
-      //               </button>
-      //             </div>
+// <Transition appear show={openModal2} as={Fragment}>
+//   <Dialog
+//     as="div"
+//     className="relative z-[999]"
+//     onClose={() => { }}
+//   >
+//     {(
+//       <Transition.Child
+//         as={Fragment}
+//         enter={noFade ? "" : "duration-300 ease-out"}
+//         enterFrom={noFade ? "" : "opacity-0"}
+//         enterTo={noFade ? "" : "opacity-100"}
+//         leave={noFade ? "" : "duration-200 ease-in"}
+//         leaveFrom={noFade ? "" : "opacity-100"}
+//         leaveTo={noFade ? "" : "opacity-0"}
+//       >
+//         <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+//       </Transition.Child>
+//     )}
+//     <div
+//       className="fixed inset-0 "
+//     >
+//       <div
+//         className={`flex min-h-full justify-center text-center p-6 items-center `}
+//       >
+//         <Transition.Child
+//           as={Fragment}
+//           enter={noFade ? "" : "duration-300  ease-out"}
+//           enterFrom={noFade ? "" : "opacity-0 scale-95"}
+//           enterTo={noFade ? "" : "opacity-100 scale-100"}
+//           leave={noFade ? "" : "duration-200 ease-in"}
+//           leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+//           leaveTo={noFade ? "" : "opacity-0 scale-95"}
+//         >
+//           <Dialog.Panel
+//             className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+//           >
+//             <div
+//               className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+//             >
+//               <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+//                 Select Address
+//               </h2>
+//               <button onClick={() => setOpenModal2(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+//                 <Icon icon="heroicons-outline:x" />
+//               </button>
+//             </div>
 
-      //             <div className="p-4 overflow-y-auto max-h-[50vh]">
-      //               {addresses?.length > 0 ? (
-      //                 addresses.map((address) => (
-      //                   <div
-      //                     key={address._id}
-      //                     className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${formData.shippingAddress?._id === address._id ? 'bg-indigo-50 text-gray-500' : ''
-      //                       }`}
-      //                     onClick={() => handleSelectShippingAddress(address)}
-      //                   >
-      //                     <div>
-      //                       <p className="font-medium">{address.fullName}</p>
-      //                       <p className="text-sm">{address.phone}</p>
-      //                       <p className="text-sm">{address.address},{address?.city}, {address?.state}</p>
-      //                     </div>
-      //                     {formData.shippingAddress?._id === address._id && (
-      //                       <GoCheck className="text-green-500" />
-      //                     )}
-      //                   </div>
-      //                 ))
-      //               ) : (
-      //                 <p className={isDark ? 'text-gray-300' : 'text-gray-500'}>
-      //                   No address available
-      //                 </p>
-      //               )}
-      //             </div>
+//             <div className="p-4 overflow-y-auto max-h-[50vh]">
+//               {addresses?.length > 0 ? (
+//                 addresses.map((address) => (
+//                   <div
+//                     key={address._id}
+//                     className={`p-2 my-2 rounded cursor-pointer hover:bg-indigo-100 hover:text-black-500 flex justify-between items-center dark:hover:bg-gray-700 ${formData.shippingAddress?._id === address._id ? 'bg-indigo-50 text-gray-500' : ''
+//                       }`}
+//                     onClick={() => handleSelectShippingAddress(address)}
+//                   >
+//                     <div>
+//                       <p className="font-medium">{address.fullName}</p>
+//                       <p className="text-sm">{address.phone}</p>
+//                       <p className="text-sm">{address.address},{address?.city}, {address?.state}</p>
+//                     </div>
+//                     {formData.shippingAddress?._id === address._id && (
+//                       <GoCheck className="text-green-500" />
+//                     )}
+//                   </div>
+//                 ))
+//               ) : (
+//                 <p className={isDark ? 'text-gray-300' : 'text-gray-500'}>
+//                   No address available
+//                 </p>
+//               )}
+//             </div>
 
-      //             <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary bg-white dark:bg-darkInput">
-      //               <button
-      //                 type="button"
-      //                 onClick={() => {
-      //                   setOpenModal2(false)
-      //                   setTimeout(() => {
-      //                     setOpenModal3(true);
-      //                   }, 300);
-      //                 }}
-      //                 className='flex items-center px-2 hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
-      //               >
-      //                 <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
-      //                 <span className='text-lightHoverBgBtn dark:text-darkBtn'>
-      //                   Add Address
-      //                 </span>
-      //               </button>
-      //               <Button
-      //                 text="Cancel"
-      //                 className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText px-4 py-2 rounded"
-      //                 onClick={() => setOpenModal2(false)}
-      //               />
-      //             </div>
-      //           </Dialog.Panel>
-      //         </Transition.Child>
-      //       </div>
-      //     </div>
-      //   </Dialog>
-      // </Transition>
+//             <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary bg-white dark:bg-darkInput">
+//               <button
+//                 type="button"
+//                 onClick={() => {
+//                   setOpenModal2(false)
+//                   setTimeout(() => {
+//                     setOpenModal3(true);
+//                   }, 300);
+//                 }}
+//                 className='flex items-center px-2 hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+//               >
+//                 <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
+//                 <span className='text-lightHoverBgBtn dark:text-darkBtn'>
+//                   Add Address
+//                 </span>
+//               </button>
+//               <Button
+//                 text="Cancel"
+//                 className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText px-4 py-2 rounded"
+//                 onClick={() => setOpenModal2(false)}
+//               />
+//             </div>
+//           </Dialog.Panel>
+//         </Transition.Child>
+//       </div>
+//     </div>
+//   </Dialog>
+// </Transition>
 
 //       {/* add address  */}
 //       <AddAddressModel openModal3={openModal3} setOpenModal3={setOpenModal3} getShippingAddress={getShippingAddress} currentSupplierId={currentSupplierId} />
@@ -959,7 +959,12 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     items: [
       {
         srNo: 1,
-        itemName: '',
+        itemName: {
+          name: "",
+          productStock: "",
+          productMainStock: "",
+          purchasePrice: ""
+        },
         quantity: 1,
         mrp: 0,
         discount: 0,
@@ -988,6 +993,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     paidAmount: 0,
     balance: 0,
   });
+
+  console.log("formData", formData);
+  
 
   const [suppliers, setSuppliers] = useState([]);
   const [openModal, setOpenModal] = useState(false);     // Supplier modal
@@ -1060,7 +1068,12 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         ...prev.items,
         {
           srNo: newSrNo,
-          itemName: '',
+          itemName: {
+            name: "",
+            productStock: "",
+            productMainStock: "",
+            purchasePrice: ""
+          },
           quantity: 1,
           mrp: 0,
           discount: 0,
@@ -1362,9 +1375,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                             onClick={() => setOpenModal4(true)}
                             className='flex w-full items-center p-2 text-left hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md text-sm'
                           >
-                            <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
+                            {/* <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' /> */}
                             <span className='ml-1 text-lightHoverBgBtn dark:text-darkBtn'>
-                              {item.itemName || 'Select Item'}
+                              {/* {item.itemName || 'Select Item'} */} {item?.itemName?.name}
                             </span>
                           </button>
                         </td>
@@ -1449,7 +1462,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
               </div>
               <button
                 type="button"
-                onClick={addItem}
+                // onClick={addItem}
+                onClick={() => setOpenModal4(true)}
                 className='mt-3 flex items-center px-3 py-2 text-sm hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
               >
                 <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
@@ -1644,7 +1658,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       </Card>
 
       {/* Supplier Selection Modal */}
-       <Transition appear show={openModal} as={Fragment}>
+      <Transition appear show={openModal} as={Fragment}>
         <Dialog
           as="div"
           className="relative z-[999]"
@@ -1844,6 +1858,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
       {/* Product List Modal */}
       <ProductListModel
+        items={formData?.items}
+        setItem={setFormData}
         openModal3={openModal4}
         setOpenModal3={setOpenModal4}
         getShippingAddress={getShippingAddress}
