@@ -150,6 +150,63 @@ const deleteAddress = async (data) => {
 
 
 
+const createTransporter = async (data) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/transporter/create/supplier/transport`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+const updateTransporter = async (data) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/transporter/update/supplier/transport`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+
+const getAllTransportersList = async (page, keyword, perPage) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/transporter/list/supplier/transport?keyword=${keyword}&&page=${page}&&perPage=${perPage}&&clientId=${clientId}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
+
+
+
+const activeInActiveTransport = async ({ id, status, page, keyword: keyWord, perPage }) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/transporter/activeInactive/transport`, { clientId, id, status, page, keyword: keyWord, perPage }, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+
+
+};
+
 
 
 
@@ -169,6 +226,10 @@ export default {
     getSupplierAddress,
     addAddress,
     updateAddress,
-    deleteAddress
+    deleteAddress,
+    createTransporter,
+    updateTransporter,
+    getAllTransportersList,
+    activeInActiveTransport
 
 }

@@ -49,7 +49,9 @@ const Pricing2 = lazy(() => import("./pages/pricing/Pricing2"))
 
 const Supplier = lazy(() => import("./pages/supplier/Supplier"));
 const CreateSupplier = lazy(() => import("./pages/supplier/CreateSupplier"));
-const AddSupplierAddress = lazy(() => import("./pages/supplier/AddSupplierAddress"))
+const AddSupplierAddress = lazy(() => import("./pages/supplier/AddSupplierAddress"));
+const SupplierTransport = lazy(() => import("./pages/supplierTransport/SupplierTransport"));
+const CreateSupplierTransport = lazy(() => import("./pages/supplierTransport/CreateSupplierTransport"));
 
 const Stock = lazy(() => import("./pages/stock/Srock"));
 const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
@@ -245,6 +247,10 @@ function App() {
                 <Route path="supplier-list" element={<Supplier />} />
                 <Route path="create-supplier" element={<CreateSupplier />} />
                 <Route path="create-supplier/add/address" element={<AddSupplierAddress />} />
+
+                <Route path="create-transport" element={<CreateSupplierTransport />} />
+                <Route path="transport-list" element={<SupplierTransport />} />
+
 
                 <Route path="stock-list" element={<Stock />} />
                 <Route path="create-stock" element={<CreateStock />} />
