@@ -931,6 +931,7 @@ import Icon from "@/components/ui/Icon";
 import Button from '../../components/ui/Button';
 import AddAddressModel from './AddAddressModel';
 import ProductListModel from './ProductListModel';
+import AddTransportModel from './AddTransportModel';
 
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const [isDark] = useDarkmode();
@@ -995,13 +996,14 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   });
 
   console.log("formData", formData);
-  
+
 
   const [suppliers, setSuppliers] = useState([]);
   const [openModal, setOpenModal] = useState(false);     // Supplier modal
   const [openModal2, setOpenModal2] = useState(false);   // Shipping Address list modal
   const [openModal3, setOpenModal3] = useState(false);   // Add Address modal
   const [openModal4, setOpenModal4] = useState(false);   // Product List modal
+  const [openModal5, setOpenModal5] = useState(false);   // Add Transport modal
   const [showNotesInput, setShowNotesInput] = useState(false);
   const [showBankInput, setShowBankInput] = useState(false);
 
@@ -1289,6 +1291,13 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                           <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Address</span>
                         </button>
                       )}
+                      <div className='mt-2 flex justify-end'>
+                        <Button
+                          text="Add Trasnport"
+                          className="text-lightModalHeaderColor  dark:text-darkBtn border py-1 border-lightModalHeaderColor dark:border-darkBtn hover:bg-lightModalHeaderColor/20"
+                          onClick={() => setOpenModal5(true)}
+                        />
+                      </div>
                     </div>
                   </div>
                 )}
@@ -1852,6 +1861,14 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       <AddAddressModel
         openModal3={openModal3}
         setOpenModal3={setOpenModal3}
+        getShippingAddress={getShippingAddress}
+        currentSupplierId={currentSupplierId}
+      />
+
+      {/* Add Transport Model */}
+      <AddTransportModel
+        openModal3={openModal5}
+        setOpenModal3={setOpenModal5}
         getShippingAddress={getShippingAddress}
         currentSupplierId={currentSupplierId}
       />
