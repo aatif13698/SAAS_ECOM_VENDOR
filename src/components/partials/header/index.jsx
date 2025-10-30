@@ -62,7 +62,7 @@ const Header = ({ className = "custom-class" }) => {
         ${borderSwicthClass()}
              ${menuType === "horizontal" && width > breakpoints.xl
             ? "py-1"
-            : "md:py-6 py-3"
+            : " py-3"
           }
         `}
       >
