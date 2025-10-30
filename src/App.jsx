@@ -92,6 +92,8 @@ const DocAdjustOrder = lazy(() => import("./pages/documents/DocAdjustOrder"));
 const Ledger = lazy(() => import("./pages/ledger/Ledger"));
 const CreateLedger = lazy(() => import("./pages/ledger/CreateLedger"));
 
+const ProductQaOut = lazy(() => import("./pages/ProudctQaOut/ProductQaOut"));
+
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
@@ -239,6 +241,7 @@ function App() {
                 <Route path="attribute-list" element={<Attribute />} />
                 <Route path="product-list" element={<ProductBluePrint />} />
                 <Route path="create-product" element={<CreateProductBluePrint />} />
+                <Route path="product-qa-out-list" element={<ProductQaOut/>} />
 
                 <Route path="variant-list" element={<Variant2 />} />
 
