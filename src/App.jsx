@@ -50,6 +50,7 @@ const Pricing2 = lazy(() => import("./pages/pricing/Pricing2"))
 const Supplier = lazy(() => import("./pages/supplier/Supplier"));
 const CreateSupplier = lazy(() => import("./pages/supplier/CreateSupplier"));
 const AddSupplierAddress = lazy(() => import("./pages/supplier/AddSupplierAddress"));
+const LinkedItems = lazy(() => import("./pages/supplier/LinkedItems"));
 const SupplierTransport = lazy(() => import("./pages/supplierTransport/SupplierTransport"));
 const CreateSupplierTransport = lazy(() => import("./pages/supplierTransport/CreateSupplierTransport"));
 
@@ -250,6 +251,7 @@ function App() {
                 <Route path="supplier-list" element={<Supplier />} />
                 <Route path="create-supplier" element={<CreateSupplier />} />
                 <Route path="create-supplier/add/address" element={<AddSupplierAddress />} />
+                <Route path="create-supplier/link/items" element={<LinkedItems />} />
 
                 <Route path="create-transport" element={<CreateSupplierTransport />} />
                 <Route path="transport-list" element={<SupplierTransport />} />

@@ -28,6 +28,39 @@ const update = async (data) => {
 };
 
 
+
+const addItem = async (data) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/add/items`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+const removeItem = async (data) => {
+  const authToken = localStorage.getItem("saas_client_token");
+  
+  if (!authToken) {
+    throw new Error("Authentication token not found");
+  }
+
+  return await axios.delete(
+    `${import.meta.env.VITE_BASE_URL}/api/vendor/supplier/remove/items`,
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      data, // axios puts payload here for DELETE
+    }
+  );
+};
+
+
+
 // for getting all business unit list
 const getAllList = async ( page, keyword, perPage, currentLevel, levelId ) => {
     const authToken = localStorage.getItem("saas_client_token");
@@ -42,11 +75,11 @@ const getAllList = async ( page, keyword, perPage, currentLevel, levelId ) => {
     return response.data
 }
 
-const getStockList = async ( page, keyword, perPage, currentLevel, levelId ) => {
+const getStockList = async ( page, keyword, perPage, currentLevel, levelId, categoryFilter, subCategoryFilter ) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/listStock/all?keyword=${keyword}&&page=${page}&&perPage=${perPage}&&clientId=${clientId}&&level=${currentLevel}&&levelId=${levelId}`, {
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/listStock/all?keyword=${keyword}&&page=${page}&&perPage=${perPage}&&clientId=${clientId}&&level=${currentLevel}&&levelId=${levelId}&&categoryId=${categoryFilter}&&subCategoryId=${subCategoryFilter}`, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -140,5 +173,7 @@ export default {
     getAllStocks,
     getParticularStocks,
     getStockList,
-    getStockByProduct
+    getStockByProduct,
+    addItem,
+    removeItem
 }

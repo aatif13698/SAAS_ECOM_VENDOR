@@ -1375,16 +1375,35 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                     </div>
                                 </form>
 
-                                 {
-                                    id ?
-                                        <button
-                                            onClick={() => navigate("/create-supplier/add/address", { state: { customerId: id } })}
-                                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                        >
-                                            Add Address
-                                        </button>
-                                        : ""
-                                }
+                                <hr />
+
+                                <div className="flex gap-2 mt-2">
+
+                                    {
+                                        id ?
+                                            <button
+                                                onClick={() => navigate("/create-supplier/add/address", { state: { customerId: id } })}
+                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                            >
+                                                Add Address
+                                            </button>
+                                            : ""
+                                    }
+
+                                    {
+                                        id ?
+                                            <button
+                                                onClick={() => navigate(`/create-supplier/link/items`, { state: { supplierId: id } })}
+                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                            >
+                                                Linked Items
+                                            </button>
+                                            : ""
+                                    }
+
+                                </div>
+
+
 
 
                             </div>
