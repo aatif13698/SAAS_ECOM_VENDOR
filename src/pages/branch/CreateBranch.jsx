@@ -66,6 +66,27 @@ const CreateBranch = ({ noFade, scrollContent }) => {
     const id = location?.state?.id;
 
     console.log("id", id);
+    const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
+     const [levelList, setLevelList] = useState([
+            // {
+            //     name: "Vendor",
+            //     value: "vendor"
+            // },
+            {
+                name: "Business",
+                value: "business"
+            },
+            {
+                name: "Branch",
+                value: "branch"
+            },
+            {
+                name: "Warehouse",
+                value: "warehouse"
+            },
+        ])
+    
+
 
     const [pageLoading, setPageLoading] = useState(true);
     const [showLoadingModal, setShowLoadingModal] = useState(false);
@@ -827,6 +848,70 @@ const CreateBranch = ({ noFade, scrollContent }) => {
     };
 
 
+    useEffect(() => {
+        if (currentUser && isAuthenticated) {
+            if (currentUser.isVendorLevel) {
+                setLevelList([
+                    // {
+                    //     name: "Vendor",
+                    //     value: "vendor"
+                    // },
+                    {
+                        name: "Business",
+                        value: "business"
+                    },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ])
+            } else if (currentUser.isBuLevel) {
+                setLevelList([
+                    {
+                        name: "Business",
+                        value: "business"
+                    },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ]);
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
+            } else if (currentUser.isBranchLevel) {
+                setLevelList([
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ]);
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
+            } else if (currentUser.isWarehouseLevel) {
+                setLevelList([
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ])
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
+            }
+
+        } else {
+
+        }
+
+    }, [currentUser])
 
 
 
@@ -872,7 +957,7 @@ const CreateBranch = ({ noFade, scrollContent }) => {
                                                     name="businessUnit"
                                                     value={businessUnit}
                                                     onChange={handleChange}
-                                                    disabled={isViewed}
+                                                        disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>

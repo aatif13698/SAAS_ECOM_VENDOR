@@ -56,10 +56,10 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
     // console.log("store user", currentUser);
 
     const [levelList, setLevelList] = useState([
-        {
-            name: "Vendor",
-            value: "vendor"
-        },
+        // {
+        //     name: "Vendor",
+        //     value: "vendor"
+        // },
         {
             name: "Business",
             value: "business"
@@ -125,10 +125,10 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
                 setLevelList([
-                    {
-                        name: "Vendor",
-                        value: "vendor"
-                    },
+                    // {
+                    //     name: "Vendor",
+                    //     value: "vendor"
+                    // },
                     {
                         name: "Business",
                         value: "business"
