@@ -16,6 +16,8 @@ import Button from '../../components/ui/Button';
 import { useSelector } from 'react-redux';
 import stockService from '@/services/stock/stock.service';
 import categoryService from '@/services/category/category.service';
+import subcategoryService from '@/services/subCategory/subcategory.service';
+import { useNavigate } from 'react-router-dom';
 
 /* --------------------------------------------------------------
    Main Component
@@ -26,16 +28,20 @@ function ProductListModel({
     noFade,
     openModal3,
     setOpenModal3,
+    supplier,
     getShippingAddress,
     currentSupplierId,
 }) {
+    console.log("supplier", supplier);
+
     const { user: currentUser, isAuth: isAuthenticated } = useSelector(
         (state) => state.auth
     );
     const [isDark] = useDarkmode();
+    const navigate = useNavigate();
 
     /* ---------------------- pagination & filters ---------------------- */
-    const [pending, setPending] = useState(true);
+    const [pending, setPending] = useState(false);
     const [totalRows, setTotalRows] = useState(0);
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
@@ -75,18 +81,7 @@ function ProductListModel({
     }, [keyWord, selectedCategory, selectedSubCategory, perPage]);
 
     /* ---------------------- load categories ---------------------- */
-    useEffect(() => {
-        const load = async () => {
-            try {
-                const res = await categoryService.getCategories();
-                setCategories(res?.data || []);
-            } catch (e) {
-                console.error(e);
-                toast.error('Failed to load categories');
-            }
-        };
-        load();
-    }, []);
+
 
     /* ---------------------- load sub-categories ---------------------- */
     useEffect(() => {
@@ -95,16 +90,14 @@ function ProductListModel({
             setSelectedSubCategory('');
             return;
         }
-        const load = async () => {
+        (async () => {
             try {
-                const res = await categoryService.getSubCategories(selectedCategory);
-                setSubCategories(res?.data || []);
-            } catch (e) {
-                console.error(e);
+                const res = await subcategoryService.getAllSubCategoryByCategory(selectedCategory);
+                setSubCategories(res?.data ?? []);
+            } catch {
                 toast.error('Failed to load sub-categories');
             }
-        };
-        load();
+        })();
     }, [selectedCategory]);
 
     /* ---------------------- fetch stock (paginated) ---------------------- */
@@ -116,18 +109,20 @@ function ProductListModel({
             level,
             levelId,
             categoryFilter,
-            subCategoryFilter
+            subCategoryFilter,
+            supplier
         ) => {
             try {
                 setPending(true);
-                const res = await stockService.getStockList(
+                const res = await stockService.getStockListOfSupplier(
                     page,
                     keyWord,
                     perPage,
                     level,
                     levelId,
                     categoryFilter || null,
-                    subCategoryFilter || null
+                    subCategoryFilter || null,
+                    supplier || null
                 );
                 setTotalRows(res?.data?.count || 0);
                 setPaginationData(res?.data?.stocks || []);
@@ -158,15 +153,23 @@ function ProductListModel({
             levelId = currentUser.warehouse;
         }
 
-        fetchStockData(
-            page,
-            perPage,
-            keyWord,
-            level,
-            levelId,
-            selectedCategory,
-            selectedSubCategory
-        );
+        if (supplier) {
+            fetchStockData(
+                page,
+                perPage,
+                keyWord,
+                level,
+                levelId,
+                selectedCategory,
+                selectedSubCategory,
+                supplier
+            );
+        } else {
+            setTotalRows(0);
+            setPaginationData([]);
+        }
+
+
     }, [
         isAuthenticated,
         currentUser,
@@ -175,6 +178,7 @@ function ProductListModel({
         keyWord,
         selectedCategory,
         selectedSubCategory,
+        supplier,
         fetchStockData,
     ]);
 
@@ -317,6 +321,18 @@ function ProductListModel({
         }
     };
 
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const res = await subcategoryService.getAllActiveCategory();
+                setCategories(res?.data ?? []);
+            } catch {
+                toast.error('Failed to load categories');
+            }
+        })();
+    }, []);
+
     /* --------------------------------------------------------------
        Render
        -------------------------------------------------------------- */
@@ -377,10 +393,6 @@ function ProductListModel({
                                                     className="animate-spin text-4xl"
                                                 />
                                             </div>
-                                        ) : paginationData.length === 0 ? (
-                                            <p className="text-center text-gray-500">
-                                                No products found matching your filters.
-                                            </p>
                                         ) : (
                                             <>
                                                 {/* ----- Filters (sticky) ----- */}
@@ -394,6 +406,7 @@ function ProductListModel({
                                                             ? 'bg-darkInput border-darkSecondary text-white'
                                                             : 'bg-white border-gray-300'
                                                             }`}
+                                                        disabled={!supplier || paginationData?.length == 0}
                                                     />
                                                     <select
                                                         value={selectedCategory}
@@ -405,6 +418,7 @@ function ProductListModel({
                                                             ? 'bg-darkInput border-darkSecondary text-white'
                                                             : 'bg-white border-gray-300'
                                                             }`}
+                                                        disabled={!supplier || paginationData?.length == 0}
                                                     >
                                                         <option value="">All Categories</option>
                                                         {categories.map((c) => (
@@ -416,7 +430,7 @@ function ProductListModel({
                                                     <select
                                                         value={selectedSubCategory}
                                                         onChange={(e) => setSelectedSubCategory(e.target.value)}
-                                                        disabled={!selectedCategory}
+                                                        disabled={!selectedCategory || paginationData?.length == 0}
                                                         className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${isDark
                                                             ? 'bg-darkInput border-darkSecondary text-white'
                                                             : 'bg-white border-gray-300'
@@ -430,6 +444,7 @@ function ProductListModel({
                                                         ))}
                                                     </select>
                                                     <select
+                                                        disabled={paginationData?.length == 0}
                                                         value={perPage}
                                                         onChange={(e) => setPerPage(Number(e.target.value))}
                                                         className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${isDark
@@ -447,7 +462,7 @@ function ProductListModel({
 
                                                 {/* ----- Product groups (tables) ----- */}
                                                 <div className="space-y-8 p-4">
-                                                    {paginationData.map((stock) => (
+                                                    {paginationData?.length > 0 ? paginationData.map((stock) => (
                                                         <div
                                                             key={stock._id}
                                                             className={`border rounded-lg p-5 ${isDark
@@ -589,7 +604,26 @@ function ProductListModel({
                                                                 </table>
                                                             </div>
                                                         </div>
-                                                    ))}
+                                                    )) : <>
+
+                                                        {
+                                                            supplier ? paginationData?.length == 0 ?
+                                                                <div className="flex flex-col items-center">
+                                                                    <p className='text-center text-gray-500'>No items linked to this supplier yet. Please link items first.</p>
+                                                                    <button
+                                                                        onClick={() => navigate(`/create-supplier/link/items`, { state: { supplierId: supplier } })}
+                                                                        className='bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover mt-2 text-white dark:hover:text-black-900 px-4 py-2 rounded'>Link now</button>
+                                                                </div> : "" :
+                                                                <div className="">
+                                                                    <p className='text-center text-gray-500'> No supplier selected yet.</p>
+
+                                                                </div>
+
+                                                        }
+                                                    </>
+
+
+                                                    }
                                                 </div>
 
                                                 {/* ----- Pagination ----- */}
@@ -646,6 +680,16 @@ function ProductListModel({
                                             onClick={handleSave}
                                             disabled={Object.keys(selectedVariants).length === 0}
                                         />
+
+                                        {
+                                            supplier && paginationData?.length > 0 &&
+                                            <Button
+                                                onClick={() => navigate(`/create-supplier/link/items`, { state: { supplierId: supplier } })}
+                                                text="Link more items"
+                                                className={`bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900 px-4 py-2 rounded `}
+                                            />
+                                        }
+
                                     </div>
                                 </Dialog.Panel>
                             </Transition.Child>

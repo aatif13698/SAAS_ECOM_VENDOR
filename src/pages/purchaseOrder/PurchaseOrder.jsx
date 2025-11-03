@@ -1251,7 +1251,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                       <button
                         type="button"
                         onClick={() => setOpenModal(true)}
-                        className='flex items-center p-4 w-full justify-center hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+                        className='flex items-center p-4 w-fill justify-center hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
                       >
                         <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
                         <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Party</span>
@@ -1881,6 +1881,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         setOpenModal3={setOpenModal4}
         getShippingAddress={getShippingAddress}
         currentSupplierId={currentSupplierId}
+        supplier={formData?.supplier?._id}
       />
     </div>
   );
