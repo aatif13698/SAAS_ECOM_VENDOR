@@ -949,7 +949,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     <tr className="bg-gray-100 dark:bg-gray-800 font-medium">
                       <td colSpan={5} className="py-2 px-4 border border-gray-300 text-left text-sm">Total Discount: {totals.totalDiscount.toFixed(2)}</td>
                       <td className="py-2 px-4 border border-gray-300 text-left text-sm">Total Taxable: {totals.totalTaxable.toFixed(2)}</td>
-                      <td colSpan={2} className="py-2 px-4 border border-gray-300 text-left text-sm">Total Taxes: {totals.totalTaxes.toFixed(2)}</td>
+                      <td colSpan={formData?.isInterState ? 3 : 2} className="py-2 px-4 border border-gray-300 text-left text-sm">Total Taxes: {totals.totalTaxes.toFixed(2)}</td>
                       <td className="py-2 px-4 border border-gray-300 text-left text-sm font-bold">Grand Total: {totals.grandTotal.toFixed(2)}</td>
                       <td className="py-2 px-4 border border-gray-300"></td>
                     </tr>
