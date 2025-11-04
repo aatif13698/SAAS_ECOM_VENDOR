@@ -1720,3 +1720,83 @@ function CreateLedger() {
 
 export default CreateLedger;
 
+
+
+
+
+
+
+
+{/* <Modal
+        open={openModal}
+        onClose={() => setOpenModal(false)}
+        aria-labelledby="supplier-modal-title"
+        aria-describedby="supplier-modal-description"
+      >
+        <Box sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: isDark ? 'rgb(31, 41, 55)' : 'white',
+          border: '1px solid',
+          borderColor: isDark ? 'rgb(75, 85, 99)' : 'rgb(209, 213, 219)',
+          boxShadow: 24,
+          borderRadius: 2,
+          maxHeight: '80vh',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          <div
+            className={`relative overflow-hidden rounded-t-lg py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+          >
+            <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+              Select Party
+            </h2>
+            <button onClick={() => setOpenModal(false)} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+              <Icon icon="heroicons-outline:x" />
+            </button>
+          </div>
+          <Box sx={{
+            p: 2,
+            flex: 1,
+            overflowY: 'auto',
+          }}>
+            {suppliers.length > 0 ? (
+              suppliers.map((supplier) => (
+                <div
+                  key={supplier._id}
+                  className={`p-2 mb-2 rounded cursor-pointer hover:bg-indigo-100 flex justify-between items-center ${formData.supplier?._id === supplier._id ? 'bg-indigo-50' : ''
+                    }`}
+                  onClick={() => handleSelectSupplier(supplier)}
+                >
+                  <div>
+                    <p className="font-medium">{supplier.name}</p>
+                    <p className="text-sm text-gray-500">{supplier.contactPerson} - {supplier.emailContact}</p>
+                  </div>
+                  {formData.supplier?._id === supplier._id && (
+                    <GoCheck className="text-green-500" />
+                  )}
+                </div>
+              ))
+            ) : (
+              <Typography className={isDark ? 'text-gray-300' : 'text-gray-500'}>
+                No suppliers available
+              </Typography>
+            )}
+          </Box>
+          {(
+            <div className="px-4 py-3 rounded-b-lg flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
+              <div className="flex gap-2">
+                <Button
+                  text="Close"
+                  // className="border bg-red-300 rounded px-5 py-2"
+                  className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
+                  onClick={() => setOpenModal(false)}
+                />
+              </div>
+            </div>
+          )}
+        </Box>
+      </Modal> */}
