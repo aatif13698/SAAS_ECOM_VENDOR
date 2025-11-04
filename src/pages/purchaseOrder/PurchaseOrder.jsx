@@ -1363,6 +1363,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       {/* Product List Modal */}
       <ProductListModel
         items={formData?.items}
+        isInterState={formData?.isInterState}
         setItem={setFormData}
         openModal3={openModal4}
         setOpenModal3={setOpenModal4}

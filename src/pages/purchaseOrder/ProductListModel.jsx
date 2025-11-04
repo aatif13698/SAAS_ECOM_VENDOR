@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
    -------------------------------------------------------------- */
 function ProductListModel({
     items,
+    isInterState,
     setItem,
     noFade,
     openModal3,
@@ -32,7 +33,6 @@ function ProductListModel({
     getShippingAddress,
     currentSupplierId,
 }) {
-    console.log("supplier", supplier);
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector(
         (state) => state.auth
@@ -136,6 +136,73 @@ function ProductListModel({
         []
     );
 
+
+    useEffect(() => {
+        const existingItems = items
+        const filteredPaginatedData = paginationData?.map((items) => {
+            const updatednormalSaleStock = items?.normalSaleStock?.filter((stock) => {
+                let count = 0
+                for (let index = 0; index < existingItems.length; index++) {
+                    const productMainStock = existingItems[index]?.itemName?.productMainStock;
+                    const newQuantity = existingItems[index]?.quantity;
+                    const newcgstPercent = existingItems[index]?.cgstPercent;
+                    const newdiscount = existingItems[index]?.discount;
+                    const newgstPercent = existingItems[index]?.gstPercent;
+                    const newigst = existingItems[index]?.igst;
+                    const newigstPercent = existingItems[index]?.igstPercent;
+                    const newmrp = existingItems[index]?.mrp;
+                    const sgst = existingItems[index]?.sgst;
+                    const newsgstPercent = existingItems[index]?.sgstPercent;
+                    const newtax = existingItems[index]?.tax;
+                    const newtaxableAmount = existingItems[index]?.taxableAmount;
+                    const newtotalAmount = existingItems[index]?.totalAmount
+                    if (stock?._id == productMainStock) {
+                        stock.newQty = newQuantity;
+                        stock.cgstPercent = newcgstPercent;
+                        stock.discount = newdiscount;
+                        stock.gstPercent = newgstPercent;
+                        stock.igst = newigst;
+                        stock.igstPercent = newigstPercent;
+                        stock.mrp = newmrp;
+                        stock.sgst = sgst;
+                        stock.sgstPercent = newsgstPercent;
+                        stock.tax = newtax;
+                        stock.taxableAmount = newtaxableAmount;
+                        stock.totalAmount = newtotalAmount;
+                        count++
+                    }
+                }
+                if (count > 0) {
+                    return { ...stock }
+                }
+            });
+
+            console.log("updatednormalSaleStock xyz", updatednormalSaleStock);
+
+            return {
+                ...items,
+                normalSaleStock: updatednormalSaleStock
+            }
+        });
+
+        let object = {}
+        for (let index = 0; index < filteredPaginatedData.length; index++) {
+            const element = filteredPaginatedData[index];
+            element?.normalSaleStock?.map((stock) => {
+                if (object[stock?._id]) {
+                } else {
+                    const id = stock?._id;
+                    object[id] = {
+                        variant: { ...stock }, stock: { ...element }, qty: stock?.newQty, cgstPercent: stock?.cgstPercent, discount: stock?.discount,
+                        gstPercent: stock?.gstPercent, igst: stock?.igst, igstPercent: stock?.igstPercent, mrp: stock?.mrp, sgst: stock?.sgst, sgstPercent: stock?.sgstPercent,
+                        tax: stock?.tax, taxableAmount: stock?.taxableAmount, totalAmount: stock?.totalAmount
+                    }
+                }
+            })
+        }
+        setSelectedVariants(object);
+    }, [items])
+
     useEffect(() => {
         if (!isAuthenticated || !currentUser) return;
 
@@ -236,6 +303,24 @@ function ProductListModel({
         const selected = Object.values(selectedVariants).filter((v) => v.qty > 0);
 
         const itemsArray = selected?.map((stock, index) => {
+            const quantity = stock?.qty;
+            const mrp = stock?.mrp || 0;
+            const discount = stock?.discount || 0;
+            const taxableAmount = mrp * quantity - discount;
+            const gstPercent = stock?.gstPercent || 0;
+            const cgstPercent = stock?.cgstPercent || 0;
+            const sgstPercent = stock?.sgstPercent || 0;
+            const igstPercent = stock?.igstPercent || 0;
+            const cgst = taxableAmount * (cgstPercent / 100) || 0;
+            const sgst = taxableAmount * (sgstPercent / 100) || 0;
+            const igst = taxableAmount * (igstPercent / 100) || 0;
+            let tax = 0
+            if (isInterState) {
+                tax = (cgst + sgst) || 0;
+            } else {
+                tax = igst || 0;
+            }
+            const totalAmount = (taxableAmount + tax) || 0;
             return {
                 srNo: index + 1,
                 itemName: {
@@ -244,18 +329,18 @@ function ProductListModel({
                     productMainStock: stock?.variant?._id,
                 },
                 quantity: stock?.qty,
-                mrp: 0,
-                discount: 0,
-                taxableAmount: 0,
-                gstPercent: 0,
-                cgstPercent: 0,
-                sgstPercent: 0,
-                igstPercent: 0,
-                cgst: 0,
-                sgst: 0,
-                igst: 0,
-                tax: 0,
-                totalAmount: 0
+                mrp: mrp || 0,
+                discount: discount || 0,
+                taxableAmount: taxableAmount || 0,
+                gstPercent: gstPercent || 0,
+                cgstPercent: cgstPercent || 0,
+                sgstPercent: sgstPercent || 0,
+                igstPercent: igstPercent || 0,
+                cgst: cgst || 0,
+                sgst: sgst || 0,
+                igst: igst || 0,
+                tax: tax || 0,
+                totalAmount: totalAmount || 0
             }
         });
 
@@ -266,14 +351,6 @@ function ProductListModel({
 
             }
         })
-
-
-        console.log("itemsArray", itemsArray);
-
-
-
-
-        console.log('Selected variants →', selected);
         toast.success(`Selected ${selected.length} variant(s)`);
         setOpenModal3(false);
     };
@@ -406,7 +483,7 @@ function ProductListModel({
                                                             ? 'bg-darkInput border-darkSecondary text-white'
                                                             : 'bg-white border-gray-300'
                                                             }`}
-                                                        disabled={!supplier || paginationData?.length == 0}
+                                                        disabled={!supplier}
                                                     />
                                                     <select
                                                         value={selectedCategory}
@@ -418,7 +495,7 @@ function ProductListModel({
                                                             ? 'bg-darkInput border-darkSecondary text-white'
                                                             : 'bg-white border-gray-300'
                                                             }`}
-                                                        disabled={!supplier || paginationData?.length == 0}
+                                                        disabled={!supplier}
                                                     >
                                                         <option value="">All Categories</option>
                                                         {categories.map((c) => (
@@ -430,7 +507,7 @@ function ProductListModel({
                                                     <select
                                                         value={selectedSubCategory}
                                                         onChange={(e) => setSelectedSubCategory(e.target.value)}
-                                                        disabled={!selectedCategory || paginationData?.length == 0}
+                                                        disabled={!selectedCategory}
                                                         className={`px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 ${isDark
                                                             ? 'bg-darkInput border-darkSecondary text-white'
                                                             : 'bg-white border-gray-300'
