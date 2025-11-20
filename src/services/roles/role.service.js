@@ -3,13 +3,13 @@ import axios from "axios";
 import { authHeader } from "../auth-headers";
 
 
-const getAllRole = async (keyWord) => {
+const getAllRole = async (data) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/role/listRolesAndPermission?keyword=${keyWord}&clientId=${clientId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/role/listRolesAndPermission?keyword=${data.keyword}&clientId=${clientId}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,

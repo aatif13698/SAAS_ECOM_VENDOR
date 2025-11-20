@@ -205,7 +205,7 @@ function App() {
                 <Route path="department-list" element={<Department />} />
                 <Route path="create-department" element={<CreateDepartment />} />
 
-                <Route path="roles-permissions-list" element={<RoleList />} />
+                <Route path="roles-&-permissions-list" element={<RoleList />} />
                 <Route path="assignPermission" element={<AssignPermission />} />
 
                 <Route path="documents-list" element={<Documents />} />
