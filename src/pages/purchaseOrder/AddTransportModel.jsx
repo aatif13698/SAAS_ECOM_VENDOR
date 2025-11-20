@@ -8,7 +8,6 @@ import Button from "@/components/ui/Button";
 import supplierService from "@/services/supplier/supplier.service";
 
 const DEFAULT_FORM = {
-    supplierId: "",
     // E-Way Bill
     ewayBillNo: "",
     ewayBillDate: "",
@@ -326,18 +325,15 @@ function AddTransportModel({ noFade, openModal3, setOpenModal3 }) {
     const [form, setForm] = useState(DEFAULT_FORM);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [suppliers, setSuppliers] = useState([]);
     const [transporters, setTransporters] = useState([]);
 
     // Fetch suppliers & transporters
     const fetchLookups = useCallback(async () => {
         try {
-            const [sup, trans] = await Promise.all([
-                supplierService.getSuppliers(),
-                supplierService.getTransporters(),
+            const [trans] = await Promise.all([
+                supplierService.getAllActiveTransporters(),
             ]);
-            setSuppliers(sup.data || []);
-            setTransporters(trans.data || []);
+            setTransporters(trans?.data?.transports || []);
         } catch (e) {
             toast.error("Failed to load suppliers/transporters");
         }
@@ -416,7 +412,6 @@ function AddTransportModel({ noFade, openModal3, setOpenModal3 }) {
     const validate = () => {
         const err = {};
 
-        if (!form.supplierId) err.supplierId = "Supplier is required";
         if (!form.lrDetails.transporterId) err["lrDetails.transporterId"] = "Transporter is required";
 
         if (form.lrDetails.driverPhone && !/^\d{10}$/.test(form.lrDetails.driverPhone)) {
@@ -537,18 +532,8 @@ function AddTransportModel({ noFade, openModal3, setOpenModal3 }) {
 
                                 {/* Body */}
                                 <div className="p-5 space-y-6 max-h-[70vh] overflow-y-auto">
-                                    {/* Supplier */}
-                                    <div className="grid sm:grid-cols-2 gap-4">
-                                        <Select
-                                            label="Supplier"
-                                            name="supplierId"
-                                            value={form.supplierId}
-                                            onChange={handleChange}
-                                            required
-                                            error={errors.supplierId}
-                                            options={suppliers.map((s) => ({ value: s._id, label: s.name }))}
-                                        />
-                                    </div>
+                                   
+                                    
                                     {/* Shipping & Incoterm */}
                                     <div className="grid sm:grid-cols-2 gap-4">
                                         <Select
@@ -616,7 +601,7 @@ function AddTransportModel({ noFade, openModal3, setOpenModal3 }) {
                                                     onChange={handleChange}
                                                     required
                                                     error={errors["lrDetails.transporterId"]}
-                                                    options={transporters.map((t) => ({ value: t._id, label: t.name }))}
+                                                    options={transporters.map((t) => ({ value: t._id, label: t.transporterName }))}
                                                 />
                                             </div>
 
@@ -712,34 +697,7 @@ function AddTransportModel({ noFade, openModal3, setOpenModal3 }) {
                                     </Collapsible>
 
 
-                                    {/* Documents */}
-                                    {/* <Collapsible title="Documents (optional)">
-                                        <div className="grid sm:grid-cols-2 gap-3">
-                                            <Input label="LR Copy URL" name="documents.lrCopy" value={form.documents.lrCopy} onChange={handleChange} />
-                                            <Input label="E-Way PDF" name="documents.ewayBillPdf" value={form.documents.ewayBillPdf} onChange={handleChange} />
-                                            <Input label="Invoice Copy" name="documents.invoiceCopy" value={form.documents.invoiceCopy} onChange={handleChange} />
-                                            <Input label="Packing List" name="documents.packingList" value={form.documents.packingList} onChange={handleChange} />
-                                            <Input label="Insurance Copy" name="documents.insuranceCopy" value={form.documents.insuranceCopy} onChange={handleChange} />
-                                        </div>
-                                        <div className="mt-2">
-                                            <label className="block text-sm font-medium">Other Docs (JSON)</label>
-                                            <textarea
-                                                className="form-control w-full"
-                                                rows={3}
-                                                placeholder='[{"name":"doc1","url":"https://..."}]'
-                                                onChange={(e) => {
-                                                    try {
-                                                        const parsed = JSON.parse(e.target.value);
-                                                        setForm((p) => ({
-                                                            ...p,
-                                                            documents: { ...p.documents, otherDocs: parsed },
-                                                        }));
-                                                    } catch { }
-                                                }}
-                                            />
-                                        </div>
-                                    </Collapsible> */}
-
+                                   
                                     <Collapsible title="Documents (optional)">
                                         <div className="space-y-4">
                                             {/* Individual File Uploads */}

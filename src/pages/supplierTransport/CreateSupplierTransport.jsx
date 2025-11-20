@@ -142,7 +142,6 @@ const CreateSupplierTransport = ({ noFade, scrollContent }) => {
 
 
     const [formDataErr, setFormDataErr] = useState({
-        supplierId: "",
         transporterName: "",
         transporterGstin: "",
         transporterPan: "",
@@ -157,7 +156,6 @@ const CreateSupplierTransport = ({ noFade, scrollContent }) => {
     });
 
     const {
-        supplierId,
         transporterId,
         transporterName,
         transporterGstin,
@@ -204,18 +202,6 @@ const CreateSupplierTransport = ({ noFade, scrollContent }) => {
     //------- Handling the VAlidation ------
     function validationFunction() {
         let errorCount = 0;
-        if (!supplierId) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                supplierId: "Supplier Id Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                supplierId: "",
-            }));
-        }
 
         if (!transporterContactPerson) {
             setFormDataErr((prev) => ({
@@ -512,19 +498,6 @@ const CreateSupplierTransport = ({ noFade, scrollContent }) => {
             }
         }
 
-        if (name === "supplierId") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    supplierId: "Supplier Id Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    supplierId: "",
-                }));
-            }
-        }
 
         if (name === "transporterGstin") {
             if (value === "") {
@@ -647,7 +620,6 @@ const CreateSupplierTransport = ({ noFade, scrollContent }) => {
                 let dataObject = {
                     clientId: clientId,
 
-                    supplierId,
                     transporterName,
                     transporterGstin,
                     transporterPan,
@@ -837,30 +809,6 @@ const CreateSupplierTransport = ({ noFade, scrollContent }) => {
                                 <form onSubmit={onSubmit}>
                                     <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
 
-                                        <div className=''
-                                        >
-                                            <label >
-                                                <p className="form-label">
-                                                    Supplier <span className="text-red-500">*</span>
-                                                </p>
-                                            </label>
-                                            <select
-                                                name="supplierId"
-                                                value={supplierId}
-                                                onChange={handleChange}
-                                                disabled={isViewed}
-                                                className="form-control py-2  appearance-none relative flex-1"
-                                            >
-                                                <option value="">None</option>
-
-                                                {activeSuppliers &&
-                                                    activeSuppliers?.map((item) => (
-                                                        <option value={item?._id} key={item?._id}>{item && item?.name}</option>
-                                                    ))}
-                                            </select>
-                                            {<p className="text-red-600  text-xs"> {formDataErr.supplierId}</p>}
-
-                                        </div>
 
 
 

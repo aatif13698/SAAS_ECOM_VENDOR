@@ -121,7 +121,20 @@ const Navmenu = ({ menus }) => {
             "Attribute",
             "Pricing",
             "Financial Year",
-            "Currency"
+            "Currency",
+            "Purchase Invoices",
+            "Payment Out",
+            "Purchase Returns",
+            "Debit Note",
+            "Purchase Order",
+            "Sales Invoices",
+            "Quotation",
+            "Payment In",
+            "Sales Returns",
+            "Credit Note",
+            "Performa Invoice",
+            "Delivery Challan"
+
           ];
           if (singleChildMenus.includes(menu.name)) {
             childItems = childItems.slice(0, 1);

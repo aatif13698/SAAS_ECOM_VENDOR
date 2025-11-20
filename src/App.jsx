@@ -105,7 +105,8 @@ import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 
 
-const PurchaseOrderPage = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"))
+const PurchaseOrderPage = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"));
+const ListPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ListPurchaseOrder"));
 
 
 
@@ -181,6 +182,7 @@ function App() {
 
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
+                <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
 
 
 

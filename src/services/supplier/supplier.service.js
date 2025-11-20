@@ -209,6 +209,22 @@ const activeInActiveTransport = async ({ id, status, page, keyword: keyWord, per
 
 
 
+const getAllActiveTransporters = async () => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/transporter/list/all/active/supplier/transport?clientId=${clientId}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
+
+
+
 
 
 
@@ -230,6 +246,7 @@ export default {
     createTransporter,
     updateTransporter,
     getAllTransportersList,
-    activeInActiveTransport
+    activeInActiveTransport,
+    getAllActiveTransporters
 
 }
