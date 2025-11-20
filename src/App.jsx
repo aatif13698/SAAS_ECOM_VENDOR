@@ -238,7 +238,7 @@ function App() {
                 <Route path="create-branch" element={<CreateBranch roleId={currentUser?.roleId} />} />
                 <Route path="warehouse-list" element={<Warehouse />} />
                 <Route path="create-warehouse" element={<CreateWarehouse roleId={currentUser?.roleId} />} />
-                <Route path="sub-category-list" element={<SubCategory />} />
+                <Route path="subcategory-list" element={<SubCategory />} />
                 <Route path="brand-list" element={<Brand />} />
                 <Route path="manufacturer-list" element={<Manufacturer />} />
                 <Route path="attribute-list" element={<Attribute />} />
