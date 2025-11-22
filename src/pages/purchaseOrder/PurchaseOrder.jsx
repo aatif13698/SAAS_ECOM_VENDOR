@@ -14,13 +14,26 @@ import AddTransportModel from './AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
 import { formatDate } from '@fullcalendar/core';
+import { removeItemsList, removeWarehouse, remveBranch, setBranch, setBusinessUnit, setIsInterState, setItemsList, setLevel, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
+import { useDispatch } from 'react-redux';
+import { setItem } from 'localforage';
 
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
+
+  const dispatch = useDispatch()
+
+  const purhcaseOrderDraftData = useSelector((state) => state.purchaseOrderSlice);
+  console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
+
   const [isDark] = useDarkmode();
   const [addresses, setAddresses] = useState([]);
   const [currentSupplierId, setCurrentSupplierId] = useState("");
 
   const [formData, setFormData] = useState({
+    level: purhcaseOrderDraftData?.level,
+    businessUnit: purhcaseOrderDraftData?.businessUnit,
+    branch: purhcaseOrderDraftData?.branch,
+    warehouse: purhcaseOrderDraftData.warehouse,
     supplier: null,
     shippingAddress: {
       fullName: "",
@@ -102,12 +115,12 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     warehouse: "",
   });
 
-  const [formData2, setFormData2] = useState({
-    level: "",
-    businessUnit: "",
-    branch: "",
-    warehouse: "",
-  });
+  // const [formData2, setFormData] = useState({
+  //   level: "",
+  //   businessUnit: "",
+  //   branch: "",
+  //   warehouse: "",
+  // });
 
   const {
     level,
@@ -115,7 +128,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     branch,
     warehouse,
 
-  } = formData2;
+  } = formData;
 
 
   useEffect(() => {
@@ -154,7 +167,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
             value: "warehouse"
           },
         ]);
-        setFormData2((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
+        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
       } else if (currentUser.isBranchLevel) {
         setLevelList([
           {
@@ -166,7 +179,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
             value: "warehouse"
           },
         ]);
-        setFormData2((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
+        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
       } else if (currentUser.isWarehouseLevel) {
         setLevelList([
           {
@@ -174,7 +187,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
             value: "warehouse"
           },
         ])
-        setFormData2((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
+        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
       }
     }
 
@@ -192,13 +205,29 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData2((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: value
     }));
+
+    if (name === "level" && value) {
+      dispatch(setLevel(value))
+    }
+
+
+    if (name === "businessUnit" && value) {
+      dispatch(setBusinessUnit(value));
+    }
+    if (name === "branch" && value) {
+      dispatch(setBranch(value));
+    }
+    if (name === "warehouse" && value) {
+      dispatch(setWarehouse(value))
+    }
+
     if (name === "businessUnit" && value !== "") {
       setActiveBranches([]);
-      setFormData2((prev) => ({
+      setFormData((prev) => ({
         ...prev,
         branch: ""
       }));
@@ -214,6 +243,30 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       [name]: validateField(name, value)
     }));
   };
+
+  useEffect(() => {
+    if (!purhcaseOrderDraftData) return;
+
+    setFormData((prev) => ({
+      ...prev,
+      level: purhcaseOrderDraftData.level ?? prev.level,
+      businessUnit: purhcaseOrderDraftData.businessUnit ? purhcaseOrderDraftData.businessUnit : prev.businessUnit,
+      branch: purhcaseOrderDraftData.branch ? purhcaseOrderDraftData.branch : prev.branch,
+      warehouse: purhcaseOrderDraftData.warehouse ? purhcaseOrderDraftData.warehouse : "",
+      supplier: purhcaseOrderDraftData?.supplier ? purhcaseOrderDraftData?.supplier : null,
+      shippingAddress: purhcaseOrderDraftData?.shippingAddress ? purhcaseOrderDraftData?.shippingAddress : prev.shippingAddress,
+      items: purhcaseOrderDraftData?.items ? purhcaseOrderDraftData?.items : prev?.items,
+      isInterState: purhcaseOrderDraftData?.isInterState
+
+    }));
+
+    const warehouseDetail = activeWarehouse.find((item) => item?._id == purhcaseOrderDraftData.warehouse);
+      if (warehouseDetail) {
+        setCurrentWarehouseDetal(warehouseDetail);
+      }
+  }, [purhcaseOrderDraftData]);
+
+
 
   const [suppliers, setSuppliers] = useState([]);
   const [openModal, setOpenModal] = useState(false);     // Supplier modal
@@ -288,7 +341,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     const newItems = [...formData.items];
     const parsedValue = name === 'itemName' ? value : (parseFloat(value) || 0);
 
-    console.log("parsedValue", parsedValue);
+    // console.log("parsedValue", parsedValue);
 
 
     newItems[index] = { ...newItems[index], [name]: parsedValue };
@@ -296,11 +349,12 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     // Recalculate taxable amount and taxes
     const item = newItems[index];
 
-    console.log("item", item);
+    // console.log("item", item);
 
     calculateTaxes(item, name, parsedValue);
 
     setFormData(prev => ({ ...prev, items: newItems }));
+    dispatch(setItemsList(newItems))
   };
 
 
@@ -367,6 +421,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
           ...prev,
           shippingAddress: addresses[0]
         }));
+        dispatch(setShippingAddress(addresses[0]))
+
       } else {
         setFormData(prev => ({
           ...prev,
@@ -386,8 +442,12 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
     let prevItem = formData?.items;
 
+    console.log("currentWarehouseDetail", currentWarehouseDetail);
+    
+
     if (currentWarehouseDetail?.state && formData?.shippingAddress?.state) {
 
+      console.log("aquib");
 
       if (currentWarehouseDetail?.state !== formData?.shippingAddress?.state) {
         const items = formData?.items;
@@ -410,12 +470,13 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       }
 
 
-
       setFormData(prev => ({
         ...prev,
         isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
         items: prevItem
       }));
+
+      dispatch(setIsInterState(currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true))
 
     }
 
@@ -438,6 +499,31 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       ...prev,
       supplier,
     }));
+    dispatch(setSupplier(supplier));
+    dispatch(removeItemsList([
+      {
+        srNo: 1,
+        itemName: {
+          name: "",
+          productStock: "",
+          productMainStock: "",
+          purchasePrice: ""
+        },
+        quantity: 1,
+        mrp: 0,
+        discount: 0,
+        taxableAmount: 0,
+        gstPercent: 0,
+        cgstPercent: 0,
+        sgstPercent: 0,
+        igstPercent: 0,
+        cgst: 0,
+        sgst: 0,
+        igst: 0,
+        tax: 0,
+        totalAmount: 0
+      }
+    ]))
     setOpenModal(false);
   };
 
@@ -447,6 +533,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       ...prev,
       shippingAddress: address
     }));
+    dispatch(setShippingAddress(address))
     setOpenModal2(false);
   };
 
@@ -731,13 +818,13 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                           <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Address</span>
                         </button>
                       )}
-                      <div className='mt-2 flex justify-end'>
+                      {/* <div className='mt-2 flex justify-end'>
                         <Button
                           text="Add Trasnport"
                           className="text-lightModalHeaderColor  dark:text-darkBtn border py-1 border-lightModalHeaderColor dark:border-darkBtn hover:bg-lightModalHeaderColor/20"
                           onClick={() => setOpenModal5(true)}
                         />
-                      </div>
+                      </div> */}
                     </div>
                   </div>
                 )}

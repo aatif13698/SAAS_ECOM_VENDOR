@@ -18,6 +18,8 @@ import stockService from '@/services/stock/stock.service';
 import categoryService from '@/services/category/category.service';
 import subcategoryService from '@/services/subCategory/subcategory.service';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { setItemsList } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
 
 /* --------------------------------------------------------------
    Main Component
@@ -33,6 +35,9 @@ function ProductListModel({
     getShippingAddress,
     currentSupplierId,
 }) {
+
+
+    const dispatch = useDispatch();
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector(
         (state) => state.auth
@@ -138,7 +143,11 @@ function ProductListModel({
 
 
     useEffect(() => {
-        const existingItems = items
+        console.log("aaattif");
+        
+        const existingItems = items;
+        console.log("existingItems", existingItems);
+        
         const filteredPaginatedData = paginationData?.map((items) => {
             const updatednormalSaleStock = items?.normalSaleStock?.filter((stock) => {
                 let count = 0
@@ -201,7 +210,7 @@ function ProductListModel({
             })
         }
         setSelectedVariants(object);
-    }, [items])
+    }, [items, paginationData]);
 
     useEffect(() => {
         if (!isAuthenticated || !currentUser) return;
@@ -350,7 +359,13 @@ function ProductListModel({
                 items: itemsArray
 
             }
-        })
+        });
+
+        dispatch(setItemsList(itemsArray))
+
+
+
+
         toast.success(`Selected ${selected.length} variant(s)`);
         setOpenModal3(false);
     };
