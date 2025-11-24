@@ -3,68 +3,70 @@ import { createSlice } from "@reduxjs/toolkit";
 const storedAdmin = JSON.parse(localStorage.getItem("adminInfo"));
 
 
+const initialState = {
+    level: "",
+    businessUnit: "",
+    branch: "",
+    warehouse: "",
+    supplier: null,
+    shippingAddress: {
+        fullName: "",
+        phone: "",
+        alternamtivePhone: "",
+        country: "",
+        state: "",
+        city: "",
+        ZipCode: "",
+        address: "",
+        roadName: "",
+        nearbyLandmark: "",
+        houseNumber: "",
+        _id: ""
+    },
+    poNumber: '',
+    poDate: new Date().toISOString().split('T')[0],
+    items: [
+        {
+            srNo: 1,
+            itemName: {
+                name: "",
+                productStock: "",
+                productMainStock: "",
+                purchasePrice: ""
+            },
+            quantity: 1,
+            mrp: 0,
+            discount: 0,
+            taxableAmount: 0,
+            gstPercent: 0,
+            cgstPercent: 0,
+            sgstPercent: 0,
+            igstPercent: 0,
+            cgst: 0,
+            sgst: 0,
+            igst: 0,
+            tax: 0,
+            totalAmount: 0
+        }
+    ],
+    notes: '',
+    bankDetails: {
+        bankName: '',
+        accountNumber: '',
+        ifscCode: '',
+        branch: '',
+    },
+    isInterState: false,
+    roundOff: false,
+    paymentMethod: '',
+    paidAmount: 0,
+    balance: 0,
+
+}
+
 export const purchaseOrderSlice = createSlice({
     name: "addPurchaseOrder",
-    initialState: {
-        level: "",
-        businessUnit: "",
-        branch: "",
-        warehouse: "",
-        supplier: null,
-        shippingAddress: {
-            fullName: "",
-            phone: "",
-            alternamtivePhone: "",
-            country: "",
-            state: "",
-            city: "",
-            ZipCode: "",
-            address: "",
-            roadName: "",
-            nearbyLandmark: "",
-            houseNumber: "",
-            _id: ""
-        },
-        poNumber: '',
-        poDate: new Date().toISOString().split('T')[0],
-        items: [
-            {
-                srNo: 1,
-                itemName: {
-                    name: "",
-                    productStock: "",
-                    productMainStock: "",
-                    purchasePrice: ""
-                },
-                quantity: 1,
-                mrp: 0,
-                discount: 0,
-                taxableAmount: 0,
-                gstPercent: 0,
-                cgstPercent: 0,
-                sgstPercent: 0,
-                igstPercent: 0,
-                cgst: 0,
-                sgst: 0,
-                igst: 0,
-                tax: 0,
-                totalAmount: 0
-            }
-        ],
-        notes: '',
-        bankDetails: {
-            bankName: '',
-            accountNumber: '',
-            ifscCode: '',
-            branch: '',
-        },
-        isInterState: false,
-        roundOff: false,
-        paymentMethod: '',
-        paidAmount: 0,
-        balance: 0,
-
-    },
+    initialState: initialState,
     reducers: {
         setLevel: (state, action) => {
             state.level = action.payload;
@@ -101,12 +103,14 @@ export const purchaseOrderSlice = createSlice({
         setItemsList: (state, action) => {
             state.items = action.payload;
         },
-         removeItemsList: (state, action) => {
+        removeItemsList: (state, action) => {
             state.items = action.payload;
         },
         setIsInterState: (state, action) => {
             state.isInterState = action.payload;
         },
+
+        resetPurchaseOrder: () => initialState,
     },
 });
 
@@ -115,6 +119,7 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setShippingAddress,
     setItemsList,
     removeItemsList,
-    setIsInterState
+    setIsInterState,
+    resetPurchaseOrder
 } = purchaseOrderSlice.actions;
 export default purchaseOrderSlice.reducer;

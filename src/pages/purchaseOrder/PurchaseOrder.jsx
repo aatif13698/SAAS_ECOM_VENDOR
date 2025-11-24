@@ -14,9 +14,70 @@ import AddTransportModel from './AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
 import { formatDate } from '@fullcalendar/core';
-import { removeItemsList, removeWarehouse, remveBranch, setBranch, setBusinessUnit, setIsInterState, setItemsList, setLevel, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
+import { removeItemsList, removeWarehouse, remveBranch, resetPurchaseOrder, setBranch, setBusinessUnit, setIsInterState, setItemsList, setLevel, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
 import { useDispatch } from 'react-redux';
 import { setItem } from 'localforage';
+
+const defaultState = {
+  level: "",
+  businessUnit: "",
+  branch: "",
+  warehouse: "",
+  supplier: null,
+  shippingAddress: {
+    fullName: "",
+    phone: "",
+    alternamtivePhone: "",
+    country: "",
+    state: "",
+    city: "",
+    ZipCode: "",
+    address: "",
+    roadName: "",
+    nearbyLandmark: "",
+    houseNumber: "",
+    _id: ""
+  },
+  poNumber: '',
+  poDate: new Date().toISOString().split('T')[0],
+  items: [
+    {
+      srNo: 1,
+      itemName: {
+        name: "",
+        productStock: "",
+        productMainStock: "",
+        purchasePrice: ""
+      },
+      quantity: 1,
+      mrp: 0,
+      discount: 0,
+      taxableAmount: 0,
+      gstPercent: 0,
+      cgstPercent: 0,
+      sgstPercent: 0,
+      igstPercent: 0,
+      cgst: 0,
+      sgst: 0,
+      igst: 0,
+      tax: 0,
+      totalAmount: 0
+    }
+  ],
+  notes: '',
+  bankDetails: {
+    bankName: '',
+    accountNumber: '',
+    ifscCode: '',
+    branch: '',
+  },
+  isInterState: false,
+  roundOff: false,
+  paymentMethod: '',
+  paidAmount: 0,
+  balance: 0,
+
+};
 
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
@@ -261,9 +322,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     }));
 
     const warehouseDetail = activeWarehouse.find((item) => item?._id == purhcaseOrderDraftData.warehouse);
-      if (warehouseDetail) {
-        setCurrentWarehouseDetal(warehouseDetail);
-      }
+    if (warehouseDetail) {
+      setCurrentWarehouseDetal(warehouseDetail);
+    }
   }, [purhcaseOrderDraftData]);
 
 
@@ -439,36 +500,27 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-
     let prevItem = formData?.items;
-
-    console.log("currentWarehouseDetail", currentWarehouseDetail);
-    
-
     if (currentWarehouseDetail?.state && formData?.shippingAddress?.state) {
+      // if (currentWarehouseDetail?.state !== formData?.shippingAddress?.state) {
+      const items = formData?.items;
+      const updatedItem = items?.map((item) => {
+        return {
+          ...item,
+          sgstPercent: 0,
+          cgstPercent: 0,
+          igstPercent: 0,
 
-      console.log("aquib");
+          sgst: 0,
+          cgst: 0,
+          igst: 0,
 
-      if (currentWarehouseDetail?.state !== formData?.shippingAddress?.state) {
-        const items = formData?.items;
-        const updatedItem = items?.map((item) => {
-          return {
-            ...item,
-            sgstPercent: 0,
-            cgstPercent: 0,
-            igstPercent: 0,
-
-            sgst: 0,
-            cgst: 0,
-            igst: 0,
-
-            tax: 0,
-            totalAmount: item?.taxableAmount,
-          }
-        });
-        prevItem = updatedItem;
-      }
-
+          tax: 0,
+          totalAmount: item?.taxableAmount,
+        }
+      });
+      prevItem = updatedItem;
+      // }
 
       setFormData(prev => ({
         ...prev,
@@ -476,7 +528,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         items: prevItem
       }));
 
-      dispatch(setIsInterState(currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true))
+      dispatch(setIsInterState(currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true));
+      dispatch(setItemsList(prevItem))
 
     }
 
@@ -489,7 +542,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       alert('Please select a supplier before submitting.');
       return;
     }
-    console.log('Purchase Order Data:', formData);
     alert('Purchase Order submitted successfully!');
   };
 
@@ -619,7 +671,18 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       <Card>
         <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
           <form onSubmit={handleSubmit}>
-            <h2 className="text-xl font-semibold mb-4 text-gray-700">Purchase Invoice</h2>
+            <div className='flex items-center gap-2 mb-4'>
+              <h2 className="text-xl font-semibold  text-gray-700">Purchase Invoice</h2>
+              {
+                purhcaseOrderDraftData?.level ? <button type='button' className='bg-red-600 text-white border border-gray-200 hover:bg-red-500 rounded-lg px-2 py-1 ' onClick={() => {
+                  console.log("here is the log");
+                  dispatch(resetPurchaseOrder());
+                  setFormData(defaultState);
+
+                }}>Reset</button> : ""
+              }
+
+            </div>
 
             <section className="mb-8">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-100 dark:bg-transparent border dark:border-white p-2 rounded-lg">
@@ -892,7 +955,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                       <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">SR. NO</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Item Name</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Qty</th>
-                      <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">MRP</th>
+                      <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Price</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Discount</th>
                       <th className="py-2 px-4 border border-gray-300 text-left text-xs font-medium text-gray-700 dark:text-gray-300 uppercase tracking-wider">Taxable Amt</th>
                       {
