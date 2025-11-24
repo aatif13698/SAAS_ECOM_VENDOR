@@ -700,7 +700,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
           <form onSubmit={handleSubmit}>
             <div className='flex items-center gap-2 mb-4'>
-              <h2 className="text-xl font-semibold  text-gray-700">Purchase Invoice</h2>
+              <h2 className="text-xl font-semibold  text-gray-700">Purchase Order</h2>
               {
                 purhcaseOrderDraftData?.level ? <button type='button' className='bg-red-600 text-white border border-gray-200 hover:bg-red-500 rounded-lg px-2 py-1 ' onClick={() => {
                   console.log("here is the log");

@@ -764,7 +764,7 @@ function ProductListModel({
                                             onClick={() => setOpenModal3(false)}
                                         />
                                         <Button
-                                            text="Save"
+                                            text="Save Selected"
                                             className={`bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900 px-4 py-2 rounded ${Object.keys(selectedVariants).length === 0
                                                 ? 'opacity-50 cursor-not-allowed'
                                                 : ''
@@ -772,6 +772,16 @@ function ProductListModel({
                                             onClick={handleSave}
                                             disabled={Object.keys(selectedVariants).length === 0}
                                         />
+
+                                         {/* <Button
+                                            text="Save All"
+                                            className={`bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900 px-4 py-2 rounded ${Object.keys(selectedVariants).length === 0
+                                                ? 'opacity-50 cursor-not-allowed'
+                                                : ''
+                                                }`}
+                                            onClick={handleSave}
+                                            disabled={Object.keys(selectedVariants).length === 0}
+                                        /> */}
 
                                         {
                                             supplier && paginationData?.length > 0 &&
