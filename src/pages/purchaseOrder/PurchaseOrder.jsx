@@ -502,38 +502,66 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   useEffect(() => {
     let prevItem = formData?.items;
     if (currentWarehouseDetail?.state && formData?.shippingAddress?.state) {
-      // if (currentWarehouseDetail?.state !== formData?.shippingAddress?.state) {
-      const items = formData?.items;
-      const updatedItem = items?.map((item) => {
-        return {
-          ...item,
-          sgstPercent: 0,
-          cgstPercent: 0,
-          igstPercent: 0,
+      // const items = formData?.items;
+      // const updatedItem = items?.map((item) => {
+      //   return {
+      //     ...item,
+      //     sgstPercent: 0,
+      //     cgstPercent: 0,
+      //     igstPercent: 0,
 
-          sgst: 0,
-          cgst: 0,
-          igst: 0,
+      //     sgst: 0,
+      //     cgst: 0,
+      //     igst: 0,
 
-          tax: 0,
-          totalAmount: item?.taxableAmount,
-        }
-      });
-      prevItem = updatedItem;
-      // }
+      //     tax: 0,
+      //     totalAmount: item?.taxableAmount,
+      //   }
+      // });
+      // prevItem = updatedItem;
+      // setFormData(prev => ({
+      //   ...prev,
+      //   isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
+      //   items: prevItem
+      // }));
 
-      setFormData(prev => ({
-        ...prev,
-        isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
-        items: prevItem
-      }));
+
 
       dispatch(setIsInterState(currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true));
-      dispatch(setItemsList(prevItem))
+
+      if (!purhcaseOrderDraftData?.shippingAddress?.fullName) {
+        const items = formData?.items;
+        const updatedItem = items?.map((item) => {
+          return {
+            ...item,
+            sgstPercent: 0,
+            cgstPercent: 0,
+            igstPercent: 0,
+
+            sgst: 0,
+            cgst: 0,
+            igst: 0,
+
+            tax: 0,
+            totalAmount: item?.taxableAmount,
+          }
+        });
+        prevItem = updatedItem;
+        setFormData(prev => ({
+          ...prev,
+          isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
+          items: prevItem
+        }));
+        dispatch(setItemsList(prevItem));
+
+      }
 
     }
 
-  }, [currentWarehouseDetail, formData?.shippingAddress]);
+  }, [currentWarehouseDetail, formData?.shippingAddress, purhcaseOrderDraftData]);
+
+
+
 
   // === Form submission ===
   const handleSubmit = (e) => {
@@ -731,7 +759,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                         name="businessUnit"
                         value={businessUnit}
                         onChange={handleChange}
-                        // disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                        disabled={formData?.items[0]?.itemName?.name ? true : false}
                         className="form-control py-2  appearance-none relative flex-1"
                       >
                         <option value="">None</option>
@@ -762,7 +790,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                         name="branch"
                         value={branch}
                         onChange={handleChange}
-                        // disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                        disabled={formData?.items[0]?.itemName?.name ? true : false}
                         className="form-control py-2  appearance-none relative flex-1"
                       >
                         <option value="">None</option>
@@ -792,6 +820,8 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                         name="warehouse"
                         value={warehouse}
                         onChange={handleChange}
+                        disabled={formData?.items[0]?.itemName?.name ? true : false}
+
                         // disabled={isViewed || currentUser.isWarehouseLevel}
                         className="form-control py-2  appearance-none relative flex-1"
                       >
@@ -859,7 +889,10 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                         <Button
                           text="Change Shipping"
                           className="text-lightModalHeaderColor dark:text-darkBtn border py-1 border-lightModalHeaderColor dark:border-darkBtn hover:bg-lightModalHeaderColor/20"
-                          onClick={() => setOpenModal2(true)}
+                          onClick={() => {
+                            formData?.items[0]?.itemName?.name ? "" : setOpenModal2(true);
+                          }}
+                          disabled={formData?.items[0]?.itemName?.name ? true : false}
                         />
                       )}
                     </div>
