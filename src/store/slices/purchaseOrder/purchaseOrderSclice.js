@@ -110,6 +110,13 @@ export const purchaseOrderSlice = createSlice({
             state.isInterState = action.payload;
         },
 
+        setPoNumber: (state, action) => {
+            state.poNumber = action.payload
+        },
+        setPoDate: (state, action) => {
+            state.poDate = action.payload
+        },
+
         resetPurchaseOrder: () => initialState,
     },
 });
@@ -120,6 +127,8 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setItemsList,
     removeItemsList,
     setIsInterState,
-    resetPurchaseOrder
+    resetPurchaseOrder,
+    setPoNumber,
+    setPoDate
 } = purchaseOrderSlice.actions;
 export default purchaseOrderSlice.reducer;
