@@ -1,7 +1,6 @@
 
 import React, { useEffect, Fragment, useState } from 'react';
 import { BsPlus } from "react-icons/bs";
-import { Card } from "@mui/material";
 import useDarkmode from '@/hooks/useDarkMode';
 import { GoTrash, GoCheck } from "react-icons/go";
 import supplierService from '@/services/supplier/supplier.service';
@@ -13,10 +12,10 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from './AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { formatDate } from '@fullcalendar/core';
-import { removeItemsList, removeWarehouse, remveBranch, resetPurchaseOrder, setBranch, setBusinessUnit, setIsInterState, setItemsList, setLevel, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
+import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
 import { useDispatch } from 'react-redux';
-import { setItem } from 'localforage';
+import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
+import { formatDate } from '@fullcalendar/core';
 
 const defaultState = {
   level: "",
@@ -318,7 +317,18 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       items: purhcaseOrderDraftData?.items ? purhcaseOrderDraftData?.items : prev?.items,
       isInterState: purhcaseOrderDraftData?.isInterState,
       poNumber: purhcaseOrderDraftData?.poNumber,
-      poDate: purhcaseOrderDraftData?.poDate
+      poDate: purhcaseOrderDraftData?.poDate,
+      notes: purhcaseOrderDraftData?.notes,
+      bankDetails: {
+        bankName: purhcaseOrderDraftData?.bankDetails?.bankName || "",
+        accountNumber: purhcaseOrderDraftData?.bankDetails?.accountNumber || "",
+        ifscCode: purhcaseOrderDraftData?.bankDetails?.ifscCode || "",
+        branch: purhcaseOrderDraftData?.bankDetails?.branch || ""
+      },
+
+      paymentMethod: purhcaseOrderDraftData?.paymentMethod,
+      paidAmount: purhcaseOrderDraftData?.paidAmount,
+      balance: purhcaseOrderDraftData?.balance
 
     }));
 
@@ -347,6 +357,16 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         ...prev,
         [section]: { ...prev[section], [name]: value },
       }));
+
+      if (name == "bankName") {
+        dispatch(setBankName(value));
+      } else if (name == "accountNumber") {
+        dispatch(setAccountNumber(value));
+      } else if (name == "ifscCode") {
+        dispatch(setIfscCode(value));
+      } else if (name == "branch") {
+        dispatch(setBranchName(value));
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
       if (name == "poNumber") {
@@ -354,6 +374,15 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       }
       if (name == "poDate") {
         dispatch(setPoDate(value))
+      }
+      if (name === "notes") {
+        dispatch(setNotes(value));
+      }
+      if (name == "paymentMethod") {
+        dispatch(setPaymentMethod(value));
+      }
+      if (name == "paidAmount") {
+        dispatch(setPaidAmount(value));
       }
     }
   };
@@ -467,6 +496,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   // === Update balance when totals or paid amount change ===
   useEffect(() => {
     setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
+    dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
   }, [totals.finalTotal, formData.paidAmount]);
 
   // === Fetch shipping addresses when supplier changes ===
@@ -709,6 +739,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
     try {
 
       const dataObject = {
+        clientId: localStorage.getItem("saas_client_clientId"),
         level: level,
         businessUnit: businessUnit,
         branch: branch,
@@ -725,18 +756,15 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         roundOff: formData?.roundOff,
         paymentMethod: formData?.paymentMethod,
         paidAmount: formData?.paidAmount,
-        balance: formData?.balance
-
+        balance: formData?.balance,
       }
-
-
       console.log("dataObject", dataObject);
-
+      const response = await purchaseOrderService?.create(dataObject);
+      console.log("response purchase order", response);
 
     } catch (error) {
       console.log("error while submitting the purchase order", error);
     }
-
     alert('Purchase Order submitted successfully!');
   };
 

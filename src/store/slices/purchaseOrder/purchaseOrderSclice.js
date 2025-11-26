@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { actions } from "react-table";
 
 const storedAdmin = JSON.parse(localStorage.getItem("adminInfo"));
 
@@ -117,9 +118,36 @@ export const purchaseOrderSlice = createSlice({
             state.poDate = action.payload
         },
 
+        setBankName: (state, action) => {
+            state.bankDetails.bankName = action.payload;
+        },
+        setAccountNumber: (state, action) => {
+            state.bankDetails.accountNumber = action.payload;
+        },
+        setIfscCode: (state, action) => {
+            state.bankDetails.ifscCode = action.payload;
+        },
+        setBranchName: (state, action) => {
+            state.bankDetails.branch = action.payload;
+        },
+        setNotes: (state, action) => {
+            state.notes = action.payload;
+        },
+        setPaymentMethod: (state, action) => {
+            state.paymentMethod = action.payload;
+        },
+        setPaidAmount: (state, action) => {
+            state.paidAmount = action.payload;
+        },
+        setBalance: (state, action) => {
+            state.balance = action.payload;
+        },
         resetPurchaseOrder: () => initialState,
     },
 });
+
+
+
 
 export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, removePurchaseOrder, removeWarehouse,
     setSupplier,
@@ -129,6 +157,14 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setIsInterState,
     resetPurchaseOrder,
     setPoNumber,
-    setPoDate
+    setPoDate,
+    setBankName,
+    setAccountNumber,
+    setIfscCode,
+    setBranchName,
+    setNotes,
+    setPaymentMethod,
+    setPaidAmount,
+    setBalance
 } = purchaseOrderSlice.actions;
 export default purchaseOrderSlice.reducer;
