@@ -650,7 +650,7 @@ function ViewPurchaseOrder() {
     tableHeaders.push('Tax', 'Amount');
 
     return (
-        <div className="relative min-h-screen bg-gray-300 rounded-md dark:bg-gray-900">
+        <div className="relative min-h-screen pb-8 bg-gray-300 rounded-md dark:bg-gray-900">
             <div className="sticky top-14 z-10 bg-white dark:bg-gray-800 p-4 flex justify-between items-center shadow-md">
                 <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-order-list")}>
                     <BiArrowBack className="text-xl" />
@@ -697,7 +697,7 @@ function ViewPurchaseOrder() {
             </div>
 
             {/* PDF-like View - Responsive Layout */}
-            <div className="max-w-4xl mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0">
+            <div className="md:max-w-4xl max-w-full mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
                     <div className="text-sm text-gray-700 dark:text-gray-300">
                         <h4 className="font-semibold">Aestree</h4>
