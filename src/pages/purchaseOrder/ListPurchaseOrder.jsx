@@ -103,7 +103,6 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const [isViewed, setIsViewed] = useState(false);
-    const [userId, setUserId] = useState(null);
     const inputBoxStyle = {
         backgroundColor: isDark ? "#0F172A" : "",
         padding: "12px 14px",
@@ -131,15 +130,13 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
         scrollToTop();
         const id = row._id;
         const name = "view"
-        setUserId(id);
         setIsViewed(true);
-        navigate("/create-employee", { state: { id, row, name } });
+        navigate("/view/purchase-order", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
         const id = row._id;
         const name = "edit"
-        setUserId(id);
         setIsViewed(false);
         navigate("/create-employee", { state: { id, row, name } });
     };
@@ -243,19 +240,18 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
                 return (
                     <span className="block w-full">
                         <span
-                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  ${row?.isActive == 1 ? "text-success-500 bg-success-500" : ""
+                            className={`uppercase inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
+                                ${
+                                    row?.status == "draft" ? "text-success-500 bg-success-500" : ""
                                 }
-            ${row?.isActive == 0 ? "text-warning-500 bg-warning-500" : ""}
+                               ${
+                                    row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
+                                }
+                                `}
 
-             `}
-                            title={
-                                row?.isActive == 1
-                                    ? "Click To Deactivate"
-                                    : "Click To Activate"
-                            }
-                            onClick={() => handleActive(row)}
+                        // onClick={() => handleActive(row)}
                         >
-                            {row.isActive == 1 ? "Active" : "Inactive"}
+                            {row.status}
                         </span>
                     </span>
                 );
@@ -290,7 +286,7 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
                             </button>
                         </Tooltip>
                         <Tooltip
-                            content="Edit"
+                            content="Print"
                             placement="top"
                             arrow
                             animation="shift-away"
@@ -300,22 +296,7 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
                                 type="button"
                                 onClick={() => handleEdit(row)}
                             >
-                                <Icon icon="heroicons:pencil-square" />
-                            </button>
-                        </Tooltip>
-                        <Tooltip
-                            content="Delete"
-                            placement="top"
-                            arrow
-                            animation="shift-away"
-                            theme="danger"
-                        >
-                            <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => handleDelete(row)}
-                            >
-                                <Icon icon="heroicons:trash" />
+                                <Icon icon="material-symbols:print-outline" />
                             </button>
                         </Tooltip>
                     </div>
@@ -430,7 +411,7 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
         rangeSeparatorText: "of",
     };
     return (
-        <div className={`${isDark ? "bg-darkSecondary text-white" : ""}`}>
+        <div className={`${isDark ? "bg-darkSecondary text-white" : ""} min-h-[80vh]`}>
             <Card></Card>
             <div className="text-end mb-4">
                 <div className="flex gap-5 justify-between"></div>

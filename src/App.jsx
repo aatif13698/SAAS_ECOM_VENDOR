@@ -107,6 +107,7 @@ import { useDispatch } from "react-redux";
 
 const PurchaseOrderPage = lazy(() => import("./pages/purchaseOrder/PurchaseOrder"));
 const ListPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ListPurchaseOrder"));
+const ViewPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ViewPurchaseOrder"));
 
 
 
@@ -183,6 +184,7 @@ function App() {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
                 <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
+                <Route path="view/purchase-order" element={<ViewPurchaseOrder/>} />
 
 
 
