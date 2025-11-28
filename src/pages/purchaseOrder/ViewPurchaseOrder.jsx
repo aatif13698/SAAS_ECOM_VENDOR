@@ -410,7 +410,7 @@ function ViewPurchaseOrder() {
         const doc = new jsPDF('p', 'pt', 'a4');
         const pageWidth = doc.internal.pageSize.getWidth();
         const pageHeight = doc.internal.pageSize.getHeight();
-        const margin = 40;
+        const margin = 30;
         let y = 60;
 
         const poDate = poData.poDate ? formatDate(poData.poDate) : 'N/A';
@@ -444,7 +444,7 @@ function ViewPurchaseOrder() {
         y = 140;
 
         // Dates
-       
+
 
 
         // Vendor & Delivery Address
@@ -478,7 +478,7 @@ function ViewPurchaseOrder() {
         doc.text(poData.supplier?.emailContact || 'N/A', margin, y);
         doc.text('aayesha@yopmail.com', pageWidth / 2 + 20, y);
 
-        
+
         // Table Setup
         y = 260;
         const tableWidth = pageWidth - 2 * margin;
@@ -501,7 +501,7 @@ function ViewPurchaseOrder() {
         }
 
         // Adjust desc if needed to fit
-        colWidths.desc = tableWidth - (colWidths.srNo + colWidths.qty + colWidths.rate + colWidths.discount + colWidths.taxable + taxWidth + colWidths.tax + colWidths.amount) - 20;
+        colWidths.desc = tableWidth - (colWidths.srNo + colWidths.qty + colWidths.rate + colWidths.discount + colWidths.taxable + taxWidth + colWidths.tax + colWidths.amount) - poData.isInterState ? 70 : 10;
 
         // Table Header
         doc.setFillColor(50, 50, 50);
@@ -551,7 +551,7 @@ function ViewPurchaseOrder() {
                 doc.rect(margin, y, tableWidth, rowHeight, 'F');
             }
 
-            // Border
+            // Border  
             doc.setDrawColor(200);
             doc.rect(margin, y, tableWidth, rowHeight);
 
@@ -696,8 +696,12 @@ function ViewPurchaseOrder() {
                 </div>
             </div>
 
+
             {/* PDF-like View - Responsive Layout */}
-            <div className="md:max-w-4xl max-w-full mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0">
+            <div className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0">
+                <div className="absolute top-0 left-0 text-[1rem] font-bold text-white [--f:.5em] leading-[1.8] px-[1lh] pb-[var(--f)] [border-image:conic-gradient(#0008_0_0)_51%/var(--f)] [clip-path:polygon(100%_calc(100%_-_var(--f)),100%_100%,calc(100%_-_var(--f))_calc(100%_-_var(--f)),var(--f)_calc(100%_-_var(--f)),_0_100%,0_calc(100%_-_var(--f)),999px_calc(100%_-_var(--f)_-_999px),calc(100%_-_999px)_calc(100%_-_var(--f)_-_999px))] translate-x-[calc((cos(45deg)-1)*100%)] translate-y-[-100%] rotate-[-45deg] origin-[100%_100%] bg-[#009499]">
+                {"Draft"}
+                </div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
                     <div className="text-sm text-gray-700 dark:text-gray-300">
                         <h4 className="font-semibold">Aestree</h4>
