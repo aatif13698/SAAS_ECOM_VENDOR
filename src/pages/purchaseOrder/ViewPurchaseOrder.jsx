@@ -356,6 +356,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiChevronDown } from "react-icons/bi";
+import { BiDotsVerticalRounded } from "react-icons/bi";
+
 import jsPDF from 'jspdf';
 
 function ViewPurchaseOrder() {
@@ -569,12 +571,18 @@ function ViewPurchaseOrder() {
             doc.text(item.taxableAmount.toFixed(2), x + colWidths.taxable / 2, y + 15, { align: 'center' });
             x += colWidths.taxable;
             if (poData.isInterState) {
-                doc.text(`${item.cgst?.toFixed(2)} (${item.cgstPercent} %)`, x + colWidths.cgst / 2, y + 15, { align: 'center' });
+                doc.text(`${item.cgst?.toFixed(2)} 
+             
+                `, x + colWidths.cgst / 2, y + 15, { align: 'center' });
                 x += colWidths.cgst;
-                doc.text(`${item.sgst?.toFixed(2)} (${item.sgstPercent} %)`, x + colWidths.sgst / 2, y + 15, { align: 'center' });
+                doc.text(`${item.sgst?.toFixed(2)} 
+                
+                `, x + colWidths.sgst / 2, y + 15, { align: 'center' });
                 x += colWidths.sgst;
             } else {
-                doc.text(`${item.igst?.toFixed(2)} (${item.igstPercent} %)`, x + colWidths.igst / 2, y + 15, { align: 'center' });
+                doc.text(`${item.igst?.toFixed(2)} 
+                
+                `, x + colWidths.igst / 2, y + 15, { align: 'center' });
                 x += colWidths.igst;
             }
             doc.text(item.tax.toFixed(2), x + colWidths.tax / 2, y + 15, { align: 'center' });
@@ -654,17 +662,19 @@ function ViewPurchaseOrder() {
             <div className="sticky top-14 z-10 bg-white dark:bg-gray-800 p-4 flex justify-between items-center shadow-md">
                 <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-order-list")}>
                     <BiArrowBack className="text-xl" />
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                    <h3 className="md:text-lg text-sm font-semibold text-gray-800 dark:text-gray-200">
                         Purchase order # {poData?.poNumber || 'N/A'}
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
+                     <button onClick={handleSendMail} title="Send Mail" className="hover:text-blue-500 flex gap-1 ring-2 ring-gray-500 dark:ring-gray-400 hover:ring-blue-500 dark:hover:ring-blue-500 rounded-md p-1">
+                        <span className='text-sm text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-500'>Send Mail</span>
+                        <BiMailSend className="text-xl" /> 
+                    </button>
                     <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
                         <BiEdit className="text-xl" />
                     </button>
-                    <button onClick={handleSendMail} title="Send Mail" className="hover:text-blue-500">
-                        <BiMailSend className="text-xl" />
-                    </button>
+                   
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
@@ -677,7 +687,7 @@ function ViewPurchaseOrder() {
                             title="Change Status"
                             className="flex items-center hover:text-blue-500"
                         >
-                            <BiChevronDown className="text-xl" />
+                            <BiDotsVerticalRounded className="text-2xl" />
                         </button>
                         {showDropdown && (
                             <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md py-1 z-20 border border-gray-200 dark:border-gray-700">
