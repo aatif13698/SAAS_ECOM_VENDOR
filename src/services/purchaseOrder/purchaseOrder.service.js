@@ -10,6 +10,16 @@ const create = async (data) => {
     });
 };
 
+const issueMail = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/po/issue/purchaseOrder/mail`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
 
 const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
     const authToken = await localStorage.getItem("saas_client_token");
@@ -36,5 +46,6 @@ const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
 
 export default {
     create,
+    issueMail,
     getList
 }

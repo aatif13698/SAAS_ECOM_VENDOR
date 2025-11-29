@@ -357,8 +357,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiChevronDown } from "react-icons/bi";
 import { BiDotsVerticalRounded } from "react-icons/bi";
-
+import { FiLoader } from 'react-icons/fi'; // or use built-in spinner if you prefer
 import jsPDF from 'jspdf';
+import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
+import toast from 'react-hot-toast';
 
 function ViewPurchaseOrder() {
     const location = useLocation();
@@ -385,10 +387,26 @@ function ViewPurchaseOrder() {
         navigate('/edit-purchase-order', { state: { row: poData } });
     };
 
-    const handleSendMail = () => {
-        // Placeholder for sending email with PDF attachment
-        // In a real app, this would integrate with an email service like EmailJS or backend API
-        alert('Sending purchase order via email...');
+    const [sendingMail, setSendingMale] = useState(false);
+
+    const handleSendMail = async () => {
+        try {
+            setSendingMale(true);
+            const dataObject = {
+                clientId: localStorage.getItem("saas_client_clientId"),
+                purchaseOrderId: poData?._id
+            }
+            const response = await purchaseOrderService.issueMail(dataObject);
+            setSendingMale(false);
+
+            toast.success("Mail sent successfully")
+
+            console.log("mail dataObject", response);
+        } catch (error) {
+            setSendingMale(false);
+
+            console.log("error while issuing the mail", error);
+        }
     };
 
     const calculateTotals = () => {
@@ -667,14 +685,45 @@ function ViewPurchaseOrder() {
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-                     <button onClick={handleSendMail} title="Send Mail" className="hover:text-blue-500 flex gap-1 ring-2 ring-gray-500 dark:ring-gray-400 hover:ring-blue-500 dark:hover:ring-blue-500 rounded-md p-1">
-                        <span className='text-sm text-gray-500 dark:text-gray-300 hover:text-blue-500 dark:hover:text-blue-500'>Send Mail</span>
-                        <BiMailSend className="text-xl" /> 
+                    <button
+                        onClick={handleSendMail}
+                        disabled={sendingMail} // Prevent double clicks
+                        title="Send Mail"
+                        className={`
+    flex items-center gap-2 rounded-md px-3 py-1.5 ring-2 
+    transition-all duration-200
+    ${sendingMail
+                                ? 'cursor-not-allowed opacity-70 ring-gray-400 dark:ring-gray-500'
+                                : 'cursor-pointer ring-gray-500 dark:ring-gray-400 hover:ring-blue-500 dark:hover:ring-blue-500'
+                            }
+  `}
+                    >
+                        {/* Spinner - shown only during sending */}
+                        {sendingMail && (
+                            <FiLoader className="animate-spin text-xl text-blue-500" />
+                        )}
+
+                        {/* Icon - hidden when sending to avoid layout shift */}
+                        {!sendingMail && (
+                            <BiMailSend className="text-xl text-gray-600 dark:text-gray-300" />
+                        )}
+
+                        <span
+                            className={`
+      text-sm font-medium transition-colors
+      ${sendingMail
+                                    ? 'text-gray-600 dark:text-gray-300'
+                                    : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
+                                }
+    `}
+                        >
+                            {sendingMail ? 'Sending...' : 'Send Mail'}
+                        </span>
                     </button>
                     <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
                         <BiEdit className="text-xl" />
                     </button>
-                   
+
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
@@ -710,7 +759,7 @@ function ViewPurchaseOrder() {
             {/* PDF-like View - Responsive Layout */}
             <div className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0">
                 <div className="absolute top-0 left-0 text-[1rem] font-bold text-white [--f:.5em] leading-[1.8] px-[1lh] pb-[var(--f)] [border-image:conic-gradient(#0008_0_0)_51%/var(--f)] [clip-path:polygon(100%_calc(100%_-_var(--f)),100%_100%,calc(100%_-_var(--f))_calc(100%_-_var(--f)),var(--f)_calc(100%_-_var(--f)),_0_100%,0_calc(100%_-_var(--f)),999px_calc(100%_-_var(--f)_-_999px),calc(100%_-_999px)_calc(100%_-_var(--f)_-_999px))] translate-x-[calc((cos(45deg)-1)*100%)] translate-y-[-100%] rotate-[-45deg] origin-[100%_100%] bg-[#009499]">
-                {"Draft"}
+                    {"Draft"}
                 </div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 md:gap-0">
                     <div className="text-sm text-gray-700 dark:text-gray-300">
