@@ -210,8 +210,44 @@ const Shifts = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
+            name: "Level",
+            selector: (row) => {
+                let level = "";
+                if (row?.isBuLevel) {
+                    level = "Business Unit"
+                } else if (row?.isBranchLevel) {
+                    level = "Branch"
+                } else if (row?.isWarehouseLevel) {
+                    level = "Warehouse"
+                }
+                return level
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+         {
+            name: "Unit",
+            selector: (row) => {
+                let unit = "";
+                if (row?.isBuLevel) {
+                    unit = row?.businessUnit?.name
+                } else if (row?.isBranchLevel) {
+                    unit = row?.branch?.name
+                } else if (row?.isWarehouseLevel) {
+                    unit = row?.warehouse?.name
+                }
+                return unit
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Name",
-            selector: (row) => row?.shiftName ,
+            selector: (row) => row?.shiftName,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -219,7 +255,7 @@ const Shifts = ({ noFade, scrollContent }) => {
         },
         {
             name: "Shift Type",
-            selector: (row) => row?.shiftType ,
+            selector: (row) => row?.shiftType,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here

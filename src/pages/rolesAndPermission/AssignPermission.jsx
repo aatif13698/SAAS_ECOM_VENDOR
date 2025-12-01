@@ -277,7 +277,7 @@ function AssignPermission() {
             const response = await roleService.submitRolesAndPermission(dataObject)
             toast.success(response?.data?.message)
             setLoading(false)
-            navigate("/roles-permissions-list")
+            navigate("/roles-&-permissions-list")
         } catch (error) {
             console.log("Error while Submitting Roles And Permission", error);
         }
