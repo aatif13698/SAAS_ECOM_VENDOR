@@ -19,7 +19,7 @@ const CreateLeaveCategory = ({ noFade, scrollContent }) => {
 
     const [pageLoading, setPageLoading] = useState(true);
     const [levelList, setLevelList] = useState([
-        { name: "Vendor", value: "vendor" },
+        // { name: "Vendor", value: "vendor" },
         { name: "Business", value: "business" },
         { name: "Branch", value: "branch" },
         { name: "Warehouse", value: "warehouse" },

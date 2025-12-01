@@ -27,10 +27,10 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
     const navigate = useNavigate();
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
     const [levelList, setLevelList] = useState([
-        {
-            name: "Vendor",
-            value: "vendor"
-        },
+        // {
+        //     name: "Vendor",
+        //     value: "vendor"
+        // },
         {
             name: "Business",
             value: "business"

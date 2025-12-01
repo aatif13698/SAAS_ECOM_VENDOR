@@ -215,8 +215,8 @@ function App() {
                 <Route path="documents/custom-field" element={<DocCustomField />} />
                 <Route path="documents/adjust-order" element={<DocAdjustOrder />} />
 
-                <Route path="/assets-tools-list" element={<Asset />} />
-                <Route path="create-assets-tools" element={<CreateAsset />} />
+                <Route path="/assets-&-tools-list" element={<Asset />} />
+                <Route path="create-assets-&-tools" element={<CreateAsset />} />
                 <Route path="leave-category-list" element={<LeaveCategory />} />
                 <Route path="create-leave-category" element={<CreateLeaveCategory />} />
                 <Route path="holiday-list" element={<Holiday />} />
