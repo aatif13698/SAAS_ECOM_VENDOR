@@ -37,6 +37,7 @@
     "dayjs": "^1.11.10",
     "file-saver": "^2.0.5",
     "framer-motion": "^10.12.12",
+    "html2pdf.js": "^0.12.1",
     "i": "^0.3.7",
     "i18next": "^23.11.3",
     "i18next-browser-languagedetector": "^7.2.1",
