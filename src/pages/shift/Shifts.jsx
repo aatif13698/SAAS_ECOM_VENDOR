@@ -192,7 +192,8 @@ const Shifts = ({ noFade, scrollContent }) => {
                 perPage: perPage,
                 status: status,
                 id: id,
-                clientId: clinetId
+                clientId: clinetId,
+                currentLevel, levelId
             }
             const response = await shiftService.activeInactive(dataObject);
 
@@ -227,7 +228,7 @@ const Shifts = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             },
         },
-         {
+        {
             name: "Unit",
             selector: (row) => {
                 let unit = "";
@@ -448,7 +449,7 @@ const Shifts = ({ noFade, scrollContent }) => {
         rangeSeparatorText: "of",
     };
     return (
-        <div className={`${isDark ? "bg-darkSecondary text-white" : ""}`}>
+        <div className={`${isDark ? "bg-darkSecondary text-white" : ""} min-h-[80vh]`}>
             <Card></Card>
             <div className="text-end mb-4">
                 <div className="flex gap-5 justify-between"></div>

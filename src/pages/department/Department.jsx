@@ -191,7 +191,8 @@ const Department = ({ noFade, scrollContent }) => {
                 perPage: perPage,
                 status: status,
                 id: id,
-                clientId: clinetId
+                clientId: clinetId,
+                currentLevel, levelId
             }
             const response = await departmentService.activeInactive(dataObject);
 
@@ -209,14 +210,50 @@ const Department = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
-            name: "Name",
-            selector: (row) => row?.departmentName ,
+            name: "Level",
+            selector: (row) => {
+                let level = "";
+                if (row?.isBuLevel) {
+                    level = "Business Unit"
+                } else if (row?.isBranchLevel) {
+                    level = "Branch"
+                } else if (row?.isWarehouseLevel) {
+                    level = "Warehouse"
+                }
+                return level
+            },
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
-         {
+        {
+            name: "Unit",
+            selector: (row) => {
+                let unit = "";
+                if (row?.isBuLevel) {
+                    unit = row?.businessUnit?.name
+                } else if (row?.isBranchLevel) {
+                    unit = row?.branch?.name
+                } else if (row?.isWarehouseLevel) {
+                    unit = row?.warehouse?.name
+                }
+                return unit
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Name",
+            selector: (row) => row?.departmentName,
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Code",
             selector: (row) => row?.departmentCode,
             sortable: false,
@@ -409,7 +446,7 @@ const Department = ({ noFade, scrollContent }) => {
         rangeSeparatorText: "of",
     };
     return (
-        <div className={`${isDark ? "bg-darkSecondary text-white" : ""}`}>
+        <div className={`${isDark ? "bg-darkSecondary text-white" : ""} min-h-[80vh]`}>
             <Card></Card>
             <div className="text-end mb-4">
                 <div className="flex gap-5 justify-between"></div>

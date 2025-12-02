@@ -376,9 +376,9 @@ const CreateDepartment = ({ noFade, scrollContent }) => {
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
-                        businessUnit: baseAddress.businessUnit,
-                        branch: baseAddress.branch,
-                        warehouse: baseAddress.warehouse,
+                        businessUnit: baseAddress.businessUnit?._id,
+                        branch: baseAddress.branch?._id,
+                        warehouse: baseAddress.warehouse?._id,
                         departmentName: baseAddress.departmentName,
                         departmentCode: baseAddress.departmentCode,
                         description: baseAddress.description,

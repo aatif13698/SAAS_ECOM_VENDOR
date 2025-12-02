@@ -90,10 +90,10 @@ const CreateShifts = ({ noFade, scrollContent }) => {
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
                 setLevelList([
-                    {
-                        name: "Vendor",
-                        value: "vendor"
-                    },
+                    // {
+                    //     name: "Vendor",
+                    //     value: "vendor"
+                    // },
                     {
                         name: "Business",
                         value: "business"
@@ -485,9 +485,9 @@ const CreateShifts = ({ noFade, scrollContent }) => {
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
-                        businessUnit: baseAddress.businessUnit,
-                        branch: baseAddress.branch,
-                        warehouse: baseAddress.warehouse,
+                        businessUnit: baseAddress.businessUnit?._id,
+                        branch: baseAddress.branch?._id,
+                        warehouse: baseAddress.warehouse?._id,
                         shiftName: baseAddress?.shiftName,
                         startTime: baseAddress?.startTime,
                         endTime: baseAddress?.endTime,
