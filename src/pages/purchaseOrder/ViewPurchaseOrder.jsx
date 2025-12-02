@@ -830,25 +830,37 @@ function ViewPurchaseOrder() {
                 </div>
 
                 {/* Totals Box - Matches Backend */}
-                <div style={{ float: 'right', width: '300px', border: '1px solid #ccc', padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total Taxable Amount:</span> <span>₹{formatCurrency(totalTaxable)}</span></p>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total CGST:</span> <span>₹{formatCurrency(totalCgst)}</span></p>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total SGST:</span> <span>₹{formatCurrency(totalSgst)}</span></p>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total IGST:</span> <span>₹{formatCurrency(totalIgst)}</span></p>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total Tax Amount:</span> <span>₹{formatCurrency(totalTax)}</span></p>
-                    <p className="grand" style={{ fontWeight: 'bold', fontSize: '13pt', color: '#d00', borderTop: '2px solid #333', paddingTop: '8px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                        <span className="label">Grand Total:</span> <span>₹{formatCurrency(grandTotal)}</span>
-                    </p>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p>
-                    <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Balance Due:</span> <span>₹{formatCurrency(poData.balance)}</span></p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
+                     {poData.notes && (
+                        <div style={{ marginTop: '20px', width: '48%' }}>
+                            <strong>Notes:</strong> {poData.notes}
+                           
+                        </div>
+                    )}
+                    <div style={{ float: 'right', width: '300px',  padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>
+                        <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total Taxable Amount:</span> <span>₹{formatCurrency(totalTaxable)}</span></p>
+                        <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total CGST:</span> <span>₹{formatCurrency(totalCgst)}</span></p>
+                        <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total SGST:</span> <span>₹{formatCurrency(totalSgst)}</span></p>
+                        <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total IGST:</span> <span>₹{formatCurrency(totalIgst)}</span></p>
+                        <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total Tax Amount:</span> <span>₹{formatCurrency(totalTax)}</span></p>
+                        <p className="grand" style={{ fontWeight: 'bold', fontSize: '13pt', color: '#d00', borderTop: '2px solid #333', paddingTop: '8px', marginTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
+                            <span className="label">Grand Total:</span> <span>₹{formatCurrency(grandTotal)}</span>
+                        </p>
+                        {/* <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p> */}
+                        {/* <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Balance Due:</span> <span>₹{formatCurrency(poData.balance)}</span></p> */}
+                    </div>
+
+                   
                 </div>
+
+
 
                 <div style={{ clear: 'both' }} />
 
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
                     {/* Bank Details */}
-                    {poData.bankDetails && (
+                    {/* {poData.bankDetails && (
                         <div style={{ marginTop: '30px' , width: '48%'}}>
                             <strong>Bank Details:</strong><br />
                             <p>Bank: {poData.bankDetails.bankName} </p>
@@ -856,15 +868,15 @@ function ViewPurchaseOrder() {
                             <p> IFSC: {poData.bankDetails.ifscCode}</p>
                             <p> Branch: {poData.bankDetails.branch}</p>
                         </div>
-                    )}
+                    )} */}
 
                     {/* Notes */}
-                    {poData.notes && (
+                    {/* {poData.notes && (
                         <div style={{ marginTop: '20px', width: '48%' }}>
                             <strong>Notes:</strong><br />
                             {poData.notes}
                         </div>
-                    )}
+                    )} */}
 
                 </div>
 
@@ -877,9 +889,9 @@ function ViewPurchaseOrder() {
                 </div>
 
                 {/* Footer */}
-                <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '9pt', color: '#777', paddingTop: '15px', borderTop: '1px solid #eee' }}>
+                {/* <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '9pt', color: '#777', paddingTop: '15px', borderTop: '1px solid #eee' }}>
                     This is a computer-generated Purchase Order. No signature required.
-                </div>
+                </div> */}
 
 
             </div>

@@ -1287,7 +1287,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
               </section>
 
               {/* Bank Details */}
-              <section>
+              {/* <section>
                 {showBankInput ? (
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 p-4">
                     <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
@@ -1332,7 +1332,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     onClick={() => setShowBankInput(true)}
                   />
                 )}
-              </section>
+              </section> */}
             </div>
 
             {/* Right: Payment Summary & Options */}
@@ -1350,7 +1350,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                 </div>
               </section>
 
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   name="roundOff"
@@ -1364,9 +1364,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     Round Off: {totals.roundOffAmount.toFixed(2)}
                   </span>
                 )}
-              </div>
+              </div> */}
 
-              <section>
+              {/* <section>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Options</h2>
                 <div className="space-y-3">
                   <div>
@@ -1412,7 +1412,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     />
                   </div>
                 </div>
-              </section>
+              </section> */}
             </div>
           </div>
 
