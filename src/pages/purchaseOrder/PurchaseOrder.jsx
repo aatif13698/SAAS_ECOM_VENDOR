@@ -16,6 +16,8 @@ import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setB
 import { useDispatch } from 'react-redux';
 import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
 import { formatDate } from '@fullcalendar/core';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 
 const defaultState = {
   level: "",
@@ -80,7 +82,8 @@ const defaultState = {
 
 const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const purhcaseOrderDraftData = useSelector((state) => state.purchaseOrderSlice);
   console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
@@ -760,13 +763,26 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       }
       console.log("dataObject", dataObject);
       const response = await purchaseOrderService?.create(dataObject);
-      console.log("response purchase order", response);
+      toast.success('Purchase Order submitted successfully!');
+      // resetAllAndNavigate()
+
+
 
     } catch (error) {
-      console.log("error while submitting the purchase order", error);
+      const message = error?.response?.data?.message;
+
+      toast.error(message)
+
+      console.log("error while submitting the purchase order", message);
     }
-    alert('Purchase Order submitted successfully!');
   };
+
+  function resetAllAndNavigate() {
+    dispatch(resetPurchaseOrder());
+    // setFormData(defaultState);
+    navigate('/purchase-order-list');
+
+  }
 
 
   const isBankFilled = Object.values(formData.bankDetails).some(value => value !== '');
