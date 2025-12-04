@@ -307,7 +307,12 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-    if (!purhcaseOrderDraftData) return;
+    if (!purhcaseOrderDraftData?.level) return;
+
+
+
+    console.log("1111", purhcaseOrderDraftData);
+
 
     setFormData((prev) => ({
       ...prev,
@@ -497,10 +502,10 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const totals = calculateTotals();
 
   // === Update balance when totals or paid amount change ===
-  useEffect(() => {
-    setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
-    dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
-  }, [totals.finalTotal, formData.paidAmount]);
+  // useEffect(() => {
+  //   setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
+  //   dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
+  // }, [totals.finalTotal, formData.paidAmount]);
 
   // === Fetch shipping addresses when supplier changes ===
   useEffect(() => {
@@ -518,11 +523,11 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       setAddresses(addresses);
 
       if (addresses.length > 0) {
-        setFormData(prev => ({
-          ...prev,
-          shippingAddress: addresses[0]
-        }));
-        dispatch(setShippingAddress(addresses[0]))
+        // setFormData(prev => ({
+        //   ...prev,
+        //   shippingAddress: addresses[0]
+        // }));
+        // dispatch(setShippingAddress(addresses[0]))
 
       } else {
         setFormData(prev => ({
@@ -540,65 +545,40 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-    let prevItem = formData?.items;
-    if (currentWarehouseDetail?.state && formData?.shippingAddress?.state) {
-      // const items = formData?.items;
-      // const updatedItem = items?.map((item) => {
-      //   return {
-      //     ...item,
-      //     sgstPercent: 0,
-      //     cgstPercent: 0,
-      //     igstPercent: 0,
+    if (purhcaseOrderDraftData?.level !== "") {
+      let prevItem = formData?.items;
+      if (currentWarehouseDetail?.state && formData?.shippingAddress?.state) {
+        console.log("222");
+        dispatch(setIsInterState(currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true));
+        if (!purhcaseOrderDraftData?.shippingAddress?.fullName) {
+          const items = formData?.items;
+          const updatedItem = items?.map((item) => {
+            return {
+              ...item,
+              sgstPercent: 0,
+              cgstPercent: 0,
+              igstPercent: 0,
 
-      //     sgst: 0,
-      //     cgst: 0,
-      //     igst: 0,
+              sgst: 0,
+              cgst: 0,
+              igst: 0,
 
-      //     tax: 0,
-      //     totalAmount: item?.taxableAmount,
-      //   }
-      // });
-      // prevItem = updatedItem;
-      // setFormData(prev => ({
-      //   ...prev,
-      //   isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
-      //   items: prevItem
-      // }));
-
-
-
-      dispatch(setIsInterState(currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true));
-
-      if (!purhcaseOrderDraftData?.shippingAddress?.fullName) {
-        const items = formData?.items;
-        const updatedItem = items?.map((item) => {
-          return {
-            ...item,
-            sgstPercent: 0,
-            cgstPercent: 0,
-            igstPercent: 0,
-
-            sgst: 0,
-            cgst: 0,
-            igst: 0,
-
-            tax: 0,
-            totalAmount: item?.taxableAmount,
-          }
-        });
-        prevItem = updatedItem;
-        setFormData(prev => ({
-          ...prev,
-          isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
-          items: prevItem
-        }));
-        dispatch(setItemsList(prevItem));
-
+              tax: 0,
+              totalAmount: item?.taxableAmount,
+            }
+          });
+          prevItem = updatedItem;
+          setFormData(prev => ({
+            ...prev,
+            isInterState: currentWarehouseDetail?.state !== formData?.shippingAddress?.state ? false : true,
+            items: prevItem
+          }));
+          dispatch(setItemsList(prevItem));
+        }
       }
-
     }
 
-  }, [currentWarehouseDetail, formData?.shippingAddress, purhcaseOrderDraftData]);
+  }, [currentWarehouseDetail, formData?.shippingAddress?.state, purhcaseOrderDraftData]);
 
 
 
@@ -761,12 +741,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
       }
-      console.log("dataObject", dataObject);
       const response = await purchaseOrderService?.create(dataObject);
       toast.success('Purchase Order submitted successfully!');
-      // resetAllAndNavigate()
-
-
+      resetAllAndNavigate()
 
     } catch (error) {
       const message = error?.response?.data?.message;
@@ -779,7 +756,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
   function resetAllAndNavigate() {
     dispatch(resetPurchaseOrder());
-    // setFormData(defaultState);
+    setFormData(defaultState);
     navigate('/purchase-order-list');
 
   }
@@ -798,7 +775,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         <div className='flex gap-2'>
           {
             purhcaseOrderDraftData?.level ? <button type='button' className='bg-red-600 text-white border border-gray-200 hover:bg-red-500 rounded-lg px-2 py-1 ' onClick={() => {
-              console.log("here is the log");
               dispatch(resetPurchaseOrder());
               setFormData(defaultState);
 
@@ -807,7 +783,6 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
           <button type='button'
             className={`bg-lightBtn dark:bg-darkBtn px-2 py-1  rounded-md text-white  text-center  inline-flex justify-center`}
             onClick={(e) => {
-              console.log("here is the log");
               handleSubmit(e)
             }}>Save</button>
         </div>
@@ -1000,7 +975,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     <h3 className="text-lg font-medium text-gray-700">Ship From</h3>
                     {addresses.length > 0 && (
                       <Button
-                        text="Change Shipping"
+                        text={`${formData?.shippingAddress?.fullName ? "Change Shipping" : "Select Shipping"} `}
                         className="text-lightModalHeaderColor dark:text-darkBtn border py-1 border-lightModalHeaderColor dark:border-darkBtn hover:bg-lightModalHeaderColor/20"
                         onClick={() => {
                           formData?.items[0]?.itemName?.name ? "" : setOpenModal2(true);
@@ -1010,7 +985,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
                     )}
                   </div>
                   <div className='h-[80%] p-4'>
-                    {formData.shippingAddress ? (
+                    {formData?.shippingAddress?.fullName ? (
                       <div className="text-sm space-y-1">
                         <p><strong>Name:</strong> {formData.shippingAddress.fullName}</p>
                         <p><strong>Contact Number:</strong> {formData.shippingAddress.phone}</p>
