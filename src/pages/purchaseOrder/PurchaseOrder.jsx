@@ -17,7 +17,7 @@ import { useDispatch } from 'react-redux';
 import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const defaultState = {
   level: "",
@@ -85,6 +85,10 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const location = useLocation();
+
+  // const {id, row} = location?.state;
+ 
   const purhcaseOrderDraftData = useSelector((state) => state.purchaseOrderSlice);
   console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
 
@@ -307,13 +311,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-    if (!purhcaseOrderDraftData?.level) return;
-
-
-
-    console.log("1111", purhcaseOrderDraftData);
-
-
+    if (!purhcaseOrderDraftData?.level ) return;
     setFormData((prev) => ({
       ...prev,
       level: purhcaseOrderDraftData.level ?? prev.level,
@@ -345,6 +343,14 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
       setCurrentWarehouseDetal(warehouseDetail);
     }
   }, [purhcaseOrderDraftData]);
+
+
+  // useEffect(() => {
+  //   if(id && purhcaseOrderDraftData){
+
+  //   }
+
+  // },[id])
 
 
 

@@ -510,10 +510,14 @@ import { FiLoader } from 'react-icons/fi';
 import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
 import toast from 'react-hot-toast';
+import { useDispatch } from 'react-redux';
+import { setPurchaseOrder } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
 
 function ViewPurchaseOrder() {
-    const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    const location = useLocation();
     const [poData, setPoData] = useState(location.state?.row || {});
     const [showDropdown, setShowDropdown] = useState(false);
     const [sendingMail, setSendingMail] = useState(false); // Fixed typo: setSendingMale -> setSendingMail
@@ -535,7 +539,8 @@ function ViewPurchaseOrder() {
     console.log("purchaseOrderData", poData);
 
     const handleEdit = () => {
-        navigate('/edit-purchase-order', { state: { row: poData } });
+        dispatch(setPurchaseOrder({ ...poData, level: "warehouse" }));
+        navigate('/edit-purchase-order', { state: { row: { ...poData, level: "warehouse" }, id: poData?._id } });
     };
 
     const handleSendMail = async () => {
@@ -583,7 +588,7 @@ function ViewPurchaseOrder() {
         if (!element) return;
 
         const opt = {
-            margin: [5, 5, 5, 5],
+            margin: [5, 5, 15, 5],
             filename: `PO-${poData.poNumber || 'unknown'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
@@ -830,14 +835,17 @@ function ViewPurchaseOrder() {
                 </div>
 
                 {/* Totals Box - Matches Backend */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
-                     {poData.notes && (
+                <div
+                    className={`flex ${poData.notes ? "justify-between" : "justify-end"}  mb-8`}
+                // style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}
+                >
+                    {poData.notes && (
                         <div style={{ marginTop: '20px', width: '48%' }}>
                             <strong>Notes:</strong> {poData.notes}
-                           
+
                         </div>
                     )}
-                    <div style={{ float: 'right', width: '300px',  padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>
+                    <div style={{ float: 'right', width: '300px', padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>
                         <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total Taxable Amount:</span> <span>₹{formatCurrency(totalTaxable)}</span></p>
                         <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total CGST:</span> <span>₹{formatCurrency(totalCgst)}</span></p>
                         <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Total SGST:</span> <span>₹{formatCurrency(totalSgst)}</span></p>
@@ -850,7 +858,7 @@ function ViewPurchaseOrder() {
                         {/* <p style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Balance Due:</span> <span>₹{formatCurrency(poData.balance)}</span></p> */}
                     </div>
 
-                   
+
                 </div>
 
 

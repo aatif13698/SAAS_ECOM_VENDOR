@@ -143,6 +143,12 @@ export const purchaseOrderSlice = createSlice({
             state.balance = action.payload;
         },
         resetPurchaseOrder: () => initialState,
+        setPurchaseOrder: (state, action) => {
+            console.log("action.payload", action.payload);
+
+            return action.payload
+            
+        },
     },
 });
 
@@ -165,6 +171,7 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setNotes,
     setPaymentMethod,
     setPaidAmount,
-    setBalance
+    setBalance,
+    setPurchaseOrder
 } = purchaseOrderSlice.actions;
 export default purchaseOrderSlice.reducer;

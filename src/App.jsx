@@ -183,8 +183,10 @@ function App() {
 
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
+                <Route path="edit-purchase-order" element={<PurchaseOrderPage/>} />
                 <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
                 <Route path="view/purchase-order" element={<ViewPurchaseOrder/>} />
+
 
 
 

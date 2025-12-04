@@ -285,20 +285,6 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
                                 <Icon icon="heroicons:eye" />
                             </button>
                         </Tooltip>
-                        <Tooltip
-                            content="Print"
-                            placement="top"
-                            arrow
-                            animation="shift-away"
-                        >
-                            <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => handleEdit(row)}
-                            >
-                                <Icon icon="material-symbols:print-outline" />
-                            </button>
-                        </Tooltip>
                     </div>
                 );
             },
@@ -356,23 +342,23 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await warehouseService.getList(page, keyWord, perPage);
+            const response = await purchaseOrderService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
+            setPaginationData(response?.data?.purchaseOrders);
             setPage(page);
         } catch (error) {
-            console.log("error while fetching warehouse");
+            console.log("error while fetching");
         }
     };
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await warehouseService.getList(page, keyWord, perPage);
+            const response = await purchaseOrderService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.warehouses);
+            setPaginationData(response?.data?.purchaseOrders);
             setPerPage(perPage);
         } catch (error) {
-            console.log("error while fetching warehouse");
+            console.log("error while fetching");
         }
         setPerPage(perPage);
     };
