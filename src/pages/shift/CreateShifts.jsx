@@ -553,7 +553,7 @@ const CreateShifts = ({ noFade, scrollContent }) => {
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
 
                                 <form onSubmit={onSubmit}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
+                                    <div className="grid grid-cols-1 md:grid-cols-3  gap-5 ">
 
                                         {/* select level */}
                                         <div

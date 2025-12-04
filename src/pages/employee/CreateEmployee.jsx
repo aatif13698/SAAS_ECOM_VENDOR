@@ -96,7 +96,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
     const [activeBranches, setActiveBranches] = useState([]);
     const [activeWarehouse, setActiveWarehouse] = useState([]);
     const [roleList, setRoleList] = useState([]);
-
+    const [shifts, setShifts] = useState([]);
+    const [departments, setDepartments] = useState([]);
 
 
 
@@ -106,6 +107,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
         branch: "",
         warehouse: "",
         roleId: "",
+        department: "",
+        shift: "",
         firstName: "",
         lastName: "",
         email: "",
@@ -196,6 +199,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
         branch: "",
         warehouse: "",
         roleId: "",
+        department: "",
+        shift: "",
         firstName: "",
         lastName: "",
         email: "",
@@ -973,8 +978,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (level) {
-            console.log("level",level);
-            
+            console.log("level", level);
+
             if (level === "vendor") {
                 setLevelResult(1);
             } else if (level === "business") {
@@ -992,9 +997,19 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (businessUnit) {
-            getBranchByBusiness(businessUnit)
+            getBranchByBusiness(businessUnit);
+
+            console.log("1111", level);
+
+
+            if (businessUnit && level == "business") {
+                console.log("coming here");
+
+                getDepartmentAndShift(level, businessUnit)
+
+            }
         }
-    }, [businessUnit]);
+    }, [businessUnit, level]);
 
     async function getBranchByBusiness(id) {
 
@@ -1021,6 +1036,19 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
             setActiveWarehouse(response.data)
         } catch (error) {
             console.log("error while getting warehouse by branch");
+        }
+    }
+
+    async function getDepartmentAndShift(currentLevel, levelId) {
+        try {
+            const [departments, shifts] = await Promise.all([
+                employeeService.getDepartmentOfLevel(currentLevel, levelId),
+                employeeService.getShiftOfLevel(currentLevel, levelId)
+            ]);
+            setDepartments(departments?.data?.departments);
+            setShifts(shifts?.data?.shifts);
+        } catch (error) {
+            console.log("error while getting the department and shift", error);
         }
     }
 
@@ -1058,7 +1086,7 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                 payload.append("ZipCode", ZipCode);
 
                 console.log("form asd", formData);
-                
+
 
                 if (password) {
                     payload.append("password", password);
@@ -1247,7 +1275,6 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
     }
 
 
-    const [isUserClicked, setIsUserClicked] = useState(true);
 
 
 
@@ -1272,54 +1299,6 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
 
 
-    const handleFileChange2 = (e) => {
-        const { name, value } = e.target;
-        setImgErr2("");
-        if (name === "tradeLicense") {
-            if (!selectedFile2 && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "Trade License is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
-        let errorCount = 0;
-
-        const file = e.target.files[0];
-
-        if (file) {
-            fileSize = file.size / 1024;
-
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr2("Only images are allowed");
-
-                errorCount++;
-            }
-
-            //check if filesize is not more than 1MB
-            if (fileSize > 1024) {
-                setImgErr2("Image size should not be more than 1MB.");
-
-                errorCount++;
-            }
-
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-
-                setSelectedFile2(file);
-
-                setImgPreviwe2(imageAsBase64);
-            }
-        }
-
-    };
 
 
 
@@ -1369,10 +1348,6 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
 
 
-    const handleCloseLoadingModal = () => {
-        setShowLoadingModal(false);
-    };
-
 
 
 
@@ -1405,7 +1380,7 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
 
                                 <form onSubmit={onSubmit}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
+                                    <div className="grid grid-cols-1 md:grid-cols-3  gap-5 ">
 
                                         {/* select level */}
                                         <div
@@ -1527,6 +1502,52 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                                                     {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
                                                 </div>
                                         }
+
+                                        <label className={`fromGroup   ${formDataErr?.department !== "" ? "has-error" : ""
+                                            } `}>
+                                            <p className="form-label">
+                                                Department  <span className="text-red-500">*</span>
+                                            </p>
+                                            <select
+                                                value={formData?.department}
+                                                onChange={handleChange}
+                                                disabled={isViewed}
+                                                name="department" className="form-control outline-none w-[100%] rounded-md px-4 py-2.5 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor dark:placeholder-darkPlaceholder bg-lightBgInputColor dark:bg-darkIconAndSearchBg dark:text-white"
+                                            >
+                                                <option value="" >--Select department--</option>
+                                                {
+                                                    departments && departments.length > 0 && departments.map((item) => {
+                                                        return (
+                                                            <option key={item._id} value={item._id}>{item?.departmentName}</option>
+                                                        )
+                                                    })
+                                                }
+                                            </select>
+                                            {<p className="text-red-600  text-xs">{formDataErr.department}</p>}
+                                        </label>
+
+                                        <label className={`fromGroup   ${formDataErr?.shift !== "" ? "has-error" : ""
+                                            } `}>
+                                            <p className="form-label">
+                                                Shift  <span className="text-red-500">*</span>
+                                            </p>
+                                            <select
+                                                value={formData?.shift}
+                                                onChange={handleChange}
+                                                disabled={isViewed}
+                                                name="shift" className="form-control outline-none w-[100%] rounded-md px-4 py-2.5 border border-lightborderInputColor dark:border-darkSecondary text-lightinputTextColor dark:placeholder-darkPlaceholder bg-lightBgInputColor dark:bg-darkIconAndSearchBg dark:text-white"
+                                            >
+                                                <option value="" >--Select shift--</option>
+                                                {
+                                                    shifts && shifts.length > 0 && shifts.map((item) => {
+                                                        return (
+                                                            <option key={item._id} value={item._id}>{item?.shiftName}</option>
+                                                        )
+                                                    })
+                                                }
+                                            </select>
+                                            {<p className="text-red-600  text-xs">{formDataErr.shift}</p>}
+                                        </label>
 
                                         <label className={`fromGroup   ${formDataErr?.roleId !== "" ? "has-error" : ""
                                             } `}>
@@ -1774,7 +1795,7 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
                                         {/* address one */}
                                         <label
-                                            className={`fromGroup col-span-2  ${formDataErr?.address !== "" ? "has-error" : ""
+                                            className={`fromGroup md:col-span-3  ${formDataErr?.address !== "" ? "has-error" : ""
                                                 } `}
                                         >
                                             <p className="form-label">
