@@ -237,12 +237,22 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
 
             selector: (row) => {
 
+                const status = row?.status
+
                 return (
                     <span className="block w-full">
                         <span
                             className={`uppercase inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
                                 ${
-                                    row?.status == "draft" ? "text-success-500 bg-success-500" : ""
+                                    status == "draft" ?  "text-gray-500 bg-gray-500" 
+                                    : status == "pending_approval" ? "text-yellow-500 bg-yellow-500" 
+                                    : status == "issued" ? "text-blue-500 bg-blue-500" 
+                                    : status == "invoiced" ? "text-green-500 bg-green-500" 
+                                    : status == "partially_invoiced" ? "text-emerald-500 bg-emerald-500" 
+                                    : status == "approved" ? "text-violet-500 bg-violet-500" 
+                                    : status == "closed" ? "text-orange-500 bg-orange-500" 
+                                    : status == "canceled" ? "text-red-500 bg-red-500" 
+                                    :  ""  
                                 }
                                ${
                                     row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
@@ -307,9 +317,9 @@ const ListPurchaseOrder = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await employeeService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await purchaseOrderService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.employees);
+                    setPaginationData(response?.data?.purchaseOrders);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }

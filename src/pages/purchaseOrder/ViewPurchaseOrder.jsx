@@ -625,11 +625,20 @@ function ViewPurchaseOrder() {
         generatePDF(true);
     };
 
-    const handleStatusChange = (newStatus) => {
-        setPoData(prev => ({ ...prev, status: newStatus }));
-        setShowDropdown(false);
-        // In a real app, call API to update status on backend
-        console.log(`Status changed to: ${newStatus}`);
+    const handleStatusChange = async (newStatus) => {
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                id: poData?._id, status: newStatus, clientId: clientId,
+            }
+            const response = await purchaseOrderService.changeStauts(dataObject);
+            setPoData(prev => ({ ...prev, status: newStatus }));
+            setShowDropdown(false);
+            toast.success(`Status changed to: ${newStatus}`)
+        } catch (error) {
+            setShowDropdown(false);
+            console.log("error while changing the status", error);
+        }
     };
 
     const statuses = ['draft', 'issued', 'invoiced', 'partially_invoiced', 'pending_approval', 'approved', 'closed', 'canceled'];
@@ -710,7 +719,7 @@ function ViewPurchaseOrder() {
                                     <button
                                         key={status}
                                         onClick={() => handleStatusChange(status)}
-                                        className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left capitalize"
+                                        className={`block ${poData?.status == status ? "bg-blue-300" : ""} px-4 py-2 text-sm  dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left capitalize`}
                                     >
                                         {status.replace('_', ' ')}
                                     </button>
