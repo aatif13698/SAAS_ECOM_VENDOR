@@ -231,6 +231,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
         branch,
         warehouse,
         roleId,
+        shift,
+        department,
         firstName,
         lastName,
         email,
@@ -434,6 +436,34 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
             setFormDataErr((prev) => ({
                 ...prev,
                 roleId: ""
+            }))
+
+        }
+
+        if (!shift) {
+            setFormDataErr((prev) => ({
+                ...prev,
+                shift: "Shift is Required"
+            }))
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                shift: ""
+            }))
+
+        }
+
+        if (!department) {
+            setFormDataErr((prev) => ({
+                ...prev,
+                department: "Department is Required"
+            }))
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                department: ""
             }))
 
         }
@@ -826,7 +856,33 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
             }
         }
 
+        if (name == "shift") {
+            if (value == "") {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    shift: "Shift is Required"
+                }))
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    shift: ""
+                }))
+            }
+        }
 
+        if (name == "department") {
+            if (value == "") {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    department: "Department is Required"
+                }))
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    department: ""
+                }))
+            }
+        }
 
         if (name === "firstName") {
             if (value === "") {
@@ -1074,6 +1130,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                 payload.append("warehouse", warehouse);
                 payload.append("icon", selectedFile);
                 payload.append("roleId", roleId);
+                payload.append("shift", shift);
+                payload.append("department", department);
                 payload.append("firstName", firstName);
                 payload.append("lastName", lastName);
                 payload.append("gender", gender);
@@ -1114,6 +1172,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                     branch: "",
                     warehouse: "",
                     roleId: "",
+                    shift: "",
+                    department: "",
                     firstName: "",
                     lastName: "",
                     email: "",
@@ -1134,6 +1194,8 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                     branch: "",
                     warehouse: "",
                     roleId: "",
+                    shift: "",
+                    department: "",
                     firstName: "",
                     lastName: "",
                     email: "",
@@ -1175,7 +1237,7 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                     setPageLoading(true)
                     const response = await employeeService.getOne(id);
                     console.log('Response get employee', response?.data);
-                    const baseAddress = response?.data;
+                    const baseAddress = row;
 
 
                     let level = "";
@@ -1197,7 +1259,9 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
                         businessUnit: baseAddress.businessUnit,
                         branch: baseAddress.branch,
                         warehouse: baseAddress.warehouse,
-                        roleId: baseAddress.role,
+                        roleId: baseAddress.role?._id,
+                        shift: baseAddress?.shift?._id,
+                        department: baseAddress?.workingDepartment?._id,
                         firstName: baseAddress.firstName,
                         lastName: baseAddress.lastName,
                         email: baseAddress.email,

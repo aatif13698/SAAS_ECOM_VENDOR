@@ -208,6 +208,22 @@ const Employee = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
+            name: "Department",
+            selector: (row) => row?.workingDepartment?.departmentName ?? "N/A" ,
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Shift",
+            selector: (row) => row?.shift?.shiftName ?? "N/A",
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Name",
             selector: (row) => row?.firstName + " " + row?.lastName,
             sortable: true,
