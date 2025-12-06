@@ -72,6 +72,7 @@ const Shifts = lazy(() => import("./pages/shift/Shifts"));
 const CreateShifts = lazy(() => import("./pages/shift/CreateShifts"));
 const ChangeShifts = lazy(() => import("./pages/changeShift/ChangeShifts"));
 const CreateChangeShift = lazy(() => import("./pages/changeShift/CreateChangeShift"));
+const RequestShift = lazy(() => import("./pages/requestShift/RequestShift"));
 
 const LeaveCategory = lazy(() => import("./pages/leaveCategory/LeaveCategory"));
 const CreateLeaveCategory = lazy(() => import("./pages/leaveCategory/CreateLeaveCategory"));
@@ -216,6 +217,9 @@ function App() {
 
                 <Route path="change-shift-list" element={<ChangeShifts />} />
                 <Route path="create-change-shift" element={<CreateChangeShift />} />
+
+                <Route path="shift-change-request-list" element={<RequestShift />} />
+
 
 
 
