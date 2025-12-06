@@ -109,6 +109,8 @@ const PurchaseOrderPage = lazy(() => import("./pages/purchaseOrder/PurchaseOrder
 const ListPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ListPurchaseOrder"));
 const ViewPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ViewPurchaseOrder"));
 
+const ListPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ListPurchaseInvoice"));
+const PurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/PurchaseInvoice"));
 
 
 
@@ -186,6 +188,10 @@ function App() {
                 <Route path="edit-purchase-order" element={<PurchaseOrderPage/>} />
                 <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
                 <Route path="view/purchase-order" element={<ViewPurchaseOrder/>} />
+
+                <Route path="purchase-invoices-list" element={<ListPurchaseInvoice/>} />
+                <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
+
 
 
 
