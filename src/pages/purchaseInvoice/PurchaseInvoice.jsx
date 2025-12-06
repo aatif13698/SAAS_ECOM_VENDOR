@@ -940,7 +940,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Card 1: Supplier */}
               <div className={`bg-white dark:bg-transparent rounded-lg border border-gray-200 ${formData.supplier ? "lg:col-span-1 md:col-span-1" : "lg:col-span-2 md:col-span-2"}`}>
-                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white lg:h-[20%] md:h-[30%] p-2 rounded-t-lg flex justify-between items-center'>
+                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white  p-2 rounded-t-lg flex justify-between items-center'>
                   <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
                   {formData.supplier && (
                     <Button
@@ -1021,8 +1021,8 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
               {/* Card 3: PO Details */}
               <div className="bg-white dark:bg-transparent lg:col-span-1 md:col-span-2 rounded-lg border border-gray-200">
-                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white md:h-[20%] h-[12%] p-2 rounded-t-lg'>
-                  <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
+                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white  p-2 rounded-t-lg'>
+                  <h3 className="md:text-base text-base font-medium mb-2 text-gray-700">Purchase Invoice Details</h3>
                 </div>
                 <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -1347,7 +1347,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                 </div>
               </section>
 
-              {/* <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   name="roundOff"
@@ -1361,9 +1361,9 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                     Round Off: {totals.roundOffAmount.toFixed(2)}
                   </span>
                 )}
-              </div> */}
+              </div>
 
-              {/* <section>
+              <section>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Options</h2>
                 <div className="space-y-3">
                   <div>
@@ -1409,18 +1409,9 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                     />
                   </div>
                 </div>
-              </section> */}
+              </section>
             </div>
           </div>
-
-          {/* <div className="text-right mt-8">
-            <button
-              type="submit"
-              className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 font-medium"
-            >
-              Submit Purchase Order
-            </button>
-          </div> */}
         </form>
       </div>
 
