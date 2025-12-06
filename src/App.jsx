@@ -70,6 +70,8 @@ const Asset = lazy(() => import("./pages/assets/Asset"));
 const CreateAsset = lazy(() => import("./pages/assets/CreateAsset"));
 const Shifts = lazy(() => import("./pages/shift/Shifts"));
 const CreateShifts = lazy(() => import("./pages/shift/CreateShifts"));
+const ChangeShifts = lazy(() => import("./pages/changeShift/ChangeShifts"));
+const CreateChangeShift = lazy(() => import("./pages/changeShift/CreateChangeShift"));
 
 const LeaveCategory = lazy(() => import("./pages/leaveCategory/LeaveCategory"));
 const CreateLeaveCategory = lazy(() => import("./pages/leaveCategory/CreateLeaveCategory"));
@@ -211,6 +213,11 @@ function App() {
 
                 <Route path="shift-list" element={<Shifts />} />
                 <Route path="create-shift" element={<CreateShifts />} />
+
+                <Route path="change-shift-list" element={<ChangeShifts />} />
+                <Route path="create-change-shift" element={<CreateChangeShift />} />
+
+
 
                 <Route path="department-list" element={<Department />} />
                 <Route path="create-department" element={<CreateDepartment />} />
