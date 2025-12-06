@@ -137,14 +137,16 @@ const Navmenu = ({ menus }) => {
     ]);
 
     const excludedMenus = new Set([
-      // "Department",
-      // "Shift",
+      "Department",
+      "Shift",
       "Documents",
       "Assets & Tools",
       "Leave Category",
       "Holiday",
       "Product QA",
       "Product QA Out",
+      "Change Shift",
+      "Shift Change Request"
     ]);
 
     const result = [];
@@ -152,9 +154,9 @@ const Navmenu = ({ menus }) => {
     vendorPermissionsList
       .filter((module) => module.access)
       .forEach((module) => {
-        if (module.name !== "Human resources") {
+        // if (module.name !== "Human resources") {
           result.push({ isHeadr: true, title: module.name });
-        }
+        // }
 
         module.menu
           .filter((menu) => menu.access && !excludedMenus.has(menu.name))
