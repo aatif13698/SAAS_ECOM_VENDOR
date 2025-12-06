@@ -133,7 +133,7 @@ const RequestShifts = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-change-shift", { state: { id, row, name } });
+        navigate("/shift-change-request-action", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -141,7 +141,7 @@ const RequestShifts = ({ noFade, scrollContent }) => {
         const name = "edit"
         setUserId(id);
         setIsViewed(false);
-        navigate("/create-change-shift", { state: { id, row, name } });
+        navigate("/shift-change-request-action", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -296,20 +296,7 @@ const RequestShifts = ({ noFade, scrollContent }) => {
                                 <Icon icon="heroicons:eye" />
                             </button>
                         </Tooltip>
-                        <Tooltip
-                            content="Edit"
-                            placement="top"
-                            arrow
-                            animation="shift-away"
-                        >
-                            <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => handleEdit(row)}
-                            >
-                                <Icon icon="heroicons:pencil-square" />
-                            </button>
-                        </Tooltip>
+                       
                         <Tooltip
                             content="Delete"
                             placement="top"
