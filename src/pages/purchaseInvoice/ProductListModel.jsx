@@ -19,7 +19,7 @@ import categoryService from '@/services/category/category.service';
 import subcategoryService from '@/services/subCategory/subcategory.service';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setItemsList } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
+import { setItemsList } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
 
 /* --------------------------------------------------------------
    Main Component

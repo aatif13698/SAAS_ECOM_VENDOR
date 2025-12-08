@@ -12,9 +12,9 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from '../purchaseOrder/AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
+import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
 import { useDispatch } from 'react-redux';
-import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
+import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -89,8 +89,9 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
   // const {id, row} = location?.state;
  
-  const purhcaseOrderDraftData = useSelector((state) => state.purchaseOrderSlice);
-  console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
+  const purhcaseOrderDraftData = useSelector((state) => state.purchaseInvoiceSlice);
+  const store = useSelector((state) => state);
+  console.log("store", store);
 
   const [isDark] = useDarkmode();
   const [addresses, setAddresses] = useState([]);
@@ -747,7 +748,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
       }
-      const response = await purchaseOrderService?.create(dataObject);
+      const response = await purchaseInvoiceService?.create(dataObject);
       toast.success('Purchase Order submitted successfully!');
       resetAllAndNavigate()
 

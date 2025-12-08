@@ -188,14 +188,6 @@ function App() {
                 />
 
                 <Route path="dashboard" element={<Dashboard />} />
-                <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
-                <Route path="edit-purchase-order" element={<PurchaseOrderPage/>} />
-                <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
-                <Route path="view/purchase-order" element={<ViewPurchaseOrder/>} />
-
-                <Route path="purchase-invoices-list" element={<ListPurchaseInvoice/>} />
-                <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
-
 
 
 
@@ -268,7 +260,7 @@ function App() {
                 <Route path="attribute-list" element={<Attribute />} />
                 <Route path="product-list" element={<ProductBluePrint />} />
                 <Route path="create-product" element={<CreateProductBluePrint />} />
-                <Route path="product-qa-out-list" element={<ProductQaOut/>} />
+                <Route path="product-qa-out-list" element={<ProductQaOut />} />
 
                 <Route path="variant-list" element={<Variant2 />} />
 
@@ -307,6 +299,16 @@ function App() {
 
                 <Route path="ledger-list" element={<Ledger />} />
                 <Route path="create-ledger" element={<CreateLedger />} />
+
+
+                {/* purchase */}
+                <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
+                <Route path="edit-purchase-order" element={<PurchaseOrderPage/>} />
+                <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
+                <Route path="view/purchase-order" element={<ViewPurchaseOrder/>} />
+
+                <Route path="purchase-invoices-list" element={<ListPurchaseInvoice/>} />
+                <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
 
 
 
