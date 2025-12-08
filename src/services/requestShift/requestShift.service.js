@@ -21,10 +21,20 @@ const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
     }
 };
 
+const action = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/requestShift/action/requestShift`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
 const activeInactive = async (data) => {
-
     const authToken = await localStorage.getItem("saas_client_token");
-
     return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/requestShift/activeInactive/requestShift`, data, {
         headers: {
             Authorization: `Bearer ${authToken}`,
@@ -34,10 +44,8 @@ const activeInactive = async (data) => {
 
 
 
-
-
-
 export default {
     getList,
+    action,
     activeInactive,
 }

@@ -10,19 +10,10 @@ import FormLoader from "@/Common/formLoader/FormLoader";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import { IoClose } from "react-icons/io5";
+import requestShiftService from "@/services/requestShift/requestShift.service";
+import { formatDate } from "@fullcalendar/core";
 
 
-
-// Options for days multi-select
-const daysOptions = [
-    { value: 'Mon', label: 'Monday' },
-    { value: 'Tue', label: 'Tuesday' },
-    { value: 'Wed', label: 'Wednesday' },
-    { value: 'Thu', label: 'Thursday' },
-    { value: 'Fri', label: 'Friday' },
-    { value: 'Sat', label: 'Saturday' },
-    { value: 'Sun', label: 'Sunday' }
-];
 
 
 
@@ -175,6 +166,8 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
         remark: '',
     });
 
+    console.log("actionForm", actionForm);
+
     const handleActionChange = (e) => {
         const { name, value } = e.target;
         setActionForm(prev => ({ ...prev, [name]: value }));
@@ -195,12 +188,21 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
 
         setLoading(true);
         try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+
+            const dataObject = {
+                clientId: clientId,
+                shiftChangeId: id,
+                status: actionForm.status,
+                actionRemark: actionForm.remark,
+                newJoinDate: actionForm.joinDate,
+            }
             // TODO: Replace with actual service call, e.g.,
-            // await employeeService.updateShiftRequestAction(id, actionForm);
+            await requestShiftService.action(dataObject);
             console.log('Submitting action:', actionForm);
             toast.success('Action taken successfully.');
             setIsAction(false);
-            setActionForm({ status: 'pending', joinDate: '', remark: '' });
+            // setActionForm({ status: 'pending', joinDate: '', remark: '' });
         } catch (error) {
             console.error('Error submitting action:', error);
             toast.error('Failed to take action.');
@@ -258,6 +260,15 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
         }
     }
 
+
+    function formatDate(isoDate) {
+        const date = new Date(isoDate);
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     // -----setting the data if contain id ----------
     useEffect(() => {
         if (id) {
@@ -286,6 +297,17 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                         reason: baseAddress?.reason,
                         description: baseAddress?.description,
                     }));
+
+                    if (baseAddress?.status !== "pending") {
+                        setIsAction(true)
+
+                    }
+
+                    setActionForm((prev) => ({
+                        joinDate: formatDate(baseAddress?.newJoinDate),
+                        status: baseAddress?.status,
+                        remark: baseAddress?.actionRemark
+                    }))
                     setPageLoading(false)
                 } catch (error) {
                     setPageLoading(false)
@@ -349,6 +371,10 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                     <div>
                         <Card>
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
+
+                                <div className="bg-gray-100 p-2 rounded-md w-fit mb-4">
+                                    <h3 className="text-base">Requested By: {`${row?.createdBy?.firstName + " "+ row?.createdBy?.lastName} - ${row?.createdBy?.email}`} </h3>
+                                </div> 
 
                                 <div >
                                     <div className="grid grid-cols-1 md:grid-cols-3  gap-5 ">
@@ -477,7 +503,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                         >
                                             <label htmlFor=" hh" className="form-label ">
                                                 <p className="form-label">
-                                                    Shift <span className="text-red-500">*</span>
+                                                   Chosen Shift <span className="text-red-500">*</span>
                                                 </p>
                                             </label>
                                             <select
@@ -560,7 +586,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
 
                                                 <button
                                                     onClick={() => setIsAction(false)}
-                                                    className="absolute z-[999999] right-4"><IoClose/></button>
+                                                    className="absolute z-[999999] right-4"><IoClose /></button>
                                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                                     {/* Status Radio Buttons */}
                                                     <div className="md:col-span-3 fromGroup">
@@ -606,19 +632,45 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
 
                                                     {/* New Join Date - Conditional */}
                                                     {actionForm.status === 'approved' && (
-                                                        <div className="fromGroup">
-                                                            <label htmlFor="joinDate" className="form-label">
-                                                                New Join Date <span className="text-red-500">*</span>
-                                                            </label>
-                                                            <input
-                                                                type="date"
-                                                                id="joinDate"
-                                                                name="joinDate"
-                                                                value={actionForm.joinDate}
-                                                                onChange={handleActionChange}
-                                                                className="form-control py-2"
-                                                            />
-                                                        </div>
+                                                        <>
+                                                            <div className="fromGroup">
+                                                                <label htmlFor="joinDate" className="form-label">
+                                                                    New Join Date <span className="text-red-500">*</span>
+                                                                </label>
+                                                                <input
+                                                                    type="date"
+                                                                    id="joinDate"
+                                                                    name="joinDate"
+                                                                    value={actionForm.joinDate}
+                                                                    onChange={handleActionChange}
+                                                                    className="form-control py-2"
+                                                                />
+                                                            </div>
+                                                            <div
+                                                                className={`fromGroup   ${formDataErr?.chosenShift !== "" ? "has-error" : ""
+                                                                    } `}
+                                                            >
+                                                                <label htmlFor=" hh" className="form-label ">
+                                                                    <p className="form-label">
+                                                                      Assign Shift <span className="text-red-500">*</span>
+                                                                    </p>
+                                                                </label>
+                                                                <select
+                                                                    name="chosenShift"
+                                                                    // value={chosenShift}
+                                                                    className="form-control py-2  appearance-none relative flex-1"
+                                                                >
+                                                                    <option value="">None</option>
+
+                                                                    {shifts &&
+                                                                        shifts?.map((item) => (
+                                                                            <option value={item?._id} key={item?._id}>{item?.shiftName}</option>
+                                                                        ))}
+                                                                </select>
+                                                                {<p className="text-sm text-red-500">{formDataErr.chosenShift}</p>}
+                                                            </div>
+                                                        </>
+
                                                     )}
 
                                                     {/* Remark - Conditional */}
@@ -641,13 +693,17 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                 </div>
 
                                                 <div className="flex justify-end py-5">
-                                                    <button
-                                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn inline-flex justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                        onClick={handleSubmit}
-                                                        disabled={loading}
-                                                    >
-                                                        {loading ? 'Submitting...' : 'Submit'}
-                                                    </button>
+                                                    {
+                                                        row?.status !== "pending" ? null :
+                                                            <button
+                                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn inline-flex justify-center ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                                onClick={handleSubmit}
+                                                                disabled={loading}
+                                                            >
+                                                                {loading ? 'Submitting...' : 'Submit'}
+                                                            </button>
+                                                    }
+
                                                 </div>
                                             </div>
                                         )}

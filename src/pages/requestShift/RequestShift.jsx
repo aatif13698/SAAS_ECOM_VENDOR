@@ -247,6 +247,30 @@ const RequestShifts = ({ noFade, scrollContent }) => {
             },
         },
         {
+            name: "Name",
+            selector: (row) => (row?.createdBy?.firstName+" "+row?.createdBy?.lastName),
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Email",
+            selector: (row) => (row?.createdBy?.email),
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Chosen Shift",
+            selector: (row) => row?.chosenShift?.shiftName,
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Chosen Shift",
             selector: (row) => row?.chosenShift?.shiftName,
             sortable: true,
