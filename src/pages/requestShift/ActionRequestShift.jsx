@@ -164,6 +164,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
         status: 'pending',
         joinDate: '',
         remark: '',
+        newShift: '',
     });
 
     console.log("actionForm", actionForm);
@@ -181,7 +182,11 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
             toast.error('New join date is required for approval.');
             return;
         }
-        if ((actionForm.status === 'approved' || actionForm.status === 'rejected') && !actionForm.remark.trim()) {
+         if (actionForm.status === 'approved' && !actionForm.newShift) {
+            toast.error('New shift is required.');
+            return;
+        }
+        if ((actionForm.status === 'approved' || actionForm.status === 'rejected') && !actionForm.remark) {
             toast.error('Remark is required.');
             return;
         }
@@ -196,6 +201,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                 status: actionForm.status,
                 actionRemark: actionForm.remark,
                 newJoinDate: actionForm.joinDate,
+                newShift: actionForm.newShift
             }
             // TODO: Replace with actual service call, e.g.,
             await requestShiftService.action(dataObject);
@@ -300,14 +306,14 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
 
                     if (baseAddress?.status !== "pending") {
                         setIsAction(true)
-
                     }
 
                     setActionForm((prev) => ({
-                        joinDate: formatDate(baseAddress?.newJoinDate),
+                        joinDate: baseAddress?.status == "approved" ?  formatDate(baseAddress?.newJoinDate) : "",
+                        newShift: baseAddress?.status == "approved" ?  baseAddress?.newShift : "",
                         status: baseAddress?.status,
                         remark: baseAddress?.actionRemark
-                    }))
+                    }));
                     setPageLoading(false)
                 } catch (error) {
                     setPageLoading(false)
@@ -647,8 +653,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                 />
                                                             </div>
                                                             <div
-                                                                className={`fromGroup   ${formDataErr?.chosenShift !== "" ? "has-error" : ""
-                                                                    } `}
+                                                                className={`fromGroup `}
                                                             >
                                                                 <label htmlFor=" hh" className="form-label ">
                                                                     <p className="form-label">
@@ -656,8 +661,9 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                     </p>
                                                                 </label>
                                                                 <select
-                                                                    name="chosenShift"
-                                                                    // value={chosenShift}
+                                                                    name="newShift"
+                                                                    onChange={handleActionChange}
+                                                                    value={actionForm?.newShift}
                                                                     className="form-control py-2  appearance-none relative flex-1"
                                                                 >
                                                                     <option value="">None</option>
@@ -667,7 +673,6 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                             <option value={item?._id} key={item?._id}>{item?.shiftName}</option>
                                                                         ))}
                                                                 </select>
-                                                                {<p className="text-sm text-red-500">{formDataErr.chosenShift}</p>}
                                                             </div>
                                                         </>
 
