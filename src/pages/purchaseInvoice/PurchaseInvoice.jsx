@@ -88,7 +88,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
   const location = useLocation();
 
   // const {id, row} = location?.state;
- 
+
   const purhcaseOrderDraftData = useSelector((state) => state.purchaseInvoiceSlice);
   const store = useSelector((state) => state);
   console.log("store", store);
@@ -312,7 +312,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-    if (!purhcaseOrderDraftData?.level ) return;
+    if (!purhcaseOrderDraftData?.level) return;
     setFormData((prev) => ({
       ...prev,
       level: purhcaseOrderDraftData.level ?? prev.level,
@@ -509,10 +509,10 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
   const totals = calculateTotals();
 
   // === Update balance when totals or paid amount change ===
-  // useEffect(() => {
-  //   setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
-  //   dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
-  // }, [totals.finalTotal, formData.paidAmount]);
+  useEffect(() => {
+    setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
+    // dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
+  }, [totals.finalTotal, formData.paidAmount]);
 
   // === Fetch shipping addresses when supplier changes ===
   useEffect(() => {
@@ -724,6 +724,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
     }
     if (emptyMrpCount > 0) {
       alert('Please enter price for the items.');
+      return
     }
 
     try {
@@ -737,8 +738,8 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
         supplier: formData?.supplier?._id,
         shippingAddress: formData?.shippingAddress,
-        poNumber: formData?.poNumber,
-        poDate: formData?.poDate,
+        piNumber: formData?.poNumber,
+        piDate: formData?.poDate,
         items: formData?.items,
         notes: formData?.notes,
         bankDetails: formData?.bankDetails,
@@ -1285,7 +1286,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
               </section>
 
               {/* Bank Details */}
-              {/* <section>
+              <section>
                 {showBankInput ? (
                   <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 p-4">
                     <h2 className="text-xl font-semibold mb-4 text-gray-700">Bank Details for Payments</h2>
@@ -1330,7 +1331,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                     onClick={() => setShowBankInput(true)}
                   />
                 )}
-              </section> */}
+              </section>
             </div>
 
             {/* Right: Payment Summary & Options */}
@@ -1406,7 +1407,10 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                     <Button
                       text="Full Payment"
                       className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm"
-                      onClick={() => setFormData(prev => ({ ...prev, paidAmount: totals.finalTotal, balance: 0 }))}
+                      onClick={() => {
+                        setFormData(prev => ({ ...prev, paidAmount: totals.finalTotal, balance: 0 }));
+                        dispatch(setPaidAmount(totals.finalTotal));
+                      }}
                     />
                   </div>
                 </div>

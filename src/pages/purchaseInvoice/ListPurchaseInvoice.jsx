@@ -208,7 +208,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
     const columns = [
         {
             name: "Date",
-            selector: (row) => formatDate(row?.poDate),
+            selector: (row) => formatDate(row?.piDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -216,7 +216,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
         },
         {
             name: "PO Number",
-            selector: (row) => row?.poNumber,
+            selector: (row) => row?.piNumber,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -334,7 +334,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
         try {
             const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.purchaseInvoices);
             setPending(false);
         } catch (error) {
             setPending(false);
