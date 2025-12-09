@@ -131,7 +131,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate("/view/purchase-order", { state: { id, row, name } });
+        navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
