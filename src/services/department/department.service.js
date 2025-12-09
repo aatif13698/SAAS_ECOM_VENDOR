@@ -39,7 +39,7 @@ const all = async (currentLevel, levelId) => {
 
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/department/list/workingDepartment?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/department/all/workingDepartment?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,

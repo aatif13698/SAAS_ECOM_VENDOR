@@ -103,12 +103,16 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                         value: "business"
                     },
                 ]);
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }));
+                getAllRespectiveDepartment("business", currentUser.businessUnit);
             } else if (currentUser.isBranchLevel) {
                 setLevelList([]);
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }));
+                getAllRespectiveDepartment("branch", currentUser.branch);
+
             } else if (currentUser.isWarehouseLevel) {
-                setLevelList([])
+                setLevelList([]);
+                getAllRespectiveDepartment("warehouse", currentUser.warehouse);
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
             }
         }
@@ -239,7 +243,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
     async function getAllRespectiveDepartment(level, currentlevelId) {
         try {
             const response = await departmentService.all(level, currentlevelId);
-            setDepartments(response?.data?.department)
+            setDepartments(response?.data?.departments)
         } catch (error) {
             console.log("error in getting respective department", error);
         }
@@ -271,6 +275,7 @@ const CreateDocument = ({ noFade, scrollContent }) => {
         if (businessUnit) {
             getBranchByBusiness(businessUnit);
             if (level === "business") {
+
                 getAllRespectiveDepartment(level, businessUnit);
             }
 
