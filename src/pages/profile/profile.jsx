@@ -71,16 +71,24 @@ const profile = () => {
 
   // const { stateList } = useSelector((state) => state.states);
   const store = useSelector((state) => state);
-  console.log("store",store);
-  
+  console.log("store", store);
+
 
   const { profileData: profile, profileExists } = useSelector(
     (state) => state.profile
   );
- console.log("profile",profile);
- console.log("profileImgPreview",profileImgPreview);
- 
-  
+
+  const [formData, setFormData] = useState({});
+  console.log("formData", formData);
+
+
+
+  useEffect(() => {
+    if (profile) {
+      setFormData(profile)
+    }
+  }, [profile])
+
 
 
   // console.log("profile",profile);
@@ -122,6 +130,20 @@ const profile = () => {
 
     }
   );
+
+
+  const [formDataErr, setFormDataErr] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    gender: "",
+    country: "",
+    city: "",
+    state: "",
+    address: "",
+    ZipCode: "",
+  });
 
 
   const { firstNameErr, lastNameErr, phoneErr, dobErr, genderErr, cityErr, stateErr, countryErr } = inputError
@@ -207,7 +229,7 @@ const profile = () => {
 
       if (errorCount === 0) {
         const imageAsBase64 = URL.createObjectURL(file);
-        
+
 
         setSelectedProfileImg(file);
 
@@ -224,6 +246,87 @@ const profile = () => {
   };
 
   // ------ Handling the Country Name & ISOCode & ISDCode
+  // const handleCountry = (e) => {
+  //   const { name, value } = e.target;
+  //   const selectedCountry = countryList.find(
+  //     (country) => country?.name === value
+  //   );
+  //   if (name == "country") {
+  //     if (value == "") {
+  //       // setCountryErr("Country Is Required.")
+  //       setInputError((prev) => ({ ...prev, countryErr: 'Country Is Required.' }))
+  //     } else {
+  //       setInputError((prev) => ({ ...prev, countryErr: '' }))
+
+  //     }
+  //   }
+  //   if (selectedCountry) {
+  //     setCountryData((prev) => ({
+  //       ...prev,
+  //       countryName: selectedCountry?.name,
+  //       countryISOCode: selectedCountry?.isoCode,
+  //       CountryISDCode: selectedCountry?.phonecode,
+  //       // stateList: "",
+  //       // stateName: "",
+  //       // stateISOCode: "",
+  //       // cityList: "",
+  //       // cityName: "",
+  //     }));
+
+
+  //   }
+  //   // setCountryData((prev) => ({
+  //   //   ...prev,
+  //   //   countryName: value,
+  //   // }));
+  // };
+  // // ----- Handling the state name as per the country name
+  // const handleState = (e) => {
+  //   const { name, value } = e.target;
+  //   const selectedState = stateList.find((state) => state?.name === value);
+  //   if (name == "state") {
+  //     if (value == "") {
+  //       setInputError((prev) => ({ ...prev, stateErr: "State Is Required." }))
+  //     } else {
+  //       // setStateErr("")
+  //       setInputError((prev) => ({ ...prev, stateErr: "" }))
+
+  //     }
+  //   }
+  //   if (selectedState) {
+  //     setCountryData((prev) => ({
+  //       ...prev,
+  //       stateName: selectedState?.name,
+  //       stateISOCode: selectedState?.isoCode,
+  //     }));
+  //   }
+  // };
+  // // ----- Handling the city name as per the state name
+  // const handleCity = (e) => {
+  //   const { name, value } = e.target;
+  //   if (name == "city") {
+  //     if (value == "") {
+  //       setInputError((prev) => ({ ...prev, cityErr: "City Is Required." }))
+  //     } else {
+  //       setInputError((prev) => ({ ...prev, cityErr: "" }))
+
+  //     }
+  //   }
+  //   setCountryData((prev) => ({
+  //     ...prev,
+  //     cityName: value,
+  //   }));
+  // };
+  // useEffect(() => {
+  //   setCountryData((prev) => ({
+  //     ...prev,
+  //     countryList: Country.getAllCountries(),
+  //     stateList: State.getStatesOfCountry(countryISOCode),
+  //     cityList: City.getCitiesOfState(countryISOCode, stateISOCode),
+  //   }));
+  // }, [countryISOCode, stateISOCode, profile]);
+
+
   const handleCountry = (e) => {
     const { name, value } = e.target;
     const selectedCountry = countryList.find(
@@ -231,11 +334,15 @@ const profile = () => {
     );
     if (name == "country") {
       if (value == "") {
-        // setCountryErr("Country Is Required.")
-        setInputError((prev) => ({ ...prev, countryErr: 'Country Is Required.' }))
+        setFormDataErr((prev) => ({
+          ...prev,
+          country: "Country is required",
+        }));
       } else {
-        setInputError((prev) => ({ ...prev, countryErr: '' }))
-
+        setFormDataErr((prev) => ({
+          ...prev,
+          country: "",
+        }));
       }
     }
     if (selectedCountry) {
@@ -243,32 +350,30 @@ const profile = () => {
         ...prev,
         countryName: selectedCountry?.name,
         countryISOCode: selectedCountry?.isoCode,
-        CountryISDCode: selectedCountry?.phonecode,
-        // stateList: "",
-        // stateName: "",
-        // stateISOCode: "",
-        // cityList: "",
-        // cityName: "",
+        CountryISDCode: selectedCountry?.contactNumbercode,
       }));
-
-
+      setFormData((prev) => ({
+        ...prev,
+        country: selectedCountry?.name
+      }))
     }
-    // setCountryData((prev) => ({
-    //   ...prev,
-    //   countryName: value,
-    // }));
   };
+
   // ----- Handling the state name as per the country name
   const handleState = (e) => {
     const { name, value } = e.target;
     const selectedState = stateList.find((state) => state?.name === value);
-    if (name == "state") {
-      if (value == "") {
-        setInputError((prev) => ({ ...prev, stateErr: "State Is Required." }))
+    if (name === "state") {
+      if (value === "") {
+        setFormDataErr((prev) => ({
+          ...prev,
+          state: "State is required",
+        }));
       } else {
-        // setStateErr("")
-        setInputError((prev) => ({ ...prev, stateErr: "" }))
-
+        setFormDataErr((prev) => ({
+          ...prev,
+          state: "",
+        }));
       }
     }
     if (selectedState) {
@@ -277,32 +382,67 @@ const profile = () => {
         stateName: selectedState?.name,
         stateISOCode: selectedState?.isoCode,
       }));
+      setFormData((prev) => ({
+        ...prev,
+        state: selectedState?.name
+      }))
     }
   };
+
   // ----- Handling the city name as per the state name
   const handleCity = (e) => {
     const { name, value } = e.target;
-    if (name == "city") {
-      if (value == "") {
-        setInputError((prev) => ({ ...prev, cityErr: "City Is Required." }))
+    if (name === "city") {
+      if (value === "") {
+        setFormDataErr((prev) => ({
+          ...prev,
+          city: "City is required",
+        }));
       } else {
-        setInputError((prev) => ({ ...prev, cityErr: "" }))
-
+        setFormDataErr((prev) => ({
+          ...prev,
+          city: "",
+        }));
       }
     }
     setCountryData((prev) => ({
       ...prev,
       cityName: value,
     }));
+    setFormData((prev) => ({
+      ...prev,
+      city: value
+    }))
   };
+
+  //------ mounting the all country data -------
   useEffect(() => {
     setCountryData((prev) => ({
       ...prev,
       countryList: Country.getAllCountries(),
+    }));
+  }, []);
+
+  //------ mounting the all state data as per the country name -------
+  useEffect(() => {
+    setCountryData((prev) => ({
+      ...prev,
       stateList: State.getStatesOfCountry(countryISOCode),
+    }));
+  }, [ countryISOCode, profile]);
+  //------ mounting the all city data as per the state name -------
+  useEffect(() => {
+    setCountryData((prev) => ({
+      ...prev,
       cityList: City.getCitiesOfState(countryISOCode, stateISOCode),
     }));
-  }, [countryISOCode, stateISOCode, profile]);
+  }, [ countryISOCode, stateISOCode]);
+
+
+
+
+
+
 
   useEffect(() => {
     if (profile) {
@@ -313,23 +453,32 @@ const profile = () => {
       if (profile?.dateOfBirth) {
         setDob(profile?.dateOfBirth);
       }
-      const data = JSON.parse(localStorage.getItem("adminInfo"));
-      
-      const selectedCountry = Country?.getAllCountries()?.find((item) => item?.isoCode == profile?.country)
-      const state = State.getStatesOfCountry(profile?.country);
+      // const selectedCountry = Country?.getAllCountries()?.find((item) => {
+
+      //   console.log("item?.isoCode", item);
+      //  return item?.name == profile?.country
+      // });
+
+      const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == profile?.country);
+      console.log("selectedCountry", selectedCountry);
+
+      const state = State.getStatesOfCountry(selectedCountry?.isoCode);
+      console.log("state", state);
+
       const stateName = state?.find(
-        (item) => item?.isoCode === profile?.state
+        (item) => item?.name === profile?.state
       );
       setCountryData((prev) => ({
         ...prev,
+        stateList: state,
         countryName: selectedCountry?.name,
-        countryISOCode: profile?.country,
+        countryISOCode: selectedCountry?.isoCode,
         stateName: stateName?.name,
-        stateISOCode: profile?.state,
+        stateISOCode: stateName?.isoCode,
         cityName: profile?.city,
       }));
     }
-  }, []);
+  }, [profile]);
 
 
 
@@ -348,7 +497,7 @@ const profile = () => {
     const { name, value } = event.target;
     setCurrentUser({ ...currentUser, [name]: value });
   }
-  console.log("currentUser",currentUser);
+  console.log("currentUser", currentUser);
 
 
   //validation handler
@@ -438,8 +587,8 @@ const profile = () => {
 
     };
 
-    
-    
+
+
 
 
 
@@ -506,27 +655,16 @@ const profile = () => {
 
     } else {
       formData.append("dateOfBirth", currentUser.dateOfBirth);
-      // setDobErr("");
       errorObject.dobErr = ""
-
     }
 
-    // city error
-    console.log("aatif", cityName);
 
     if (cityName === "" || cityName === null || cityName === undefined) {
-      console.log("aaaaaaaaaa");
-
       errorCount++;
-      // setCityErr("City Is Required.");
-
       errorObject.cityErr = "City Is Required."
-
-
     } else {
       formData.append("city", cityName);
       errorObject.cityErr = ""
-
     }
 
     // Country error
@@ -540,19 +678,15 @@ const profile = () => {
     } else {
       formData.append("country", countryISOCode);
       errorObject.countryErr = ""
-
     }
 
     // state error
     if (stateName === "" || stateName === null || stateName === undefined) {
       errorCount++;
-      // setStateErr("State Is Required.");
       errorObject.stateErr = "State Is Required."
     } else {
       formData.append("state", stateISOCode);
-      // setStateErr("");
       errorObject.stateErr = ""
-
     }
 
     //  Phone error
@@ -566,11 +700,8 @@ const profile = () => {
       errorObject.phoneErr = "Phone Number Is Required."
     } else {
       formData.append("phone", currentUser.phone);
-      // setphoneErr("");
       errorObject.phoneErr = ""
-
     }
-
 
     if (profileImgErr !== "") {
       errorCount++;
@@ -580,9 +711,7 @@ const profile = () => {
       }
     }
 
-
     setInputError(errorObject)
-
 
     if (errorCount > 0) {
       setLoading(false);
@@ -590,8 +719,6 @@ const profile = () => {
     } else {
       await service.updateProfile(formData)
         .then((res) => {
-          console.log("res123",res);
-          
           dispatch(setProfile(res.data));
           navigate("/viewProfile");
           toast.success("Profile Updated Successfully..");
@@ -599,13 +726,13 @@ const profile = () => {
         })
         .catch((error) => {
           setLoading(false);
-          console.log("Error while creating profile",error);
-          
+          console.log("Error while creating profile", error);
+
         });
     }
   }
-  
-  
+
+
 
 
   const handleKeyPress = (e) => {
@@ -623,8 +750,8 @@ const profile = () => {
     }
   }
 
-  console.log("profileImgPreview",profileImgPreview);
-  
+  console.log("profileImgPreview", profileImgPreview);
+
 
 
   return (
@@ -706,7 +833,7 @@ const profile = () => {
             className={`fromGroup   ${lastNameErr !== "" ? "has-error" : ""} `}
           >
             <label htmlFor="lastName" className="">
-             Last Name
+              Last Name
             </label>
             <div className=" flex-1">
               <input
@@ -747,7 +874,7 @@ const profile = () => {
               className={`${genderErr !== "" ? "radioErrStyle" : ""}`}
               style={{ marginTop: "-10px" }}
             >
-             Gender :
+              Gender :
             </label>
             {/* {genderErr !== "" && (
               <div
@@ -774,7 +901,7 @@ const profile = () => {
 
           <div className={`fromGroup   ${dobErr !== "" ? "has-error" : ""} `}>
             <label className="" htmlFor="hf-picker">
-             Date Of Birth
+              Date Of Birth
             </label>
             <Flatpickr
               // value="1998-01-12"
@@ -969,7 +1096,7 @@ const profile = () => {
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                       ></path>
                     </svg>
-                   Loading
+                    Loading
                   </>
                 )}
               </button>

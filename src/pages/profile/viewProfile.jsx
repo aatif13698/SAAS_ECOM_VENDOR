@@ -40,15 +40,7 @@ const ViewProfile = () => {
   const { profileData: profile, profileExists } = useSelector(
     (state) => state.profile
   );
-  const [currentUser, setCurrentUser] = useState({});
-  const [profileImgPreview, setProfileImgPreview] = useState("");
 
-  useEffect(() => {
-    if (profile) {
-      setCurrentUser(profile);
-      setProfileImgPreview(`${profile?.profileImage}`);
-    }
-  }, [profile]);
   const dispatch = useDispatch();
   function naviagteHandler(e) {
     e.preventDefault();
@@ -69,36 +61,36 @@ const ViewProfile = () => {
   };
   const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
   const roleId = adminInfo?.roleId;
-  const [data, setData] = useState({
-    profileImage: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address: "",
-  });
-  useEffect(() => {
-    if (roleId == 1 || roleId == 2) {
-      dispatch(ViewParticularAuth()).then((res) => {
-        console.log("res",res);
+  // const [data, setData] = useState({
+  //   profileImage: "",
+  //   firstName: "",
+  //   lastName: "",
+  //   email: "",
+  //   phone: "",
+  //   address: "",
+  // });
+  // useEffect(() => {
+  //   if (roleId == 1 || roleId == 2) {
+  //     dispatch(ViewParticularAuth()).then((res) => {
+  //       console.log("res",res);
         
-        const country = Country.getAllCountries()
-        const countryName = country?.find((item) => item.isoCode == res?.payload?.data?.country)
-        const state = State.getStatesOfCountry(res?.payload?.data?.country)
-        const stateName = state.find((item) => item?.isoCode == res?.payload?.data?.state)
+  //       const country = Country.getAllCountries()
+  //       const countryName = country?.find((item) => item.isoCode == res?.payload?.data?.country)
+  //       const state = State.getStatesOfCountry(res?.payload?.data?.country)
+  //       const stateName = state.find((item) => item?.isoCode == res?.payload?.data?.state)
 
-        setData((prev) => ({
-          ...prev,
-          firstName: res?.payload?.data?.firstName,
-          lastName: res?.payload?.data?.lastName,
-          profileImage: res?.payload?.data?.profileImage,
-          email: res?.payload?.data?.email,
-          phone: res?.payload?.data?.phone,
-          address: res?.payload?.data?.city + "," + stateName?.name + " ," + countryName?.name,
-        }));
-      });
-    } 
-  }, []);
+  //       setData((prev) => ({
+  //         ...prev,
+  //         firstName: res?.payload?.data?.firstName,
+  //         lastName: res?.payload?.data?.lastName,
+  //         profileImage: res?.payload?.data?.profileImage,
+  //         email: res?.payload?.data?.email,
+  //         phone: res?.payload?.data?.phone,
+  //         address: res?.payload?.data?.city + "," + stateName?.name + " ," + countryName?.name,
+  //       }));
+  //     });
+  //   } 
+  // }, []);
 
   
 
@@ -112,7 +104,7 @@ const ViewProfile = () => {
               <div className="flex-none">
                 <div className="md:h-[186px] md:w-[186px] h-[140px] w-[140px] md:ml-0 md:mr-0 ml-auto mr-auto md:mb-0 mb-4 rounded-full ring-4 ring-slate-100 relative">
                   <img
-                    src={data?.profileImage ? data?.profileImage : ProfileImage}
+                    src={profile?.profileImage ? profile?.profileImage : ProfileImage}
                     alt=""
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -153,13 +145,9 @@ const ViewProfile = () => {
               </div>
               <div className="flex-1">
                 <div className="text-2xl font-medium text-slate-900 dark:text-slate-200 mb-[3px]">
-                  {/* {currentUser && currentUser?.firstName
-                    ? currentUser.firstName + " " + currentUser.lastName
-                    : ""} */}
-                  {data && data?.firstName + " " + data?.lastName}
+                  {profile && profile?.firstName + " " + profile?.lastName}
                 </div>
                 <div className="text-sm font-light text-slate-600 dark:text-slate-400">
-                  {/* {currentUser?.designation ? currentUser?.designation : ""} */}
                   {roleId == 1 ? "SuperAdmin" : "Admin"}
                 </div>
               </div>
@@ -182,10 +170,7 @@ const ViewProfile = () => {
                       href="mailto:someone@example.com"
                       className="text-base text-slate-600 dark:text-slate-50"
                     >
-                      {/* {currentUser && currentUser?.optionalEmail
-                        ? currentUser?.optionalEmail
-                        : ""} */}
-                      {data && data?.email}
+                      {profile?.email}
                     </a>
                   </div>
                 </li>
@@ -202,10 +187,7 @@ const ViewProfile = () => {
                       href="tel:0189749676767"
                       className="text-base text-slate-600 dark:text-slate-50"
                     >
-                      {/* {currentUser && currentUser?.emergencyPhone
-                        ? currentUser?.emergencyPhone
-                        : ""} */}
-                      {data && data?.phone}
+                      {profile && profile?.phone}
                     </a>
                   </div>
                 </li>
@@ -219,21 +201,13 @@ const ViewProfile = () => {
                       Location
                     </div>
                     <div className="text-base text-slate-600 dark:text-slate-50">
-                      {/* {currentUser && currentUser?.city
-                        ? currentUser?.city + "," + currentUser?.state
-                        : ""}{" "}
-                      {`, ${currentUser?.address ? currentUser?.address : ""}`} */}
-                      {data && data?.address}
+                      {profile && profile?.address}
                     </div>
                   </div>
                 </li>
               </ul>
             </Card>
           </div>
-          {/* <div className="lg:col-span-8 col-span-12">
-            <Card title="User Overview">
-            </Card>
-          </div> */}
         </div>
       </div>
     </div>
