@@ -7,10 +7,17 @@ import Icon from "@/components/ui/Icon";
 import "../../assets/scss/components/custome.css";
 import { Country, State, City } from "country-state-city";
 import authService from "@/services/authService";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { setProfile } from "@/store/api/auth/peofileSlice";
+import toast from "react-hot-toast";
 
 const Profile = () => {
   const store = useSelector((state) => state);
   console.log("store", store);
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [profileImgErr, setProfileImgErr] = useState("");
   const [selectedProfileImg, setSelectedProfileImg] = useState(null);
@@ -214,6 +221,17 @@ const Profile = () => {
         payload.append("profileImage", selectedProfileImg);
       }
       const response = await authService.updateProfile(payload);
+
+      const { _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage, } = response.data;
+      const profileInfo = {
+        _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage
+      };
+      dispatch(setProfile(profileInfo));
+
+      toast.success("Profile updated successfully")
+
+      navigate("/viewProfile")
+
       console.log("res", response);
     } catch (error) {
       console.log("error while submit", error);

@@ -79,7 +79,7 @@ const profileLabel = () => {
         <div className="lg:h-8 lg:w-8 h-7 w-7 rounded-full">
           <img
             // src={data && data?.profileImage}
-            src={roleId == 1 || roleId == 2 ? viewParticularAuth?.data?.profileImage ? viewParticularAuth?.data?.profileImage : ProfileImage : viewParticularOrganiser ? viewParticularOrganiser?.data?.profileImage : ProfileImage}
+            src={profile?.profileImage ??  ProfileImage}
             alt=""
             className="block w-full h-full object-cover rounded-full"
           />
@@ -103,6 +103,8 @@ const Profile = () => {
   const [adminId, setAdminId] = useState(null);
 
   const adminInfo = useSelector((state) => state?.auth);
+   
+  
   
   const { profileData: profile, profileExists } = useSelector(
     (state) => state.profile
@@ -137,49 +139,6 @@ const Profile = () => {
     // window.location.reload();
 
   };
-
-  async function callProfile() {
-
-    // console.log("adminInfo?.user?.id",adminInfo?.user?.id);
-    
-
-    await authService.getProfile(adminInfo?.user?._id).then((res) => {
-      dispatch(setProfile(res.data.data));
-    });
-  }
-
-  // async function callOrganiserProfile() {
-  //   await authService.getOrganiserProfile(adminInfo?.user?.id).then((res) => {
-  //     dispatch(setProfile(res.data.data));
-  //   });
-  // }
-
-  useEffect(() => {
-
-    // console.log("adminInfo",adminInfo?.user?.id);
-    const roldeId = adminInfo?.user?.roleId;
-    
-
-    if(roldeId == 1 || roldeId == 2){
-      callProfile();
-    }
-    
-
-    // if (adminInfo?.user?.roleId !== 1) {
-    //   if (adminInfo?.user?._id) {
-    //     callOrganiserProfile(adminInfo?.user?._id);
-    //   }
-    // } else {
-    //   if (adminInfo?.user?.id) {
-    //     // console.log("heey");
-        
-    //     callProfile();
-    //   }
-    // }
-
-
-
-  }, [adminInfo]);
 
   const ProfileMenu = [
     {
