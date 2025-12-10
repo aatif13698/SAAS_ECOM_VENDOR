@@ -141,16 +141,21 @@ function ViewPurchaseInvoice() {
         }
     };
 
-    const statuses = ['draft', 'issued', 'invoiced', 'partially_invoiced', 'pending_approval', 'approved', 'closed', 'canceled'];
+    const statuses = ['draft', 'received', 'verified', 'approved', 'paid', 'partially_paid', 'overdue', 'disputed', 'canceled', 'closed'];
 
     // Dynamic status badge text
     const getStatusBadge = () => {
         switch (poData.status) {
             case 'draft': return 'Draft';
-            case 'issued': return 'Issued';
+            case 'received': return 'Received';
+            case 'verified': return 'verified';
             case 'approved': return 'Approved';
-            case 'closed': return 'Closed';
+            case 'paid': return 'Paid';
+            case 'partially_paid': return 'Partially_Paid';
+            case 'overdue': return 'Overdue';
+            case 'disputed': return 'Disputed';
             case 'canceled': return 'Canceled';
+            case 'closed': return 'Closed';
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
     };
@@ -165,37 +170,7 @@ function ViewPurchaseInvoice() {
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-                    <button
-                        onClick={handleSendMail}
-                        disabled={sendingMail}
-                        title="Send Mail"
-                        className={`
-                            flex items-center gap-2 rounded-md px-3 py-1.5 ring-2 
-                            transition-all duration-200
-                            ${sendingMail
-                                ? 'cursor-not-allowed opacity-70 ring-gray-400 dark:ring-gray-500'
-                                : 'cursor-pointer ring-gray-500 dark:ring-gray-400 hover:ring-blue-500 dark:hover:ring-blue-500'
-                            }
-                        `}
-                    >
-                        {sendingMail && (
-                            <FiLoader className="animate-spin text-xl text-blue-500" />
-                        )}
-                        {!sendingMail && (
-                            <BiMailSend className="text-xl text-gray-600 dark:text-gray-300" />
-                        )}
-                        <span
-                            className={`
-                                text-sm font-medium transition-colors
-                                ${sendingMail
-                                    ? 'text-gray-600 dark:text-gray-300'
-                                    : 'text-gray-700 dark:text-gray-200 hover:text-blue-600 dark:hover:text-blue-400'
-                                }
-                            `}
-                        >
-                            {sendingMail ? 'Sending...' : 'Send Mail'}
-                        </span>
-                    </button>
+                   
                     <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
                         <BiEdit className="text-xl" />
                     </button>
@@ -356,7 +331,7 @@ function ViewPurchaseInvoice() {
 
                             </div>
                         )}
-                        {poData.bankDetails && (
+                        {/* {poData.bankDetails && (
                             <div style={{ marginTop: '30px',  }}>
                                 <strong>Bank Details:</strong><br />
                                 <p>Bank: {poData.bankDetails.bankName} </p>
@@ -364,7 +339,7 @@ function ViewPurchaseInvoice() {
                                 <p> IFSC: {poData.bankDetails.ifscCode}</p>
                                 <p> Branch: {poData.bankDetails.branch}</p>
                             </div>
-                        )}
+                        )} */}
                     </div>
 
                     <div className='bg-green-200' style={{ float: 'right', width: '50%', padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>
@@ -379,29 +354,7 @@ function ViewPurchaseInvoice() {
                         <p className='text-green-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p>
                         <p className='text-blue-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Balance Due:</span> <span>₹{formatCurrency(poData.balance)}</span></p>
                     </div>
-
-
                 </div>
-
-
-
-                <div style={{ clear: 'both' }} />
-
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
-                    {/* Bank Details */}
-
-
-                    {/* Notes */}
-                    {/* {poData.notes && (
-                        <div style={{ marginTop: '20px', width: '48%' }}>
-                            <strong>Notes:</strong><br />
-                            {poData.notes}
-                        </div>
-                    )} */}
-
-                </div>
-
 
 
                 {/* Authorized Signature */}

@@ -1,1112 +1,407 @@
 import React, { useEffect, useState } from "react";
-import Textinput from "@/components/ui/Textinput";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { useSelector } from "react-redux";
 import Card from "@/components/ui/Card";
-import UserAvatar from "@/assets/images/all-img/user.png";
 import ProfileImage from "@/assets/images/users/user-1.jpg";
-
-import Flatpickr from "react-flatpickr";
-import Select from "react-select";
 import Radio from "@/components/ui/Radio";
-import ViewProfile from "./viewProfile";
-import axios from "axios";
-
-import stateService from "@/services/state-service";
-import cityService from "@/services/city-service";
-import { setState } from "@/store/api/auth/stateSlice";
-import { useDispatch } from "react-redux";
 import Icon from "@/components/ui/Icon";
-import service from "../../services/authService";
-
 import "../../assets/scss/components/custome.css";
-
-import { setProfile } from "@/store/api/auth/peofileSlice";
-import { useNavigate } from "react-router-dom";
-import toast from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 
-
-
-
-
-
-const styles = {
-  option: (provided, state) => ({
-    ...provided,
-    fontSize: "14px",
-  }),
-};
-
-const FormValidationSchema = yup
-  .object({
-
-  })
-  .required();
-
-const profile = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+const Profile = () => {
   const [profileImgErr, setProfileImgErr] = useState("");
   const [selectedProfileImg, setSelectedProfileImg] = useState(null);
-  const [profileImgPreview, setProfileImgPreview] = useState("");
-  const [removeProfileImg, setRemoveProfileImg] = useState(false);
-  // const [refresh, setRefresh] = useState(0);
+  const [profileImgPreview, setProfileImgPreview] = useState(ProfileImage);
 
-  const [stateArray, setStateArray] = useState([]);
-  const [selectedState, setSelectedState] = useState(null);
-  // const [cityList, setCityList] = useState([]);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const { profileData: profile, profileExists } = useSelector((state) => state.profile);
 
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [dob, setDob] = useState(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    gender: "",
+    phone: "",
+    country: "",
+    state: "",
+    city: ""
+  });
 
-  const [selectgender, setSelectGender] = useState("");
-  const [selectMaritalStatus, setSelectMaritalStatus] = useState("");
+  const [errors, setErrors] = useState({});
 
-  const [currentUser, setCurrentUser] = useState({});
+  const [countryList, setCountryList] = useState([]);
+  const [stateList, setStateList] = useState([]);
+  const [cityList, setCityList] = useState([]);
+  const [countryISOCode, setCountryISOCode] = useState("");
+  const [stateISOCode, setStateISOCode] = useState("");
+  const genderOptions = [
+    { value: "Male", label: "Male", activeClass: "ring-primary-500 border-primary-500" },
+    { value: "Female", label: "Female", activeClass: "ring-danger-500 border-danger-500" },
+    { value: "Other", label: "Other", activeClass: "ring-info-500 border-info-500" },
+    { value: "Other", label: "Other", activeClass: "ring-info-500 border-info-500" },
+  ];
 
-
-  // const { stateList } = useSelector((state) => state.states);
-  const store = useSelector((state) => state);
-  console.log("store", store);
-
-
-  const { profileData: profile, profileExists } = useSelector(
-    (state) => state.profile
-  );
-
-  const [formData, setFormData] = useState({});
-  console.log("formData", formData);
-
-
+  useEffect(() => {
+    setCountryList(Country.getAllCountries());
+  }, []);
 
   useEffect(() => {
     if (profile) {
-      setFormData(profile)
+      setFormData({
+        firstName: profile.firstName || "",
+        lastName: profile.lastName || "",
+        gender: profile.gender || "",
+        phone: profile.phone || "",
+        country: profile.country || "",
+        state: profile.state || "",
+        city: profile.city || "",
+      });
+      setProfileImgPreview(profile.profileImage || ProfileImage);
+
+      const selectedCountry = countryList.find((item) => item.name === profile.country);
+      if (selectedCountry) {
+        setCountryISOCode(selectedCountry.isoCode);
+        const states = State.getStatesOfCountry(selectedCountry.isoCode);
+        setStateList(states);
+
+        const selectedState = states.find((item) => item.name === profile.state);
+        if (selectedState) {
+          setStateISOCode(selectedState.isoCode);
+          setCityList(City.getCitiesOfState(selectedCountry.isoCode, selectedState.isoCode));
+        }
+      }
     }
-  }, [profile])
+  }, [profile, countryList]);
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    validateField(name, value);
+  };
 
+  const handlePhoneChange = (e) => {
+    let value = e.target.value.replace(/[^0-9]/g, '').slice(0, 10);
+    setFormData((prev) => ({ ...prev, phone: value }));
+    validateField('phone', value);
+  };
 
-  // console.log("profile",profile);
-  // console.log("profileExists",profileExists);
-
-
-
-
-
-  const gender = [
-    {
-      value: "Male",
-      label: "Male",
-      activeClass: "ring-primary-500 border-primary-500",
-    },
-    {
-      value: "Female",
-      label: "Female",
-      activeClass: "ring-danger-500 border-danger-500",
-    },
-    {
-      value: "Other",
-      label: "Other",
-      activeClass: "ring-info-500 border-info-500",
-    },
-  ];
-
-  const [inputError, setInputError] = useState(
-    {
-      firstNameErr: "",
-      lastNameErr: "",
-      emailErr: "",
-      phoneErr: "",
-      dobErr: "",
-      genderErr: "",
-      cityErr: "",
-      stateErr: "",
-      countryErr: ""
-
+  const handleCountryChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, country: value }));
+    validateField('country', value);
+    if (value !== "") {
+      const selected = countryList.find((c) => c.name === value);
+      if (selected) {
+        setCountryISOCode(selected.isoCode);
+        setStateList(State.getStatesOfCountry(selected.isoCode));
+        setFormData((prev) => ({ ...prev, state: "", city: "" }));
+        setStateISOCode("");
+        setCityList([]);
+      }
+    } else {
+      setStateList([]);
+      setCityList([]);
     }
-  );
+  };
 
+  const handleStateChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, state: value }));
+    validateField('state', value);
+    if (value !== "") {
+      const selected = stateList.find((s) => s.name === value);
+      if (selected) {
+        setStateISOCode(selected.isoCode);
+        setCityList(City.getCitiesOfState(countryISOCode, selected.isoCode));
+        setFormData((prev) => ({ ...prev, city: "" }));
+      }
+    } else {
+      setCityList([]);
+    }
+  };
 
-  const [formDataErr, setFormDataErr] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    gender: "",
-    country: "",
-    city: "",
-    state: "",
-    address: "",
-    ZipCode: "",
-  });
+  const handleCityChange = (e) => {
+    const value = e.target.value;
+    setFormData((prev) => ({ ...prev, city: value }));
+    validateField('city', value);
+  };
 
-
-  const { firstNameErr, lastNameErr, phoneErr, dobErr, genderErr, cityErr, stateErr, countryErr } = inputError
-
-  // const [firstNameErr, setFirstNameErr] = useState("");
-  // const [lastNameErr, setLastNameErr] = useState("");
-  // const [emailErr, setemailErr] = useState("");
-  // const [phoneErr, setphoneErr] = useState("");
-  // const [dobErr, setDobErr] = useState("");
-  // const [genderErr, setGenderErr] = useState("");
-  // const [cityErr, setCityErr] = useState("");
-  // const [stateErr, setStateErr] = useState("");
-  // const [countryErr, setCountryErr] = useState("");
-  const [loading, setLoading] = useState(false);
-
-
-  console.log("cityErr", cityErr);
-
-
-
-
-  const [countryData, setCountryData] = useState({
-    countryList: "",
-    countryName: "",
-    countryISOCode: "",
-    CountryISDCode: "",
-    stateList: "",
-    stateName: "",
-    stateISOCode: "",
-    cityList: "",
-    cityName: "",
-  });
-  const {
-    countryList,
-    countryName,
-    countryISOCode,
-    CountryISDCode,
-    stateList,
-    stateName,
-    stateISOCode,
-    cityList,
-    cityName,
-  } = countryData;
-
-  console.log("countryData123", countryData);
-
-
-  const {
-    register,
-    formState: { errors },
-    setError,
-    handleSubmit,
-    clearErrors,
-  } = useForm({
-    mode: "all",
-    resolver: yupResolver(FormValidationSchema),
-  });
+  const validateField = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "firstName":
+      case "lastName":
+        error = value.trim() === "" ? "Required" : "";
+        break;
+      case "gender":
+        error = value === "" ? "Required" : "";
+        break;
+      case "phone":
+        const phoneRegex = /^[0-9]{10}$/;
+        if (value.trim() === "") {
+          error = "Required";
+        } else if (!phoneRegex.test(value)) {
+          error = "Enter a valid 10-digit phone number";
+        }
+        break;
+      case "country":
+      case "state":
+      case "city":
+        error = value === "" ? "Required" : "";
+        break;
+      default:
+        break;
+    }
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
 
   const handleImageChange = (event) => {
     setProfileImgErr("");
-
-    let fileSize = 0;
-
-    let errorCount = 0;
-
     const file = event.target.files[0];
+    if (!file) return;
 
-    if (file) {
-      fileSize = file.size / 1024;
-
-      if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-        setProfileImgErr("only img is allowed");
-
-        errorCount++;
-      }
-
-      //check if filesize is not more than 1MB
-      if (fileSize > 1024) {
-        setProfileImgErr("img size should be less than 1 MB.");
-
-        errorCount++;
-      }
-
-      if (errorCount === 0) {
-        const imageAsBase64 = URL.createObjectURL(file);
-
-
-        setSelectedProfileImg(file);
-
-        setProfileImgPreview(imageAsBase64);
-
-        setRemoveProfileImg(false);
-      }
-    }
-  };
-
-
-  const handleGender = (e) => {
-    setSelectGender(e.target.value);
-  };
-
-  // ------ Handling the Country Name & ISOCode & ISDCode
-  // const handleCountry = (e) => {
-  //   const { name, value } = e.target;
-  //   const selectedCountry = countryList.find(
-  //     (country) => country?.name === value
-  //   );
-  //   if (name == "country") {
-  //     if (value == "") {
-  //       // setCountryErr("Country Is Required.")
-  //       setInputError((prev) => ({ ...prev, countryErr: 'Country Is Required.' }))
-  //     } else {
-  //       setInputError((prev) => ({ ...prev, countryErr: '' }))
-
-  //     }
-  //   }
-  //   if (selectedCountry) {
-  //     setCountryData((prev) => ({
-  //       ...prev,
-  //       countryName: selectedCountry?.name,
-  //       countryISOCode: selectedCountry?.isoCode,
-  //       CountryISDCode: selectedCountry?.phonecode,
-  //       // stateList: "",
-  //       // stateName: "",
-  //       // stateISOCode: "",
-  //       // cityList: "",
-  //       // cityName: "",
-  //     }));
-
-
-  //   }
-  //   // setCountryData((prev) => ({
-  //   //   ...prev,
-  //   //   countryName: value,
-  //   // }));
-  // };
-  // // ----- Handling the state name as per the country name
-  // const handleState = (e) => {
-  //   const { name, value } = e.target;
-  //   const selectedState = stateList.find((state) => state?.name === value);
-  //   if (name == "state") {
-  //     if (value == "") {
-  //       setInputError((prev) => ({ ...prev, stateErr: "State Is Required." }))
-  //     } else {
-  //       // setStateErr("")
-  //       setInputError((prev) => ({ ...prev, stateErr: "" }))
-
-  //     }
-  //   }
-  //   if (selectedState) {
-  //     setCountryData((prev) => ({
-  //       ...prev,
-  //       stateName: selectedState?.name,
-  //       stateISOCode: selectedState?.isoCode,
-  //     }));
-  //   }
-  // };
-  // // ----- Handling the city name as per the state name
-  // const handleCity = (e) => {
-  //   const { name, value } = e.target;
-  //   if (name == "city") {
-  //     if (value == "") {
-  //       setInputError((prev) => ({ ...prev, cityErr: "City Is Required." }))
-  //     } else {
-  //       setInputError((prev) => ({ ...prev, cityErr: "" }))
-
-  //     }
-  //   }
-  //   setCountryData((prev) => ({
-  //     ...prev,
-  //     cityName: value,
-  //   }));
-  // };
-  // useEffect(() => {
-  //   setCountryData((prev) => ({
-  //     ...prev,
-  //     countryList: Country.getAllCountries(),
-  //     stateList: State.getStatesOfCountry(countryISOCode),
-  //     cityList: City.getCitiesOfState(countryISOCode, stateISOCode),
-  //   }));
-  // }, [countryISOCode, stateISOCode, profile]);
-
-
-  const handleCountry = (e) => {
-    const { name, value } = e.target;
-    const selectedCountry = countryList.find(
-      (country) => country?.name === value
-    );
-    if (name == "country") {
-      if (value == "") {
-        setFormDataErr((prev) => ({
-          ...prev,
-          country: "Country is required",
-        }));
-      } else {
-        setFormDataErr((prev) => ({
-          ...prev,
-          country: "",
-        }));
-      }
-    }
-    if (selectedCountry) {
-      setCountryData((prev) => ({
-        ...prev,
-        countryName: selectedCountry?.name,
-        countryISOCode: selectedCountry?.isoCode,
-        CountryISDCode: selectedCountry?.contactNumbercode,
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        country: selectedCountry?.name
-      }))
-    }
-  };
-
-  // ----- Handling the state name as per the country name
-  const handleState = (e) => {
-    const { name, value } = e.target;
-    const selectedState = stateList.find((state) => state?.name === value);
-    if (name === "state") {
-      if (value === "") {
-        setFormDataErr((prev) => ({
-          ...prev,
-          state: "State is required",
-        }));
-      } else {
-        setFormDataErr((prev) => ({
-          ...prev,
-          state: "",
-        }));
-      }
-    }
-    if (selectedState) {
-      setCountryData((prev) => ({
-        ...prev,
-        stateName: selectedState?.name,
-        stateISOCode: selectedState?.isoCode,
-      }));
-      setFormData((prev) => ({
-        ...prev,
-        state: selectedState?.name
-      }))
-    }
-  };
-
-  // ----- Handling the city name as per the state name
-  const handleCity = (e) => {
-    const { name, value } = e.target;
-    if (name === "city") {
-      if (value === "") {
-        setFormDataErr((prev) => ({
-          ...prev,
-          city: "City is required",
-        }));
-      } else {
-        setFormDataErr((prev) => ({
-          ...prev,
-          city: "",
-        }));
-      }
-    }
-    setCountryData((prev) => ({
-      ...prev,
-      cityName: value,
-    }));
-    setFormData((prev) => ({
-      ...prev,
-      city: value
-    }))
-  };
-
-  //------ mounting the all country data -------
-  useEffect(() => {
-    setCountryData((prev) => ({
-      ...prev,
-      countryList: Country.getAllCountries(),
-    }));
-  }, []);
-
-  //------ mounting the all state data as per the country name -------
-  useEffect(() => {
-    setCountryData((prev) => ({
-      ...prev,
-      stateList: State.getStatesOfCountry(countryISOCode),
-    }));
-  }, [ countryISOCode, profile]);
-  //------ mounting the all city data as per the state name -------
-  useEffect(() => {
-    setCountryData((prev) => ({
-      ...prev,
-      cityList: City.getCitiesOfState(countryISOCode, stateISOCode),
-    }));
-  }, [ countryISOCode, stateISOCode]);
-
-
-
-
-
-
-
-  useEffect(() => {
-    if (profile) {
-      setCurrentUser(profile);
-      setSelectMaritalStatus(profile?.maritalStatus);
-      setSelectGender(profile?.gender);
-      setProfileImgPreview(`${profile.profileImage}`);
-      if (profile?.dateOfBirth) {
-        setDob(profile?.dateOfBirth);
-      }
-      // const selectedCountry = Country?.getAllCountries()?.find((item) => {
-
-      //   console.log("item?.isoCode", item);
-      //  return item?.name == profile?.country
-      // });
-
-      const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == profile?.country);
-      console.log("selectedCountry", selectedCountry);
-
-      const state = State.getStatesOfCountry(selectedCountry?.isoCode);
-      console.log("state", state);
-
-      const stateName = state?.find(
-        (item) => item?.name === profile?.state
-      );
-      setCountryData((prev) => ({
-        ...prev,
-        stateList: state,
-        countryName: selectedCountry?.name,
-        countryISOCode: selectedCountry?.isoCode,
-        stateName: stateName?.name,
-        stateISOCode: stateName?.isoCode,
-        cityName: profile?.city,
-      }));
-    }
-  }, [profile]);
-
-
-
-
-
-
-
-
-
-  // const selectedCountry = Country?.find(
-  //   (country) => country.name == data?.country
-  // );
-
-
-  function handleInputChange(event) {
-    const { name, value } = event.target;
-    setCurrentUser({ ...currentUser, [name]: value });
-  }
-  console.log("currentUser", currentUser);
-
-
-  //validation handler
-  const handleValidation = (event) => {
-    const inputValue = event.target.value.trim();
-    const { name, value } = event.target
-    const inputFieldName = event.target.name;
-
-    //set error message for firstName
-    if (inputFieldName === "firstName") {
-      if (value == "") {
-        setInputError((prev) => ({ ...prev, firstNameErr: "First Name Is Required." }))
-      } else {
-        setInputError((prev) => ({ ...prev, firstNameErr: "" }))
-      }
-    }
-
-
-    if (inputFieldName === "lastName") {
-      if (value == "") {
-        setInputError((prev) => ({ ...prev, lastNameErr: "Last Name Is Required." }))
-      } else {
-        setInputError((prev) => ({ ...prev, lastNameErr: "" }))
-      }
-    }
-
-
-    //set error message for  email
-    if (inputFieldName === "email") {
-      const emailRegex =
-        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-
-      if (!emailRegex.test(inputValue) || inputValue.length === 0) {
-        setInputError((prev) => ({ ...prev, emailErr: "Enter A Valid Email." }))
-
-      } else {
-        setInputError((prev) => ({ ...prev, emailErr: "" }))
-
-      }
-    }
-
-    //set error message for  phone
-    if (inputFieldName === "phone") {
-      const phoneRegex = /^[0-9]{10}$/; // Adjust pattern based on your phone number format needs
-
-      if (!phoneRegex.test(inputValue) || inputValue.length === 0) {
-        setInputError((prev) => ({ ...prev, phoneErr: "Enter a valid phone number." }));
-      } else {
-        setInputError((prev) => ({ ...prev, phoneErr: "" }));
-      }
-    }
-
-
-
-
-
-  };
-
-  function formatDateToISO(date) {
-    // Extract year, month, and day components
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0"); // Month is 0-based, so add 1
-    const day = String(date.getDate()).padStart(2, "0");
-
-    // Format components into the desired string format
-    const formattedDate = `${year}-${month}-${day}`;
-
-    return formattedDate;
-  }
-  // submit all data
-  async function handleSubmitData(e) {
-    e.preventDefault();
+    const fileSize = file.size / 1024; // in KB
     let errorCount = 0;
-    setLoading(true);
-    const formData = new FormData();
 
-    const errorObject = {
-      firstNameErr: "",
-      lastNameErr: "",
-      emailErr: "",
-      phoneErr: "",
-      dobErr: "",
-      genderErr: "",
-      cityErr: "",
-      stateErr: "",
-      countryErr: ""
-
-    };
-
-
-
-
-
-
-    // firstName error
-    if (
-      currentUser.firstName === "" ||
-      currentUser.firstName === null
-    ) {
-      // setFirstNameErr("First Name IS Required.");
-
-      errorObject.firstNameErr = "First Name IS Required."
-
+    if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
+      setProfileImgErr("Only image files are allowed (jpg, jpeg, png, gif)");
       errorCount++;
-    } else {
-
-      formData.append("firstName", currentUser.firstName);
-
-      errorObject.firstNameErr = ""
-
-
     }
 
-    // lastName error
-    if (
-      currentUser.lastName === "" ||
-      currentUser.lastName === null ||
-      currentUser.lastName === undefined
-    ) {
-
-      errorObject.lastNameErr = "Last Name Is Required."
+    if (fileSize > 1024) {
+      setProfileImgErr("Image size should be less than 1 MB");
       errorCount++;
-    } else {
-      formData.append("lastName", currentUser.lastName);
-      errorObject.lastNameErr = ""
-
     }
 
-    // gender error
-    if (
-      currentUser.gender === "" ||
-      currentUser.gender === null ||
-      currentUser.gender === undefined
-    ) {
-      errorCount++;
-      errorObject.genderErr = "Gender Is Required."
-    } else {
-
-      formData.append("gender", currentUser.gender);
-
-      errorObject.genderErr = ""
-
+    if (errorCount === 0) {
+      const imageAsBase64 = URL.createObjectURL(file);
+      setSelectedProfileImg(file);
+      setProfileImgPreview(imageAsBase64);
     }
+  };
 
-    // DOB error
-    if (
-      currentUser.dateOfBirth === "" ||
-      currentUser.dateOfBirth === null ||
-      currentUser.dateOfBirth === undefined
-    ) {
-      errorCount++;
+  const validateForm = () => {
+    let newErrors = {};
+    Object.keys(formData).forEach((key) => {
+      validateField(key, formData[key]);
+      if (errors[key]) newErrors[key] = errors[key];
+    });
+    setErrors((prev) => ({ ...prev, ...newErrors }));
+    return Object.keys(newErrors).length === 0;
+  };
 
-      errorObject.dobErr = "Dob Is Required."
-
-
-    } else {
-      formData.append("dateOfBirth", currentUser.dateOfBirth);
-      errorObject.dobErr = ""
-    }
-
-
-    if (cityName === "" || cityName === null || cityName === undefined) {
-      errorCount++;
-      errorObject.cityErr = "City Is Required."
-    } else {
-      formData.append("city", cityName);
-      errorObject.cityErr = ""
-    }
-
-    // Country error
-    if (
-      countryName === "" ||
-      countryName === null ||
-      countryName === undefined
-    ) {
-      errorCount++;
-      errorObject.countryErr = "County Is Required."
-    } else {
-      formData.append("country", countryISOCode);
-      errorObject.countryErr = ""
-    }
-
-    // state error
-    if (stateName === "" || stateName === null || stateName === undefined) {
-      errorCount++;
-      errorObject.stateErr = "State Is Required."
-    } else {
-      formData.append("state", stateISOCode);
-      errorObject.stateErr = ""
-    }
-
-    //  Phone error
-
-    if (
-      currentUser.phone === "" ||
-      currentUser.phone === null ||
-      currentUser.phone === undefined
-    ) {
-      errorCount++;
-      errorObject.phoneErr = "Phone Number Is Required."
-    } else {
-      formData.append("phone", currentUser.phone);
-      errorObject.phoneErr = ""
-    }
-
-    if (profileImgErr !== "") {
-      errorCount++;
-    } else {
-      if (selectedProfileImg) {
-        formData.append("profileImage", selectedProfileImg);
-      }
-    }
-
-    setInputError(errorObject)
-
-    if (errorCount > 0) {
-      setLoading(false);
-      return;
-    } else {
-      await service.updateProfile(formData)
-        .then((res) => {
-          dispatch(setProfile(res.data));
-          navigate("/viewProfile");
-          toast.success("Profile Updated Successfully..");
-          setLoading(false);
-        })
-        .catch((error) => {
-          setLoading(false);
-          console.log("Error while creating profile", error);
-
-        });
-    }
-  }
-
-
-
-
-  const handleKeyPress = (e) => {
-    const value = e.target.value;
-    const cleanedValue = value.replace(/[^0-9]/g, '');
-    if (cleanedValue.trim() !== "") {
-      if ((cleanedValue.match(/\./g) || []).length <= 1) {
-        const formattedValue = cleanedValue.toLocaleString('en-US');
-        e.target.value = formattedValue;
-      } else {
-        e.target.value = cleanedValue.replace(/\.(?=.*\.)/g, '');
-      }
-    } else {
-      e.target.value = '';
-    }
-  }
-
-  console.log("profileImgPreview", profileImgPreview);
-
-
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const isValid = validateForm();
+    if (!isValid) return;
+    // TODO: Submit logic, e.g., service.updateProfile(formData)
+    console.log("Form submitted:", formData);
+  };
 
   return (
-    <>
-      <Card>
-        <form
-          // onSubmit={handleSubmitData}
-          className="grid gap-5 grid-cols-1 md:grid-cols-2"
-        >
-          <div className="flex flex-col items-center justify-center">
-            {/* <img src={ProfileImage} alt="" /> */}
-            {" "}
-            {/* Updated line */}
-            <label htmlFor="imageInput" className="cursor-pointer">
-              <img
-                src={profileImgPreview !== "null" ? profileImgPreview : ProfileImage}
-                alt="Default"
-                className="w-16 h-16 object-cover rounded-full"
-              />
-            </label>
+    <Card>
+      <form onSubmit={handleSubmit} className="grid gap-5 grid-cols-1 md:grid-cols-2">
+        <div className="flex flex-col items-center justify-center">
+          <label htmlFor="imageInput" className="cursor-pointer">
+            <img
+              src={profileImgPreview}
+              alt="Profile"
+              className="w-16 h-16 object-cover rounded-full"
+            />
+          </label>
+          <input
+            id="imageInput"
+            type="file"
+            className="hidden"
+            accept="image/*"
+            onChange={handleImageChange}
+          />
+          {profileImgErr && (
+            <span style={{ color: "red", fontSize: "0.7em" }}>{profileImgErr}</span>
+          )}
+          <label htmlFor="imageInput" className="text-sm mt-2 text-gray-500 cursor-pointer">
+            Select Image
+          </label>
+        </div>
+
+        <div className={`fromGroup ${errors.firstName ? "has-error" : ""}`}>
+          <label htmlFor="firstName" className="mb-1">
+            First Name
+          </label>
+          <div className="flex-1 relative">
             <input
-              id="imageInput"
-              type="file"
-              className="hidden"
-              accept="image/*"
-              onChange={(e) => {
-                handleImageChange(e);
-              }}
+              id="firstName"
+              type="text"
+              name="firstName"
+              value={formData.firstName}
+              onChange={handleChange}
+              onBlur={() => validateField("firstName", formData.firstName)}
+              placeholder="Enter First Name"
+              className="form-control py-2"
             />
-            <span style={{ color: "red", fontSize: "0.7em" }}>
-              {profileImgErr}
-            </span>
-            <label
-              htmlFor="imageInput"
-              className="text-sm mt-2 text-gray-500 cursor-pointer"
-            >
-              Select
-            </label>{" "}
-            {/* New line */}
-          </div>
-
-          <div
-            className={`fromGroup  ${firstNameErr !== "" ? "has-error" : ""} `}
-          >
-            <label htmlFor="firstName" className="mb-1">
-              First Name
-            </label>
-            <div className=" flex-1">
-              <input
-                id="firstName"
-                type="text"
-                name="firstName"
-                placeholder="Enter First Name"
-                className={`form-control py-2`}
-                value={currentUser.firstName ? currentUser.firstName : ""}
-                //  className="form-control py-2"
-                onChange={handleInputChange}
-                onKeyUp={handleValidation}
-              />
-              <div
-                style={{ top: "47%" }}
-                className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2  space-x-1 rtl:space-x-reverse"
-              >
-                {firstNameErr !== "" && (
-                  <span className="text-danger-500">
-                    <Icon icon="heroicons-outline:information-circle" />
-                  </span>
-                )}
-              </div>
-            </div>
-            {firstNameErr !== "" && (
-              <div className={` mt-2 text-danger-500 block text-sm `}>
-                {firstNameErr}
-              </div>
-            )}
-          </div>
-
-          <div
-            className={`fromGroup   ${lastNameErr !== "" ? "has-error" : ""} `}
-          >
-            <label htmlFor="lastName" className="">
-              Last Name
-            </label>
-            <div className=" flex-1">
-              <input
-                type="text"
-                name="lastName"
-                placeholder="Enter Last Name Here.."
-                className="form-control py-2"
-                onChange={handleInputChange}
-                onKeyUp={handleValidation}
-                value={currentUser.lastName ? currentUser.lastName : ""}
-              />
-              <div className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2  -translate-y-1/2   space-x-1 rtl:space-x-reverse">
-                {lastNameErr !== "" && (
-                  <span className="text-danger-500">
-                    <Icon icon="heroicons-outline:information-circle" />
-                  </span>
-                )}
-              </div>
-            </div>
-            {lastNameErr !== "" && (
-              <div className={` mt-2 text-danger-500 block text-sm `}>
-                {lastNameErr}
-              </div>
-            )}
-
-          </div>
-
-          <div
-            className="flex flex-wrap space-xy-5"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginTop: "1.4em",
-            }}
-          >
-            <label
-              htmlFor="maritalStatus"
-              className={`${genderErr !== "" ? "radioErrStyle" : ""}`}
-              style={{ marginTop: "-10px" }}
-            >
-              Gender :
-            </label>
-            {/* {genderErr !== "" && (
-              <div
-                className={` mt-2 text-danger-500 block text-sm `}
-              >
-                {genderErr}
-              </div>
-            )} */}
-            {gender.map((gender, index) => (
-              <Radio
-                key={index}
-                label={gender.label}
-                name="gender"
-                value={gender.value}
-                checked={selectgender === gender.value}
-                onChange={(e) => {
-                  handleGender(e);
-                  handleInputChange(e);
-                }}
-                activeClass={gender.activeClass}
-              />
-            ))}
-          </div>
-
-          <div className={`fromGroup   ${dobErr !== "" ? "has-error" : ""} `}>
-            <label className="" htmlFor="hf-picker">
-              Date Of Birth
-            </label>
-            <Flatpickr
-              // value="1998-01-12"
-              value={dob ? dob : ""}
-              id="hf-picker"
-              className="form-control py-2 "
-              onChange={(date) => {
-                setCurrentUser({
-                  ...currentUser,
-                  ["dateOfBirth"]: formatDateToISO(date[0]),
-                });
-                // setDobErr("");
-                setInputError((prev) => ({ ...prev, dobErr: "" }))
-              }}
-              onOpen={() => {
-                if (!currentUser.dateOfBirth) {
-                  // setDobErr("This Field Is Required.");
-                  setInputError((prev) => ({ ...prev, dobErr: "Dob Is Required." }))
-
-                }
-              }}
-              options={{
-                altInput: true,
-                altFormat: "F j, Y",
-                dateFormat: "Y-m-d",
-              }}
-            />
-            <div className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2   -translate-y-1/2   space-x-1 rtl:space-x-reverse">
-              {dobErr !== "" && (
+            {errors.firstName && (
+              <div className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2 space-x-1 rtl:space-x-reverse">
                 <span className="text-danger-500">
                   <Icon icon="heroicons-outline:information-circle" />
                 </span>
-              )}
-            </div>
-            {dobErr !== "" && (
-              <div className={` mt-2 text-danger-500 block text-sm `}>
-                {dobErr}
               </div>
             )}
           </div>
+          {errors.firstName && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.firstName}</div>
+          )}
+        </div>
 
-          <div className={`fromGroup   ${phoneErr !== "" ? "has-error" : ""} `}>
-            <label htmlFor="phone" className="mb-1">
-              Contact Number
-            </label>
-            <div className=" flex-1">
-              <input
-                type="text"
-                name="phone"
-                placeholder="Enter Contact Phone Number Here.."
-                className="form-control py-2"
-                onChange={handleInputChange}
-                onKeyUp={handleValidation}
-                onInput={handleKeyPress}
-                value={currentUser.phone ? currentUser.phone : ""}
-              />
-              <div className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2   -translate-y-1/2   space-x-1 rtl:space-x-reverse">
-                {phoneErr !== "" && (
-                  <span className="text-danger-500">
-                    <Icon icon="heroicons-outline:information-circle" />
-                  </span>
-                )}
-              </div>
-            </div>
-            {phoneErr !== "" && (
-              <div className={` mt-2 text-danger-500 block text-sm `}>
-                {phoneErr}
+        <div className={`fromGroup ${errors.lastName ? "has-error" : ""}`}>
+          <label htmlFor="lastName" className="mb-1">
+            Last Name
+          </label>
+          <div className="flex-1 relative">
+            <input
+              id="lastName"
+              type="text"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              onBlur={() => validateField("lastName", formData.lastName)}
+              placeholder="Enter Last Name"
+              className="form-control py-2"
+            />
+            {errors.lastName && (
+              <div className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2 space-x-1 rtl:space-x-reverse">
+                <span className="text-danger-500">
+                  <Icon icon="heroicons-outline:information-circle" />
+                </span>
               </div>
             )}
           </div>
+          {errors.lastName && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.lastName}</div>
+          )}
+        </div>
 
+        <div className={`flex flex-wrap space-x-5 items-center ${errors.gender ? "has-error" : ""}`}>
+          <label className="mb-1">Gender:</label>
+          {genderOptions.map((gend, index) => (
+            <Radio
+              key={index}
+              label={gend.label}
+              name="gender"
+              value={gend.value}
+              checked={formData.gender === gend.value}
+              onChange={handleChange}
+              activeClass={gend.activeClass}
+            />
+          ))}
+          {errors.gender && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.gender}</div>
+          )}
+        </div>
 
-          {/* country */}
-          <div
-            className={`fromGroup   ${countryErr !== "" ? "has-error" : ""
-              } `}
+        <div className={`fromGroup ${errors.phone ? "has-error" : ""}`}>
+          <label htmlFor="phone" className="mb-1">
+            Contact Number
+          </label>
+          <div className="flex-1 relative">
+            <input
+              id="phone"
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handlePhoneChange}
+              onBlur={() => validateField("phone", formData.phone)}
+              placeholder="Enter 10-digit Phone Number"
+              className="form-control py-2"
+            />
+            {errors.phone && (
+              <div className="flex text-xl absolute ltr:right-[14px] rtl:left-[14px] top-1/2 -translate-y-1/2 space-x-1 rtl:space-x-reverse">
+                <span className="text-danger-500">
+                  <Icon icon="heroicons-outline:information-circle" />
+                </span>
+              </div>
+            )}
+          </div>
+          {errors.phone && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.phone}</div>
+          )}
+        </div>
+
+        <div className={`fromGroup ${errors.country ? "has-error" : ""}`}>
+          <label htmlFor="country" className="mb-1">
+            Country <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="country"
+            value={formData.country}
+            onChange={handleCountryChange}
+            onBlur={() => validateField("country", formData.country)}
+            className="form-control py-2 appearance-none relative flex-1"
           >
-            <label htmlFor=" hh" className="form-label ">
-              <p className="form-label">
-                Country <span className="text-red-500">*</span>
-              </p>
-            </label>
-            <select
-              name="country"
-              value={countryName}
-              onChange={(e) => handleCountry(e)}
-              className="form-control py-2  appearance-none relative flex-1"
-            >
-              <option value="">None</option>
+            <option value="">Select Country</option>
+            {countryList.map((country) => (
+              <option key={country.isoCode} value={country.name}>
+                {country.name}
+              </option>
+            ))}
+          </select>
+          {errors.country && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.country}</div>
+          )}
+        </div>
 
-              {countryList &&
-                countryList?.map((country) => (
-                  <option key={country?.isoCode}>
-                    {country && country?.name}
-                  </option>
-                ))}
-            </select>
-            {<p className="text-sm text-red-500">{countryErr}</p>}
-
-          </div>
-
-          {/* state */}
-          <div
-            className={`fromGroup   ${stateErr !== "" ? "has-error" : ""
-              } `}
+        <div className={`fromGroup ${errors.state ? "has-error" : ""}`}>
+          <label htmlFor="state" className="mb-1">
+            State <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="state"
+            value={formData.state}
+            onChange={handleStateChange}
+            onBlur={() => validateField("state", formData.state)}
+            className="form-control py-2 appearance-none relative flex-1"
           >
-            <label htmlFor=" hh" className="form-label ">
-              <p className="form-label">
-                State <span className="text-red-500">*</span>
-              </p>
-            </label>
-            <select
-              name="state"
-              value={stateName}
-              onChange={(e) => handleState(e)}
-              className="form-control py-2  appearance-none relative flex-1"
-            >
-              <option value="">None</option>
+            <option value="">Select State</option>
+            {stateList.map((state) => (
+              <option key={state.isoCode} value={state.name}>
+                {state.name}
+              </option>
+            ))}
+          </select>
+          {errors.state && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.state}</div>
+          )}
+        </div>
 
-              {stateList &&
-                stateList?.map((state) => (
-                  <option key={state?.isoCode}>{state && state?.name}</option>
-                ))}
-            </select>
-            {<p className="text-sm text-red-500">{stateErr}</p>}
-
-          </div>
-
-
-          {/* city */}
-          <div
-            className={`fromGroup   ${cityErr !== "" ? "has-error" : ""
-              } `}
+        <div className={`fromGroup ${errors.city ? "has-error" : ""}`}>
+          <label htmlFor="city" className="mb-1">
+            City <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="city"
+            value={formData.city}
+            onChange={handleCityChange}
+            onBlur={() => validateField("city", formData.city)}
+            className="form-control py-2 appearance-none relative flex-1"
           >
-            <label htmlFor=" hh" className="form-label ">
-              <p className="form-label">
-                City <span className="text-red-500">*</span>
-              </p>
-            </label>
-            <select
-              name="city"
-              value={cityName}
-              onChange={(e) => handleCity(e)}
-              className="form-control py-2  appearance-none relative flex-1"
-            >
-              <option value="">None</option>
+            <option value="">Select City</option>
+            {cityList.map((city) => (
+              <option key={city.name} value={city.name}>
+                {city.name}
+              </option>
+            ))}
+          </select>
+          {errors.city && (
+            <div className="mt-2 text-danger-500 block text-sm">{errors.city}</div>
+          )}
+        </div>
 
-              {cityList &&
-                cityList?.map((city) => (
-                  <option key={city?.name}>{city && city?.name}</option>
-                ))}
-            </select>
-            {<p className="text-sm text-red-500">{cityErr}</p>}
-
+        <div className="lg:col-span-2 col-span-1">
+          <div className="ltr:text-right rtl:text-left">
+            <button type="submit" className="bg-lightLoginBtn p-3 rounded-md text-white text-center inline-flex justify-center">
+              {profileExists ? "Update" : "Save"}
+            </button>
           </div>
-
-          <div className="lg:col-span-2 col-span-1">
-            <div className="ltr:text-right rtl:text-left">
-              <button
-                type="submit"
-                // className="btn btn-dark text-center"
-                onClick={handleSubmitData}
-                disabled={loading}
-                // isLoading={loading}
-                style={
-                  loading
-                    ? { opacity: "0.5", cursor: "not-allowed" }
-                    : { opacity: "1" }
-                }
-                className={`bg-lightLoginBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center `}
-              >
-                {loading ? "" : `${profileExists ? "Update" : "Save"}`}
-                {loading && (
-                  <>
-                    <svg
-                      className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Loading
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </Card>
-      {/* <ViewProfile /> */}
-    </>
+        </div>
+      </form>
+    </Card>
   );
 };
 
-export default profile;
+export default Profile;
