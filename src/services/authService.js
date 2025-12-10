@@ -115,14 +115,16 @@ const getProfile = async (id) => {
 const updateProfile = async (data) => {
   console.log("data", data);
 
-  const headers = authHeader();
+  const authToken = localStorage.getItem("saas_client_token");
 
   try {
     const response = await axios.post(
       `${import.meta.env.VITE_BASE_URL}/api/superAdmin/superAdminProfile`,
       data, // Pass the data as the second parameter
       {
-        headers: headers,
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        }
       }
     );
 
@@ -133,6 +135,9 @@ const updateProfile = async (data) => {
     throw error; // Re-throw the error to be handled by the calling code
   }
 };
+
+
+
 
 // const logout = () => {
 //   localStorage.removeItem("_stl");

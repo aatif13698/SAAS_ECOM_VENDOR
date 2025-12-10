@@ -6,10 +6,16 @@ import Radio from "@/components/ui/Radio";
 import Icon from "@/components/ui/Icon";
 import "../../assets/scss/components/custome.css";
 import { Country, State, City } from "country-state-city";
+import authService from "@/services/authService";
 
 const Profile = () => {
+  const store = useSelector((state) => state);
+  console.log("store", store);
+
   const [profileImgErr, setProfileImgErr] = useState("");
   const [selectedProfileImg, setSelectedProfileImg] = useState(null);
+  console.log("selectedProfileImg", selectedProfileImg);
+
   const [profileImgPreview, setProfileImgPreview] = useState(ProfileImage);
 
   const { profileData: profile, profileExists } = useSelector((state) => state.profile);
@@ -34,7 +40,6 @@ const Profile = () => {
   const genderOptions = [
     { value: "Male", label: "Male", activeClass: "ring-primary-500 border-primary-500" },
     { value: "Female", label: "Female", activeClass: "ring-danger-500 border-danger-500" },
-    { value: "Other", label: "Other", activeClass: "ring-info-500 border-info-500" },
     { value: "Other", label: "Other", activeClass: "ring-info-500 border-info-500" },
   ];
 
@@ -187,12 +192,33 @@ const Profile = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const isValid = validateForm();
     if (!isValid) return;
+
+    try {
+
+      const clientId = localStorage.getItem("saas_client_clientId");
+      const payload = new FormData();
+      payload.append("clientId", clientId);
+      payload.append("useId", profile?._id);
+      payload.append("firstName", formData?.firstName);
+      payload.append("lastName", formData?.lastName);
+      payload.append("gender", formData?.gender);
+      payload.append("phone", formData?.phone);
+      payload.append("city", formData?.city);
+      payload.append("state", formData?.state);
+      payload.append("country", formData?.country);
+      if (selectedProfileImg) {
+        payload.append("profileImage", selectedProfileImg);
+      }
+      const response = await authService.updateProfile(payload);
+      console.log("res", response);
+    } catch (error) {
+      console.log("error while submit", error);
+    }
     // TODO: Submit logic, e.g., service.updateProfile(formData)
-    console.log("Form submitted:", formData);
   };
 
   return (

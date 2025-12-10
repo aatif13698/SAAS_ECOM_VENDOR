@@ -66,9 +66,6 @@ const StaffOtp = () => {
           _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage
         }
 
-        console.log("profileInfo", profileInfo);
-        
-
         dispatch(setProfile(profileInfo));
         dispatch(setUser(response.data?.adminInfo));
         dispatch(setCapability(response.data?.adminInfo?.role?.capability));

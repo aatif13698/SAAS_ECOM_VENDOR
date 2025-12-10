@@ -14,6 +14,7 @@ import { Button } from "@mui/material";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { setCapability } from "@/store/slices/auth/capabilitySclice";
+import { setProfile } from "@/store/api/auth/peofileSlice";
 
 const schema = yup
   .object({
@@ -58,6 +59,16 @@ const ForgotPass = () => {
         localStorage.setItem("saas_client_adminInfo", JSON.stringify(response.data.adminInfo));
         localStorage.setItem("saas_client_expiryTime", response.data.expiryTime);
         localStorage.setItem("saas_client_clientId", response.data.clientId);
+
+        const { _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage, } = response.data?.adminInfo;
+
+        const profileInfo = {
+          _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage
+        };
+        console.log("profileInfo", profileInfo);
+        
+
+        dispatch(setProfile(profileInfo));
         dispatch(setUser(response.data?.adminInfo));
         dispatch(setCapability(response.data?.adminInfo?.role?.capability));
 
