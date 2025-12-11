@@ -94,7 +94,7 @@ const BusinessUnit = ({ noFade, scrollContent }) => {
         setUserId(id);
         const name = "view";
         setIsViewed(true);
-        navigate("/create-business-unit", { state: { id, row, name } });
+        navigate("/create-businessunit", { state: { id, row, name } });
     };
 
     const handleEdit = (row) => {
@@ -103,7 +103,7 @@ const BusinessUnit = ({ noFade, scrollContent }) => {
         setUserId(id);
         const name = "edit";
         setIsViewed(false);
-        navigate("/create-business-unit", { state: { id, row, name } });
+        navigate("/create-businessunit", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
