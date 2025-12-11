@@ -359,7 +359,10 @@ const CreateDocument = ({ noFade, scrollContent }) => {
                 setLoading(false);
             } catch (error) {
                 setLoading(false);
+                toast.error(error?.response?.data?.message)
+
                 console.log("error while creating ledger group", error);
+
             }
         }
     };

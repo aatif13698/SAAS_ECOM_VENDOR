@@ -774,7 +774,7 @@ function DocCustomField() {
                         {formData.type === 'file' && (
                             <div>
                                 <div className="flex flex-row gap-2 items-center">
-                                    <h3>Aspect Ratio (Optional)</h3>
+                                    <p className='font-semibold'>Aspect Ratio (Optional)</p>
                                     <Tippy
                                         content={
                                             "You can set the aspect ratio of the image file. Define the width and height respectively. If left blank, it defaults to 3/4."

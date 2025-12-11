@@ -57,18 +57,6 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
     const [levelList, setLevelList] = useState([
         {
-            name: "Vendor",
-            value: "vendor"
-        },
-        {
-            name: "Business",
-            value: "business"
-        },
-        {
-            name: "Branch",
-            value: "branch"
-        },
-        {
             name: "Warehouse",
             value: "warehouse"
         },
@@ -98,6 +86,11 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
 
     const [formData, setFormData] = useState({
+        level: "",
+        businessUnit: "",
+        branch: "",
+        warehouse: "",
+
         name: '',
         contactPerson: '',
         emailContact: "",
@@ -116,32 +109,12 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             if (currentUser.isVendorLevel) {
                 setLevelList([
                     {
-                        name: "Vendor",
-                        value: "vendor"
-                    },
-                    {
-                        name: "Business",
-                        value: "business"
-                    },
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
                         name: "Warehouse",
                         value: "warehouse"
                     },
                 ])
             } else if (currentUser.isBuLevel) {
                 setLevelList([
-                    {
-                        name: "Business",
-                        value: "business"
-                    },
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
                     {
                         name: "Warehouse",
                         value: "warehouse"
@@ -150,10 +123,6 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
             } else if (currentUser.isBranchLevel) {
                 setLevelList([
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
                     {
                         name: "Warehouse",
                         value: "warehouse"
@@ -174,7 +143,9 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
         }
 
-    }, [currentUser])
+    }, [currentUser]);
+
+
 
 
     console.log("formData", formData);
@@ -219,7 +190,10 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
 
     const {
-
+        level,
+        businessUnit,
+        branch,
+        warehouse,
 
         name,
         contactPerson,
@@ -238,10 +212,23 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
 
 
+    useEffect(() => {
+        if (level) {
+            console.log("level", level);
 
-
-
-
+            if (level === "vendor") {
+                setLevelResult(1);
+            } else if (level === "business") {
+                setLevelResult(2)
+            } else if (level === "branch") {
+                setLevelResult(3)
+            } else if (level === "warehouse") {
+                setLevelResult(4)
+            }
+        } else {
+            setLevelResult(0)
+        }
+    }, [level]);
 
 
 
@@ -465,10 +452,108 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             }));
         }
 
+
+        if (level == "") {
+            setFormDataErr((prev) => ({
+                ...prev,
+                level: "Level Is Required.",
+            }));
+            errorCount++
+        } else {
+            setFormDataErr((prev) => ({
+                ...prev,
+                level: "",
+            }));
+            
+        }
+
+        if (level == "business") {
+            if (!businessUnit) {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "Business Unit Is Required.",
+                }));
+                errorCount++
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "",
+                }));
+            }
+
+        }
+
+        if (level == "branch") {
+
+            if (!businessUnit) {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "Business Unit Is Required.",
+                }));
+                errorCount++
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "",
+                }));
+            }
+
+            if (!branch) {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    branch: "Branch Is Required.",
+                }));
+                errorCount++
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    branch: "",
+                }));
+            }
+
+
+        }
+
+        if (level == "warehouse") {
+            if (!businessUnit) {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "Business Unit Is Required.",
+                }));
+                errorCount++
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "",
+                }));
+            }
+            if (!branch) {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    branch: "Branch Is Required.",
+                }));
+                errorCount++
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    branch: "",
+                }));
+            }
+            if (!warehouse) {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    warehouse: "Warehouse Is Required.",
+                }));
+                errorCount++
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    warehouse: "",
+                }));
+            }
+        }
+
         console.log("errorCount", errorCount);
-
-
-
 
         // if (id == null) {
         //     if (!selectedFile) {
@@ -723,6 +808,83 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             }
         }
 
+        if (name === "businessUnit" && value) {
+            setActiveBranches([]);
+            setFormData((prev) => ({
+                ...prev,
+                branch: "",
+                warehouse: ""
+            }));
+            setFormDataErr((prev) => ({
+                ...prev,
+                branch: "",
+                warehouse: ""
+            }));
+        }
+
+         if (name == "level") {
+            if (value === "") {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    level: "Level Is Required.",
+                }));
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    level: "",
+                }));
+            }
+        }
+
+
+
+        if (name == "businessUnit") {
+            if (value == "") {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: "Business Unit is Required"
+                }))
+            } else {
+                setActiveBranches([])
+                setFormData((prev) => ({
+                    ...prev,
+                    branchId: ""
+                }))
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    businessUnit: ""
+                }))
+            }
+        }
+
+        if (name == "branch") {
+            if (value == "") {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    branch: "Branch is Required"
+                }))
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    branch: ""
+                }))
+            }
+        }
+
+        if (name == "warehouse") {
+            if (value == "") {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    warehouse: "Warehouse is Required"
+                }))
+            } else {
+                setFormDataErr((prev) => ({
+                    ...prev,
+                    warehouse: ""
+                }))
+            }
+        }
+
         setFormData((prev) => ({
             ...prev,
             [name]: value,
@@ -744,6 +906,10 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                 const clientId = localStorage.getItem("saas_client_clientId");
                 let dataObject = {
                     clientId: clientId,
+                    level: level,
+                    businessUnit: businessUnit,
+                    branch: branch,
+                    warehouse: warehouse,
                     supplierId: id,
                     name,
                     contactPerson,
@@ -806,7 +972,8 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
             } catch (error) {
                 setLoading(false);
-                console.log("error while creating branch", error);
+                toast.error(error?.response?.data?.message)
+                console.log("error while creating branch", error?.response?.data?.message);
             }
         }
     };
@@ -830,6 +997,10 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                     }
                     setFormData((prev) => ({
                         ...prev,
+                        level: level,
+                        businessUnit: baseAddress.businessUnit?._id,
+                        branch: baseAddress.branch?._id,
+                        warehouse: baseAddress.warehouse?._id,
                         name: baseAddress?.name,
                         contactPerson: baseAddress?.contactPerson,
                         emailContact: baseAddress?.emailContact,
@@ -869,7 +1040,35 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
         }
     }, [id, countryList]);
 
+    useEffect(() => {
+        if (businessUnit) {
+            getBranchByBusiness(businessUnit)
+        }
+    }, [businessUnit]);
 
+    async function getBranchByBusiness(id) {
+        try {
+            const response = await warehouseService.getBranchByBusiness(id);
+            setActiveBranches(response.data)
+        } catch (error) {
+            console.log("error while getting branch by business unit");
+        }
+    }
+
+    useEffect(() => {
+        if (branch) {
+            getWarehouseByBranch(branch)
+        }
+    }, [branch]);
+
+    async function getWarehouseByBranch(id) {
+        try {
+            const response = await warehouseService.getWarehouseByBranch(id);
+            setActiveWarehouse(response.data)
+        } catch (error) {
+            console.log("error while getting warehouse by branch");
+        }
+    }
 
 
 
@@ -897,7 +1096,6 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
     }
 
 
-    const [isUserClicked, setIsUserClicked] = useState(true);
 
 
 
@@ -1056,6 +1254,125 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
 
                                 <form onSubmit={onSubmit}>
                                     <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
+                                        <div
+                                            className={`fromGroup   ${formDataErr?.level !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <label htmlFor="level" className="form-label ">
+                                                <p className="form-label">
+                                                    Level <span className="text-red-500">*</span>
+                                                </p>
+                                            </label>
+                                            <select
+                                                name="level"
+                                                value={level}
+                                                onChange={handleChange}
+                                                disabled={isViewed}
+                                                className="form-control py-2  appearance-none relative flex-1"
+                                            >
+                                                <option value="">None</option>
+
+                                                {levelList &&
+                                                    levelList?.map((item) => (
+                                                        <option value={item.value} key={item?.value}>
+                                                            {item && item?.name}
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                            {<p className="text-sm text-red-500">{formDataErr.level}</p>}
+                                        </div>
+
+
+                                        {
+                                            (levelResult == 0 || levelResult == 1) ? "" :
+
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Business Unit <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="businessUnit"
+                                                        value={businessUnit}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeBusinessUnits &&
+                                                            activeBusinessUnits?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
+                                                </div>
+                                        }
+
+
+                                        {
+                                            (levelResult == 0 || levelResult == 1 || levelResult == 2) ? "" :
+
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.branch !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Branch <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="branch"
+                                                        value={branch}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeBranches &&
+                                                            activeBranches?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.branch}</p>}
+                                                </div>
+
+                                        }
+
+                                        {
+                                            (levelResult == 0 || levelResult == 1 || levelResult == 2 || levelResult == 3) ? "" :
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.warehouse !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Warehouse <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="warehouse"
+                                                        value={warehouse}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed || currentUser.isWarehouseLevel}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeWarehouse &&
+                                                            activeWarehouse?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
+                                                </div>
+                                        }
                                         <label
                                             className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
                                                 } `}

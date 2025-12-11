@@ -55,6 +55,8 @@ const StaffOtp = () => {
       try {
         const dataObject = { identifier: identifier, otp: otp, rememberMe: checked };
         const response = await authLogin.staffOtpSignIn(dataObject);
+        console.log("response staff login", response);
+
         localStorage.setItem("saas_client_token", response.data.token);
         localStorage.setItem("saas_client_adminInfo", JSON.stringify(response.data.adminInfo));
         localStorage.setItem("saas_client_expiryTime", response.data.expiryTime);
@@ -63,7 +65,7 @@ const StaffOtp = () => {
         const { _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage, } = response.data?.adminInfo;
 
         const profileInfo = {
-          _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage
+          roleId: response?.data?.adminInfo?.role?.id, roleName: response?.data?.adminInfo?.role?.name, _id, businessUnit, branch, warehouse, isVendorLevel, isBuLevel, isBranchLevel, isWarehouseLevel, workingDepartment, shift, firstName, lastName, email, phone, gender, city, state, country, ZipCode, address, profileImage
         }
 
         dispatch(setProfile(profileInfo));

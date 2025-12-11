@@ -1,5 +1,8 @@
+
+
+
+
 import Tippy from "@tippyjs/react";
-import "tippy.js/dist/tippy.css";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/themes/light.css";
 import "tippy.js/themes/light-border.css";
@@ -18,31 +21,28 @@ import "tippy.js/animations/shift-toward-extreme.css";
 import "tippy.js/animations/shift-toward-subtle.css";
 import "tippy.js/animations/shift-toward.css";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/Icon";
-import Card from "@/components/ui/Card";
-import Tooltip from "@/components/ui/Tooltip";
-
-// import BasicArea from "../chart/appex-chart/BasicArea";
 
 // import images
 import ProfileImage from "@/assets/images/users/user-1.jpg";
 import { useSelector } from "react-redux";
-import {
-  ViewParticularAuth,
-  ViewParticularOrganiser,
-} from "@/redux/slices/Auth/Auth";
-import { useDispatch } from "react-redux";
-import { Country, State } from "country-state-city";
+import CustomDocumentSubmit from "./customDocumentSubmit";
+
 const ViewProfile = () => {
   const navigate = useNavigate();
-  const { profileData: profile, profileExists } = useSelector(
-    (state) => state.profile
-  );
+  const { profileData: profile } = useSelector((state) => state.profile);
+  const { user: useData } = useSelector((state) => state.auth);
 
-  const dispatch = useDispatch();
-  function naviagteHandler(e) {
+  console.log("profile", profile);
+  console.log("useData", useData);
+  
+  
+
+  const [activeTab, setActiveTab] = useState("information");
+
+  function navigateHandler(e) {
     e.preventDefault();
     navigate("/profile");
   }
@@ -61,43 +61,11 @@ const ViewProfile = () => {
   };
   const adminInfo = JSON.parse(localStorage.getItem("adminInfo"));
   const roleId = adminInfo?.roleId;
-  // const [data, setData] = useState({
-  //   profileImage: "",
-  //   firstName: "",
-  //   lastName: "",
-  //   email: "",
-  //   phone: "",
-  //   address: "",
-  // });
-  // useEffect(() => {
-  //   if (roleId == 1 || roleId == 2) {
-  //     dispatch(ViewParticularAuth()).then((res) => {
-  //       console.log("res",res);
-        
-  //       const country = Country.getAllCountries()
-  //       const countryName = country?.find((item) => item.isoCode == res?.payload?.data?.country)
-  //       const state = State.getStatesOfCountry(res?.payload?.data?.country)
-  //       const stateName = state.find((item) => item?.isoCode == res?.payload?.data?.state)
-
-  //       setData((prev) => ({
-  //         ...prev,
-  //         firstName: res?.payload?.data?.firstName,
-  //         lastName: res?.payload?.data?.lastName,
-  //         profileImage: res?.payload?.data?.profileImage,
-  //         email: res?.payload?.data?.email,
-  //         phone: res?.payload?.data?.phone,
-  //         address: res?.payload?.data?.city + "," + stateName?.name + " ," + countryName?.name,
-  //       }));
-  //     });
-  //   } 
-  // }, []);
-
-  
 
   return (
     <div>
-      <div className="space-y-5 profile-page">
-        <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-slate-800 lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-[1]">
+      <div className="space-y-5 profile-page min-h-[80vh] z-0">
+        <div className="profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg bg-white dark:bg-slate-800 lg:flex lg:space-y-0 space-y-6 justify-between items-end relative z-0">
           <div className="bg-emerald-400 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg"></div>
           <div className="profile-box flex-none md:text-start text-center">
             <div className="md:flex items-end md:space-x-6 rtl:space-x-reverse">
@@ -125,21 +93,11 @@ const ViewProfile = () => {
                         maxWidth={tippy.maxWidth}
                         duration={tippy.duration}
                       >
-                        <button onClick={naviagteHandler}>
+                        <button onClick={navigateHandler}>
                           <Icon icon="heroicons:pencil-square" />
                         </button>
                       </Tippy>
                     </div>
-
-                    {/* <Tooltip
-                      title="Edit Profile"
-                      content="Edit Profile"
-                      placement="top"
-                      className="btn btn-outline-dark "
-                      arrow
-                      animation="scale"
-                      children={<button onClick={naviagteHandler}><Icon icon="heroicons:pencil-square" /></button> }
-                    /> */}
                   </Link>
                 </div>
               </div>
@@ -148,65 +106,135 @@ const ViewProfile = () => {
                   {profile && profile?.firstName + " " + profile?.lastName}
                 </div>
                 <div className="text-sm font-light text-slate-600 dark:text-slate-400">
-                  {roleId == 1 ? "SuperAdmin" : "Admin"}
+                  {useData?.roleId == 1 ? "Admin" : profile?.roleName}
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-12 gap-6">
-          <div className="lg:col-span-12 col-span-12">
-            <Card title="Information">
-              <ul className="list space-y-8">
-                <li className="flex space-x-3 rtl:space-x-reverse">
-                  <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
-                    <Icon icon="heroicons:envelope" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
-                      Email
-                    </div>
-                    <a
-                      href="mailto:someone@example.com"
-                      className="text-base text-slate-600 dark:text-slate-50"
-                    >
-                      {profile?.email}
-                    </a>
-                  </div>
-                </li>
+        <div className="grid grid-cols-12 ">
+          {/* Navigation/Tabs Section */}
+          <div className="col-span-12">
+            <nav
+              className="flex space-x-4  "
+              role="tablist"
+              aria-label="Profile sections"
+            >
+              <button
+                className={`font-medium text-sm uppercase tracking-wide  ${activeTab === "information"
+                    ? "text-emerald-500 border-2 rounded-2xl rounded-br-none rounded-bl-none px-2 py-2 border-emerald-500 bg-emerald-50"
+                    : "text-slate-600 dark:text-slate-300 hover:text-emerald-500 px-2 py-2"
+                  }`}
+                onClick={() => setActiveTab("information")}
+                role="tab"
+                aria-selected={activeTab === "information"}
+                aria-controls="information-tab"
+                id="information-tab-button"
+              >
+                Information
+              </button>
 
-                <li className="flex space-x-3 rtl:space-x-reverse">
-                  <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
-                    <Icon icon="heroicons:phone-arrow-up-right" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
-                      Phone
-                    </div>
-                    <a
-                      href="tel:0189749676767"
-                      className="text-base text-slate-600 dark:text-slate-50"
-                    >
-                      {profile && profile?.phone}
-                    </a>
-                  </div>
-                </li>
+              {
+                useData?.roleId == 1 ? null :
+                  <button
+                    className={`flex items-center space-x-1 font-medium text-sm uppercase tracking-wide  ${activeTab === "documents"
+                        ? "text-emerald-500 border-2 rounded-2xl rounded-br-none rounded-bl-none px-2 py-2 border-emerald-500 bg-emerald-50"
+                        : "text-slate-600 dark:text-slate-300 hover:text-emerald-500 px-2 py-2"
+                      }`}
+                    onClick={() => setActiveTab("documents")}
+                    role="tab"
+                    aria-selected={activeTab === "documents"}
+                    aria-controls="documents-tab"
+                    id="documents-tab-button"
+                  >
+                    <Icon icon="heroicons:document-text" className="w-4 h-4" />
+                    <span>Documents</span>
+                  </button>
+              }
 
-                <li className="flex space-x-3 rtl:space-x-reverse">
-                  <div className="flex-none text-2xl text-slate-600 dark:text-slate-300">
-                    <Icon icon="heroicons:map" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px]">
-                      Location
+            </nav>
+          </div>
+
+          {/* Content Section */}
+          <div className="col-span-12">
+            {activeTab === "information" && (
+              <div
+                className="p-4 bg-white dark:bg-slate-800 rounded-lg rounded-tl-none shadow-md"
+                role="tabpanel"
+                aria-labelledby="information-tab-button"
+                id="information-tab"
+              >
+                <ul className="space-y-6">
+                  <li className="flex items-start space-x-3 rtl:space-x-reverse">
+                    <div className="flex-none text-2xl text-slate-600 dark:text-slate-300 mt-1">
+                      <Icon icon="heroicons:envelope" aria-hidden="true" />
                     </div>
-                    <div className="text-base text-slate-600 dark:text-slate-50">
-                      {profile && profile?.address}
+                    <div className="flex-1">
+                      <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px] font-semibold">
+                        Email
+                      </div>
+                      <a
+                        href={`mailto:${profile?.email}`}
+                        className="text-base text-slate-600 dark:text-slate-50 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        aria-label={`Email ${profile?.email}`}
+                      >
+                        {profile?.email}
+                      </a>
                     </div>
-                  </div>
-                </li>
-              </ul>
-            </Card>
+                  </li>
+
+                  <li className="flex items-start space-x-3 rtl:space-x-reverse">
+                    <div className="flex-none text-2xl text-slate-600 dark:text-slate-300 mt-1">
+                      <Icon icon="heroicons:phone-arrow-up-right" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px] font-semibold">
+                        Phone
+                      </div>
+                      <a
+                        href={`tel:${profile?.phone}`}
+                        className="text-base text-slate-600 dark:text-slate-50 hover:underline focus:outline-none focus:ring-2 focus:ring-primary-500"
+                        aria-label={`Call ${profile?.phone}`}
+                      >
+                        {profile?.phone}
+                      </a>
+                    </div>
+                  </li>
+
+                  <li className="flex items-start space-x-3 rtl:space-x-reverse">
+                    <div className="flex-none text-2xl text-slate-600 dark:text-slate-300 mt-1">
+                      <Icon icon="heroicons:map" aria-hidden="true" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="uppercase text-xs text-slate-500 dark:text-slate-300 mb-1 leading-[12px] font-semibold">
+                        Location
+                      </div>
+                      <div className="text-base text-slate-600 dark:text-slate-50">
+                        {profile?.address}
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            )}
+            {activeTab === "documents" && (
+              <>
+                {
+                  useData?.roleId == 1 ? null :
+                    <div
+                      className="p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md"
+                      role="tabpanel"
+                      aria-labelledby="documents-tab-button"
+                      id="documents-tab"
+                    >
+
+                      {/* <p className="text-slate-600 dark:text-slate-300">Documents content will be displayed here.</p> */}
+
+                      <CustomDocumentSubmit roleId={useData?.role?._id} userId={useData?._id}  />
+                    </div>
+                }
+              </>
+            )}
           </div>
         </div>
       </div>

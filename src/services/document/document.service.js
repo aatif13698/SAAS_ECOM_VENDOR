@@ -166,6 +166,70 @@ const updateOrder = async (groupId, data) => {
 
 
 
+const getAllFieldByRole = async (roleId) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/hr/doc/get/document/requirement/by/${clientId}/${roleId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
+
+const submitDocData = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/doc/submit/document/requirement`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+
+const getDocData = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/hr/doc/get/doc/custom/data/${clientId}/${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                },
+            }
+        );
+        return response;
+    } catch (error) {
+        if (error.response) {
+            // The request was made, but the server responded with a status code
+            return Promise.reject(error.response.data.message);
+        } else if (error.request) {
+            // The request was made but no response was received
+            return Promise.reject("Network error. Please try again.");
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            return Promise.reject("An error occurred. Please try again later.");
+        }
+    }
+};
+
+
 
 
 
@@ -315,9 +379,9 @@ export default {
     createField,
     deleteCustomField,
     updateOrder,
-
-
-
+    getAllFieldByRole,
+    submitDocData,
+    getDocData,
 
     getActiveBusinessUnit,
     updatewarehouse,
