@@ -137,8 +137,8 @@ const Navmenu = ({ menus }) => {
     ]);
 
     const excludedMenus = new Set([
-      "Department",
-      "Shift",
+      // "Department",
+      // "Shift",
       "Documents",
       "Assets & Tools",
       "Leave Category",
