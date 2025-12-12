@@ -29,6 +29,7 @@ const Customer = lazy(() => import("./pages/customer/Customer"));
 
 const BusinessUnit = lazy(() => import("./pages/businessUnit/BusinessUnit"));
 const CreateBusinessUnit = lazy(() => import("./pages/businessUnit/CreateBusinessUnit"));
+const ViewBusinessUnit = lazy(() => import("./pages/businessUnit/ViewBusinessUnit"));
 const Branch = lazy(() => import("./pages/branch/Branch"));
 const CreateBranch = lazy(() => import("./pages/branch/CreateBranch"));
 const Warehouse = lazy(() => import("./pages/warehouse/Warehouse"));
@@ -251,6 +252,7 @@ function App() {
 
                 <Route path="business-unit-list" element={<BusinessUnit />} />
                 <Route path="create-businessunit" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
+                <Route path="view-businessunit" element={<ViewBusinessUnit roleId={currentUser?.roleId} />} />
                 <Route path="branch-list" element={<Branch />} />
                 <Route path="create-branch" element={<CreateBranch roleId={currentUser?.roleId} />} />
                 <Route path="warehouse-list" element={<Warehouse />} />
