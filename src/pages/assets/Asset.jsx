@@ -7,37 +7,17 @@ import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
 import Icon from "@/components/ui/Icon";
 import Tooltip from "@/components/ui/Tooltip";
-import Swal from "sweetalert2";
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
 import { Card } from "@mui/material";
-import vendorService from "@/services/vendor/vendor.service";
 import debounceFunction from "@/helper/Debounce";
-
 import loadingImg from "../../assets/images/aestree-logo.png"
-import businessUnitService from "@/services/businessUnit/businessUnit.service";
-import { data } from "autoprefixer";
 import { Dialog, Transition } from "@headlessui/react";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import tableConfigure from "../common/tableConfigure";
-import branchService from "@/services/branch/branch.service";
-import warehouseService from "@/services/warehouse/warehouse.service";
-import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
-import departmentService from "@/services/department/department.service";
 import assetService from "@/services/asset/asset.service";
 
 
-// const FormValidationSchema = yup
-//   .object({
-//     question: yup.string().required("Question is Required"),
-//     answer: yup.string().required("Answer is Required"),
-//   })
-//   .required();
-
-
-const Asset = ({ noFade, scrollContent }) => {
+const Asset = ({ noFade }) => {
 
     const { noDataStyle, customStyles } = tableConfigure();
     const [currentLevel, setCurrentLevel] = useState("");
@@ -49,9 +29,7 @@ const Asset = ({ noFade, scrollContent }) => {
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
-
     useEffect(() => {
-
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
                 setCurrentLevel("vendor");
@@ -67,117 +45,42 @@ const Asset = ({ noFade, scrollContent }) => {
             } else {
                 setCurrentLevel("vendor");
             }
-        } else {
-
-
         }
-
     }, [currentUser])
-
 
     const [showLoadingModal, setShowLoadingModal] = useState(false);
     const handleCloseLoadingModal = () => {
         setShowLoadingModal(false);
     };
 
-
-
-
-    // const {
-    //   register,
-    //   reset,
-    //   formState: { errors },
-    //   handleSubmit,
-    //   setValue,
-    // } = useForm({
-    //   resolver: yupResolver(FormValidationSchema),
-    // });
-
-
     const [isDark] = useDarkMode();
-
     const [pending, setPending] = useState(true);
     const [totalRows, setTotalRows] = useState();
     const [page, setPage] = useState(1);
     const [perPage, setPerPage] = useState(10);
-    const dispatch = useDispatch();
     const navigate = useNavigate();
-    const [isViewed, setIsViewed] = useState(false);
-    const [userId, setUserId] = useState(null);
-    const inputBoxStyle = {
-        backgroundColor: isDark ? "#0F172A" : "",
-        padding: "12px 14px",
-        border: isDark ? "1px solid white" : "1px solid black",
-        height: "38px",
-        borderRadius: "0.5rem",
-    };
 
 
-    const [refresh, setRefresh] = useState(0);
-
-    //  ---- Performing the Action After clicking on the view button---
-    // This function helps us to move on top side
     const scrollToTop = () => {
         window.scrollTo({
             top: 0,
-            behavior: "smooth", // This makes the scrolling smooth
+            behavior: "smooth", 
         });
     };
-    const scrollToBottom = () => {
-        const bottomElement = document.documentElement;
-        bottomElement.scrollIntoView({ behavior: "smooth", block: "end" });
-    };
+
     const handleView = (row) => {
         scrollToTop();
         const id = row._id;
         const name = "view"
-        setUserId(id);
-        setIsViewed(true);
-        navigate("/create-assets-tools", { state: { id, row, name } });
+        navigate("/create-assets-&-tools", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
         const id = row._id;
         const name = "edit"
-        setUserId(id);
-        setIsViewed(false);
-        navigate("/create-assets-tools", { state: { id, row, name } });
+        navigate("/create-assets-&-tools", { state: { id, row, name } });
     };
-    //   --- Deletiing the Particulare Row
-    const handleDelete = (row) => {
-        const id = row._id;
-        Swal.fire({
-            title: `Are You Sure You Want To Permanantly Delete ${row?.firstName + " " + row?.lastName}?`,
-            icon: "error",
-            showCloseButton: true,
-            showCancelButton: true,
-            cancelButtonText: "Cancel",
-
-            customClass: {
-                popup: "sweet-alert-popup-dark-mode-style",
-            },
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                deleteOne(id)
-            }
-        });
-    };
-    async function deleteOne(id) {
-        try {
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                employeeId: id,
-            }
-            const response = await employeeService.deleteOne(dataObject);
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
-            toast.success(`Deleted Successfully`)
-        } catch (error) {
-            console.error("Error while fetching manufacturer:", error);
-        }
-    }
+  
     //   ---- Active And InActive the Row
     const handleActive = async (row) => {
         setShowLoadingModal(true)
@@ -218,6 +121,42 @@ const Asset = ({ noFade, scrollContent }) => {
     //   ------- Data Table Columns ---
     const columns = [
         {
+            name: "Level",
+            selector: (row) => {
+                let level = "";
+                if (row?.isBuLevel) {
+                    level = "Business Unit"
+                } else if (row?.isBranchLevel) {
+                    level = "Branch"
+                } else if (row?.isWarehouseLevel) {
+                    level = "Warehouse"
+                }
+                return level
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Unit",
+            selector: (row) => {
+                let unit = "";
+                if (row?.isBuLevel) {
+                    unit = row?.businessUnit?.name
+                } else if (row?.isBranchLevel) {
+                    unit = row?.branch?.name
+                } else if (row?.isWarehouseLevel) {
+                    unit = row?.warehouse?.name
+                }
+                return unit
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
             name: "Name",
             selector: (row) => row?.assetName,
             sortable: true,
@@ -241,7 +180,7 @@ const Asset = ({ noFade, scrollContent }) => {
         },
         {
             name: "Purchase Date",
-            selector: (row) => formatDate(row.purchaseDate) ,
+            selector: (row) => formatDate(row.purchaseDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -250,25 +189,21 @@ const Asset = ({ noFade, scrollContent }) => {
         {
             name: "Status",
             sortable: true,
-
             selector: (row) => {
-
+                const status = row?.status;
                 return (
                     <span className="block w-full">
                         <span
-                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  ${row?.isActive == 1 ? "text-success-500 bg-success-500" : ""
-                                }
-            ${row?.isActive == 0 ? "text-warning-500 bg-warning-500" : ""}
-
-             `}
-                            title={
-                                row?.isActive == 1
-                                    ? "Click To Deactivate"
-                                    : "Click To Activate"
-                            }
-                            onClick={() => handleActive(row)}
+                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  
+                              ${
+                                    status == "available" ?  "text-green-500 bg-green-500" 
+                                    : status == "assigned" ? "text-blue-500 bg-blue-500" 
+                                    : status == "in-maintenance" ? "text-violet-500 bg-violet-500" 
+                                    : status == "disposed" ? "text-red-500 bg-red-500" 
+                                    :  ""  
+                                }`}
                         >
-                            {row.isActive == 1 ? "Active" : "Inactive"}
+                            {status?.toUpperCase()}
                         </span>
                     </span>
                 );
@@ -307,32 +242,15 @@ const Asset = ({ noFade, scrollContent }) => {
                                 <Icon icon="heroicons:pencil-square" />
                             </button>
                         </Tooltip>
-                        <Tooltip
-                            content="Delete"
-                            placement="top"
-                            arrow
-                            animation="shift-away"
-                            theme="danger"
-                        >
-                            <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => handleDelete(row)}
-                            >
-                                <Icon icon="heroicons:trash" />
-                            </button>
-                        </Tooltip>
                     </div>
                 );
             },
         },
     ];
     //------ Applying server side Pagination------
-    // const [paginationData, setPaginationData] = useState(records);
     const [paginationData, setPaginationData] = useState();
 
     // FIlter the Data Based on the search
-    const [filterData, setFilterData] = useState();
     const [keyWord, setkeyWord] = useState("");
     const handleFilter = (e) => {
         let currentKeyword = e.target.value;
@@ -356,7 +274,6 @@ const Asset = ({ noFade, scrollContent }) => {
         []
     );
 
-
     async function getList() {
         try {
             const response = await assetService.getList(page, keyWord, perPage, currentLevel, levelId);
@@ -370,11 +287,10 @@ const Asset = ({ noFade, scrollContent }) => {
     }
 
     useEffect(() => {
-
         if (currentLevel) {
             getList()
         }
-    }, [refresh, currentLevel]);
+    }, [currentLevel]);
 
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
@@ -400,8 +316,6 @@ const Asset = ({ noFade, scrollContent }) => {
         setPerPage(perPage);
     };
 
-    // -----Adding a Search Box ---------
-
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
             <div className="table-heading text-start ">Assets List</div>
@@ -409,17 +323,13 @@ const Asset = ({ noFade, scrollContent }) => {
                 <input
                     type="text"
                     placeholder="Search.."
-                    // style={inputBoxStyle}
                     onChange={handleFilter}
                     className="form-control rounded-md px-4 py-2 border border-lightborderInputColor  dark:border-darkSecondary text-lightinputTextColor  bg-lightBgInputColor dark:bg-darkInput dark:text-white"
                 />
             </div>
         </div>
     );
-
-    const handleBack = () => {
-        navigate("/layout/dashboard");
-    };
+   
 
     const paginationOptions = {
         rowsPerPageText: "row",
@@ -443,21 +353,18 @@ const Asset = ({ noFade, scrollContent }) => {
                 paginationTotalRows={totalRows}
                 onChangePage={handlePageChange}
                 onChangeRowsPerPage={handlePerRowChange}
-                // selectableRows
                 pointerOnHover
                 progressPending={pending}
                 subHeader
                 subHeaderComponent={subHeaderComponent}
                 paginationComponentOptions={paginationOptions}
                 noDataComponent={<div className={`${isDark ? "bg-darkBody" : ""}`} style={{ display: "flex", justifyContent: "center", padding: "2rem", border: "2px solid white", flexDirection: "row", gap: "1rem", width: "100%" }}>
-
                     <p className="text-center text-bold text-2xl" style={noDataStyle}>
                         There is no record to display
                     </p>
                 </div>
                 }
                 progressComponent={
-
                     <div style={{ display: "flex", justifyContent: "center", padding: "2rem", border: "2px solid white", flexDirection: "row", gap: "1rem", background: isDark ? "#0F172A" : "", width: "100%" }}>
                         <img src={loadingImg} alt="No Data Image" style={{ height: "2rem", width: "2rem" }} />
 

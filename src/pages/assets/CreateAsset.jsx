@@ -1,28 +1,17 @@
 import { Card } from "@mui/material";
-import React, { useState, Fragment, useEffect } from "react";
-import { Country, State, City } from "country-state-city";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
-import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
 import "../../assets/scss/common.scss"
 
 import { useSelector } from "react-redux";
-import ProfileImage from "../../assets/images/users/user-4.jpg"
-import TradingLicense from "../../assets/images/tradingLicense.png"
-import vendorService from "@/services/vendor/vendor.service";
-import Fileinput from "@/components/ui/Fileinput";
-import { Dialog, Transition } from "@headlessui/react";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import warehouseService from "@/services/warehouse/warehouse.service";
-import employeeService from "@/services/employee/employee.service";
-import departmentService from "@/services/department/department.service";
 import Button from "@/components/ui/Button";
 import assetService from "@/services/asset/asset.service";
-
-
+import employeeService from "@/services/employee/employee.service";
+import { FaUserPlus } from "react-icons/fa6";
 
 const CreateAsset = ({ noFade, scrollContent }) => {
     const navigate = useNavigate();
@@ -52,10 +41,16 @@ const CreateAsset = ({ noFade, scrollContent }) => {
     const name = location?.state?.name;
     const id = location?.state?.id;
     const [pageLoading, setPageLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
     const [levelResult, setLevelResult] = useState(0)
     const [activeBranches, setActiveBranches] = useState([]);
     const [activeWarehouse, setActiveWarehouse] = useState([]);
+    const [currentLevelEmp, setCurrentLevelEmp] = useState([]);
+
+    console.log("currentLevelEmp", currentLevelEmp);
+
+
 
     const [formData, setFormData] = useState({
         level: "",
@@ -396,7 +391,7 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                     expirationDate: "",
                 })
                 setLoading(false);
-                navigate("/assets-tools-list");
+                navigate("/assets-&-tools-list");
 
             } catch (error) {
                 setLoading(false);
@@ -420,59 +415,48 @@ const CreateAsset = ({ noFade, scrollContent }) => {
             } else {
                 setIsViewed(false)
             }
-            async function getBranch() {
-                try {
-                    setPageLoading(true)
-                    // const response = await employeeService.getOne(id);
-                    // console.log('Response get employee', response?.data);
-                    // const baseAddress = response?.data;
-                    const baseAddress = location?.state?.row;
 
+            setPageLoading(true)
+            const baseAddress = location?.state?.row;
+            let level = "";
+            let levelId = ""
+            if (baseAddress.isBuLevel) {
+                level = "business";
+                levelId = baseAddress.businessUnit?._id;
 
+            } else if (baseAddress.isVendorLevel) {
+                level = "vendor";
+            } else if (baseAddress.isWarehouseLevel) {
+                level = "warehouse"
+                levelId = baseAddress.warehouse?._id;
+            } else if (baseAddress.isBranchLevel) {
+                level = "branch"
+                levelId = baseAddress.branch?._id;
 
-                    let level = "";
-
-                    if (baseAddress.isBuLevel) {
-                        level = "business"
-                    } else if (baseAddress.isVendorLevel) {
-                        level = "vendor"
-                    } else if (baseAddress.isWarehouseLevel) {
-                        level = "warehouse"
-                    } else if (baseAddress.isBranchLevel) {
-                        level = "branch"
-                    }
-
-
-                    setFormData((prev) => ({
-                        ...prev,
-                        level: level,
-                        businessUnit: baseAddress.businessUnit,
-                        branch: baseAddress.branch,
-                        warehouse: baseAddress.warehouse,
-                        assetName: baseAddress.assetName,
-                        serialNumber: baseAddress.serialNumber,
-                        model: baseAddress.model,
-                        purchaseDate: formatDate(baseAddress.purchaseDate),
-                        purchaseCost: baseAddress.purchaseCost,
-                        currentValue: baseAddress.currentValue,
-                        usefulLife: baseAddress.usefulLife,
-                        status: baseAddress.status,
-                        condition: baseAddress.condition,
-                        warrantyEndDate: formatDate(baseAddress.warrantyEndDate),
-                        disposalDate: formatDate(baseAddress.disposalDate),
-                        disposalReason: baseAddress.disposalReason,
-                        notes: baseAddress.notes,
-                        expirationDate: baseAddress.expirationDate,
-                    }));
-
-                    setPageLoading(false)
-
-                } catch (error) {
-                    setPageLoading(false)
-                    console.log("error in fetching vendor data");
-                }
             }
-            getBranch()
+            setFormData((prev) => ({
+                ...prev,
+                level: level,
+                businessUnit: baseAddress.businessUnit?._id,
+                branch: baseAddress.branch?._id,
+                warehouse: baseAddress.warehouse?._id,
+                assetName: baseAddress.assetName,
+                serialNumber: baseAddress.serialNumber,
+                model: baseAddress.model,
+                purchaseDate: formatDate(baseAddress.purchaseDate),
+                purchaseCost: baseAddress.purchaseCost,
+                currentValue: baseAddress.currentValue,
+                usefulLife: baseAddress.usefulLife,
+                status: baseAddress.status,
+                condition: baseAddress.condition,
+                warrantyEndDate: formatDate(baseAddress.warrantyEndDate),
+                disposalDate: formatDate(baseAddress.disposalDate),
+                disposalReason: baseAddress.disposalReason,
+                notes: baseAddress.notes,
+                expirationDate: baseAddress.expirationDate,
+            }));
+            setPageLoading(false)
+            getAllEmployeeOfCurrentLevel(level, levelId)
         } else {
             setPageLoading(false)
         }
@@ -492,8 +476,33 @@ const CreateAsset = ({ noFade, scrollContent }) => {
         getActiveBusinessUnit()
     }, [])
 
-    return (
+    async function getAllEmployeeOfCurrentLevel(level, levelId) {
+        try {
+            const response = await employeeService.getListAllEmpByCurrentLevel(level, levelId);
+            setCurrentLevelEmp(response?.data?.employees)
+            console.log("respone emp all", response);
+        } catch (error) {
+            console.log("error while getting the active business unit", error);
+        }
+    }
 
+
+    const [selectedEmp, setSelectedEmp] = useState("");
+
+
+    console.log("selectedEmp", selectedEmp);
+    
+
+    async function onAssign(params) {
+        try {
+            
+        } catch (error) {
+            console.log("error while assigning", error);
+        }
+        
+    }
+
+    return (
         <>
             {
                 pageLoading ?
@@ -506,22 +515,16 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                             flexDirection: "column",
                         }}
                     >
-
                         <div className="flex flex-col justify-center mt-5 items-center gap-2">
                             <FormLoader />
-
                         </div>
-
                     </div>
-
                     :
                     <div>
                         <Card>
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
-
                                 <form onSubmit={onSubmit}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
-
+                                    <div className="grid grid-cols-1 md:grid-cols-3  gap-5 ">
                                         {/* select level */}
                                         <div
                                             className={`fromGroup   ${formDataErr?.level !== "" ? "has-error" : ""
@@ -550,11 +553,8 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                             </select>
                                             {<p className="text-sm text-red-500">{formDataErr.level}</p>}
                                         </div>
-
-
                                         {
                                             (levelResult == 0 || levelResult == 1) ? "" :
-
                                                 <div
                                                     className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
                                                         } `}
@@ -581,8 +581,6 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                                     {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
                                                 </div>
                                         }
-
-
                                         {
                                             (levelResult == 0 || levelResult == 1 || levelResult == 2) ? "" :
 
@@ -613,7 +611,6 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                                 </div>
 
                                         }
-
                                         {
                                             (levelResult == 0 || levelResult == 1 || levelResult == 2 || levelResult == 3) ? "" :
                                                 <div
@@ -642,7 +639,6 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                                     {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
                                                 </div>
                                         }
-
                                         <label
                                             className={`fromGroup   ${formDataErr?.assetName !== "" ? "has-error" : ""
                                                 } `}
@@ -1022,6 +1018,116 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                     }
                                 </form>
                             </div>
+
+                            {
+                                id && status == "available" ?
+
+                                    <>
+
+                                    <hr />
+
+                                        <div className="w-full max-w-lg p-4">
+                                            {/* Optional: Card wrapper for better visual separation */}
+                                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <FaUserPlus className="w-5 h-5 text-emerald-500 dark:text-blue-400" />
+                                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                        Assign Employee
+                                                    </h3>
+                                                </div>
+
+                                                <hr className="mb-4 border-gray-200 dark:border-gray-700" />
+
+                                                <form onSubmit={(e) => e.preventDefault()} className="space-y-5">
+                                                    <div className="relative">
+                                                        <label
+                                                            htmlFor="employee-select"
+                                                            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                                        >
+                                                            Employee <span className="text-red-500">*</span>
+                                                        </label>
+
+                                                        <select
+                                                            id="employee-select"
+                                                            name="employeeId"
+                                                            onChange={(e) => setSelectedEmp(e.target.value)}
+                                                            required
+                                                            className="w-full px-4 py-3 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none cursor-pointer pr-10"
+                                                            defaultValue=""
+                                                        >
+                                                            <option value="" disabled>
+                                                                Select an employee
+                                                            </option>
+                                                            {currentLevelEmp?.map((employee) => (
+                                                                <option key={employee._id} value={employee._id}>
+                                                                    {employee.firstName} {employee.lastName || ''}{' '}
+                                                                    {employee.email && `<${employee.email}>`}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+
+                                                        {/* Custom dropdown arrow */}
+                                                        <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none mt-7">
+                                                            <svg
+                                                                className="w-5 h-5 text-gray-400"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M19 9l-7 7-7-7"
+                                                                />
+                                                            </svg>
+                                                        </div>
+                                                    </div>
+
+                                                    <button
+                                                        type="submit"
+                                                        disabled={isLoading}
+                                                        onClick={onAssign}
+                                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                                    >
+                                                        {isLoading ? (
+                                                            <>
+                                                                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                                                    <circle
+                                                                        className="opacity-25"
+                                                                        cx="12"
+                                                                        cy="12"
+                                                                        r="10"
+                                                                        stroke="currentColor"
+                                                                        strokeWidth="4"
+                                                                    />
+                                                                    <path
+                                                                        className="opacity-75"
+                                                                        fill="currentColor"
+                                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                                                    />
+                                                                </svg>
+                                                                Assigning...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <FaUserPlus className="w-5 h-5 mr-1" />
+                                                                Assign Employee
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+
+                                    </>
+
+
+
+                                    : ""
+                            }
+
+
                         </Card>
                     </div>
             }
