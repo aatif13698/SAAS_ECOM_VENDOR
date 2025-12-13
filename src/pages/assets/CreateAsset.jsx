@@ -491,15 +491,25 @@ const CreateAsset = ({ noFade, scrollContent }) => {
 
 
     console.log("selectedEmp", selectedEmp);
-    
 
-    async function onAssign(params) {
+
+    async function onAssign() {
         try {
-            
+            if (!selectedEmp) {
+                toast.error("Select Employee First..");
+                return
+            }
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                assetId: id, empId: selectedEmp, clientId
+            }
+            const response = await assetService.assignToEmployee(dataObject);
+            console.log("res assign to emp");
         } catch (error) {
             console.log("error while assigning", error);
+
+            toast.error(error)
         }
-        
     }
 
     return (
@@ -1024,7 +1034,7 @@ const CreateAsset = ({ noFade, scrollContent }) => {
 
                                     <>
 
-                                    <hr />
+                                        <hr />
 
                                         <div className="w-full max-w-lg p-4">
                                             {/* Optional: Card wrapper for better visual separation */}
@@ -1119,12 +1129,35 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                                 </form>
                                             </div>
                                         </div>
-
                                     </>
+                                    :
+                                    <div className="pb-4">
 
+                                        <hr className="pb-4" />
 
+                                        <div className="p-4 bg-gray-50 rounded-lg shadow-md max-w-md ml-4">
+                                            <h2 className="text-lg font-semibold mb-4 text-gray-800">Asset Assigned To</h2>
 
-                                    : ""
+                                            <div className="flex items-start space-x-4 bg-white p-4 rounded-lg border border-gray-200">
+                                                <img
+                                                    src={location?.state?.row?.assignedTo?.profileImage}
+                                                    alt={`${location?.state?.row?.assignedTo?.firstName} ${location?.state?.row?.assignedTo?.lastName}`}
+                                                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-300"
+                                                />
+                                                <div className="flex-1 ">
+                                                    <p className="text-base font-medium text-gray-900">
+                                                        Name: {location?.state?.row?.assignedTo?.firstName} {location?.state?.row?.assignedTo?.lastName}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        Email: {location?.state?.row?.assignedTo?.email}
+                                                    </p>
+                                                    <p className="text-sm text-gray-600 mt-1">
+                                                        Phone: {location?.state?.row?.assignedTo?.phone}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                             }
 
 

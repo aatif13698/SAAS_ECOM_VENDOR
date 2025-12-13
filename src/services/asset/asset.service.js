@@ -53,6 +53,18 @@ const activeInactive = async (data) => {
     });
 };
 
+const assignToEmployee = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/asset/assign/asset`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 const update = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -200,6 +212,7 @@ export default {
     getList,
     update,
     activeInactive,
+    assignToEmployee,
 
     getActiveBusinessUnit,
     updatewarehouse,
