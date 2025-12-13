@@ -168,10 +168,10 @@ const Overview = ({ data, isDark }) => {
 
 const Documents = ({ data, isDark }) => {
     const documents = [
-        { label: "TIN", number: data.tinNumber, image: data.tinDocument },
-        { label: "CIN", number: data.cinNumber, image: data.cinDocument },
-        { label: "TAN", number: data.tanNumber, image: data.tanDocument },
         { label: "PAN", number: data.panNumber, image: data.panDocument },
+        { label: "TIN", number: data.tinNumber !== "nul" ? data.tinNumber : "N/A", image: data.tinDocument },
+        { label: "CIN", number: data.cinNumber !== "null" ? data.cinNumber : "N/A", image: data.cinDocument },
+        { label: "TAN", number: data.tanNumber !== "null" ? data.tanNumber : "N/A", image: data.tanDocument },
         { label: "Business License", number: data.businessLicenseNumber, image: data.businessLicenseDocument },
     ].filter(doc => doc.number); // Only show if number is present
 

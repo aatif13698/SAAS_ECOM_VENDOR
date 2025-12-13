@@ -134,6 +134,7 @@ const Navmenu = ({ menus }) => {
       "Credit Note",
       "Performa Invoice",
       "Delivery Challan",
+      "BusinessUnit"
     ]);
 
     const excludedMenus = new Set([

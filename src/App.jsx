@@ -252,6 +252,7 @@ function App() {
 
                 <Route path="business-unit-list" element={<BusinessUnit />} />
                 <Route path="create-businessunit" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
+                <Route path="edit-business-unit" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
                 <Route path="view-businessunit" element={<ViewBusinessUnit roleId={currentUser?.roleId} />} />
                 <Route path="branch-list" element={<Branch />} />
                 <Route path="create-branch" element={<CreateBranch roleId={currentUser?.roleId} />} />
