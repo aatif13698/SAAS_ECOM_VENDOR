@@ -359,70 +359,70 @@ const CreateBusinessUnit = () => {
                 const response = await businessUnitService.createBusinessUnit(payload);
                 toast.success(response?.data?.message);
             }
-            setCountryData((prev) => ({
-                ...prev,
-                countryISOCode: "",
-                countryName: "",
-                stateISOCode: "",
-                stateName: "",
-                cityName: "",
-            }));
-            setFormData({
-                name: "",
-                emailContact: "",
-                contactNumber: "",
-                tinNumber: "",
-                businessLicenseNumber: "",
-                cinNumber: "",
-                tanNumber: "",
-                panNumber: "",
-                country: "",
-                city: "",
-                state: "",
-                houseOrFlat: "",
-                streetOrLocality: "",
-                landmark: "",
-                address: "",
-                ZipCode: "",
-            });
-            setFormDataErr({
-                name: "",
-                emailContact: "",
-                contactNumber: "",
-                tinNumber: "",
-                businessLicenseNumber: "",
-                cinNumber: "",
-                tanNumber: "",
-                panNumber: "",
-                country: "",
-                city: "",
-                state: "",
-                houseOrFlat: "",
-                streetOrLocality: "",
-                landmark: "",
-                address: "",
-                ZipCode: "",
-                icon: "",
-                tinImage: "",
-                cinImage: "",
-                tanImage: "",
-                businessLicenseImage: "",
-                panImage: "",
-            })
-            setImgPreview(null);
-            setTinPreview(null);
-            setCinPreview(null);
-            setTanPreview(null);
-            setBusinessLicensePreview(null);
-            setPanPreview(null);
-            setSelectedFile(null);
-            setSelectedTinFile(null);
-            setSelectedCinFile(null);
-            setSelectedTanFile(null);
-            setSelectedBusinessLicenseFile(null);
-            setSelectedPanFile(null);
+            // setCountryData((prev) => ({
+            //     ...prev,
+            //     countryISOCode: "",
+            //     countryName: "",
+            //     stateISOCode: "",
+            //     stateName: "",
+            //     cityName: "",
+            // }));
+            // setFormData({
+            //     name: "",
+            //     emailContact: "",
+            //     contactNumber: "",
+            //     tinNumber: "",
+            //     businessLicenseNumber: "",
+            //     cinNumber: "",
+            //     tanNumber: "",
+            //     panNumber: "",
+            //     country: "",
+            //     city: "",
+            //     state: "",
+            //     houseOrFlat: "",
+            //     streetOrLocality: "",
+            //     landmark: "",
+            //     address: "",
+            //     ZipCode: "",
+            // });
+            // setFormDataErr({
+            //     name: "",
+            //     emailContact: "",
+            //     contactNumber: "",
+            //     tinNumber: "",
+            //     businessLicenseNumber: "",
+            //     cinNumber: "",
+            //     tanNumber: "",
+            //     panNumber: "",
+            //     country: "",
+            //     city: "",
+            //     state: "",
+            //     houseOrFlat: "",
+            //     streetOrLocality: "",
+            //     landmark: "",
+            //     address: "",
+            //     ZipCode: "",
+            //     icon: "",
+            //     tinImage: "",
+            //     cinImage: "",
+            //     tanImage: "",
+            //     businessLicenseImage: "",
+            //     panImage: "",
+            // })
+            // setImgPreview(null);
+            // setTinPreview(null);
+            // setCinPreview(null);
+            // setTanPreview(null);
+            // setBusinessLicensePreview(null);
+            // setPanPreview(null);
+            // setSelectedFile(null);
+            // setSelectedTinFile(null);
+            // setSelectedCinFile(null);
+            // setSelectedTanFile(null);
+            // setSelectedBusinessLicenseFile(null);
+            // setSelectedPanFile(null);
             setLoading(false);
-            navigate("/business-unit-list");
+            // navigate("/business-unit-list");
         } catch (error) {
             setLoading(false);
             toast.error(error?.response?.data?.message)

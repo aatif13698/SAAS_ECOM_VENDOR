@@ -72,7 +72,7 @@ const Asset = ({ noFade }) => {
         scrollToTop();
         const id = row._id;
         const name = "view"
-        navigate("/create-assets-&-tools", { state: { id, row, name } });
+        navigate("/view-assets-&-tool", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();

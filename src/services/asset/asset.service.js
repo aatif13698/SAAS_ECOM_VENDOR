@@ -78,6 +78,20 @@ const update = async (data) => {
 };
 
 
+const getOne = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/asset/get/${clinetId}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+
+}
+
+
 
 
 
@@ -142,18 +156,6 @@ const deleteOne = async (data) => {
 };
 
 
-const getOne = async (id) => {
-    const authToken = localStorage.getItem("saas_client_token");
-    const clinetId = localStorage.getItem("saas_client_clientId");
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/employee/employee/${clinetId}/${id}`, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
-
-    });
-    return response.data
-
-}
 
 
 

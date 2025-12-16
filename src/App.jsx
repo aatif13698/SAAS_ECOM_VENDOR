@@ -69,6 +69,8 @@ const CreateDepartment = lazy(() => import("./pages/department/CreateDepartment"
 
 const Asset = lazy(() => import("./pages/assets/Asset"));
 const CreateAsset = lazy(() => import("./pages/assets/CreateAsset"));
+const ViewAssetAndTool = lazy(() => import("./pages/assets/ViewAssetAndTool"));
+
 const Shifts = lazy(() => import("./pages/shift/Shifts"));
 const CreateShifts = lazy(() => import("./pages/shift/CreateShifts"));
 const ChangeShifts = lazy(() => import("./pages/changeShift/ChangeShifts"));
@@ -233,6 +235,7 @@ function App() {
 
                 <Route path="/assets-&-tools-list" element={<Asset />} />
                 <Route path="create-assets-&-tools" element={<CreateAsset />} />
+                <Route path="view-assets-&-tool" element={<ViewAssetAndTool />} />
                 <Route path="leave-category-list" element={<LeaveCategory />} />
                 <Route path="create-leave-category" element={<CreateLeaveCategory />} />
                 <Route path="holiday-list" element={<Holiday />} />
