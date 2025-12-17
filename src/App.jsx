@@ -209,6 +209,16 @@ function App() {
 
                 {/* vendor routes */}
 
+                {/* Business unit */}
+                <Route path="business-unit-list" element={<BusinessUnit />} />
+                <Route path="create-businessunit" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
+                <Route path="edit-business-unit/:id" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
+                <Route path="view-businessunit/:id" element={<ViewBusinessUnit roleId={currentUser?.roleId} />} />
+
+
+
+
+
                 <Route path="shift-list" element={<Shifts />} />
                 <Route path="create-shift" element={<CreateShifts />} />
 
@@ -253,10 +263,7 @@ function App() {
 
 
 
-                <Route path="business-unit-list" element={<BusinessUnit />} />
-                <Route path="create-businessunit" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
-                <Route path="edit-business-unit" element={<CreateBusinessUnit roleId={currentUser?.roleId} />} />
-                <Route path="view-businessunit" element={<ViewBusinessUnit roleId={currentUser?.roleId} />} />
+
                 <Route path="branch-list" element={<Branch />} />
                 <Route path="create-branch" element={<CreateBranch roleId={currentUser?.roleId} />} />
                 <Route path="warehouse-list" element={<Warehouse />} />
@@ -310,13 +317,13 @@ function App() {
 
                 {/* purchase */}
                 <Route path="create-purchase-order" element={<PurchaseOrderPage />} />
-                <Route path="edit-purchase-order" element={<PurchaseOrderPage/>} />
-                <Route path="purchase-order-list" element={<ListPurchaseOrder/>} />
-                <Route path="view/purchase-order" element={<ViewPurchaseOrder/>} />
+                <Route path="edit-purchase-order" element={<PurchaseOrderPage />} />
+                <Route path="purchase-order-list" element={<ListPurchaseOrder />} />
+                <Route path="view/purchase-order" element={<ViewPurchaseOrder />} />
 
-                <Route path="purchase-invoices-list" element={<ListPurchaseInvoice/>} />
+                <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />
                 <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
-                <Route path="view/purchase-invoice" element={<ViewPurchaseInvoice/>} />
+                <Route path="view/purchase-invoice" element={<ViewPurchaseInvoice />} />
 
 
 

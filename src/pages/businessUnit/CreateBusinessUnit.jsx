@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Country, State, City } from "country-state-city";
 import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import "../../assets/scss/common.scss"
 import BusinessLogo from "../../assets/images/logo.png"
 import DocImage from "../../assets/images/demo-doc.avif"
@@ -11,9 +11,31 @@ import FormLoader from "@/Common/formLoader/FormLoader";
 import businessUnitService from "@/services/businessUnit/businessUnit.service";
 import Button from "@/components/ui/Button";
 
+import CryptoJS from "crypto-js";
+
+// Secret key for decryption (same as used for encryption)
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
+const encryptId = (id) => {
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    // URL-safe encoding
+    return encodeURIComponent(encrypted);
+};
+const decryptId = (encryptedId) => {
+    try {
+        const decoded = decodeURIComponent(encryptedId);
+        const bytes = CryptoJS.AES.decrypt(decoded, SECRET_KEY);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error("Decryption failed:", error);
+        return null;
+    }
+};
+
+
 const CreateBusinessUnit = () => {
     const [isDark] = useDarkMode();
     const location = useLocation();
+    const {id: encryptedId} = useParams();
     const mode = location?.state?.name;
     const id = location?.state?.id;
     const [pageLoading, setPageLoading] = useState(true);
@@ -430,13 +452,17 @@ const CreateBusinessUnit = () => {
         }
     };
     useEffect(() => {
-        if (id) {
+        if (encryptedId) {
             if (mode == "view") {
                 setIsViewed(true)
             } else {
                 setIsViewed(false)
             }
-            async function getBusinessUnit() {
+
+            const decryptedId = decryptId(encryptedId)
+            getBusinessUnit(decryptedId)
+
+            async function getBusinessUnit(id) {
                 try {
                     setPageLoading(true)
                     const response = await businessUnitService.getOne(id);
@@ -487,11 +513,10 @@ const CreateBusinessUnit = () => {
                     console.log("error in fetching vendor data");
                 }
             }
-            getBusinessUnit()
         } else {
             setPageLoading(false)
         }
-    }, [id, countryList]);
+    }, [encryptedId, countryList]);
     const handleKeyPress = (e) => {
         const value = e.target.value;
         const cleanedValue = value.replace(/[^0-9]/g, '');
