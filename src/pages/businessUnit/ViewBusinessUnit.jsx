@@ -240,29 +240,38 @@ const Overview = ({ data, isDark, branches, branchesLoading, setBranches }) => {
                         </div>
                     ) : branches?.length > 0 ? (
                         branches.map((row) => (
-                            <div onClick={() => handleView(row)} className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'} cursor-pointer ${selectedBranch?._id === row._id ? 'border-2 border-blue-500' : ''}`} key={row._id}>
+                            <div onClick={() => handleView(row)} className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 text-white' : 'bg-blue-100/30 text-gray-900'} cursor-pointer ${selectedBranch?._id === row._id ? 'border-2 border-blue-500' : ''}`} key={row._id}>
                                 <div className="flex items-center gap-4 mb-4">
                                     <img
                                         src={row.icon || ProfileImage}
                                         alt="branch logo"
                                         className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
                                     />
-                                    <div>
-                                        <h3 className="text-lg font-semibold">{row.name}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{row.city || "N/A"}</p>
+                                    <div className="flex-1">
+                                        <div>
+                                            <h3 className="text-lg font-semibold">{row.name}</h3>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{row.city || "N/A"}</p>
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-sm  ${row.isActive ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300'}`}
+                                            >
+                                                {row.isActive ? "Active" : "Inactive"}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="space-y-2 mb-4">
                                     <p className="text-sm"><span className="font-medium">Email:</span> {row.emailContact || "N/A"}</p>
                                     <p className="text-sm"><span className="font-medium">Phone:</span> {row.contactNumber || "N/A"}</p>
                                 </div>
-                                <div className="flex justify-between items-center">
+                                {/* <div className="flex justify-between items-center">
                                     <span
                                         className={`px-3 py-1 rounded-full text-sm  ${row.isActive ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300'}`}
                                     >
                                         {row.isActive ? "Active" : "Inactive"}
                                     </span>
-                                </div>
+                                </div> */}
                             </div>
                         ))
                     ) : (
@@ -429,29 +438,38 @@ const BranchOverview = ({ data, isDark }) => {
                         </div>
                     ) : warehouses?.length > 0 ? (
                         warehouses.map((row) => (
-                            <div onClick={() => handleWarehouseView(row)} className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'} cursor-pointer ${selectedWarehouse?._id === row._id ? 'border-2 border-red-500' : ''}`} key={row._id}>
+                            <div onClick={() => handleWarehouseView(row)} className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 text-white' : 'bg-blue-100/30 text-gray-900'} cursor-pointer ${selectedWarehouse?._id === row._id ? 'border-2 border-red-500' : ''}`} key={row._id}>
                                 <div className="flex items-center gap-4 mb-4">
                                     <img
                                         src={row.icon || ProfileImage}
                                         alt="warehouse logo"
                                         className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
                                     />
-                                    <div>
-                                        <h3 className="text-lg font-semibold">{row.name}</h3>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{row.city || "N/A"}</p>
+                                    <div className="flex-1">
+                                        <div>
+                                            <h3 className="text-lg font-semibold">{row.name}</h3>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{row.city || "N/A"}</p>
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-sm  ${row.isActive ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300'}`}
+                                            >
+                                                {row.isActive ? "Active" : "Inactive"}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="space-y-2 mb-4">
                                     <p className="text-sm"><span className="font-medium">Email:</span> {row.emailContact || "N/A"}</p>
                                     <p className="text-sm"><span className="font-medium">Phone:</span> {row.contactNumber || "N/A"}</p>
                                 </div>
-                                <div className="flex justify-between items-center">
+                                {/* <div className="flex justify-between items-center">
                                     <span
                                         className={`px-3 py-1 rounded-full text-sm  ${row.isActive ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300'}`}
                                     >
                                         {row.isActive ? "Active" : "Inactive"}
                                     </span>
-                                </div>
+                                </div> */}
                             </div>
                         ))
                     ) : (
