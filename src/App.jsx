@@ -32,8 +32,13 @@ const CreateBusinessUnit = lazy(() => import("./pages/businessUnit/CreateBusines
 const ViewBusinessUnit = lazy(() => import("./pages/businessUnit/ViewBusinessUnit"));
 const Branch = lazy(() => import("./pages/branch/Branch"));
 const CreateBranch = lazy(() => import("./pages/branch/CreateBranch"));
+const ViewBranch = lazy(() => import("./pages/branch/ViewBranch"));
 const Warehouse = lazy(() => import("./pages/warehouse/Warehouse"));
 const CreateWarehouse = lazy(() => import("./pages/warehouse/CreateWarehouse"));
+const ViewWarehouse = lazy(() => import("./pages/warehouse/ViewWarehouse"));
+
+
+
 const Brand = lazy(() => import("./pages/brand/Brand"));
 const Manufacturer = lazy(() => import("./pages/manufacturer/Manufacturer"));
 const Attribute = lazy(() => import("./pages/attribute/Attributes"));
@@ -216,6 +221,18 @@ function App() {
                 <Route path="view-businessunit/:id" element={<ViewBusinessUnit roleId={currentUser?.roleId} />} />
 
 
+                {/* Branch */}
+                <Route path="branch-list" element={<Branch />} />
+                <Route path="create-branch" element={<CreateBranch roleId={currentUser?.roleId} />} />
+                <Route path="view-branch/:id" element={<ViewBranch roleId={currentUser?.roleId} />} />
+                <Route path="edit-branch/:id" element={<CreateBranch roleId={currentUser?.roleId} />} />
+
+
+                {/* Warehouse */}
+                <Route path="warehouse-list" element={<Warehouse />} />
+                <Route path="create-warehouse" element={<CreateWarehouse roleId={currentUser?.roleId} />} />
+                <Route path="view-warehouse/:id" element={<ViewWarehouse roleId={currentUser?.roleId} />} />
+                <Route path="edit-warehouse/:id" element={<CreateWarehouse roleId={currentUser?.roleId} />} />
 
 
 
@@ -264,10 +281,8 @@ function App() {
 
 
 
-                <Route path="branch-list" element={<Branch />} />
-                <Route path="create-branch" element={<CreateBranch roleId={currentUser?.roleId} />} />
-                <Route path="warehouse-list" element={<Warehouse />} />
-                <Route path="create-warehouse" element={<CreateWarehouse roleId={currentUser?.roleId} />} />
+
+
                 <Route path="subcategory-list" element={<SubCategory />} />
                 <Route path="brand-list" element={<Brand />} />
                 <Route path="manufacturer-list" element={<Manufacturer />} />

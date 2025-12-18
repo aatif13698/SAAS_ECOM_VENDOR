@@ -1,157 +1,85 @@
-import { Card } from "@mui/material";
-import React, { useState, Fragment, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Country, State, City } from "country-state-city";
 import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
-import { useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
-import "../../assets/scss/common.scss"
-
-import { useSelector } from "react-redux";
-import ProfileImage from "../../assets/images/users/user-4.jpg"
-import TradingLicense from "../../assets/images/tradingLicense.png"
-import vendorService from "@/services/vendor/vendor.service";
-import Fileinput from "@/components/ui/Fileinput";
-import { Dialog, Transition } from "@headlessui/react";
+import "../../assets/scss/common.scss";
+import DocImage from "../../assets/images/demo-doc.avif";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import branchService from "@/services/branch/branch.service";
 import Button from "@/components/ui/Button";
 
-
-
-const companyTypeList = [
-    {
-        name: "Sole Proprietorship",
-        value: "soleProprietorship"
-    },
-    {
-        name: "Partnership",
-        value: "partnership"
-    },
-    {
-        name: "Private Limited (Corporation)",
-        value: "privateLimited"
-    },
-    {
-        name: "Limited Liability Company",
-        value: "limitedLiabilityCompany"
-    },
-    {
-        name: "One Person Company",
-        value: "onePersonCompany"
-    },
-    {
-        name: "Public Limited",
-        value: "publicLimited"
-    }
-]
-
-
-const CreateBranch = ({ noFade, scrollContent }) => {
-
-    // useEffect(() => {
-    //     if (roleId !== 1) {
-    //         navigate("/dashboard");
-    //         return;
-    //     }
-    //     return;
-    // }, []);
+const CreateBranch = () => {
     const [isDark] = useDarkMode();
-    const dispatch = useDispatch();
     const location = useLocation();
-    const row = location?.state?.row;
     const mode = location?.state?.name;
     const id = location?.state?.id;
-
-    console.log("id", id);
-    const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
-     const [levelList, setLevelList] = useState([
-            // {
-            //     name: "Vendor",
-            //     value: "vendor"
-            // },
-            {
-                name: "Business",
-                value: "business"
-            },
-            {
-                name: "Branch",
-                value: "branch"
-            },
-            {
-                name: "Warehouse",
-                value: "warehouse"
-            },
-        ])
-    
-
-
     const [pageLoading, setPageLoading] = useState(true);
-    const [showLoadingModal, setShowLoadingModal] = useState(false);
 
-    const [activeBusinessUnits, setActiveBusinessUnits] = useState([])
     const [formData, setFormData] = useState({
         businessUnit: "",
         name: "",
-        incorporationName: "",
         emailContact: "",
         contactNumber: "",
+        gstInNumber: "",
+        houseOrFlat: "",
+        streetOrLocality: "",
+        landmark: "",
         country: "",
         city: "",
         state: "",
         address: "",
         ZipCode: "",
     });
-
-    console.log("formData branch", formData);
-
 
     const [formDataErr, setFormDataErr] = useState({
         businessUnit: "",
         name: "",
-        incorporationName: "",
         emailContact: "",
         contactNumber: "",
+        gstInNumber: "",
+        houseOrFlat: "",
+        streetOrLocality: "",
+        landmark: "",
         country: "",
         city: "",
         state: "",
         address: "",
         ZipCode: "",
-        icon: "",
+        gstDocument: "",
     });
+
     const {
         businessUnit,
         name,
-        incorporationName,
         emailContact,
         contactNumber,
-        tinNumber,
-        businessLicenseNumber,
+        gstInNumber,
+        houseOrFlat,
+        streetOrLocality,
+        landmark,
         country,
         city,
         state,
         address,
         ZipCode,
-
     } = formData;
+
     const [countryData, setCountryData] = useState({
-        countryList: "",
+        countryList: [],
         countryName: "",
         countryISOCode: "",
-        CountryISDCode: "",
-        stateList: "",
+        stateList: [],
         stateName: "",
         stateISOCode: "",
-        cityList: "",
+        cityList: [],
         cityName: "",
     });
+
     const {
         countryList,
         countryName,
         countryISOCode,
-        CountryISDCode,
         stateList,
         stateName,
         stateISOCode,
@@ -159,1180 +87,545 @@ const CreateBranch = ({ noFade, scrollContent }) => {
         cityName,
     } = countryData;
 
-    const [passwordErr, setPasswordErr] = useState("");
-    const [confirmPasswordErr, setConfirmPasswordErr] = useState("");
+    const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
     const [isViewed, setIsViewed] = useState(false);
-    const [showAddButton, setShowAddButton] = useState(true);
-    const [isPasswordVissible, setIsPasswordVissile] = useState(false);
-    const [loading, setLoading] = useState(false)
-    const [isConfirmPasswordVissible, setConfirmIsPasswordVissile] = useState(false);
-    const [refresh, setRefresh] = useState(0);
+    const [loading, setLoading] = useState(false);
 
-    const [imgPreview, setImgPreviwe] = useState(null);
-    const [ImgErr, setImgErr] = useState("");
-    const [selectedFile, setselectedFile] = useState(null);
-
-
-
-    const [imgPreview2, setImgPreviwe2] = useState(null);
-    const [ImgErr2, setImgErr2] = useState("");
-    const [selectedFile2, setSelectedFile2] = useState(null);
-
-
-
-
-
-
-
-
-
-
+    // GST Document states
+    const [gstPreview, setGstPreview] = useState(null);
+    const [gstImgErr, setGstImgErr] = useState("");
+    const [selectedGstFile, setSelectedGstFile] = useState(null);
 
     const navigate = useNavigate();
-    const [vehicleViewByNotification, setVehicleViewByNotification] = useState(false);
 
+    // Validation rules (houseOrFlat, streetOrLocality, landmark are optional → no rules)
+    const validateField = (fieldName, value) => {
+        const rules = {
+            businessUnit: [[!value, "Business Unit is Required"]],
+            name: [
+                [!value, "Name is Required"],
+                [value && value.length <= 3, "Minimum 3 characters required"],
+            ],
+            emailContact: [
+                [!value, "Email is Required"],
+                [value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), "Enter valid Email"],
+            ],
+            contactNumber: [
+                [!value, "Phone Number is Required"],
+                [value && !/^[0-9]{10}$/.test(value), "Enter a valid 10-digit phone number"],
+            ],
+            gstInNumber: [[!value, "GSTIN Number is Required"]],
+            country: [[!value, "Country is Required"]],
+            state: [[!value, "State is Required"]],
+            city: [[!value, "City is Required"]],
+            ZipCode: [[!value, "Zip Code is Required"]],
+            address: [[!value, "Address is Required"]],
+        };
+        return (rules[fieldName] || []).find(([condition]) => condition)?.[1] || "";
+    };
 
+    const validationFunction = () => {
+        const errors = {
+            businessUnit: validateField("businessUnit", businessUnit),
+            name: validateField("name", name),
+            emailContact: validateField("emailContact", emailContact),
+            contactNumber: validateField("contactNumber", contactNumber),
+            gstInNumber: validateField("gstInNumber", gstInNumber),
+            country: validateField("country", countryData.countryName),
+            state: validateField("state", countryData.stateName),
+            city: validateField("city", countryData.cityName),
+            ZipCode: validateField("ZipCode", ZipCode),
+            address: validateField("address", address),
+            gstDocument: !selectedGstFile && !gstPreview ? "GST Document is required" : "",
+        };
 
+        setFormDataErr((prev) => ({ ...prev, ...errors }));
+        return Object.values(errors).some((error) => error);
+    };
 
-
-
-    //------- Handling the VAlidation ------
-    function validationFunction() {
-        let errorCount = 0;
-        if (!name) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                name: "Name Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                name: "",
-            }));
-        }
-
-        if (!incorporationName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                incorporationName: "Incorporation Name Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                incorporationName: "",
-            }));
-        }
-
-        if (!emailContact) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                emailContact: "Email Is Required.",
-            }));
-            errorCount++
-
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                emailContact: "",
-            }));
-            errorCount++
-
-        }
-
-        const phoneRegex = /^[0-9]{10}$/;
-        if (!contactNumber) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                contactNumber: "Phone Number Is Required.",
-            }));
-            errorCount++
-        } else {
-            if (!phoneRegex.test(contactNumber) || contactNumber.length === 0) {
-                setFormDataErr((prev) => ({ ...prev, contactNumber: "Enter a valid phone number." }));
-            } else {
-                setFormDataErr((prev) => ({ ...prev, contactNumber: "" }));
-            }
-        }
-
-
-        if (!countryData?.countryName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                country: "Country is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                country: ""
-            }))
-        }
-        if (!countryData?.stateName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                state: "State is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                state: ""
-            }))
-        }
-        if (!countryData?.cityName) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                city: "City is Required"
-            }))
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                city: ""
-            }))
-        }
-
-        if (!ZipCode) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                ZipCode: "ZipCode Code Is Required.",
-            }));
-            errorCount++
-
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                ZipCode: "",
-            }));
-        }
-        if (!address) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                address: "Address Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                address: "",
-            }));
-        }
-
-        if (id == null) {
-            if (!selectedFile) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "Logo is required."
-                }))
-                errorCount++
-            }
-        }
-        if (errorCount > 0) {
-            return false
-        } else {
-            return true
-        }
-    }
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormDataErr((prev) => ({ ...prev, [name]: validateField(name, value) }));
+    };
 
     const handleCountry = (e) => {
-        const { name, value } = e.target;
-        const selectedCountry = countryList.find(
-            (country) => country?.name === value
-        );
-        if (name == "country") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    country: "Country is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    country: "",
-                }));
-            }
-        }
+        const { value } = e.target;
+        const selectedCountry = countryList.find((c) => c?.name === value);
         if (selectedCountry) {
             setCountryData((prev) => ({
                 ...prev,
-                countryName: selectedCountry?.name,
-                countryISOCode: selectedCountry?.isoCode,
-                CountryISDCode: selectedCountry?.contactNumbercode,
+                countryName: selectedCountry.name,
+                countryISOCode: selectedCountry.isoCode,
             }));
-            setFormData((prev) => ({
+            setFormDataErr((prev) => ({ ...prev, country: "" }));
+        } else {
+            setCountryData((prev) => ({
                 ...prev,
-                country: selectedCountry?.name
-            }))
+                countryName: "",
+                countryISOCode: "",
+            }));
+            setFormDataErr((prev) => ({ ...prev, country: "Country is Required" }));
         }
     };
 
-    // ----- Handling the state name as per the country name
     const handleState = (e) => {
-        const { name, value } = e.target;
-        const selectedState = stateList.find((state) => state?.name === value);
-        if (name === "state") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    state: "State is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    state: "",
-                }));
-            }
-        }
+        const { value } = e.target;
+        const selectedState = stateList.find((s) => s?.name === value);
         if (selectedState) {
             setCountryData((prev) => ({
                 ...prev,
-                stateName: selectedState?.name,
-                stateISOCode: selectedState?.isoCode,
+                stateName: selectedState.name,
+                stateISOCode: selectedState.isoCode,
             }));
-            setFormData((prev) => ({
+            setFormDataErr((prev) => ({ ...prev, state: "" }));
+        } else {
+            setCountryData((prev) => ({
                 ...prev,
-                state: selectedState?.name
-            }))
+                stateName: "",
+                stateISOCode: "",
+            }));
+            setFormDataErr((prev) => ({ ...prev, state: "State is Required" }));
         }
     };
 
-    // ----- Handling the city name as per the state name
     const handleCity = (e) => {
-        const { name, value } = e.target;
-        if (name === "city") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    city: "City is required",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    city: "",
-                }));
-            }
-        }
-        setCountryData((prev) => ({
-            ...prev,
-            cityName: value,
-        }));
-        setFormData((prev) => ({
-            ...prev,
-            city: value
-        }))
+        const { value } = e.target;
+        setCountryData((prev) => ({ ...prev, cityName: value }));
+        setFormDataErr((prev) => ({ ...prev, city: value ? "" : "City is Required" }));
     };
 
-    //------ mounting the all country data -------
+    // Load countries, states, cities
     useEffect(() => {
-        setCountryData((prev) => ({
-            ...prev,
-            countryList: Country.getAllCountries(),
-        }));
+        setCountryData((prev) => ({ ...prev, countryList: Country.getAllCountries() }));
     }, []);
 
-    //------ mounting the all state data as per the country name -------
     useEffect(() => {
         setCountryData((prev) => ({
             ...prev,
             stateList: State.getStatesOfCountry(countryISOCode),
         }));
-    }, [isViewed, countryISOCode, id]);
-    //------ mounting the all city data as per the state name -------
+    }, [countryISOCode]);
+
     useEffect(() => {
         setCountryData((prev) => ({
             ...prev,
             cityList: City.getCitiesOfState(countryISOCode, stateISOCode),
         }));
-    }, [isViewed, countryISOCode, stateISOCode]);
-    // ------ HAndling the change in the form ---
+    }, [countryISOCode, stateISOCode]);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        if (name == "businessUnit") {
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: "Business Unit is Required"
-                }))
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    businessUnit: ""
-                }))
-            }
-        }
-
-
-
-        if (name === "name") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    name: "Name Is Required.",
-                }));
-            } else if (value?.length <= 3) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    name: "Minimum 3 characters required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    name: "",
-                }));
-            }
-        }
-
-        if (name === "incorporationName") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    incorporationName: "Incorporation Name Is Required.",
-                }));
-            } else if (value?.length <= 3) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    incorporationName: "Minimum 3 characters required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    incorporationName: "",
-                }));
-            }
-        }
-        if (name == "emailContact") {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (value == "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    emailContact: "Email is Required"
-                }))
-            } else if (!emailRegex.test(value)) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    emailContact: "Enter valid Email "
-                }))
-            }
-            else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    emailContact: ""
-                }))
-            }
-        }
-        if (name === "contactNumber") {
-            const phoneRegex = /^[0-9]{10}$/;
-            if (!phoneRegex.test(value) || value.length === 0) {
-                setFormDataErr((prev) => ({ ...prev, contactNumber: "Enter a valid phone number." }));
-            } else {
-                setFormDataErr((prev) => ({ ...prev, contactNumber: "" }));
-            }
-        }
-
-        if (name == "ZipCode") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    ZipCode: "Zip Code Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    ZipCode: "",
-                }));
-            }
-        }
-
-        if (name == "address") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    address: "Address Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    address: "",
-                }));
-            }
-        }
-
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-
-    const onSubmit = async (e) => {
-        e.preventDefault();
-        setIsViewed(false);
-        const error = validationFunction();
-        setLoading(true);
-        if (error) {
-            return
-        } else {
+    // Fetch active business units
+    useEffect(() => {
+        async function fetchActiveBusinessUnits() {
             try {
-                const clientId = localStorage.getItem("saas_client_clientId");
-                const payload = new FormData();
-                payload.append("clientId", clientId);
-                payload.append("businessUnit", businessUnit);
-                payload.append("icon", selectedFile);
-                payload.append("name", name);
-                payload.append("incorporationName", incorporationName);
-                payload.append("emailContact", emailContact);
-                payload.append("contactNumber", contactNumber);
-                payload.append("tinNumber", tinNumber);
-                payload.append("businessLicenseNumber", businessLicenseNumber);
-                payload.append("country", countryData?.countryName);
-                payload.append("state", countryData?.stateName);
-                payload.append("city", countryData?.cityName);
-                payload.append("address", address);
-                payload.append("ZipCode", ZipCode);
-
-                if (id) {
-                    payload.append("branchId", id);
-                    const response = await branchService.updateBranch(payload)
-                    toast.success(response?.data?.message);
-                } else {
-                    const response = await branchService.createBranch(payload);
-                    toast.success(response?.data?.message);
-                }
-                setCountryData((prev) => ({
-                    ...prev,
-                    countryISOCode: "",
-                    countryName: "",
-                    stateISOCode: "",
-                    stateName: "",
-                    cityName: "",
-                }));
-                setFormData({
-                    name: "",
-                    incorporationName: "",
-                    emailContact: "",
-                    contactNumber: "",
-                    country: "",
-                    city: "",
-                    state: "",
-                    address: "",
-                    ZipCode: "",
-                });
-                setFormDataErr({
-                    name: "",
-                    incorporationName: "",
-                    emailContact: "",
-                    contactNumber: "",
-                    country: "",
-                    city: "",
-                    state: "",
-                    address: "",
-                    ZipCode: "",
-                    icon: "",
-                })
-                setImgPreviwe(null);
-                setselectedFile(null);
-                setLoading(false);
-                navigate("/branch-list");
-
+                const response = await branchService.getActiveBusinessUnit();
+                setActiveBusinessUnits(response?.data?.businessUnits || []);
             } catch (error) {
-                setLoading(false);
-                console.log("error while creating branch", error);
+                console.log("Error fetching active business units", error);
             }
         }
-    };
-    // -----setting the data if contain id ----------
+        fetchActiveBusinessUnits();
+    }, []);
+
+    // Load branch data if editing/viewing
     useEffect(() => {
         if (id) {
-            if (mode == "view") {
-                setIsViewed(true)
-            } else {
-                setIsViewed(false)
-            }
-            async function getBranch() {
+            if (mode === "view") setIsViewed(true);
+            async function fetchBranch() {
                 try {
-                    setPageLoading(true)
+                    setPageLoading(true);
                     const response = await branchService.getOne(id);
-                    console.log('Response get business unit', response?.data);
-                    const baseAddress = response?.data;
+                    const data = response?.data;
+
                     setFormData((prev) => ({
                         ...prev,
-                        businessUnit: baseAddress.businessUnit,
-                        name: baseAddress?.name,
-                        incorporationName: baseAddress.incorporationName,
-                        emailContact: baseAddress?.emailContact,
-                        contactNumber: baseAddress?.contactNumber,
-                        ZipCode: baseAddress?.ZipCode,
-                        address: baseAddress?.address,
+                        businessUnit: data.businessUnit?._id || data.businessUnit,
+                        name: data.name || "",
+                        emailContact: data.emailContact || "",
+                        contactNumber: data.contactNumber || "",
+                        gstInNumber: data.gstInNumber || "",
+                        houseOrFlat: data.houseOrFlat || "",
+                        streetOrLocality: data.streetOrLocality || "",
+                        landmark: data.landmark || "",
+                        ZipCode: data.ZipCode || "",
+                        address: data.address || "",
                     }));
 
-                    setImgPreviwe(`${baseAddress?.icon}`)
+                    setGstPreview(data.gstInDocument || null);
 
-                    const selectedCountry = Country?.getAllCountries()?.find((item) => item?.name == baseAddress?.country);
-                    const state = State.getStatesOfCountry(selectedCountry?.isoCode);
-
-                    const stateName = state?.find(
-                        (item) => item?.name === baseAddress?.state
-                    );
+                    const selectedCountry = Country.getAllCountries().find((c) => c.name === data.country);
+                    const states = selectedCountry ? State.getStatesOfCountry(selectedCountry.isoCode) : [];
+                    const selectedState = states.find((s) => s.name === data.state);
 
                     setCountryData((prev) => ({
                         ...prev,
-                        stateList: state,
-                        countryName: selectedCountry?.name,
-                        countryISOCode: selectedCountry?.isoCode,
-                        stateName: stateName?.name,
-                        stateISOCode: stateName?.isoCode,
-                        cityName: baseAddress?.city,
+                        countryName: data.country || "",
+                        countryISOCode: selectedCountry?.isoCode || "",
+                        stateName: data.state || "",
+                        stateISOCode: selectedState?.isoCode || "",
+                        cityName: data.city || "",
                     }));
 
-                    setPageLoading(false)
-
+                    setPageLoading(false);
                 } catch (error) {
-                    setPageLoading(false)
-                    console.log("error in fetching vendor data");
+                    setPageLoading(false);
+                    console.log("Error fetching branch", error);
                 }
             }
-            getBranch()
+            fetchBranch();
         } else {
-            setPageLoading(false)
+            setPageLoading(false);
         }
-    }, [id, countryList]);
+    }, [id, mode]);
 
-
-
-
-
-    useEffect(() => {
-        async function getActiveBusinessUnit() {
-            console.log("yess");
-
-            try {
-                const response = await branchService.getActiveBusinessUnit();
-                console.log("respone active", response);
-                setActiveBusinessUnits(response?.data?.businessUnits)
-            } catch (error) {
-                console.log("error while getting the active business unit", error);
-            }
-        }
-        getActiveBusinessUnit()
-    }, [])
-
-
-    const [isUserClicked, setIsUserClicked] = useState(true);
-
-
-
-
-
-    //------------- Allow only Numbers in contact number -------------
-    const handleKeyPress = (e) => {
-        const value = e.target.value;
-        const cleanedValue = value.replace(/[^0-9]/g, '');
-        if (cleanedValue.trim() !== "") {
-            if ((cleanedValue.match(/\./g) || []).length <= 1) {
-                const formattedValue = cleanedValue.toLocaleString('en-US');
-                e.target.value = formattedValue;
-            } else {
-                e.target.value = cleanedValue.replace(/\.(?=.*\.)/g, '');
-            }
-        } else {
-            e.target.value = '';
-        }
-    }
-
-
-
-
-    const handleFileChange2 = (e) => {
-        const { name, value } = e.target;
-        setImgErr2("");
-        if (name === "tradeLicense") {
-            if (!selectedFile2 && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "Trade License is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    trandeLicense: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
+    const handleGstFileChange = (e) => {
+        setGstImgErr("");
+        const file = e.target.files[0];
         let errorCount = 0;
 
-        const file = e.target.files[0];
-
         if (file) {
-            fileSize = file.size / 1024;
-
+            const fileSize = file.size / 1024; // KB
             if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr2("Only images are allowed");
-
+                setGstImgErr("Only images are allowed");
                 errorCount++;
             }
-
-            //check if filesize is not more than 1MB
             if (fileSize > 1024) {
-                setImgErr2("Image size should not be more than 1MB.");
-
-                errorCount++;
-            }
-
-            if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-
-                setSelectedFile2(file);
-
-                setImgPreviwe2(imageAsBase64);
-            }
-        }
-
-    };
-
-
-
-    // handle file change
-    const handleFileChange = (e) => {
-        const { name, value } = e.target;
-        setImgErr("");
-        if (name === "profileImage") {
-            if (!selectedFile && value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "Logo is required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    icon: "",
-                }));
-            }
-        }
-        let fileSize = 0;
-
-        let errorCount = 0;
-
-        const file = e.target.files[0];
-
-        if (file) {
-            fileSize = file.size / 1024;
-
-            if (!file.name.match(/\.(jpg|jpeg|png|gif)$/i)) {
-                setImgErr("Only images are allowed");
-                errorCount++;
-            }
-
-            //check if filesize is not more than 1MB
-            if (fileSize > 1024) {
-                setImgErr("Image size should not be more than 1MB.");
+                setGstImgErr("Image size should not exceed 1MB");
                 errorCount++;
             }
             if (errorCount === 0) {
-                const imageAsBase64 = URL.createObjectURL(file);
-                setselectedFile(file);
-                setImgPreviwe(imageAsBase64);
+                const preview = URL.createObjectURL(file);
+                setSelectedGstFile(file);
+                setGstPreview(preview);
+                setFormDataErr((prev) => ({ ...prev, gstDocument: "" }));
             }
-        }
-    };
-
-
-
-    const handleCloseLoadingModal = () => {
-        setShowLoadingModal(false);
-    };
-
-
-    useEffect(() => {
-        if (currentUser && isAuthenticated) {
-            if (currentUser.isVendorLevel) {
-                setLevelList([
-                    // {
-                    //     name: "Vendor",
-                    //     value: "vendor"
-                    // },
-                    {
-                        name: "Business",
-                        value: "business"
-                    },
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ])
-            } else if (currentUser.isBuLevel) {
-                setLevelList([
-                    {
-                        name: "Business",
-                        value: "business"
-                    },
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ]);
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
-            } else if (currentUser.isBranchLevel) {
-                setLevelList([
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ]);
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
-            } else if (currentUser.isWarehouseLevel) {
-                setLevelList([
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ])
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
-            }
-
         } else {
+            setFormDataErr((prev) => ({ ...prev, gstDocument: "GST Document is required" }));
+        }
+    };
 
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        const hasError = validationFunction();
+        setLoading(true);
+        if (hasError) {
+            setLoading(false);
+            return;
         }
 
-    }, [currentUser])
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const payload = new FormData();
+            payload.append("clientId", clientId);
+            payload.append("businessUnit", businessUnit);
+            payload.append("name", name);
+            payload.append("emailContact", emailContact);
+            payload.append("contactNumber", contactNumber);
+            payload.append("gstInNumber", gstInNumber);
+            payload.append("houseOrFlat", houseOrFlat);
+            payload.append("streetOrLocality", streetOrLocality);
+            payload.append("landmark", landmark);
+            payload.append("country", countryData.countryName);
+            payload.append("state", countryData.stateName);
+            payload.append("city", countryData.cityName);
+            payload.append("address", address);
+            payload.append("ZipCode", ZipCode);
 
+            if (selectedGstFile) payload.append("gstDocument", selectedGstFile);
 
+            if (id) {
+                payload.append("branchId", id);
+                const response = await branchService.updateBranch(payload);
+                toast.success(response?.data?.message || "Branch updated successfully");
+            } else {
+                const response = await branchService.createBranch(payload);
+                toast.success(response?.data?.message || "Branch created successfully");
+            }
+
+            navigate("/branch-list");
+        } catch (error) {
+            setLoading(false);
+            toast.error(error?.response?.data?.message || "Something went wrong");
+            console.log("Error submitting branch", error);
+        }
+    };
 
     return (
-
         <>
-            {
-                pageLoading ?
-                    <div
-                        style={{
-                            display: "flex",
-                            justifyContent: "center",
-                            height: "100vh",
-                            alignItems: "center",
-                            flexDirection: "column",
-                        }}
-                    >
+            {pageLoading ? (
+                <div className="flex justify-center items-center h-screen">
+                    <FormLoader />
+                </div>
+            ) : (
+                <div>
+                    <div className={`p-6 ${isDark ? "bg-darkSecondary text-white" : "bg-white"}`}>
+                        <form onSubmit={onSubmit}>
+                            <div className="grid lg:grid-cols-3 gap-4 mb-6">
+                                <div className={`space-y-1 ${formDataErr.businessUnit ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Business Unit <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        name="businessUnit"
+                                        value={businessUnit}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    >
+                                        <option value="">Select Business Unit</option>
+                                        {activeBusinessUnits.map((bu) => (
+                                            <option key={bu._id} value={bu._id}>
+                                                {bu.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {formDataErr.businessUnit && <p className="text-sm">{formDataErr.businessUnit}</p>}
+                                </div>
 
-                        <div className="flex flex-col justify-center mt-5 items-center gap-2">
-                            <FormLoader />
+                                <div className={`space-y-1 ${formDataErr.name ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Branch Name <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="name"
+                                        type="text"
+                                        placeholder="Enter branch name"
+                                        value={name}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                    {formDataErr.name && <p className="text-sm">{formDataErr.name}</p>}
+                                </div>
 
-                        </div>
+                                <div className={`space-y-1 ${formDataErr.emailContact ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Contact Email <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="emailContact"
+                                        type="email"
+                                        placeholder="Enter email"
+                                        value={emailContact}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                    {formDataErr.emailContact && <p className="text-sm">{formDataErr.emailContact}</p>}
+                                </div>
 
-                    </div>
+                                <div className={`space-y-1 ${formDataErr.contactNumber ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Contact Number <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="contactNumber"
+                                        type="text"
+                                        placeholder="Enter 10-digit number"
+                                        value={contactNumber}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                        maxLength="10"
+                                    />
+                                    {formDataErr.contactNumber && <p className="text-sm">{formDataErr.contactNumber}</p>}
+                                </div>
 
-                    :
-                    <div>
-                        <Card>
-                            <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
-                                {isUserClicked && (
-                                    <form onSubmit={onSubmit}>
-                                        <div className="grid lg:grid-cols-3 flex-col gap-3">
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        Business Unit <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="businessUnit"
-                                                    value={businessUnit}
-                                                    onChange={handleChange}
-                                                        disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-
-                                                    {activeBusinessUnits &&
-                                                        activeBusinessUnits?.map((item) => (
-                                                            <option value={item?._id} key={item?._id}>{item?.name}</option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
-                                            </div>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.name !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Name <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="name"
-                                                    type="text"
-                                                    placeholder="Enter Name"
-                                                    value={name}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    disabled={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.name}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.incorporationName !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Incorporation Name <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="incorporationName"
-                                                    type="text"
-                                                    placeholder="Enter Incorporation Name"
-                                                    value={incorporationName}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    disabled={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.incorporationName}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.emailContact !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Contact Email <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="emailContact"
-                                                    type="email"
-                                                    placeholder="Enter Email"
-                                                    value={emailContact}
-                                                    onChange={handleChange}
-                                                    disabled={isViewed}
-
-                                                    className="form-control py-2"
-                                                />
-                                                {<p className="text-sm text-red-500">{formDataErr.emailContact}</p>}
-                                            </label>
-
-                                            <label
-                                                className={`fromGroup   ${formDataErr?.contactNumber !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className=" form-label">
-                                                    Contact Number <span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="contactNumber"
-                                                    type="text"
-                                                    placeholder="Enter contact number"
-                                                    value={contactNumber}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    disabled={isViewed}
-                                                    onInput={handleKeyPress}
-
-                                                />
-                                                {<p className="text-sm text-red-500">{formDataErr.contactNumber}</p>}
-                                            </label>
-
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.country !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        {" "}
-                                                        Country <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="country"
-                                                    value={countryName}
-                                                    onChange={(e) => handleCountry(e)}
-                                                    disabled={isViewed}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-                                                    {countryList &&
-                                                        countryList?.map((country) => (
-                                                            <option key={country?.isoCode}>
-                                                                {country && country?.name}
-                                                            </option>
-                                                        ))}
-                                                </select>
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.country}
-                                                    </p>
-                                                }
-                                            </div>
-
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.state !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        State <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="state"
-                                                    value={stateName}
-                                                    onChange={(e) => handleState(e)}
-                                                    disabled={isViewed}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-
-                                                    {stateList &&
-                                                        stateList?.map((state) => (
-                                                            <option key={state?.isoCode}>
-                                                                {state && state?.name}
-                                                            </option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.state}</p>}
-                                            </div>
-                                            <div
-                                                className={`fromGroup   ${formDataErr?.city !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <label htmlFor=" hh" className="form-label ">
-                                                    <p className="form-label">
-                                                        City <span className="text-red-500">*</span>
-                                                    </p>
-                                                </label>
-                                                <select
-                                                    name="city"
-                                                    value={cityName}
-                                                    onChange={(e) => handleCity(e)}
-                                                    disabled={isViewed}
-                                                    className="form-control py-2  appearance-none relative flex-1"
-                                                >
-                                                    <option value="">None</option>
-
-                                                    {cityList &&
-                                                        cityList?.map((city) => (
-                                                            <option key={city?.name}>{city && city?.name}</option>
-                                                        ))}
-                                                </select>
-                                                {<p className="text-sm text-red-500">{formDataErr.city}</p>}
-                                            </div>
-
-                                            {/* pin code */}
-
-                                            <label
-                                                className={`fromGroup    ${formDataErr?.ZipCode !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Pin Code<span className="text-red-500">*</span>
-                                                </p>
-                                                <input
-                                                    name="ZipCode"
-                                                    type="text"
-                                                    placeholder="Enter ZipCode"
-                                                    value={ZipCode}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    disabled={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.ZipCode}
-                                                    </p>
-                                                }
-                                            </label>
-
-                                            {/* address one */}
-                                            <label
-                                                className={`fromGroup col-span-3   ${formDataErr?.address !== "" ? "has-error" : ""
-                                                    } `}
-                                            >
-                                                <p className="form-label">
-                                                    Address<span className="text-red-500">*</span>
-                                                </p>
-                                                <textarea
-                                                    name="address"
-                                                    type="text"
-                                                    placeholder="Enter address"
-                                                    value={address}
-                                                    onChange={handleChange}
-                                                    className="form-control py-2"
-                                                    disabled={isViewed}
-                                                />
-                                                {
-                                                    <p className="text-sm text-red-500">
-                                                        {formDataErr.address}
-                                                    </p>
-                                                }
-                                            </label>
-                                        </div>
-
-                                        <div
-                                            className={`fromGroup  mt-2  ${formDataErr?.icon !== "" ? "has-error" : ""
-                                                } `}
-                                        >
-                                            <p className="form-label">
-                                                Branch Logo
-                                                <span className="text-red-500">*</span>
-                                            </p>
-
-                                            <label
-                                                htmlFor={isViewed ? "" : "imageInput"}
-                                                className="cursor-pointer"
-                                            >
-                                                <div
-                                                    htmlFor="imageInput"
-                                                    className="flex flex-col items-center justify-between pl-3 form-control py-5"
-                                                >
-                                                    <label
-                                                        htmlFor={isViewed ? "" : "imageInput"}
-                                                        className="cursor-pointer"
-                                                    >
-                                                        <img
-                                                            src={
-                                                                imgPreview ? imgPreview : ProfileImage
-                                                            }
-                                                            alt="Default"
-                                                            className="w-20 h-20 object-cover rounded-md"
-                                                        />
-                                                    </label>
-                                                    <input
-                                                        name="profileImage"
-                                                        id="imageInput"
-                                                        type="file"
-                                                        className="hidden"
-                                                        accept="image/*"
-                                                        onChange={handleFileChange}
-                                                    />
-                                                    <span style={{ color: "red", fontSize: "0.7em" }}>
-                                                        {ImgErr}
-                                                    </span>
-                                                    <label
-                                                        htmlFor="imageInput"
-                                                        className="text-sm mt-2 text-gray-500 cursor-pointer"
-                                                    >
-                                                        <p
-                                                            className={`${isDark ? "text-secondary-300" : ""
-                                                                }`}
-                                                        >
-                                                            click to upload logo
-                                                        </p>
-                                                    </label>{" "}
-                                                    {
-                                                        <p className="text-sm text-red-500">
-                                                            {formDataErr.icon}
-                                                        </p>
-                                                    }
-                                                </div>
-                                            </label>
-                                        </div>
-
-                                        {
-                                            isViewed && (
-                                                <div className="lg:col-span-2 col-span-1">
-                                                    <div className="flex justify-end py-5 ">
-                                                        <Button
-                                                            text="Edit"
-                                                            // className="border bg-blue-gray-300 rounded px-5 py-2"
-                                                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                                            onClick={() => setIsViewed(false)}
-                                                            isLoading={loading}
-                                                        />
-                                                    </div>
-                                                </div>
+                                <div className={`space-y-1 ${formDataErr.gstInNumber ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        GSTIN Number <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="gstInNumber"
+                                        type="text"
+                                        placeholder="Enter GSTIN"
+                                        value={gstInNumber}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                    {formDataErr.gstInNumber && <p className="text-sm">{formDataErr.gstInNumber}</p>}
+                                </div>
 
 
-                                            )
-                                        }
 
-                                        {
-                                            !isViewed && (
-                                                <div className="lg:col-span-2 col-span-1">
-                                                    <div className="ltr:text-right rtl:text-left p-5">
-                                                        {showAddButton ? (
-                                                            <button
-                                                                disabled={loading}
-                                                                style={
-                                                                    loading
-                                                                        ? { opacity: "0.5", cursor: "not-allowed" }
-                                                                        : { opacity: "1" }
-                                                                }
-                                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                                            >
-                                                                {loading
-                                                                    ? ""
-                                                                    : showAddButton && id
-                                                                        ? "Update"
-                                                                        : "Save"}
-                                                                {loading && (
-                                                                    <>
-                                                                        <svg
-                                                                            className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            fill="none"
-                                                                            viewBox="0 0 24 24"
-                                                                        >
-                                                                            <circle
-                                                                                className="opacity-25"
-                                                                                cx="12"
-                                                                                cy="12"
-                                                                                r="10"
-                                                                                stroke="currentColor"
-                                                                                strokeWidth="4"
-                                                                            ></circle>
-                                                                            <path
-                                                                                className="opacity-75"
-                                                                                fill="currentColor"
-                                                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                                            ></path>
-                                                                        </svg>
-                                                                        Loading..
-                                                                    </>
-                                                                )}
-                                                            </button>
-                                                        ) : (
-                                                            ""
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            )
-                                        }
+                                <div className={`space-y-1 ${formDataErr.country ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Country <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={countryName}
+                                        onChange={handleCountry}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    >
+                                        <option value="">Select Country</option>
+                                        {countryList.map((c) => (
+                                            <option key={c.isoCode}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                    {formDataErr.country && <p className="text-sm">{formDataErr.country}</p>}
+                                </div>
 
+                                <div className={`space-y-1 ${formDataErr.state ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        State <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={stateName}
+                                        onChange={handleState}
+                                        disabled={isViewed || !countryISOCode}
+                                        className="form-control py-2"
+                                    >
+                                        <option value="">Select State</option>
+                                        {stateList.map((s) => (
+                                            <option key={s.isoCode}>{s.name}</option>
+                                        ))}
+                                    </select>
+                                    {formDataErr.state && <p className="text-sm">{formDataErr.state}</p>}
+                                </div>
 
-                                    </form>
-                                )}
+                                <div className={`space-y-1 ${formDataErr.city ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        City <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        value={cityName}
+                                        onChange={handleCity}
+                                        disabled={isViewed || !stateISOCode}
+                                        className="form-control py-2"
+                                    >
+                                        <option value="">Select City</option>
+                                        {cityList.map((c) => (
+                                            <option key={c.name}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                    {formDataErr.city && <p className="text-sm">{formDataErr.city}</p>}
+                                </div>
 
+                                <div className={`space-y-1 ${formDataErr.ZipCode ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Pin Code <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="ZipCode"
+                                        type="text"
+                                        placeholder="Enter pin code"
+                                        value={ZipCode}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                    {formDataErr.ZipCode && <p className="text-sm">{formDataErr.ZipCode}</p>}
+                                </div>
+                                {/* Optional Address Fields */}
+                                <div className="space-y-1">
+                                    <label className="form-label">House/Flat (Optional)</label>
+                                    <input
+                                        name="houseOrFlat"
+                                        type="text"
+                                        placeholder="e.g., Flat 101, Tower A"
+                                        value={houseOrFlat}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="form-label">Street/Locality (Optional)</label>
+                                    <input
+                                        name="streetOrLocality"
+                                        type="text"
+                                        placeholder="e.g., MG Road"
+                                        value={streetOrLocality}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label className="form-label">Landmark (Optional)</label>
+                                    <input
+                                        name="landmark"
+                                        type="text"
+                                        placeholder="e.g., Near Metro Station"
+                                        value={landmark}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                </div>
+
+                                <div className={`space-y-1 col-span-3 ${formDataErr.address ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Address <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        name="address"
+                                        placeholder="Enter full address"
+                                        value={address}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2 h-24"
+                                    />
+                                    {formDataErr.address && <p className="text-sm">{formDataErr.address}</p>}
+                                </div>
                             </div>
-                        </Card>
-                    </div>
-            }
-        </>
 
+                            {/* GST Document Upload - Mandatory */}
+                            <div className={`space-y-2 mb-8 ${formDataErr.gstDocument ? "text-red-500" : ""}`}>
+                                <label className="form-label">
+                                    GST Document <span className="text-red-500">*</span>
+                                </label>
+                                <label htmlFor={isViewed ? "" : "gstDocumentInput"} className="cursor-pointer block">
+                                    <div className="flex flex-col items-center justify-center border rounded-lg p-6 ">
+                                        <img
+                                            src={gstPreview || DocImage}
+                                            alt="GST Document Preview"
+                                            className={`rounded-md ${gstPreview ? "w-full max-h-96 object-contain" : "w-32 h-32"}`}
+                                        />
+                                        <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
+                                            Click to {gstPreview ? "change" : "upload"} GST document
+                                        </p>
+                                    </div>
+                                    <input
+                                        id="gstDocumentInput"
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={handleGstFileChange}
+                                        disabled={isViewed}
+                                    />
+                                </label>
+                                {gstImgErr && <p className="text-sm">{gstImgErr}</p>}
+                                {formDataErr.gstDocument && <p className="text-sm">{formDataErr.gstDocument}</p>}
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex justify-end gap-4 mt-8">
+                                {isViewed && (
+                                    <Button
+                                        text="Edit"
+                                        onClick={() => setIsViewed(false)}
+                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn btn inline-flex justify-center`}
+                                    />
+                                )}
+                                {!isViewed && (
+                                    <Button
+                                        type="submit"
+                                        text={id ? "Update" : "Save"}
+                                        isLoading={loading}
+                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn btn inline-flex justify-center`}
+                                    />
+                                )}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+        </>
     );
 };
 
