@@ -260,9 +260,9 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
         if (businessUnit) {
             getBranchByBusiness(businessUnit);
             if (level === "business") {
-                console.log("level a",level );
-                console.log("businessUnit a",businessUnit );
-                
+                console.log("level a", level);
+                console.log("businessUnit a", businessUnit);
+
                 getAllParent(level, businessUnit);
             }
             if (!id) {
@@ -456,6 +456,9 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
 
     const handleHasParentToggle = () => {
+        if (id) {
+            return
+        }
         if (!isViewed) {
             setFormData((prev) => ({
                 ...prev,
@@ -618,7 +621,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                             name="level"
                                             value={level}
                                             onChange={handleChange}
-                                            disabled={isViewed}
+                                            disabled={isViewed || id}
                                             className="form-control py-2  appearance-none relative flex-1"
                                         >
                                             <option value="">None</option>
@@ -650,7 +653,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                     name="businessUnit"
                                                     value={businessUnit}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                    disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -681,7 +684,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                     name="branch"
                                                     value={branch}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                    disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -711,7 +714,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                     name="warehouse"
                                                     value={warehouse}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || currentUser.isWarehouseLevel}
+                                                    disabled={isViewed || currentUser.isWarehouseLevel || id}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -739,7 +742,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                             value={groupName}
                                             onChange={handleChange}
                                             className="form-control py-2"
-                                            disabled={isViewed}
+                                            disabled={isViewed || ledgerData?.isMaster}
                                         />
                                         {
                                             <p className="text-sm text-red-500">
@@ -750,10 +753,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
                                     {
                                         parentLedgers?.length > 0 ?
-
-
                                             <>
-
                                                 <label className={`fromGroup ${formDataErr?.hasParent ? "has-error" : ""}`}>
                                                     <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
                                                         Is Child
@@ -783,7 +783,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                             </label>
                                                             <select
                                                                 name="parentGroup"
-                                                                disabled={isViewed}
+                                                                disabled={isViewed || id}
 
                                                                 value={parentGroup}
                                                                 onChange={handleChange}

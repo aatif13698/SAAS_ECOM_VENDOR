@@ -298,7 +298,7 @@ const LedgerGroup = ({ noFade, scrollContent }) => {
                                 <Icon icon="heroicons:pencil-square" />
                             </button>
                         </Tooltip>
-                        <Tooltip
+                        {/* <Tooltip
                             content="Delete"
                             placement="top"
                             arrow
@@ -312,7 +312,7 @@ const LedgerGroup = ({ noFade, scrollContent }) => {
                             >
                                 <Icon icon="heroicons:trash" />
                             </button>
-                        </Tooltip>
+                        </Tooltip> */}
                     </div>
                 );
             },

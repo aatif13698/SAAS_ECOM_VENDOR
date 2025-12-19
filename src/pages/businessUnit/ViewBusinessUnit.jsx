@@ -14,6 +14,8 @@ import CryptoJS from "crypto-js";
 import employeeService from "@/services/employee/employee.service";
 import Tooltip from "@/components/ui/Tooltip";
 import { RxCross2 } from "react-icons/rx";
+import { FiRefreshCw } from "react-icons/fi";
+import toast from "react-hot-toast";
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -89,7 +91,9 @@ const ViewBusinessUnit = () => {
                 console.log("error while getting business branches", error);
             }
         }
-    }, [businessData])
+    }, [businessData]);
+
+
 
     if (pageLoading) {
         return (
@@ -151,6 +155,8 @@ const Overview = ({ data, isDark, branches, branchesLoading, setBranches }) => {
     const [selectedBranch, setSelectedBranch] = useState(null);
     const [branchTabValue, setBranchTabValue] = useState(0);
 
+    const [refresh1, setRefresh1] = useState(false);
+
     const handleView = (row) => {
         setSelectedBranch(row);
         setBranchTabValue(0); // Default to Overview
@@ -160,24 +166,57 @@ const Overview = ({ data, isDark, branches, branchesLoading, setBranches }) => {
         navigate(`/edit-branch/${encryptId(row._id)}`, { state: { id: row._id, name: "edit" } });
     };
 
+    async function handleRefreshMaster(params) {
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                clientId: clientId,
+                businessUnitId: data._id
+            }
+            setRefresh1(true);
+            const response = await businessUnitService.refreshMaster(dataObject);
+            console.log("resfresh", response);
+            toast.success(response?.data?.message);
+            setRefresh1(false);
+        } catch (error) {
+            setRefresh1(false);
+            console.log("error while refreshing the master", error);
+            toast.error(error?.response?.data?.message);
+        }
+    }
+
     return (
         <div className="md:p-6 p-2">
             {/* Profile Card */}
             <div className={`rounded-lg shadow-md border-green-700 border md:p-6 p-2 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
                 <div className={`rounded-lg  p-6 mb-6 ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="relative">
-                            <img
-                                src={data.icon || ProfileImage}
-                                alt="Business Logo"
-                                className="w-20 h-20 object-cover rounded-full shadow-md border-2 border-gray-200 dark:border-gray-700"
-                            />
-                            {/* <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div> */}
+                    <div className="flex justify-between items-start gap-4 mb-4">
+                        <div className="flex gap-2 items-center">
+                            <div className="relative">
+                                <img
+                                    src={data.icon || ProfileImage}
+                                    alt="Business Logo"
+                                    className="w-20 h-20 object-cover rounded-full shadow-md border-2 border-gray-200 dark:border-gray-700"
+                                />
+                                {/* <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div> */}
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{data.name || "N/A"}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Business Unit</p>
+                            </div>
+
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{data.name || "N/A"}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Business Unit</p>
+
+                        <div className="flex gap-2 items-center">
+                            <span>
+                                Refresh Masters
+                            </span>
+                            <button disabled={refresh1} onClick={handleRefreshMaster} className="bg-gray-500 text-white  p-1 rounded-full">
+                                <FiRefreshCw className={`${refresh1 ? "animate-spin" : ""}`} />
+                            </button>
                         </div>
+
+
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
                         <div>
