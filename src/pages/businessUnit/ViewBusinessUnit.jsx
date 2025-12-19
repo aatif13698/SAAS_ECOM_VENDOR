@@ -317,7 +317,9 @@ const Overview = ({ data, isDark, branches, branchesLoading, setBranches }) => {
                             </div>
                         ))
                     ) : (
-                        <div>No Branch Found</div>
+                         <div className="p-6 bg-gray-100 flex justify-center">
+                            <span>No Branch Found</span>
+                        </div>
                     )}
 
                     <button onClick={() => navigate("/create-branch")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
@@ -555,9 +557,11 @@ const BranchOverview = ({ data, isDark }) => {
                             </div>
                         ))
                     ) : (
-                        <div>No Warehouse Found</div>
+                        <div className="p-6 bg-gray-100 flex justify-center">
+                            <span>No Warehouse Found</span>
+                        </div>
                     )}
-                    <button onClick={() => navigate("/create-warehouse")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                    <button onClick={() => navigate("/create-warehouse")} className={`p-6  rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
                         <BiPlus size={24}/>
                         <span>Add Warehouse</span>
                     </button>
