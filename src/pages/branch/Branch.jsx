@@ -664,7 +664,7 @@ const Branch = () => {
                     {paginationData.map((row) => (
                         <div
                             key={row._id}
-                            className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-gray-50'} border border-gray-200 dark:border-gray-700`}
+                            className={`p-4 rounded-lg shadow-md ${isDark ? 'bg-gray-800' : 'bg-gray-50'} border border-gray-200 dark:border-gray-700`}
                         >
                             <div onClick={() => handleView(row)} className=" cursor-pointer">
                                 <div className="flex items-center gap-4 mb-2">
@@ -689,6 +689,8 @@ const Branch = () => {
 
                             </div>
 
+                            <hr className="mb-4" />
+
                             <div className="flex justify-between items-center">
                                 <span
                                     onClick={() => handleActive(row)}
@@ -700,11 +702,11 @@ const Branch = () => {
                                     {row.isActive ? "Active" : "Inactive"}
                                 </span>
                                 <div className="flex gap-3">
-                                    <Tooltip content="View" placement="top">
+                                    {/* <Tooltip content="View" placement="top">
                                         <button onClick={() => handleView(row)} className="text-blue-600 hover:text-blue-800">
                                             <Icon icon="heroicons:eye" />
                                         </button>
-                                    </Tooltip>
+                                    </Tooltip> */}
                                     <Tooltip content="Edit" placement="top">
                                         <button onClick={() => handleEdit(row)} className="text-green-600 hover:text-green-800">
                                             <Icon icon="heroicons:pencil-square" />

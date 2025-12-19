@@ -5,7 +5,7 @@ import branchService from "@/services/branch/branch.service";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import ProfileImage from "../../assets/images/users/user-4.jpg";
 import DocImage from "../../assets/images/demo-doc.avif";
-import { BiArrowBack } from "react-icons/bi";
+import { BiArrowBack, BiPlus } from "react-icons/bi";
 import { FaRegEdit } from "react-icons/fa";
 import { IoIosSettings } from "react-icons/io";
 import CryptoJS from "crypto-js";
@@ -253,6 +253,10 @@ const Overview = ({ data, isDark, warehouses, warehousesLoading }) => {
                     ) : (
                         <div>No Warehouse Found</div>
                     )}
+                    <button onClick={() => navigate("/create-warehouse")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                        <BiPlus size={24} />
+                        <span>Add Warehouse</span>
+                    </button>
                 </div>
 
                 {/* Selected Warehouse Details */}

@@ -18,6 +18,7 @@ import { FiRefreshCw } from "react-icons/fi";
 import toast from "react-hot-toast";
 import branchService from "@/services/branch/branch.service";
 import warehouseService from "@/services/warehouse/warehouse.service";
+import { BiPlus } from "react-icons/bi";
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -318,6 +319,11 @@ const Overview = ({ data, isDark, branches, branchesLoading, setBranches }) => {
                     ) : (
                         <div>No Branch Found</div>
                     )}
+
+                    <button onClick={() => navigate("/create-branch")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                        <BiPlus size={24}/>
+                        <span>Add Branch</span>
+                    </button>
                 </div>
 
                 {/* Selected Branch Details */}
@@ -551,6 +557,10 @@ const BranchOverview = ({ data, isDark }) => {
                     ) : (
                         <div>No Warehouse Found</div>
                     )}
+                    <button onClick={() => navigate("/create-warehouse")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                        <BiPlus size={24}/>
+                        <span>Add Warehouse</span>
+                    </button>
                 </div>
 
                 {/* Selected Warehouse Details */}
@@ -599,7 +609,7 @@ const BranchOverview = ({ data, isDark }) => {
 };
 
 const WarehouseOverview = ({ data, isDark }) => {
-        const [refresh1, setRefresh1] = useState(false);
+    const [refresh1, setRefresh1] = useState(false);
 
     async function handleRefreshMaster(params) {
         try {

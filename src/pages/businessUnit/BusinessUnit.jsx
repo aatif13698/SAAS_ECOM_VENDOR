@@ -28,9 +28,9 @@ import CryptoJS from "crypto-js";
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
 
 const encryptId = (id) => {
-  const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
-  // URL-safe encoding
-  return encodeURIComponent(encrypted);
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    // URL-safe encoding
+    return encodeURIComponent(encrypted);
 };
 
 const BusinessUnit = ({ noFade, scrollContent }) => {
@@ -239,23 +239,28 @@ const BusinessUnit = ({ noFade, scrollContent }) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
                     {paginationData.map((row) => (
-                        <div className={`p-6 rounded-lg shadow-md ${isDark ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'} cursor-pointer`}>
-                            <div onClick={() => handleView(row)} key={row._id} className="flex items-center gap-4 mb-4">
-                                <img
-                                    src={row.icon || ProfileImage}
-                                    alt="Business Logo"
-                                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
-                                />
-                                <div>
-                                    <h3 className="text-lg font-semibold">{row.name}</h3>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{row.city || "N/A"}</p>
+                        <div className={`p-4 rounded-lg shadow-md ${isDark ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-900'} cursor-pointer`}>
+                            <div onClick={() => handleView(row)}>
+                                <div  key={row._id} className="flex items-center gap-4 mb-4">
+                                    <img
+                                        src={row.icon || ProfileImage}
+                                        alt="Business Logo"
+                                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-300 dark:border-gray-600"
+                                    />
+                                    <div>
+                                        <h3 className="text-lg font-semibold">{row.name}</h3>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{row.city || "N/A"}</p>
+                                    </div>
+                                </div>
+                                <div className="space-y-2 mb-4">
+                                    <p className="text-sm"><span className="font-medium">Email:</span> {row.emailContact || "N/A"}</p>
+                                    <p className="text-sm"><span className="font-medium">Phone:</span> {row.contactNumber || "N/A"}</p>
                                 </div>
                             </div>
-                            <div className="space-y-2 mb-4">
-                                <p className="text-sm"><span className="font-medium">Email:</span> {row.emailContact || "N/A"}</p>
-                                <p className="text-sm"><span className="font-medium">Phone:</span> {row.contactNumber || "N/A"}</p>
-                            </div>
-                            <div className="flex justify-between items-center">
+
+
+                            <hr className="mb-4" />
+                            <div className="flex justify-between  items-center">
                                 <span
                                     className={`px-3 py-1 rounded-full text-sm cursor-pointer ${row.isActive ? 'bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-600 dark:bg-red-900 dark:text-red-300'}`}
                                     onClick={() => handleActive(row)}
@@ -263,11 +268,11 @@ const BusinessUnit = ({ noFade, scrollContent }) => {
                                     {row.isActive ? "Active" : "Inactive"}
                                 </span>
                                 <div className="flex gap-2">
-                                    <Tooltip content="View" placement="top" arrow animation="shift-away">
+                                    {/* <Tooltip content="View" placement="top" arrow animation="shift-away">
                                         <button className="text-blue-500 hover:text-blue-700" onClick={() => handleView(row)}>
                                             <Icon icon="heroicons:eye" />
                                         </button>
-                                    </Tooltip>
+                                    </Tooltip> */}
                                     <Tooltip content="Edit" placement="top" arrow animation="shift-away">
                                         <button className="text-green-500 hover:text-green-700" onClick={() => handleEdit(row)}>
                                             <Icon icon="heroicons:pencil-square" />
