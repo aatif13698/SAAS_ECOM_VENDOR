@@ -16,6 +16,8 @@ import Tooltip from "@/components/ui/Tooltip";
 import { RxCross2 } from "react-icons/rx";
 import { FiRefreshCw } from "react-icons/fi";
 import toast from "react-hot-toast";
+import branchService from "@/services/branch/branch.service";
+import warehouseService from "@/services/warehouse/warehouse.service";
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -373,6 +375,8 @@ const BranchOverview = ({ data, isDark }) => {
     const [selectedWarehouse, setSelectedWarehouse] = useState(null);
     const [warehouseTabValue, setWarehouseTabValue] = useState(0);
 
+    const [refresh1, setRefresh1] = useState(false);
+
     console.log("warehouses", warehouses);
 
     useEffect(() => {
@@ -402,28 +406,61 @@ const BranchOverview = ({ data, isDark }) => {
         navigate(`/edit-warehouse/${encryptId(row._id)}`, { state: { id: row._id, name: "edit" } });
     };
 
+    async function handleRefreshMaster(params) {
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                clientId: clientId,
+                branchId: data._id
+            }
+            setRefresh1(true);
+            const response = await branchService.refreshMaster(dataObject);
+            console.log("resfresh", response);
+            toast.success(response?.data?.message);
+            setRefresh1(false);
+        } catch (error) {
+            setRefresh1(false);
+            console.log("error while refreshing the master", error);
+            toast.error(error?.response?.data?.message);
+        }
+    }
+
     return (
         <div className="md:p-1 p-2">
             <div className={`rounded-lg  md:p-4 p-2 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
                 <div className={`rounded-lg p-6 mb-6 ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <div className="flex items-center gap-4 mb-4">
-                        <div className="relative">
-                            <img
-                                src={data.icon || ProfileImage}
-                                alt="Branch Logo"
-                                className="w-20 h-20 object-cover rounded-full shadow-md border-2 border-gray-200 dark:border-gray-700"
-                            />
+                    <div className="flex justify-between items-start gap-4 mb-4">
+                        <div className="flex gap-2 items-center">
+                            <div className="relative">
+                                <img
+                                    src={data.icon || ProfileImage}
+                                    alt="Business Logo"
+                                    className="w-20 h-20 object-cover rounded-full shadow-md border-2 border-gray-200 dark:border-gray-700"
+                                />
+                                {/* <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div> */}
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{data.name || "N/A"}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Branch</p>
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white">{data.name || "N/A"}</h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">Branch</p>
+
+                        <div className="flex gap-2 items-center">
+                            <span>
+                                Refresh Masters
+                            </span>
+                            <button disabled={refresh1} onClick={handleRefreshMaster} className="bg-gray-500 text-white  p-1 rounded-full">
+                                <FiRefreshCw className={`${refresh1 ? "animate-spin" : ""}`} />
+                            </button>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
                         <div>
+                            {/* <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact Email</p> */}
                             <p className="text-sm">{data.emailContact || "N/A"}</p>
                         </div>
                         <div>
+                            {/* <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact Number</p> */}
                             <p className="text-sm">{data.contactNumber || "N/A"}</p>
                         </div>
                     </div>
@@ -562,11 +599,31 @@ const BranchOverview = ({ data, isDark }) => {
 };
 
 const WarehouseOverview = ({ data, isDark }) => {
+        const [refresh1, setRefresh1] = useState(false);
+
+    async function handleRefreshMaster(params) {
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                clientId: clientId,
+                warehouseId: data._id
+            }
+            setRefresh1(true);
+            const response = await warehouseService.refreshMaster(dataObject);
+            console.log("resfresh", response);
+            toast.success(response?.data?.message);
+            setRefresh1(false);
+        } catch (error) {
+            setRefresh1(false);
+            console.log("error while refreshing the master", error);
+            toast.error(error?.response?.data?.message);
+        }
+    }
     return (
         <div className="md:p-6 p-2">
             <div className={`rounded-lg md:p-1 p-2 mb-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
                 <div className={`rounded-lg p-6 mb-6 ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
-                    <div className="flex items-center gap-4 mb-4">
+                    {/* <div className="flex items-center gap-4 mb-4">
                         <div className="relative">
                             <img
                                 src={data.icon || ProfileImage}
@@ -584,6 +641,42 @@ const WarehouseOverview = ({ data, isDark }) => {
                             <p className="text-sm">{data.emailContact || "N/A"}</p>
                         </div>
                         <div>
+                            <p className="text-sm">{data.contactNumber || "N/A"}</p>
+                        </div>
+                    </div> */}
+
+                    <div className="flex justify-between items-start gap-4 mb-4">
+                        <div className="flex gap-2 items-center">
+                            <div className="relative">
+                                <img
+                                    src={data.icon || ProfileImage}
+                                    alt="Business Logo"
+                                    className="w-20 h-20 object-cover rounded-full shadow-md border-2 border-gray-200 dark:border-gray-700"
+                                />
+                                {/* <div className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div> */}
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-gray-900 dark:text-white">{data.name || "N/A"}</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Branch</p>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-2 items-center">
+                            <span>
+                                Refresh Masters
+                            </span>
+                            <button disabled={refresh1} onClick={handleRefreshMaster} className="bg-gray-500 text-white  p-1 rounded-full">
+                                <FiRefreshCw className={`${refresh1 ? "animate-spin" : ""}`} />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-1 gap-2">
+                        <div>
+                            {/* <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact Email</p> */}
+                            <p className="text-sm">{data.emailContact || "N/A"}</p>
+                        </div>
+                        <div>
+                            {/* <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Contact Number</p> */}
                             <p className="text-sm">{data.contactNumber || "N/A"}</p>
                         </div>
                     </div>

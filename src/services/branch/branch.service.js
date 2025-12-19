@@ -121,6 +121,16 @@ const getBranchByBusiness = async (id) => {
 }
 
 
+const refreshMaster = async (data) => {
+
+    const authToken = await localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/branch/refresh/master/group`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
 
 
 
@@ -136,5 +146,6 @@ export default {
     deleteOne,
     getOne,
     activeInactive,
-    getBranchByBusiness
+    getBranchByBusiness,
+    refreshMaster
 }
