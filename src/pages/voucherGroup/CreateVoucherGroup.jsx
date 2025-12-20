@@ -23,16 +23,6 @@ import VoucherGroup from "./VoucherGroup";
 import voucherGroupService from "@/services/voucherGroup/voucherGroup.service";
 
 
-// Options for days multi-select
-const daysOptions = [
-    { value: 'Mon', label: 'Monday' },
-    { value: 'Tue', label: 'Tuesday' },
-    { value: 'Wed', label: 'Wednesday' },
-    { value: 'Thu', label: 'Thursday' },
-    { value: 'Fri', label: 'Friday' },
-    { value: 'Sat', label: 'Saturday' },
-    { value: 'Sun', label: 'Sunday' }
-];
 
 const CreateVoucherGroup = ({ noFade, scrollContent }) => {
     const navigate = useNavigate();
@@ -71,7 +61,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
     const [levelId, setLevelId] = useState("");
     const [financialYears, setFinancialYears] = useState([]);
     const [fields, setFields] = useState([]);
-    const [ledgerData, setLedgerData] = useState(null)
+    const [voucherGroupData, setVoucherGroupData] = useState(null)
     const [formData, setFormData] = useState({
         level: "",
         businessUnit: "",
@@ -208,7 +198,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
             category: validateField("category", category),
             description: validateField("description", description),
             resetFrequency: validateField("resetFrequency", resetFrequency),
-            financialYear: validateField("financialYear", financialYear),
+            // financialYear: validateField("financialYear", financialYear),
         };
 
         errors.level = validateField("level", level);
@@ -376,6 +366,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                         isSingleEntryType: baseAddress?.isSingleEntryType
 
                     }));
+                    setVoucherGroupData(baseAddress);
                     setPageLoading(false)
                 } catch (error) {
                     setPageLoading(false)
@@ -524,7 +515,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                             name="level"
                                             value={level}
                                             onChange={handleChange}
-                                            disabled={isViewed}
+                                            disabled={isViewed || id}
                                             className="form-control py-2  appearance-none relative flex-1"
                                         >
                                             <option value="">None</option>
@@ -556,7 +547,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                                     name="businessUnit"
                                                     value={businessUnit}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                    disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -587,7 +578,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                                     name="branch"
                                                     value={branch}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                    disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -617,7 +608,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                                     name="warehouse"
                                                     value={warehouse}
                                                     onChange={handleChange}
-                                                    disabled={isViewed || currentUser.isWarehouseLevel}
+                                                    disabled={isViewed || currentUser.isWarehouseLevel || id}
                                                     className="form-control py-2  appearance-none relative flex-1"
                                                 >
                                                     <option value="">None</option>
@@ -645,7 +636,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                             value={VoucherGroupName}
                                             onChange={handleChange}
                                             className="form-control py-2"
-                                            disabled={isViewed}
+                                            disabled={isViewed || voucherGroupData?.isMaster}
                                         />
                                         {
                                             <p className="text-sm text-red-500">
@@ -668,7 +659,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                             value={code}
                                             onChange={handleChange}
                                             className="form-control py-2"
-                                            disabled={isViewed}
+                                            disabled={isViewed || voucherGroupData?.isMaster}
                                         />
                                         {
                                             <p className="text-sm text-red-500">
@@ -744,7 +735,7 @@ const CreateVoucherGroup = ({ noFade, scrollContent }) => {
                                     <label className={`fromGroup   ${formDataErr?.financialYear !== "" ? "has-error" : ""
                                         } `}>
                                         <p className="form-label">
-                                            Financial Year  <span className="text-red-500">*</span>
+                                            Financial Year  
                                         </p>
                                         <select
                                             value={formData?.financialYear}
