@@ -251,12 +251,19 @@ const Overview = ({ data, isDark, warehouses, warehousesLoading }) => {
                             </div>
                         ))
                     ) : (
-                        <div>No Warehouse Found</div>
+                        <button onClick={() => navigate("/create-warehouse")} className={`p-6 md:col-span-3 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                                <BiPlus size={24} />
+                                <span>Add Warehouse</span>
+                            </button>
                     )}
-                    <button onClick={() => navigate("/create-warehouse")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
-                        <BiPlus size={24} />
-                        <span>Add Warehouse</span>
-                    </button>
+                    {
+                        warehouses?.length > 0 ?
+                            <button onClick={() => navigate("/create-warehouse")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                                <BiPlus size={24} />
+                                <span>Add Warehouse</span>
+                            </button> : null
+                    }
+
                 </div>
 
                 {/* Selected Warehouse Details */}

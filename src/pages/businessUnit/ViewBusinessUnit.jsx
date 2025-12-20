@@ -317,15 +317,20 @@ const Overview = ({ data, isDark, branches, branchesLoading, setBranches }) => {
                             </div>
                         ))
                     ) : (
-                         <div className="p-6 bg-gray-100 flex justify-center">
-                            <span>No Branch Found</span>
-                        </div>
+                        <button onClick={() => navigate("/create-branch")} className={`p-6 md: col-span-3 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                            <BiPlus size={24} />
+                            <span>Add Branch</span>
+                        </button>
                     )}
 
-                    <button onClick={() => navigate("/create-branch")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
-                        <BiPlus size={24}/>
-                        <span>Add Branch</span>
-                    </button>
+                    {
+                        branches?.length > 0 ?
+                            <button onClick={() => navigate("/create-branch")} className={`p-6 rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                                <BiPlus size={24} />
+                                <span>Add Branch</span>
+                            </button> : null
+                    }
+
                 </div>
 
                 {/* Selected Branch Details */}
@@ -557,14 +562,19 @@ const BranchOverview = ({ data, isDark }) => {
                             </div>
                         ))
                     ) : (
-                        <div className="p-6 bg-gray-100 flex justify-center">
-                            <span>No Warehouse Found</span>
-                        </div>
+                        <button onClick={() => navigate("/create-warehouse")} className={`p-6 md:col-span-3  rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                            <BiPlus size={24} />
+                            <span>Add Warehouse</span>
+                        </button>
                     )}
-                    <button onClick={() => navigate("/create-warehouse")} className={`p-6  rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
-                        <BiPlus size={24}/>
-                        <span>Add Warehouse</span>
-                    </button>
+                    {
+                        warehouses?.length > 0 ?
+                            <button onClick={() => navigate("/create-warehouse")} className={`p-6  rounded-lg shadow-md flex justify-center items-center gap-2 text-emerald-700  cursor-pointer border border-dashed border-emerald-500 `} >
+                                <BiPlus size={24} />
+                                <span>Add Warehouse</span>
+                            </button> : null
+                    }
+
                 </div>
 
                 {/* Selected Warehouse Details */}
