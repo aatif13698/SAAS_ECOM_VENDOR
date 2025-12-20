@@ -138,6 +138,46 @@ const updateProfile = async (data) => {
 
 
 
+const punch = async (type, data) => {
+  console.log("data", data);
+  const authToken = localStorage.getItem("saas_client_token");
+  try {
+    const response = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/api/vendor/hr/attendance/punch-${type}/attendance`,
+      data, // Pass the data as the second parameter
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        }
+      }
+    );
+
+
+    return response.data; // Assuming you want to return the response data
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error; // Re-throw the error to be handled by the calling code
+  }
+};
+
+
+
+
+const check = async (id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/attendance/can-punch-in/attendance/${clinetId}/${id}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+    
+}
+
+
+
 
 // const logout = () => {
 //   localStorage.removeItem("_stl");
@@ -145,4 +185,6 @@ const updateProfile = async (data) => {
 // };
 
 /* eslint import/no-anonymous-default-export: [2, {"allowObject": true}] */
-export default { Login, LoginStaff, OtpSignIn, staffOtpSignIn, getProfile, updateProfile, forgotPassword, resetPassword };
+export default { Login, LoginStaff, OtpSignIn, staffOtpSignIn, getProfile, updateProfile, forgotPassword, resetPassword, punch,
+  check
+ };
