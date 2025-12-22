@@ -87,12 +87,17 @@ const ViewProfile = () => {
         const res = await authService.check(useData?._id);
         if (res.canPunch === false) {
           setIsPunchDay(false)
-          setTodayAttendanceData(res?.attendance)
         } else {
           setIsPunchDay(true)
-          setCanPunchIn(res.canPunch === true);
-          setPunchMessage(res.message || "");
         }
+
+        if (res.canPunchIn === false) {
+          setCanPunchIn(false);
+          setTodayAttendanceData(res?.attendance);
+        } else if (res.canPunchIn === true) {
+          setCanPunchIn(true);
+        }
+        setPunchMessage(res.message || "");
 
       } catch (err) {
         setPunchError(err.response?.data?.message || "Failed to check punch-in status");
