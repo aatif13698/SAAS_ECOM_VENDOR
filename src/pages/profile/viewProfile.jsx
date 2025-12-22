@@ -53,6 +53,7 @@ const ViewProfile = () => {
   const [punchLoading, setPunchLoading] = useState(false);
   const [punchSuccess, setPunchSuccess] = useState("");
   const [punchError, setPunchError] = useState("");
+  const [isPunchDay, setIsPunchDay] = useState(false);
 
   const [todayAttendanceData, setTodayAttendanceData] = useState(null);
 
@@ -85,10 +86,14 @@ const ViewProfile = () => {
       try {
         const res = await authService.check(useData?._id);
         if (res.canPunch === false) {
+          setIsPunchDay(false)
           setTodayAttendanceData(res?.attendance)
+        } else {
+          setIsPunchDay(true)
+          setCanPunchIn(res.canPunch === true);
+          setPunchMessage(res.message || "");
         }
-        setCanPunchIn(res.canPunch === true);
-        setPunchMessage(res.message || "");
+
       } catch (err) {
         setPunchError(err.response?.data?.message || "Failed to check punch-in status");
         setCanPunchIn(false);
@@ -119,18 +124,18 @@ const ViewProfile = () => {
 
 
   const handlePunchOut = () => {
-       
-          Swal.fire({
-              title: `Are you Sure Want to punch-out`,
-              icon: "warning",
-              showCloseButton: true,
-              showCancelButton: true,
-          }).then((result) => {
-              if (result.isConfirmed) {
-                  handlePunch("out")
-              }
-          });
-      };
+
+    Swal.fire({
+      title: `Are you Sure Want to punch-out`,
+      icon: "warning",
+      showCloseButton: true,
+      showCancelButton: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        handlePunch("out")
+      }
+    });
+  };
 
   // Handle punch actions
   const handlePunch = async (type) => {
@@ -255,38 +260,50 @@ const ViewProfile = () => {
                   </div>
 
                   <div>
-                    {canPunchIn ? (
-                      <button
-                        className={`flex items-center justify-center gap-2 px-4 py-2 text-white font-medium rounded-lg shadow-md transition-all duration-200 ${!canPunchIn || punchLoading ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
-                          }`}
-                        onClick={() => handlePunch("in")}
-                        disabled={!canPunchIn || punchLoading}
-                      >
-                        {punchLoading ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white border-opacity-25 border-t-white"></div>
-                        ) : (
-                          <Icon icon="heroicons:clock" className="w-5 h-5" />
-                        )}
-                        Punch In
-                      </button>
-                    ) : (
-                      ""
-                    )}
-                    {!canPunchIn && (
-                      <button
-                        className={`flex items-center justify-center gap-2 px-4 py-2 text-white font-medium rounded-lg shadow-md transition-all duration-200 ${punchLoading ? "bg-red-300 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
-                          }`}
-                        onClick={() => handlePunchOut()}
-                        disabled={punchLoading}
-                      >
-                        {punchLoading ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white border-opacity-25 border-t-white"></div>
-                        ) : (
-                          <Icon icon="heroicons:arrow-right-on-rectangle" className="w-5 h-5" />
-                        )}
-                        Punch Out
-                      </button>
-                    )}
+
+                    {
+                      isPunchDay ?
+                        <>
+                          {canPunchIn ? (
+                            <button
+                              className={`flex items-center justify-center gap-2 px-4 py-2 text-white font-medium rounded-lg shadow-md transition-all duration-200 ${!canPunchIn || punchLoading ? "bg-green-300 cursor-not-allowed" : "bg-green-500 hover:bg-green-600"
+                                }`}
+                              onClick={() => handlePunch("in")}
+                              disabled={!canPunchIn || punchLoading}
+                            >
+                              {punchLoading ? (
+                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white border-opacity-25 border-t-white"></div>
+                              ) : (
+                                <Icon icon="heroicons:clock" className="w-5 h-5" />
+                              )}
+                              Punch In
+                            </button>
+                          ) : (
+                            ""
+                          )}
+                          {!canPunchIn && (
+                            <button
+                              className={`flex items-center justify-center gap-2 px-4 py-2 text-white font-medium rounded-lg shadow-md transition-all duration-200 ${punchLoading ? "bg-red-300 cursor-not-allowed" : "bg-red-500 hover:bg-red-600"
+                                }`}
+                              onClick={() => handlePunchOut()}
+                              disabled={punchLoading}
+                            >
+                              {punchLoading ? (
+                                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-white border-opacity-25 border-t-white"></div>
+                              ) : (
+                                <Icon icon="heroicons:arrow-right-on-rectangle" className="w-5 h-5" />
+                              )}
+                              Punch Out
+                            </button>
+                          )}
+
+                        </> :
+
+                        <div>
+                          Holiday Today !
+                        </div>
+                    }
+
                   </div>
                 </div>
 

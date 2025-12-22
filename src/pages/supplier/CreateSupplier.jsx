@@ -313,31 +313,31 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             }));
         }
 
-        if (!contactPerson) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                contactPerson: "Contact Person Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                contactPerson: "",
-            }));
-        }
+        // if (!contactPerson) {
+        //     setFormDataErr((prev) => ({
+        //         ...prev,
+        //         contactPerson: "Contact Person Is Required.",
+        //     }));
+        //     errorCount++
+        // } else {
+        //     setFormDataErr((prev) => ({
+        //         ...prev,
+        //         contactPerson: "",
+        //     }));
+        // }
 
-        if (!url) {
-            setFormDataErr((prev) => ({
-                ...prev,
-                url: "URL Is Required.",
-            }));
-            errorCount++
-        } else {
-            setFormDataErr((prev) => ({
-                ...prev,
-                url: "",
-            }));
-        }
+        // if (!url) {
+        //     setFormDataErr((prev) => ({
+        //         ...prev,
+        //         url: "URL Is Required.",
+        //     }));
+        //     errorCount++
+        // } else {
+        //     setFormDataErr((prev) => ({
+        //         ...prev,
+        //         url: "",
+        //     }));
+        // }
 
         if (!GstVanNumber) {
             setFormDataErr((prev) => ({
@@ -705,24 +705,24 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             }
         }
 
-        if (name === "contactPerson") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    contactPerson: "Contact Person Is Required.",
-                }));
-            } else if (value?.length <= 3) {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    contactPerson: "Minimum 3 characters required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    contactPerson: "",
-                }));
-            }
-        }
+        // if (name === "contactPerson") {
+        //     if (value === "") {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             contactPerson: "Contact Person Is Required.",
+        //         }));
+        //     } else if (value?.length <= 3) {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             contactPerson: "Minimum 3 characters required.",
+        //         }));
+        //     } else {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             contactPerson: "",
+        //         }));
+        //     }
+        // }
         if (name == "emailContact") {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (value == "") {
@@ -752,19 +752,19 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
             }
         }
 
-        if (name == "url") {
-            if (value === "") {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    url: "URL Is Required.",
-                }));
-            } else {
-                setFormDataErr((prev) => ({
-                    ...prev,
-                    url: "",
-                }));
-            }
-        }
+        // if (name == "url") {
+        //     if (value === "") {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             url: "URL Is Required.",
+        //         }));
+        //     } else {
+        //         setFormDataErr((prev) => ({
+        //             ...prev,
+        //             url: "",
+        //         }));
+        //     }
+        // }
 
         if (name == "GstVanNumber") {
             if (value === "") {
@@ -1401,7 +1401,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 } `}
                                         >
                                             <p className="form-label">
-                                                contact Person<span className="text-red-500">*</span>
+                                                contact Person
                                             </p>
                                             <input
                                                 name="contactPerson"
@@ -1465,7 +1465,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 } `}
                                         >
                                             <p className="form-label">
-                                                URL <span className="text-red-500">*</span>
+                                                URL 
                                             </p>
                                             <input
                                                 name="url"
