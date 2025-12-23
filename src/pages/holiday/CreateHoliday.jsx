@@ -70,6 +70,9 @@ const CreateHoliday = ({ noFade, scrollContent }) => {
         isHalfDay,
     } = formData;
 
+    console.log("formData", formData);
+    
+
     // Calculate if isHalfDay should be disabled
     const isHalfDayDisabled = () => {
         if (!startDate || !endDate) return false;
@@ -312,8 +315,8 @@ const CreateHoliday = ({ noFade, scrollContent }) => {
                 isBuLevel: formData.isBuLevel || false,
                 isBranchLevel: formData.isBranchLevel || false,
                 isWarehouseLevel: formData.isWarehouseLevel || false,
-                startDate: new Date(formData.startDate),
-                endDate: new Date(formData.endDate),
+                startDate: (formData.startDate),
+                endDate: (formData.endDate),
             };
             if (id) {
                 const response = await holidayService.update({ ...payload, holidayId: id });
