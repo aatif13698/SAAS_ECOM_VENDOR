@@ -35,6 +35,7 @@ import ProfileImage from "@/assets/images/users/user-1.jpg";
 import authService from "@/services/authService";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import AttendanceCalendar from "./AttendanceCalendar";
 
 const ViewProfile = () => {
   const navigate = useNavigate();
@@ -354,6 +355,19 @@ const ViewProfile = () => {
                   <span>Documents</span>
                 </button>
               )}
+
+               {useData?.roleId !== 1 && (
+                <button
+                  className={`flex items-center space-x-1 font-medium text-sm uppercase tracking-wide ${activeTab === "attendance"
+                    ? "text-emerald-500 border-2 rounded-2xl rounded-br-none rounded-bl-none px-2 py-2 border-emerald-500 bg-emerald-50"
+                    : "text-slate-600 dark:text-slate-300 hover:text-emerald-500 px-2 py-2"
+                    }`}
+                  onClick={() => setActiveTab("attendance")}
+                >
+                  <Icon icon="heroicons:document-text" className="w-4 h-4" />
+                  <span>Attendance</span>
+                </button>
+              )}
             </nav>
           </div>
 
@@ -410,6 +424,13 @@ const ViewProfile = () => {
               <div className="p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md">
                 <CustomDocumentSubmit roleId={useData?.role?._id} userId={useData?._id} />
               </div>
+            )}
+
+             {activeTab === "attendance" && useData?.roleId !== 1 && (
+              // <div className="p-4 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+              //   <CustomDocumentSubmit roleId={useData?.role?._id} userId={useData?._id} />
+              // </div>
+              <AttendanceCalendar />
             )}
           </div>
         </div>

@@ -7,6 +7,7 @@ const Profile = lazy(() => import("./pages/profile/profile"));
 const ViewProfile = lazy(() => import("./pages/profile/viewProfile"));
 const OtpVerify = lazy(() => import("./pages/auth/OtpVerify"));
 const StaffOtpVerify = lazy(() => import("./pages/auth/StaffOtpVerify"));
+const AttendanceCalendar = lazy(() => import("./pages/profile/AttendanceCalendar"));
 
 // const Vendors = lazy(() => import("./pages/vendor/Vendor"))
 const CreateVendor = lazy(() => import("./pages/vendor/CreateVendor"));
@@ -206,6 +207,7 @@ function App() {
                 {/* ---- Profile Routes ----- */}
                 <Route path="profile" element={<Profile />} />
                 <Route path="viewProfile" element={<ViewProfile />} />
+                <Route path="attendance" element={<AttendanceCalendar />} />
                 <Route path="businessunit-list" element={<BusinessUnit />} />
                 {/* <Route path="vendors-list" element={<Vendors roleId={currentUser?.roleId} />} /> */}
                 <Route path="create-vendor" element={<CreateVendor roleId={currentUser?.roleId} />} />
