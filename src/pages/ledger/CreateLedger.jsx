@@ -466,6 +466,8 @@ function CreateLedger() {
     setIsSubmitting(true);
     try {
       const newErrors = {};
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
       existingFields.forEach((field) => {
         const fieldName = field.name;
         const value = customizationValues[fieldName];
@@ -476,6 +478,7 @@ function CreateLedger() {
             (typeof value === "string" && !value.trim()) ||
             (field.type === "file" && !value) ||
             (field.type === "checkbox" && value === false)
+
           ) {
             newErrors[fieldName] = `${field.label} is required`;
           }
@@ -483,6 +486,9 @@ function CreateLedger() {
             if (!value?.length) {
               newErrors[fieldName] = `${field.label} is required`;
             }
+          }
+          if (field.type === "email" && !emailRegex.test(value)) {
+            newErrors[fieldName] = `Enter a valid Email`;
           }
         }
         if (field.validation?.regex && value) {
