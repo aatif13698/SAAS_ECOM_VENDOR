@@ -467,6 +467,7 @@ function CreateLedger() {
     try {
       const newErrors = {};
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^[0-9]{10}$/;
 
       existingFields.forEach((field) => {
         const fieldName = field.name;
@@ -489,6 +490,11 @@ function CreateLedger() {
           }
           if (field.type === "email" && !emailRegex.test(value)) {
             newErrors[fieldName] = `Enter a valid Email`;
+          }
+          if (field.type === "number" && field.name == "Phone") {
+            if (!phoneRegex.test(value) || value.length === 0) {
+              newErrors[fieldName] = `Enter a valid phone no.`;
+            }
           }
         }
         if (field.validation?.regex && value) {
@@ -564,7 +570,6 @@ function CreateLedger() {
         const response = await ledgerService.submitFormData(formData);
       }
 
-
       Swal.fire({
         position: "top-end",
         icon: "success",
@@ -580,12 +585,12 @@ function CreateLedger() {
       setErrors({});
     } catch (error) {
       setIsSubmitting(false);
-      console.error("Error submitting form:", error?.response?.data?.error);
+      console.error("Error submitting form:", error?.response?.data?.message);
       Swal.fire({
         icon: "error",
         title: "Error",
         text:
-          error?.response?.data?.error,
+          error?.response?.data?.message,
       });
     } finally {
       setIsSubmitting(false);
@@ -698,11 +703,11 @@ function CreateLedger() {
     const rules = {
       ledgerName: [
         [!value, "Ledger Name is Required"],
-        [value.length <= 3, "Minimum 3 characters required."]
+        [value.length < 3, "Minimum 3 characters required."]
       ],
       alias: [
         [!value, "Alias is Required"],
-        [value.length <= 3, "Minimum 3 characters required."]
+        [value.length < 3, "Minimum 3 characters required."]
       ],
       ledgerGroupId: [
         [!value, "Grup is Required"],
@@ -1074,7 +1079,7 @@ function CreateLedger() {
               name="level"
               value={level}
               onChange={handleChange}
-              disabled={isViewed}
+              disabled={isViewed || id}
               className="form-control py-2  appearance-none relative flex-1"
             >
               <option value="">None</option>
@@ -1106,7 +1111,7 @@ function CreateLedger() {
                   name="businessUnit"
                   value={businessUnit}
                   onChange={handleChange}
-                  disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                  disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                   className="form-control py-2  appearance-none relative flex-1"
                 >
                   <option value="">None</option>
@@ -1137,7 +1142,7 @@ function CreateLedger() {
                   name="branch"
                   value={branch}
                   onChange={handleChange}
-                  disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                  disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                   className="form-control py-2  appearance-none relative flex-1"
                 >
                   <option value="">None</option>
@@ -1167,7 +1172,7 @@ function CreateLedger() {
                   name="warehouse"
                   value={warehouse}
                   onChange={handleChange}
-                  disabled={isViewed || currentUser.isWarehouseLevel}
+                  disabled={isViewed || currentUser.isWarehouseLevel || id}
                   className="form-control py-2  appearance-none relative flex-1"
                 >
                   <option value="">None</option>
@@ -1240,7 +1245,7 @@ function CreateLedger() {
               name="ledgerGroupId"
               value={ledgerGroupId}
               onChange={handleChange}
-              disabled={isViewed}
+              disabled={isViewed || id}
               className="form-control py-2  appearance-none relative flex-1"
             >
               <option value="">None</option>
@@ -1387,7 +1392,7 @@ function CreateLedger() {
                       isNone: true
                     }))
                   }
-                  disabled={isViewed}
+                  disabled={isViewed || id}
                   className="form-radio text-blue-600"
                   aria-label="Customer"
                 />
@@ -1408,7 +1413,7 @@ function CreateLedger() {
                       isNone: false
                     }))
                   }
-                  disabled={isViewed}
+                  disabled={isViewed || id}
                   className="form-radio text-blue-600"
                   aria-label="Customer"
                 />
@@ -1429,7 +1434,7 @@ function CreateLedger() {
                       isNone: false
                     }))
                   }
-                  disabled={isViewed}
+                  disabled={isViewed || id}
                   className="form-radio text-blue-600"
                   aria-label="Supplier"
                 />
@@ -1450,7 +1455,7 @@ function CreateLedger() {
                       isNone: false
                     }))
                   }
-                  disabled={isViewed}
+                  disabled={isViewed || id}
                   className="form-radio text-blue-600"
                   aria-label="Employee"
                 />

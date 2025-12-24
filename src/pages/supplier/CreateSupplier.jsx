@@ -1267,7 +1267,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 name="level"
                                                 value={level}
                                                 onChange={handleChange}
-                                                disabled={isViewed}
+                                                disabled={isViewed || id}
                                                 className="form-control py-2  appearance-none relative flex-1"
                                             >
                                                 <option value="">None</option>
@@ -1299,7 +1299,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                         name="businessUnit"
                                                         value={businessUnit}
                                                         onChange={handleChange}
-                                                        disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                        disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                                                         className="form-control py-2  appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
@@ -1330,7 +1330,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                         name="branch"
                                                         value={branch}
                                                         onChange={handleChange}
-                                                        disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel}
+                                                        disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
                                                         className="form-control py-2  appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
@@ -1360,7 +1360,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                         name="warehouse"
                                                         value={warehouse}
                                                         onChange={handleChange}
-                                                        disabled={isViewed || currentUser.isWarehouseLevel}
+                                                        disabled={isViewed || currentUser.isWarehouseLevel || id}
                                                         className="form-control py-2  appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
@@ -1387,7 +1387,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 value={name}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                readOnly={isViewed}
+                                                readOnly={isViewed || id}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
@@ -1410,7 +1410,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 value={contactPerson}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                readOnly={isViewed}
+                                                readOnly={isViewed || id}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
@@ -1432,7 +1432,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 placeholder="Enter Email"
                                                 value={emailContact}
                                                 onChange={handleChange}
-                                                readOnly={isViewed}
+                                                readOnly={isViewed || id}
 
                                                 className="form-control py-2"
                                             />
@@ -1453,7 +1453,7 @@ const CreateSupplier = ({ noFade, scrollContent }) => {
                                                 value={contactNumber}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                readOnly={isViewed}
+                                                readOnly={isViewed || id}
                                                 onInput={handleKeyPress}
 
                                             />

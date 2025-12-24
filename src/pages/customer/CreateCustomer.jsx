@@ -1204,7 +1204,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
 
                                 <form onSubmit={onSubmit}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
+                                    <div className="grid grid-cols-1 md:grid-cols-3  gap-5 ">
 
                                         <label
                                             className={`fromGroup   ${formDataErr?.firstName !== "" ? "has-error" : ""
@@ -1220,7 +1220,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
                                                 value={firstName}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                disabled={isViewed}
+                                                disabled={isViewed || id}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
@@ -1265,7 +1265,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
                                                 placeholder="Enter Email"
                                                 value={email}
                                                 onChange={handleChange}
-                                                disabled={isViewed}
+                                                disabled={isViewed || id}
 
                                                 className="form-control py-2"
                                             />
@@ -1286,7 +1286,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
                                                 value={phone}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                disabled={isViewed}
+                                                disabled={isViewed || id}
                                                 onInput={handleKeyPress}
 
                                             />
@@ -1426,7 +1426,7 @@ const CreateCustomer = ({ noFade, scrollContent }) => {
 
                                         {/* address one */}
                                         <label
-                                            className={`fromGroup col-span-2  ${formDataErr?.address !== "" ? "has-error" : ""
+                                            className={`fromGroup md:col-span-3  ${formDataErr?.address !== "" ? "has-error" : ""
                                                 } `}
                                         >
                                             <p className="form-label">
