@@ -77,7 +77,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
         warehouse: "",
 
         groupName: "",
-        hasParent: false,
+        hasParent: true,
         parentGroup: "",
     });
 
@@ -728,33 +728,11 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                             </div>
                                     }
 
-                                    <label
-                                        className={`fromGroup   ${formDataErr?.groupName !== "" ? "has-error" : ""
-                                            } `}
-                                    >
-                                        <p className="form-label">
-                                            Name <span className="text-red-500">*</span>
-                                        </p>
-                                        <input
-                                            name="groupName"
-                                            type="text"
-                                            placeholder="Enter group name"
-                                            value={groupName}
-                                            onChange={handleChange}
-                                            className="form-control py-2"
-                                            disabled={isViewed || ledgerData?.isMaster}
-                                        />
-                                        {
-                                            <p className="text-sm text-red-500">
-                                                {formDataErr.groupName}
-                                            </p>
-                                        }
-                                    </label>
 
-                                    {
+                                      {
                                         parentLedgers?.length > 0 ?
                                             <>
-                                                <label className={`fromGroup ${formDataErr?.hasParent ? "has-error" : ""}`}>
+                                                {/* <label className={`fromGroup ${formDataErr?.hasParent ? "has-error" : ""}`}>
                                                     <p className={`mb-1 ${isDark ? "text-white" : "text-black"}`}>
                                                         Is Child
                                                     </p>
@@ -767,7 +745,7 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
                                                         ></div>
                                                     </div>
                                                     {formDataErr?.hasParent && <p className="text-red-600 text-xs">{formDataErr.hasParent}</p>}
-                                                </label>
+                                                </label> */}
 
                                                 {
 
@@ -808,6 +786,31 @@ const CreateLedgerGroup = ({ noFade, scrollContent }) => {
 
                                             : ""
                                     }
+
+                                    <label
+                                        className={`fromGroup   ${formDataErr?.groupName !== "" ? "has-error" : ""
+                                            } `}
+                                    >
+                                        <p className="form-label">
+                                            Name <span className="text-red-500">*</span>
+                                        </p>
+                                        <input
+                                            name="groupName"
+                                            type="text"
+                                            placeholder="Enter group name"
+                                            value={groupName}
+                                            onChange={handleChange}
+                                            className="form-control py-2"
+                                            disabled={isViewed || ledgerData?.isMaster}
+                                        />
+                                        {
+                                            <p className="text-sm text-red-500">
+                                                {formDataErr.groupName}
+                                            </p>
+                                        }
+                                    </label>
+
+                                  
 
 
 

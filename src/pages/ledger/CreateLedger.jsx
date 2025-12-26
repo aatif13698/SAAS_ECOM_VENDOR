@@ -1186,6 +1186,31 @@ function CreateLedger() {
               </div>
           }
 
+          <div
+            className={`fromGroup   ${formDataErr?.ledgerGroupId !== "" ? "has-error" : ""
+              } `}
+          >
+            <label htmlFor=" hh" className="form-label ">
+              <p className="form-label">
+                Ledger Group <span className="text-red-500">*</span>
+              </p>
+            </label>
+            <select
+              name="ledgerGroupId"
+              value={ledgerGroupId}
+              onChange={handleChange}
+              disabled={isViewed || id}
+              className="form-control py-2  appearance-none relative flex-1"
+            >
+              <option value="">None</option>
+              {ledgerGroups &&
+                ledgerGroups?.map((item) => (
+                  <option value={item?._id} key={item?._id}>{item?.groupName}</option>
+                ))}
+            </select>
+            {<p className="text-sm text-red-500">{formDataErr.ledgerGroupId}</p>}
+          </div>
+
           <label
             className={`fromGroup   ${formDataErr?.ledgerName !== "" ? "has-error" : ""
               } `}
@@ -1232,30 +1257,7 @@ function CreateLedger() {
             }
           </label>
 
-          <div
-            className={`fromGroup   ${formDataErr?.ledgerGroupId !== "" ? "has-error" : ""
-              } `}
-          >
-            <label htmlFor=" hh" className="form-label ">
-              <p className="form-label">
-                Ledger Group <span className="text-red-500">*</span>
-              </p>
-            </label>
-            <select
-              name="ledgerGroupId"
-              value={ledgerGroupId}
-              onChange={handleChange}
-              disabled={isViewed || id}
-              className="form-control py-2  appearance-none relative flex-1"
-            >
-              <option value="">None</option>
-              {ledgerGroups &&
-                ledgerGroups?.map((item) => (
-                  <option value={item?._id} key={item?._id}>{item?.groupName}</option>
-                ))}
-            </select>
-            {<p className="text-sm text-red-500">{formDataErr.ledgerGroupId}</p>}
-          </div>
+
 
           <label
             className={`fromGroup   ${formDataErr?.ledgerType !== "" ? "has-error" : ""
