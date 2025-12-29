@@ -128,6 +128,11 @@ const ViewPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ViewPurch
 
 
 
+// system settings
+const SystemSettings = lazy(() => import("./pages/systemSettings/SystemSettings"))
+
+
+
 
 
 import ForgotPassword from "./Common/forgotPassword/ForgotPassword";
@@ -341,6 +346,12 @@ function App() {
                 <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />
                 <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
                 <Route path="view/purchase-invoice" element={<ViewPurchaseInvoice />} />
+
+
+
+                {/* system settings */}
+
+                <Route path="system/settings" element={<SystemSettings/>} />
 
 
 

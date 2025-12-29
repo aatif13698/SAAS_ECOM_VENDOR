@@ -15,9 +15,12 @@ import MonoChrome from "./Tools/MonoChrome";
 import GoogleLanguage from "./Tools/GoogleLanguage";
 import logo from "../../../assets/images/logo/logo.png"
 import { FiAlignJustify } from "react-icons/fi";
+import { IoIosSettings } from "react-icons/io";
+import { useNavigate } from "react-router-dom";
 
 
 const Header = ({ className = "custom-class" }) => {
+  const navigate = useNavigate()
   const [collapsed, setMenuCollapsed] = useSidebar();
   const { width, breakpoints } = useWidth();
   const [navbarType] = useNavbarType();
@@ -123,9 +126,20 @@ const Header = ({ className = "custom-class" }) => {
           {/* Nav Tools  */}
           <div className="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse">
 
+           
+
             <GoogleLanguage />
             {/* <SwitchDark /> */}
             <MonoChrome />
+             <span>
+              <div
+                className="lg:h-[32px] lg:w-[32px]  dark:text-white text-slate-900 cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
+                onClick={() => navigate("/system/settings")}
+              >
+                {/* <Icon icon="mdi:palette-outline" /> */}
+                <IoIosSettings />
+              </div>
+            </span>
             {width >= breakpoints.md && <Notification />}
             {width >= breakpoints.md && <Profile />}
             {width <= breakpoints.md && (
@@ -134,9 +148,13 @@ const Header = ({ className = "custom-class" }) => {
                 onClick={handleOpenMobileMenu}
               >
                 {/* <Icon icon="heroicons-outline:menu-alt-3" /> */}
-                   <FiAlignJustify />
+                <FiAlignJustify />
               </div>
             )}
+
+
+
+
           </div>
         </div>
       </div>
