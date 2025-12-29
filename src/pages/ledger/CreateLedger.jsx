@@ -619,7 +619,7 @@ function CreateLedger() {
       name: "Warehouse",
       value: "warehouse"
     },
-  ])
+  ]);
 
 
 
