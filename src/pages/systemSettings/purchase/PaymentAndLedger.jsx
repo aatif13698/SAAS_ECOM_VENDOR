@@ -6,6 +6,11 @@ import { FaRegEdit, FaStar, FaRegStar } from "react-icons/fa";
 import ledgerGroupService from '@/services/ledgerGroup/ledgerGroup.service';
 import { BsTrash } from "react-icons/bs";
 import warehouseService from '@/services/warehouse/warehouse.service';
+import purchasePaymentService from "../../../services/purchasePaymentConfig/purchasePaymentConfigure.service"
+import purchasePaymentConfigureService from '../../../services/purchasePaymentConfig/purchasePaymentConfigure.service';
+import { MdOutlineRadioButtonUnchecked } from "react-icons/md";
+import { IoCheckmarkCircle } from "react-icons/io5";
+import toast from 'react-hot-toast';
 
 // import purchasePaymentService from '@/services/purchasePaymentConfig.service'; // create this
 
@@ -21,6 +26,10 @@ const PaymentAndLedger = () => {
 
     const [cashMethods, setCashMethods] = useState([]);     // [{ledgerId, name, isPrimary, _id?}]
     const [bankMethods, setBankMethods] = useState([]);
+
+    console.log("cashMethods", cashMethods);
+    console.log("bankMethods", bankMethods);
+
 
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -169,7 +178,7 @@ const PaymentAndLedger = () => {
             }
         }
 
-    }, [currentUser])
+    }, [currentUser]);
 
 
 
@@ -263,10 +272,19 @@ const PaymentAndLedger = () => {
             if (level === "vendor") {
                 setLevelResult(1);
             } else if (level === "business") {
+                if (currentUser.isBuLevel && currentUser.businessUnit) {
+                    loadData(level, currentUser.businessUnit)
+                }
                 setLevelResult(2)
             } else if (level === "branch") {
+                if (currentUser.isBranchLevel && currentUser.branch) {
+                    loadData(level, currentUser.branch)
+                }
                 setLevelResult(3)
             } else if (level === "warehouse") {
+                if (currentUser.isWarehouseLevel && currentUser.warehouse) {
+                    loadData(level, currentUser.warehouse)
+                }
                 setLevelResult(4)
             }
         } else {
@@ -283,19 +301,48 @@ const PaymentAndLedger = () => {
     const loadData = async (currentLevel, levelId) => {
         setLoading(true);
         try {
+
+
             // 1. Available ledgers
             const ledgersRes = await ledgerGroupService.getCashAndBankGroupLedger(currentLevel, levelId);
             setAvailableCash(ledgersRes?.data?.cashLedgers || []);
             setAvailableBank(ledgersRes?.data?.bankLedgers || []);
 
+
+            const configures = await purchasePaymentConfigureService.getConfigure(currentLevel, levelId);
+            console.log("configures", configures);
+
+
+            let cashArray = []
+
+            if (configures.data.cashLedgers?.length > 0) {
+                cashArray = configures.data.cashLedgers?.map((cash) => {
+                    return {
+                        ...cash,
+                        ledgerId: cash.id
+                    }
+                })
+            }
+
+            let bankArray = []
+
+            if (configures.data.bankLedgers?.length > 0) {
+                bankArray = configures.data.bankLedgers?.map((bank) => {
+                    return {
+                        ...bank,
+                        ledgerId: bank.id
+                    }
+                })
+            }
+
             // 2. Saved payment configurations (you'll need this endpoint)
             // const configRes = await purchasePaymentService.getConfigs(currentLevel, levelId);
-            // setCashMethods(configRes.data.cashLedgers || []);
-            // setBankMethods(configRes.data.bankLedgers || []);
+            setCashMethods(cashArray);
+            setBankMethods(bankArray);
 
             // For now simulate / use your real service
-            setCashMethods([]);
-            setBankMethods([]);
+            // setCashMethods([]);
+            // setBankMethods([]);
 
         } catch (err) {
             console.error(err);
@@ -339,6 +386,7 @@ const PaymentAndLedger = () => {
             next[index].isPrimary = true;
             return next;
         });
+        toast.success("Marked primary")
     };
 
     const toggleEdit = (type, index, shouldEdit = true) => {
@@ -367,34 +415,43 @@ const PaymentAndLedger = () => {
     const saveAll = async () => {
         setSaving(true);
         try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+
             // You should call two separate requests or one bulk
             // Here we show separate for clarity
-
             if (cashMethods.length > 0) {
-                await purchasePaymentService.upsert({
-                    level: currentLevel,
-                    levelId,
+                const dataObject = {
+                    clientId: clientId,
+                    level: level,
+                    businessUnit,
+                    branch,
+                    warehouse,
                     type: 'cash',
                     ledgers: cashMethods.map(m => ({
                         id: m.ledgerId,
                         isPrimary: m.isPrimary
                     }))
-                });
+                }
+                await purchasePaymentService.upsert(dataObject);
             }
 
             if (bankMethods.length > 0) {
-                await purchasePaymentService.upsert({
-                    level: currentLevel,
-                    levelId,
+                const dataObject = {
+                    clientId: clientId,
+                    level: level,
+                    businessUnit,
+                    branch,
+                    warehouse,
                     type: 'bank',
                     ledgers: bankMethods.map(m => ({
                         id: m.ledgerId,
                         isPrimary: m.isPrimary
                     }))
-                });
+                }
+                await purchasePaymentService.upsert(dataObject);
             }
 
-            alert('Changes saved successfully!');
+            toast.success("Changes saved successfully!")
             // Optionally reload data
         } catch (err) {
             console.error(err);
@@ -446,10 +503,10 @@ const PaymentAndLedger = () => {
                         <button
                             type="button"
                             onClick={() => togglePrimary(type, index)}
-                            className="p-2 text-yellow-500 hover:text-yellow-600 transition-colors"
+                            className="p-2 text-green-500 hover:text-green-600 transition-colors"
                             title={method.isPrimary ? "Primary" : "Set as primary"}
                         >
-                            {method.isPrimary ? <FaStar size={20} /> : <FaRegStar size={20} />}
+                            {method.isPrimary ? <IoCheckmarkCircle size={20} /> : <MdOutlineRadioButtonUnchecked size={20} />}
                         </button>
 
                         <div className="flex items-center gap-2">
@@ -464,13 +521,13 @@ const PaymentAndLedger = () => {
                                 <>
                                     <button
                                         onClick={() => toggleEdit(type, index, true)}
-                                        className="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md"
+                                        className="p-2 bg-indigo-500/70 hover:bg-indigo-700 text-white rounded-md"
                                     >
                                         <FaRegEdit />
                                     </button>
                                     <button
                                         onClick={() => remove(type, index)}
-                                        className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
+                                        className="p-2 bg-red-500/70 hover:bg-red-700 text-white rounded-md"
                                     >
                                         <BsTrash />
                                     </button>
