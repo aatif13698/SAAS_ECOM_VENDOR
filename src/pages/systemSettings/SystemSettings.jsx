@@ -15,6 +15,7 @@ import {
   FiGrid,
 } from 'react-icons/fi';
 import PurchaseSettings from './PurchaseSettings';
+import RoleList from '../rolesAndPermission/RolesList';
 
 const menuItems = [
   { id: 'general', label: 'General', icon: FiSettings },
@@ -143,8 +144,12 @@ function SystemSettings() {
             {activeSection === 'purchase' && (
               <PurchaseSettings/>
             )}
+
+            {activeSection === 'users-roles' && (
+              <RoleList/>
+            )}
             {/* Quick placeholder for other sections */}
-            {['stocks', 'sales', 'accounting', 'vendors', 'users-roles', 'notifications', 'integrations']
+            {['stocks', 'sales', 'accounting', 'vendors', 'notifications', 'integrations']
               .includes(activeSection) && (
               <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
                 <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
