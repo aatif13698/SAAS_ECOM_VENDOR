@@ -189,6 +189,9 @@ const PaymentAndLedger = () => {
     useEffect(() => {
         if (businessUnit) {
             getBranchByBusiness(businessUnit);
+            if (level === "business") {
+                loadData(level, businessUnit);
+            }
         }
     }, [businessUnit]);
 
@@ -204,6 +207,9 @@ const PaymentAndLedger = () => {
     useEffect(() => {
         if (branch) {
             getWarehouseByBranch(branch);
+            if (level === "branch") {
+                loadData(level, branch);
+            }
         }
     }, [branch]);
 
@@ -215,6 +221,13 @@ const PaymentAndLedger = () => {
             console.log("error while getting warehouse by branch");
         }
     }
+
+
+    useEffect(() => {
+        if (warehouse && level === "warehouse") {
+            loadData(level, warehouse);
+        }
+    }, [warehouse]);
 
 
     // Set level
@@ -239,6 +252,14 @@ const PaymentAndLedger = () => {
 
     useEffect(() => {
         if (level) {
+
+            setAvailableCash([]);
+            setAvailableBank([]);
+            setCashMethods([]);
+            setBankMethods([]);
+
+
+
             if (level === "vendor") {
                 setLevelResult(1);
             } else if (level === "business") {
@@ -254,35 +275,34 @@ const PaymentAndLedger = () => {
     }, [level])
 
     // Load available ledgers + saved configurations
-    useEffect(() => {
-        if (!currentLevel) return;
+    // useEffect(() => {
+    //     if (!currentLevel) return;
+    //     loadData(currentLevel, levelId);
+    // }, [currentLevel, levelId]);
 
-        const loadData = async () => {
-            setLoading(true);
-            try {
-                // 1. Available ledgers
-                const ledgersRes = await ledgerGroupService.getCashAndBankGroupLedger(currentLevel, levelId);
-                setAvailableCash(ledgersRes?.data?.cashLedgers || []);
-                setAvailableBank(ledgersRes?.data?.bankLedgers || []);
+    const loadData = async (currentLevel, levelId) => {
+        setLoading(true);
+        try {
+            // 1. Available ledgers
+            const ledgersRes = await ledgerGroupService.getCashAndBankGroupLedger(currentLevel, levelId);
+            setAvailableCash(ledgersRes?.data?.cashLedgers || []);
+            setAvailableBank(ledgersRes?.data?.bankLedgers || []);
 
-                // 2. Saved payment configurations (you'll need this endpoint)
-                // const configRes = await purchasePaymentService.getConfigs(currentLevel, levelId);
-                // setCashMethods(configRes.data.cashLedgers || []);
-                // setBankMethods(configRes.data.bankLedgers || []);
+            // 2. Saved payment configurations (you'll need this endpoint)
+            // const configRes = await purchasePaymentService.getConfigs(currentLevel, levelId);
+            // setCashMethods(configRes.data.cashLedgers || []);
+            // setBankMethods(configRes.data.bankLedgers || []);
 
-                // For now simulate / use your real service
-                setCashMethods([]);
-                setBankMethods([]);
+            // For now simulate / use your real service
+            setCashMethods([]);
+            setBankMethods([]);
 
-            } catch (err) {
-                console.error(err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-    }, [currentLevel, levelId]);
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const addNew = (type) => {
         const setter = type === 'cash' ? setCashMethods : setBankMethods;
@@ -596,18 +616,18 @@ const PaymentAndLedger = () => {
                         {renderSection('Cash Payment Methods', 'cash', cashMethods, availableCash)}
                         {renderSection('Bank Payment Methods', 'bank', bankMethods, availableBank)}
 
-                        
+
                     </div>
 
                     <div className="flex justify-end">
-                            <button
-                                onClick={saveAll}
-                                disabled={saving || (cashMethods.length === 0 && bankMethods.length === 0)}
-                                className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
-                            >
-                                {saving ? 'Saving...' : 'Save All Changes'}
-                            </button>
-                        </div>
+                        <button
+                            onClick={saveAll}
+                            disabled={saving || (cashMethods.length === 0 && bankMethods.length === 0)}
+                            className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50"
+                        >
+                            {saving ? 'Saving...' : 'Save All Changes'}
+                        </button>
+                    </div>
 
                 </div>
             )}
