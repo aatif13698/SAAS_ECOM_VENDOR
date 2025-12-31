@@ -461,84 +461,88 @@ const PaymentAndLedger = () => {
         }
     };
 
-    const renderSection = (title, type, methods, available) => (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-            <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
-                <button
-                    onClick={() => addNew(type)}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors flex items-center gap-2"
-                    type="button"
-                >
-                    + Add {type === 'cash' ? 'Cash' : 'Bank'}
-                </button>
-            </div>
+    const renderSection = (title, type, methods, available) => {
 
-            {methods.length === 0 && (
-                <div className="text-center py-10 text-gray-500 italic">
-                    No {type} payment methods configured yet
-                </div>
-            )}
-
-            <div className="space-y-3">
-                {methods.map((method, index) => (
-                    <div
-                        key={method._id || method.ledgerId || index}
-                        className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200"
+        return (
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+                <div className="flex justify-between items-center mb-5">
+                    <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+                    <button
+                        onClick={() => addNew(type)}
+                        disabled={available?.length == 0}
+                        className={`px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors flex items-center gap-2 ${available?.length === 0 ? "cursor-not-allowed" : "" }`}
+                        type="button"
                     >
-                        <select
-                            value={method.ledgerId}
-                            onChange={e => updateLedger(type, index, e.target.value)}
-                            disabled={!method.isEditing}
-                            className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100"
-                        >
-                            <option value="">Select {type === 'cash' ? 'Cash' : 'Bank'} Ledger</option>
-                            {available.map(ledger => (
-                                <option key={ledger._id} value={ledger._id}>
-                                    {ledger.ledgerName}
-                                </option>
-                            ))}
-                        </select>
+                        + Add {type === 'cash' ? 'Cash' : 'Bank'}
+                    </button>
+                </div>
 
-                        <button
-                            type="button"
-                            onClick={() => togglePrimary(type, index)}
-                            className="p-2 text-green-500 hover:text-green-600 transition-colors"
-                            title={method.isPrimary ? "Primary" : "Set as primary"}
-                        >
-                            {method.isPrimary ? <IoCheckmarkCircle size={20} /> : <MdOutlineRadioButtonUnchecked size={20} />}
-                        </button>
-
-                        <div className="flex items-center gap-2">
-                            {method.isEditing ? (
-                                <button
-                                    onClick={() => toggleEdit(type, index, false)}
-                                    className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm"
-                                >
-                                    Done
-                                </button>
-                            ) : (
-                                <>
-                                    <button
-                                        onClick={() => toggleEdit(type, index, true)}
-                                        className="p-2 bg-indigo-500/70 hover:bg-indigo-700 text-white rounded-md"
-                                    >
-                                        <FaRegEdit />
-                                    </button>
-                                    <button
-                                        onClick={() => remove(type, index)}
-                                        className="p-2 bg-red-500/70 hover:bg-red-700 text-white rounded-md"
-                                    >
-                                        <BsTrash />
-                                    </button>
-                                </>
-                            )}
-                        </div>
+                {methods.length === 0 && (
+                    <div className="text-center py-10 text-gray-500 italic">
+                        No {type} payment methods configured yet
                     </div>
-                ))}
+                )}
+
+                <div className="space-y-3">
+                    {methods.map((method, index) => (
+                        <div
+                            key={method._id || method.ledgerId || index}
+                            className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg border border-gray-200"
+                        >
+                            <select
+                                value={method.ledgerId}
+                                onChange={e => updateLedger(type, index, e.target.value)}
+                                disabled={!method.isEditing}
+                                className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100"
+                            >
+                                <option value="">Select {type === 'cash' ? 'Cash' : 'Bank'} Ledger</option>
+                                {available.map(ledger => (
+                                    <option key={ledger._id} value={ledger._id}>
+                                        {ledger.ledgerName}
+                                    </option>
+                                ))}
+                            </select>
+
+                            <button
+                                type="button"
+                                onClick={() => togglePrimary(type, index)}
+                                className="p-2 text-green-500 hover:text-green-600 transition-colors"
+                                title={method.isPrimary ? "Primary" : "Set as primary"}
+                            >
+                                {method.isPrimary ? <IoCheckmarkCircle size={20} /> : <MdOutlineRadioButtonUnchecked size={20} />}
+                            </button>
+
+                            <div className="flex items-center gap-2">
+                                {method.isEditing ? (
+                                    <button
+                                        onClick={() => toggleEdit(type, index, false)}
+                                        className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-sm"
+                                    >
+                                        Done
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => toggleEdit(type, index, true)}
+                                            className="p-2 bg-indigo-500/70 hover:bg-indigo-700 text-white rounded-md"
+                                        >
+                                            <FaRegEdit />
+                                        </button>
+                                        <button
+                                            onClick={() => remove(type, index)}
+                                            className="p-2 bg-red-500/70 hover:bg-red-700 text-white rounded-md"
+                                        >
+                                            <BsTrash />
+                                        </button>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+                </div>
             </div>
-        </div>
-    );
+        )
+    };
 
     return (
         <div className="mx-auto py-8 px-4">
