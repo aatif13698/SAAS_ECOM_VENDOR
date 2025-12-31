@@ -26,7 +26,7 @@ const menuItems = [
   { id: 'sales', label: 'Sales', icon: FiDollarSign },
   { id: 'accounting', label: 'Accounting', icon: FiPackage },
   { id: 'vendors', label: 'Vendors & Commissions', icon: FiUsers },
-  { id: 'users-roles', label: 'Users & Roles', icon: FiShield },
+  { id: 'users-roles', label: ' Roles', icon: FiShield },
   { id: 'notifications', label: 'Notifications', icon: FiBell },
   { id: 'integrations', label: 'Integrations', icon: FiLink },
 ];
