@@ -612,11 +612,9 @@ const PaymentAndLedger = () => {
             ) : (
                 <div className="space-y-10  ">
 
-                    <div className='grid grid-cols-1 md:grid-cols-2 mb-4 gap-5 bg-gray-100 px-4 py-4 rounded-lg'>
+                    <div className='grid grid-cols-1 md:grid-cols-1 mb-4 gap-5 bg-gray-100 px-4 py-4 rounded-lg'>
                         {renderSection('Cash Payment Methods', 'cash', cashMethods, availableCash)}
                         {renderSection('Bank Payment Methods', 'bank', bankMethods, availableBank)}
-
-
                     </div>
 
                     <div className="flex justify-end">

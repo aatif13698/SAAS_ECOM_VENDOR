@@ -34,9 +34,9 @@ function SystemSettings() {
   const [activeSection, setActiveSection] = useState('general');
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="flex  h-screen bg-gray-50 dark:bg-gray-950 ">
       {/* Desktop Sidebar */}
-      <aside className="hidden w-72 flex-shrink-0 border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:block">
+      <aside className="hidden w-64 flex-shrink-0 border-r border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:block">
         <div className="flex h-16 items-center border-b border-gray-200 px-6 dark:border-gray-800">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
             System Settings
@@ -74,7 +74,7 @@ function SystemSettings() {
 
       {/* Mobile Horizontal Scrollable Tabs */}
       <div className="lg:hidden">
-        <div className="flex overflow-x-auto border-b border-gray-200 bg-white px-4 py-3 dark:border-gray-800 dark:bg-gray-900 scrollbar-thin">
+        <div className="flex overflow-x-auto border-b border-gray-200 bg-white px-1 py-3 dark:border-gray-800 dark:bg-gray-900 scrollbar-thin">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -98,7 +98,7 @@ function SystemSettings() {
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto  px-4 py-8 sm:px-8 lg:px-8">
+        <div className="mx-auto  px-2 pt-2 sm:px-2 lg:px-2">
           
 
           {/* Content - placeholder sections */}
