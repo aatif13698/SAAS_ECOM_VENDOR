@@ -330,7 +330,11 @@ const Asset = ({ noFade }) => {
 
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
-            <div className="table-heading text-start ">Assets List</div>
+            <button className={`w-fit bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-3 py-2 rounded   `}
+                onClick={() => navigate("/create-assets-&-tools")}
+            >
+                Create Asset
+            </button>
             <div className="grid lg:justify-end md:justify-start">
                 <input
                     type="text"

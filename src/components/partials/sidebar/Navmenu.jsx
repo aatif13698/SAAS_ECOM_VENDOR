@@ -86,7 +86,6 @@ const Navmenu = ({ menus }) => {
       "Warehouse": "material-symbols:warehouse-outline",
       "Assets & Tools": "material-symbols:group-outline",
       "Leave Category": "material-symbols:group-outline",
-      "Holiday": "material-symbols:group-outline",
       "SubCategory": "material-symbols:category-outline",
       "Brand": "material-symbols:library-add-check-outline",
       "Manufacturer": "material-symbols:precision-manufacturing-outline",
@@ -105,11 +104,14 @@ const Navmenu = ({ menus }) => {
       "Group": "material-symbols:group-work-outline",
       "Voucher Group": "material-symbols:background-dot-large-outline",
       "Voucher": "material-symbols:featured-video-outline",
-      // "Product": "material-symbols:garden-cart-outline",
-      // "Product": "material-symbols:garden-cart-outline",
-      // "Product": "material-symbols:garden-cart-outline",
-      // "Product": "material-symbols:garden-cart-outline",
-      // "Product": "material-symbols:garden-cart-outline",
+      "Shift": "material-symbols:timer-off-outline",
+      "Change Shift": "material-symbols:timer-off",
+      "Shift Change Request": "material-symbols:more-time",
+      "Department": "material-symbols:batch-prediction",
+      "Documents": "material-symbols:docs-outline",
+      "Assets & Tools": "material-symbols:service-toolbox-rounded",
+      "Leave Category": "material-symbols:holiday-village-outline-rounded",
+      "Holiday": "material-symbols:energy-savings-leaf-outline-rounded",
       // "Product": "material-symbols:garden-cart-outline",
     };
 
@@ -139,7 +141,13 @@ const Navmenu = ({ menus }) => {
       "Warehouse",
       "Customer",
       "Supplier",
-      "Group"
+      "Group",
+      "Shift",
+      "Department",
+      "Documents",
+      "Assets & Tools",
+      "Leave Category",
+      "Holiday"
     ]);
 
     const excludedMenus = new Set([
@@ -161,7 +169,7 @@ const Navmenu = ({ menus }) => {
       .filter((module) => module.access)
       .forEach((module) => {
         // if (module.name !== "Human resources") {
-          result.push({ isHeadr: true, title: module.name });
+        result.push({ isHeadr: true, title: module.name });
         // }
 
         module.menu
