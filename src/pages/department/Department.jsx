@@ -207,6 +207,12 @@ const Department = ({ noFade, scrollContent }) => {
         }
 
     };
+
+    function truncateText(text, limit = 12) {
+        if (!text) return "";
+        return text.length > limit ? text.substring(0, limit) + "..." : text;
+    }
+
     //   ------- Data Table Columns ---
     const columns = [
         {
@@ -238,7 +244,14 @@ const Department = ({ noFade, scrollContent }) => {
                 } else if (row?.isWarehouseLevel) {
                     unit = row?.warehouse?.name
                 }
-                return unit
+                return <Tooltip
+                    content={unit}
+                    placement="top-end"
+                    arrow
+                    animation="shift-away"
+                >
+                    <span>{truncateText(unit, 24)}</span>
+                </Tooltip>
             },
             sortable: true,
             style: {

@@ -208,6 +208,10 @@ const Shifts = ({ noFade, scrollContent }) => {
         }
 
     };
+    function truncateText(text, limit = 12) {
+        if (!text) return "";
+        return text.length > limit ? text.substring(0, limit) + "..." : text;
+    }
     //   ------- Data Table Columns ---
     const columns = [
         {
@@ -239,7 +243,14 @@ const Shifts = ({ noFade, scrollContent }) => {
                 } else if (row?.isWarehouseLevel) {
                     unit = row?.warehouse?.name
                 }
-                return unit
+                return <Tooltip
+                    content={unit}
+                    placement="top-end"
+                    arrow
+                    animation="shift-away"
+                >
+                    <span>{truncateText(unit, 24)}</span>
+                </Tooltip>
             },
             sortable: true,
             style: {
@@ -262,14 +273,14 @@ const Shifts = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             },
         },
-        {
-            name: "Emp Limit",
-            selector: (row) => row.requiredEmployees,
-            sortable: true,
-            style: {
-                width: "20px", // Set the desired width here
-            },
-        },
+        // {
+        //     name: "Emp Limit",
+        //     selector: (row) => row.requiredEmployees,
+        //     sortable: true,
+        //     style: {
+        //         width: "20px", // Set the desired width here
+        //     },
+        // },
         {
             name: "Status",
             sortable: true,

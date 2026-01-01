@@ -208,6 +208,10 @@ const RequestShifts = ({ noFade, scrollContent }) => {
         }
 
     };
+      function truncateText(text, limit = 12) {
+        if (!text) return "";
+        return text.length > limit ? text.substring(0, limit) + "..." : text;
+    }
     //   ------- Data Table Columns ---
     const columns = [
         {
@@ -239,7 +243,14 @@ const RequestShifts = ({ noFade, scrollContent }) => {
                 } else if (row?.isWarehouseLevel) {
                     unit = row?.warehouse?.name
                 }
-                return unit
+                return <Tooltip
+                    content={unit}
+                    placement="top-end"
+                    arrow
+                    animation="shift-away"
+                >
+                    <span>{truncateText(unit, 24)}</span>
+                </Tooltip>
             },
             sortable: true,
             style: {
@@ -248,7 +259,7 @@ const RequestShifts = ({ noFade, scrollContent }) => {
         },
         {
             name: "Name",
-            selector: (row) => (row?.createdBy?.firstName+" "+row?.createdBy?.lastName),
+            selector: (row) => (row?.createdBy?.firstName + " " + row?.createdBy?.lastName),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -278,14 +289,14 @@ const RequestShifts = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             },
         },
-        {
-            name: "Reason",
-            selector: (row) => row?.reason,
-            sortable: true,
-            style: {
-                width: "20px", // Set the desired width here
-            },
-        },
+        // {
+        //     name: "Reason",
+        //     selector: (row) => row?.reason,
+        //     sortable: true,
+        //     style: {
+        //         width: "20px", // Set the desired width here
+        //     },
+        // },
         {
             name: "Status",
             sortable: true,
@@ -320,7 +331,7 @@ const RequestShifts = ({ noFade, scrollContent }) => {
                                 <Icon icon="heroicons:eye" />
                             </button>
                         </Tooltip>
-                       
+
                         <Tooltip
                             content="Delete"
                             placement="top"

@@ -64,7 +64,7 @@ const Asset = ({ noFade }) => {
     const scrollToTop = () => {
         window.scrollTo({
             top: 0,
-            behavior: "smooth", 
+            behavior: "smooth",
         });
     };
 
@@ -80,7 +80,7 @@ const Asset = ({ noFade }) => {
         const name = "edit"
         navigate("/create-assets-&-tools", { state: { id, row, name } });
     };
-  
+
     //   ---- Active And InActive the Row
     const handleActive = async (row) => {
         setShowLoadingModal(true)
@@ -118,6 +118,12 @@ const Asset = ({ noFade }) => {
         const day = String(date.getUTCDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+
+    function truncateText(text, limit = 12) {
+        if (!text) return "";
+        return text.length > limit ? text.substring(0, limit) + "..." : text;
+    }
+
     //   ------- Data Table Columns ---
     const columns = [
         {
@@ -149,7 +155,14 @@ const Asset = ({ noFade }) => {
                 } else if (row?.isWarehouseLevel) {
                     unit = row?.warehouse?.name
                 }
-                return unit
+                return <Tooltip
+                    content={unit}
+                    placement="top-end"
+                    arrow
+                    animation="shift-away"
+                >
+                    <span>{truncateText(unit, 24)}</span>
+                </Tooltip>
             },
             sortable: true,
             style: {
@@ -195,12 +208,11 @@ const Asset = ({ noFade }) => {
                     <span className="block w-full">
                         <span
                             className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  
-                              ${
-                                    status == "available" ?  "text-green-500 bg-green-500" 
-                                    : status == "assigned" ? "text-blue-500 bg-blue-500" 
-                                    : status == "in-maintenance" ? "text-violet-500 bg-violet-500" 
-                                    : status == "disposed" ? "text-red-500 bg-red-500" 
-                                    :  ""  
+                              ${status == "available" ? "text-green-500 bg-green-500"
+                                    : status == "assigned" ? "text-blue-500 bg-blue-500"
+                                        : status == "in-maintenance" ? "text-violet-500 bg-violet-500"
+                                            : status == "disposed" ? "text-red-500 bg-red-500"
+                                                : ""
                                 }`}
                         >
                             {status?.toUpperCase()}
@@ -329,7 +341,7 @@ const Asset = ({ noFade }) => {
             </div>
         </div>
     );
-   
+
 
     const paginationOptions = {
         rowsPerPageText: "row",
