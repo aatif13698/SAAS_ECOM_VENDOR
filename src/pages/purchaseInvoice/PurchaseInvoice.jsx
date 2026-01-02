@@ -18,6 +18,7 @@ import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.s
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
+import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
 
 const defaultState = {
   level: "",
@@ -690,6 +691,51 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
       getWarehouseByBranch(branch);
     }
   }, [branch]);
+
+
+  useEffect(() => {
+
+    if (warehouse && formData.paymentMethod) {
+      console.log("formData.paymentMethod", formData.paymentMethod);
+      loadData("warehouse", warehouse, formData.paymentMethod)
+    }
+
+  }, [warehouse, formData.paymentMethod]);
+
+
+  const [paymentFrom, setPaymentFrom] = useState([]);
+
+
+  const loadData = async (currentLevel, levelId, method) => {
+    try {
+      const configures = await purchasePaymentConfigureService.getPaymentFromLedgers(currentLevel, levelId);
+      console.log("configures", configures);
+      let ledgerArray = [];
+      if (method == "cash" && configures.data.cashLedgers?.length > 0) {
+        if (configures.data.cashLedgers?.length > 0) {
+          const cashArray = configures.data.cashLedgers?.map((cash) => {
+            return {
+              ...cash.id,
+
+            }
+          });
+          ledgerArray = cashArray
+        }
+      } else {
+        if (configures.data.bankLedgers?.length > 0) {
+          const bankArray = configures.data.bankLedgers?.map((bank) => {
+            return {
+              ...bank.id,
+            }
+          });
+          ledgerArray = bankArray
+        }
+      }
+      setPaymentFrom(ledgerArray)
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
 
   async function getWarehouseByBranch(id) {
@@ -1365,12 +1411,38 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                 )}
               </div>
 
-              <section>
+              {/* <section>
                 <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Options</h2>
                 <div className="space-y-3">
+                  <div className='grid md:grid-cols-2'>
+                    <div>
+                      <label className=" text-sm font-medium text-gray-700 mb-1">Paid Amount</label>
+                      <input
+                        type="number"
+                        name="paidAmount"
+                        value={formData.paidAmount}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        text="Full Payment"
+                        className="bg-indigo-600 h-fit text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm"
+                        onClick={() => {
+                          setFormData(prev => ({ ...prev, paidAmount: totals.finalTotal, balance: 0 }));
+                          dispatch(setPaidAmount(totals.finalTotal));
+                        }}
+                      />
+                    </div>
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
                     <select
+                      disabled={!warehouse}
                       name="paymentMethod"
                       value={formData.paymentMethod}
                       onChange={handleInputChange}
@@ -1380,39 +1452,167 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                       <option value="cash">Cash</option>
                       <option value="cheque">Cheque</option>
                       <option value="online">Online</option>
-                      <option value="credit">Credit</option>
                       <option value="bank_transfer">Bank Transfer</option>
                       <option value="UPI">UPI</option>
                     </select>
                   </div>
+
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Paid Amount</label>
-                    <input
-                      type="number"
-                      name="paidAmount"
-                      value={formData.paidAmount}
-                      onChange={handleInputChange}
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment From</label>
+                    <select
+                      disabled={!warehouse}
+                      name="paymentMethod"
+                      // value={formData.paymentMethod}
+                      // onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                      min="0"
-                      step="0.01"
-                    />
+                    >
+                      <option value="">Select Ledger</option>
+                      {paymentFrom &&
+                        paymentFrom?.map((item) => (
+                          <option value={item._id} key={item?._id}>
+                            {item && item?.ledgerName}
+                          </option>
+                        ))}
+                    </select>
                   </div>
+
                   <div className="flex justify-between text-sm font-medium">
                     <span>Balance Due:</span>
                     <span className={formData.balance > 0 ? "text-red-600" : "text-green-600"}>
                       {formData.balance.toFixed(2)}
                     </span>
                   </div>
-                  <div className="flex justify-end">
-                    <Button
-                      text="Full Payment"
-                      className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm"
+
+                </div>
+              </section> */}
+
+              <section className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-800">Payment Details</h2>
+
+                {/* Paid Amount + Quick Full Payment */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="paidAmount"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Amount Paid
+                    </label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                        {'₹'}
+                      </span>
+                      <input
+                        id="paidAmount"
+                        name="paidAmount"
+                        type="number"
+                        value={formData.paidAmount ?? ''}
+                        onChange={handleInputChange}
+                        step="0.01"
+                        min="0"
+                        className="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                     disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                        placeholder="0.00"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-end pb-0.5">
+                    <button
+                      type="button"
                       onClick={() => {
-                        setFormData(prev => ({ ...prev, paidAmount: totals.finalTotal, balance: 0 }));
+                        setFormData(prev => ({
+                          ...prev,
+                          paidAmount: totals.finalTotal,
+                          balance: 0
+                        }));
                         dispatch(setPaidAmount(totals.finalTotal));
                       }}
-                    />
+                      disabled={totals.finalTotal <= 0}
+                      className="px-4 py-2 border border-dashed w-full border-emerald-500 text-emerald-500 text-sm font-medium rounded-lg
+                   hover:bg-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:ring-offset-2
+                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Mark Full Amount
+                    </button>
                   </div>
+                </div>
+
+                {/* Payment Method + Payment From (in one row on larger screens) */}
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  {/* Payment Method */}
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="paymentMethod"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Payment Method
+                    </label>
+                    <select
+                      id="paymentMethod"
+                      name="paymentMethod"
+                      value={formData.paymentMethod || ''}
+                      onChange={handleInputChange}
+                      disabled={!warehouse}
+                      className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
+                   bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                   disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                    >
+                      <option value="">Select payment method</option>
+                      <option value="cash">Cash</option>
+                      <option value="cheque">Cheque</option>
+                      <option value="online">Online Payment</option>
+                      <option value="bank_transfer">Bank Transfer</option>
+                      <option value="UPI">UPI</option>
+                    </select>
+                  </div>
+
+                  {/* Payment From (Ledger) */}
+                  <div className="space-y-1">
+                    <label
+                      htmlFor="paymentFrom"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Paid From
+                    </label>
+                    <select
+                      id="paymentFrom"
+                      name="paymentFrom"           // ← fixed name!
+                      value={formData.paymentFrom || ''}
+                      onChange={handleInputChange}
+                      disabled={!warehouse || !paymentFrom?.length}
+                      className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
+                   bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                   disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                    >
+                      <option value="">Select ledger / account</option>
+                      {paymentFrom?.map((ledger) => (
+                        <option key={ledger._id} value={ledger._id}>
+                          {ledger.ledgerName}
+                          {ledger.accountNumber && ` • ${ledger.accountNumber}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Balance Summary */}
+                <div className="pt-4 border-t border-gray-200">
+                  <dl className="flex justify-between items-center text-sm">
+                    <dt className="font-medium text-gray-700">Balance Due</dt>
+                    <dd
+                      className={`font-semibold ${formData.balance > 0
+                        ? 'text-red-600'
+                        : formData.balance < 0
+                          ? 'text-amber-600'
+                          : 'text-green-600'
+                        }`}
+                    >
+                      {Math.abs(formData.balance).toFixed(2)} {'₹'}
+                      {formData.balance < 0 && ' (Overpaid)'}
+                    </dd>
+                  </dl>
                 </div>
               </section>
             </div>
