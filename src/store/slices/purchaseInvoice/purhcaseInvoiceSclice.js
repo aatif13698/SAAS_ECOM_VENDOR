@@ -60,6 +60,7 @@ const initialState = {
     isInterState: false,
     roundOff: false,
     paymentMethod: '',
+    payedFrom: '',
     paidAmount: 0,
     balance: 0,
 
@@ -136,6 +137,9 @@ export const purchaseInvoiceSlice = createSlice({
         setPaymentMethod: (state, action) => {
             state.paymentMethod = action.payload;
         },
+        setPayedFrom: (state, action) => {
+            state.payedFrom = action.payload;
+        },
         setPaidAmount: (state, action) => {
             state.paidAmount = action.payload;
         },
@@ -172,6 +176,7 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setPaymentMethod,
     setPaidAmount,
     setBalance,
-    setPurchaseOrder
+    setPurchaseOrder,
+    setPayedFrom
 } = purchaseInvoiceSlice.actions;
 export default purchaseInvoiceSlice.reducer;

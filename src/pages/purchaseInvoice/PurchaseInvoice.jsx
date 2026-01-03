@@ -12,7 +12,7 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from '../purchaseOrder/AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
+import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
 import { useDispatch } from 'react-redux';
 import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
 import { formatDate } from '@fullcalendar/core';
@@ -92,7 +92,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
   const purhcaseOrderDraftData = useSelector((state) => state.purchaseInvoiceSlice);
   const store = useSelector((state) => state);
-  console.log("store", store);
+  console.log("store", purhcaseOrderDraftData);
 
   const [isDark] = useDarkmode();
   const [addresses, setAddresses] = useState([]);
@@ -154,6 +154,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
     isInterState: false,
     roundOff: false,
     paymentMethod: '',
+    payedFrom: '',
     paidAmount: 0,
     balance: 0,
   });
@@ -336,6 +337,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
       paymentMethod: purhcaseOrderDraftData?.paymentMethod,
       paidAmount: purhcaseOrderDraftData?.paidAmount,
+      payedFrom: purhcaseOrderDraftData?.payedFrom,
       balance: purhcaseOrderDraftData?.balance
 
     }));
@@ -396,6 +398,9 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
       }
       if (name == "paymentMethod") {
         dispatch(setPaymentMethod(value));
+      }
+      if (name == "payedFrom") {
+        dispatch(setPayedFrom(value))
       }
       if (name == "paidAmount") {
         dispatch(setPaidAmount(value));
@@ -783,6 +788,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
         warehouse: warehouse,
 
         supplier: formData?.supplier?._id,
+        supplierLedger: formData?.supplier?.ledgerLinkedId,
         shippingAddress: formData?.shippingAddress,
         piNumber: formData?.poNumber,
         piDate: formData?.poDate,
@@ -792,6 +798,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
         isInterState: formData?.isInterState,
         roundOff: formData?.roundOff,
         paymentMethod: formData?.paymentMethod,
+        payedFrom: formData?.payedFrom,
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
       }
@@ -811,7 +818,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
   function resetAllAndNavigate() {
     dispatch(resetPurchaseOrder());
     setFormData(defaultState);
-    navigate('/purchase-order-list');
+    navigate('/purchase-invoices-list');
 
   }
 
@@ -1571,15 +1578,15 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                   {/* Payment From (Ledger) */}
                   <div className="space-y-1">
                     <label
-                      htmlFor="paymentFrom"
+                      htmlFor="payedFrom"
                       className="block text-sm font-medium text-gray-700"
                     >
                       Paid From
                     </label>
                     <select
-                      id="paymentFrom"
-                      name="paymentFrom"           // ← fixed name!
-                      value={formData.paymentFrom || ''}
+                      id="payedFrom"
+                      name="payedFrom"           // ← fixed name!
+                      value={formData.payedFrom || ''}
                       onChange={handleInputChange}
                       disabled={!warehouse || !paymentFrom?.length}
                       className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
@@ -1590,7 +1597,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                       {paymentFrom?.map((ledger) => (
                         <option key={ledger._id} value={ledger._id}>
                           {ledger.ledgerName}
-                          {ledger.accountNumber && ` • ${ledger.accountNumber}`}
+                          {/* {ledger.accountNumber && ` • ${ledger.accountNumber}`} */}
                         </option>
                       ))}
                     </select>

@@ -228,9 +228,6 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
             sortable: false,
 
         },
-
-
-
         {
             name: "Status",
             sortable: true,
@@ -247,11 +244,11 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
                                     status == "draft" ?  "text-gray-500 bg-gray-500" 
                                     : status == "pending_approval" ? "text-yellow-500 bg-yellow-500" 
                                     : status == "issued" ? "text-blue-500 bg-blue-500" 
-                                    : status == "invoiced" ? "text-green-500 bg-green-500" 
-                                    : status == "partially_invoiced" ? "text-emerald-500 bg-emerald-500" 
+                                    : status == "paid" ? "text-green-500 bg-green-500" 
+                                    : status == "partially_paid" ? "text-violet-500 bg-violet-500" 
                                     : status == "approved" ? "text-violet-500 bg-violet-500" 
                                     : status == "closed" ? "text-orange-500 bg-orange-500" 
-                                    : status == "canceled" ? "text-red-500 bg-red-500" 
+                                    : status == "full_due" ? "text-red-500 bg-red-500" 
                                     :  ""  
                                 }
                                ${
