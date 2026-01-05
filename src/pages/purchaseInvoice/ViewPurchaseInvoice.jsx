@@ -147,40 +147,48 @@ function ViewPurchaseInvoice() {
     const getStatusBadge = () => {
         switch (poData.status) {
             case 'draft': return 'Draft';
-            case 'received': return 'Received';
-            case 'verified': return 'verified';
-            case 'approved': return 'Approved';
+            case 'full_due': return 'Full Due';
             case 'paid': return 'Paid';
-            case 'partially_paid': return 'Partially_Paid';
+            case 'partially_paid': return 'Partially Paid';
             case 'overdue': return 'Overdue';
-            case 'disputed': return 'Disputed';
-            case 'canceled': return 'Canceled';
             case 'closed': return 'Closed';
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
     };
 
+    const getBadgeColor = () => {
+        switch (poData.status) {
+            case 'draft': return 'Draft';
+            case 'full_due': return 'bg-[#ef4444]';
+            case 'paid': return 'bg-[#22c55e]';
+            case 'partially_paid': return 'bg-[#8b5cf6]';
+            case 'overdue': return 'Overdue';
+            case 'closed': return 'Closed';
+            default: return poData.status?.replace('_', ' ') || 'Unknown';
+        }
+    }
+
     return (
         <div className="relative min-h-screen pb-8 bg-gray-300 rounded-md dark:bg-gray-900">
             <div className="sticky top-14 z-10 bg-white dark:bg-gray-800 p-4 flex justify-between items-center shadow-md">
-                <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-order-list")}>
+                <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-invoices-list")}>
                     <BiArrowBack className="text-xl" />
                     <h3 className="md:text-lg text-sm font-semibold text-gray-800 dark:text-gray-200">
                         Purchase invoice # {poData?.piNumber || 'N/A'}
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-                   
-                    <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
+
+                    {/* <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
                         <BiEdit className="text-xl" />
-                    </button>
+                    </button> */}
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
                     <button onClick={handlePrint} title="Print PDF" className="hover:text-blue-500">
                         <BiPrinter className="text-xl" />
                     </button>
-                    <div className="relative" ref={dropdownRef}>
+                    {/* <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setShowDropdown(!showDropdown)}
                             title="Change Status"
@@ -201,7 +209,7 @@ function ViewPurchaseInvoice() {
                                 ))}
                             </div>
                         )}
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
@@ -212,7 +220,9 @@ function ViewPurchaseInvoice() {
                 style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '10pt', color: '#1a1a1a' }}
             >
                 {/* Status Badge - Dynamic */}
-                <div className="absolute top-0 left-0 text-[1rem] font-bold text-white [--f:.5em] leading-[1.8] px-[1lh] pb-[var(--f)] [border-image:conic-gradient(#0008_0_0)_51%/var(--f)] [clip-path:polygon(100%_calc(100%_-_var(--f)),100%_100%,calc(100%_-_var(--f))_calc(100%_-_var(--f)),var(--f)_calc(100%_-_var(--f)),_0_100%,0_calc(100%_-_var(--f)),999px_calc(100%_-_var(--f)_-_999px),calc(100%_-_999px)_calc(100%_-_var(--f)_-_999px))] translate-x-[calc((cos(45deg)-1)*100%)] translate-y-[-100%] rotate-[-45deg] origin-[100%_100%] bg-[#009499] only-screen:block print:hidden">
+                <div className={`absolute top-0 left-0 text-[1rem] font-bold text-white [--f:.5em] leading-[1.8] px-[1lh] pb-[var(--f)] [border-image:conic-gradient(#0008_0_0)_51%/var(--f)] [clip-path:polygon(100%_calc(100%_-_var(--f)),100%_100%,calc(100%_-_var(--f))_calc(100%_-_var(--f)),var(--f)_calc(100%_-_var(--f)),_0_100%,0_calc(100%_-_var(--f)),999px_calc(100%_-_var(--f)_-_999px),calc(100%_-_999px)_calc(100%_-_var(--f)_-_999px))] translate-x-[calc((cos(45deg)-1)*100%)] translate-y-[-100%] rotate-[-45deg] origin-[100%_100%]  only-screen:block print:hidden
+                    ${getBadgeColor()}
+                    `}>
                     {getStatusBadge()}
                 </div>
 
@@ -326,7 +336,7 @@ function ViewPurchaseInvoice() {
 
                     <div className=' w-[40%]'>
                         {poData.notes && (
-                            <div  style={{ marginTop: '20px',  }}>
+                            <div style={{ marginTop: '20px', }}>
                                 <strong>Notes:</strong> {poData.notes}
 
                             </div>
