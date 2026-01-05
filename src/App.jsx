@@ -86,6 +86,7 @@ const ActionRequestShift = lazy(() => import("./pages/requestShift/ActionRequest
 
 const LeaveCategory = lazy(() => import("./pages/leaveCategory/LeaveCategory"));
 const CreateLeaveCategory = lazy(() => import("./pages/leaveCategory/CreateLeaveCategory"));
+const LeaveAllotment = lazy(() => import("./pages/leaveAllotment/LeaveAllotment"));
 
 
 const CreateLedgerGrop = lazy(() => import("./pages/ledgerGroup/CreateLedgerGroup"));
@@ -272,6 +273,8 @@ function App() {
                 <Route path="view-assets-&-tool" element={<ViewAssetAndTool />} />
                 <Route path="leave-category-list" element={<LeaveCategory />} />
                 <Route path="create-leave-category" element={<CreateLeaveCategory />} />
+                <Route path="leave-allotment-list" element={<LeaveAllotment />} />
+
                 <Route path="holiday-list" element={<Holiday />} />
                 <Route path="create-holiday" element={<CreateHoliday />} />
 

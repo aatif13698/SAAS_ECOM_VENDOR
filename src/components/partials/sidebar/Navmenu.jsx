@@ -112,7 +112,7 @@ const Navmenu = ({ menus }) => {
       "Assets & Tools": "material-symbols:service-toolbox-rounded",
       "Leave Category": "material-symbols:holiday-village-outline-rounded",
       "Holiday": "material-symbols:energy-savings-leaf-outline-rounded",
-      // "Product": "material-symbols:garden-cart-outline",
+      "Leave Allotment": "material-symbols:assignment-outline",
     };
 
     const singleChildMenus = new Set([
@@ -147,6 +147,7 @@ const Navmenu = ({ menus }) => {
       "Documents",
       "Assets & Tools",
       "Leave Category",
+      "Leave Allotment",
       "Holiday"
     ]);
 
@@ -160,7 +161,8 @@ const Navmenu = ({ menus }) => {
       "Product QA",
       "Product QA Out",
       "Change Shift",
-      "Shift Change Request"
+      "Shift Change Request",
+      "Leave Allotment"
     ]);
 
     const result = [];
