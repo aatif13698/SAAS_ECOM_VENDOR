@@ -218,7 +218,54 @@ const Holiday = ({ noFade, scrollContent }) => {
         return `${year}-${month}-${day}`;
     }
     //   ------- Data Table Columns ---
+    function truncateText(text, limit = 12) {
+        if (!text) return "";
+        return text.length > limit ? text.substring(0, limit) + "..." : text;
+    }
     const columns = [
+        {
+            name: "Level",
+            selector: (row) => {
+                let level = "";
+                if (row?.isBuLevel) {
+                    level = "Business Unit"
+                } else if (row?.isBranchLevel) {
+                    level = "Branch"
+                } else if (row?.isWarehouseLevel) {
+                    level = "Warehouse"
+                }
+                return level
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
+        {
+            name: "Unit",
+            selector: (row) => {
+                let unit = "";
+                if (row?.isBuLevel) {
+                    unit = row?.businessUnit?.name
+                } else if (row?.isBranchLevel) {
+                    unit = row?.branch?.name
+                } else if (row?.isWarehouseLevel) {
+                    unit = row?.warehouse?.name
+                }
+                return <Tooltip
+                    content={unit}
+                    placement="top-end"
+                    arrow
+                    animation="shift-away"
+                >
+                    <span>{truncateText(unit, 24)}</span>
+                </Tooltip>
+            },
+            sortable: true,
+            style: {
+                width: "20px", // Set the desired width here
+            },
+        },
         {
             name: "Name",
             selector: (row) => row?.name,

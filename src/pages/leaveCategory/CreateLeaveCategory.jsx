@@ -219,9 +219,9 @@ const CreateLeaveCategory = ({ noFade, scrollContent }) => {
                             : row.isWarehouseLevel
                                 ? "warehouse"
                                 : "",
-                businessUnit: row.businessUnit || "",
-                branch: row.branch || "",
-                warehouse: row.warehouse || "",
+                businessUnit: row?.businessUnit?._id || "",
+                branch: row?.branch?._id || "",
+                warehouse: row?.warehouse?._id || "",
                 name: row.name || "",
                 code: row.code || "",
                 description: row.description || "",
