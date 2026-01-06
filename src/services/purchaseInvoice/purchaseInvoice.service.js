@@ -55,10 +55,31 @@ const changeStauts = async (data) => {
 }
 
 
+const getUnpaidInvoices = async (currentLevel, levelId, supplier, supplierLedger) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/unpaid/purchaseInvoice?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}&supplier=${supplier}&supplierLedger=${supplierLedger}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
 
 export default {
     create,
     issueMail,
     getList,
-    changeStauts
+    changeStauts,
+    getUnpaidInvoices
 }

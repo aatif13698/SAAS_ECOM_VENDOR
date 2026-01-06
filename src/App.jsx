@@ -126,7 +126,8 @@ const ViewPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ViewPurchaseO
 const ListPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ListPurchaseInvoice"));
 const PurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/PurchaseInvoice"));
 const ViewPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ViewPurchaseInvoice"));
-
+const PaymentOut = lazy(() => import("./pages/paymentOut/PaymentOut"))
+const CreatePaymentOut = lazy(() => import("./pages/paymentOut/CreatePaymentOut"));
 
 
 // system settings
@@ -349,6 +350,10 @@ function App() {
                 <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />
                 <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
                 <Route path="view/purchase-invoice" element={<ViewPurchaseInvoice />} />
+
+                <Route path="payment-out-list" element={<PaymentOut />} />
+                <Route path="pcreate-payment-out" element={<CreatePaymentOut />} />
+
 
 
 

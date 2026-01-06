@@ -7,6 +7,7 @@ import roleSclice from "./slices/roles/roleSclice";
 import capabilitySlice from "./slices/auth/capabilitySclice";
 import purchaseOrderSlice from "./slices/purchaseOrder/purchaseOrderSclice";
 import purchaseInvoiceSlice from "./slices/purchaseInvoice/purhcaseInvoiceSclice";
+import paymentOutSlice from "./slices/paymentOut/paymentOutSlice";
 
 import SuperAdminNotification from "@/redux/slices/Notification/SuperAdminNotification";
 import resetSlice from "@/redux/slices/Auth/Logout";
@@ -25,7 +26,8 @@ const rootReducer = {
 
   capabilitySlice,
   purchaseOrderSlice,
-  purchaseInvoiceSlice
+  purchaseInvoiceSlice,
+  paymentOutSlice
 
 };
 export default rootReducer;
