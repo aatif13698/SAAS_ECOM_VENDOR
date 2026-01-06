@@ -1,19 +1,16 @@
+
+
+
 import React, { useState, useEffect } from "react";
-import toast from "react-hot-toast";
 import useDarkMode from "@/hooks/useDarkMode";
 import { useLocation, useNavigate } from "react-router-dom";
 import "../../assets/scss/common.scss"
-
 import { useSelector } from "react-redux";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import departmentService from "@/services/department/department.service";
-import Button from "@/components/ui/Button";
-import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
 import leaveCategoryService from "@/services/leaveCategory/leaveCategory.service";
-import { categories } from "@/constant/data";
-
-
+import { BsTrash } from "react-icons/bs";
 
 
 const LeaveAllotment = ({ noFade, scrollContent }) => {
@@ -33,13 +30,11 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             value: "warehouse"
         },
     ])
-
     const [isDark] = useDarkMode();
     const location = useLocation();
     const row = location?.state?.row;
     const name = location?.state?.name;
     const id = location?.state?.id;
-
     const [pageLoading, setPageLoading] = useState(true);
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
     const [levelResult, setLevelResult] = useState(0)
@@ -52,22 +47,19 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
     const [leaveCategories, setLeaveCategories] = useState([]);
     const [allotments, setAllotments] = useState([
         {
-            categoryId: "",
+            id: "",
             allocated: 0,
         }
     ]);
-
+    console.log("allotments", allotments);
 
     const [formData, setFormData] = useState({
         level: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-
         workingDepartment: "",
     });
-
-
     useEffect(() => {
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
@@ -122,39 +114,27 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                 ])
                 setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
             }
-
         }
-
     }, [currentUser])
-
     const [formDataErr, setFormDataErr] = useState({
         level: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-
         workingDepartment: "",
     });
-
     const {
         level,
         businessUnit,
         branch,
         warehouse,
-
         workingDepartment,
     } = formData;
-
     const [isViewed, setIsViewed] = useState(false);
     const [showAddButton, setShowAddButton] = useState(true);
     const [loading, setLoading] = useState(false);
-
     const validateField = (name, value) => {
         const rules = {
-            groupName: [
-                [!value, "Gruop Name is Required"],
-                [value.length <= 3, "Minimum 3 characters required."]
-            ],
             level: [[!value, "Level is required"]],
             businessUnit: [[!value && levelResult > 1, "Business Unit is required"]],
             branch: [[!value && levelResult > 2, "Branch is required"]],
@@ -162,16 +142,9 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
         };
         return (rules[name] || []).find(([condition]) => condition)?.[1] || "";
     };
-
-
     const validationFunction = () => {
         const { level, businessUnit, branch, warehouse } = formData;
-        let errors = {
-            groupName: validateField("groupName", groupName),
-        };
-        if (hasParent && workingDepartment == "") {
-            errors.workingDepartment = "Parent group is required"
-        }
+        let errors = {};
         errors.level = validateField("level", level);
         if (level === "business" || level === "branch" || level === "warehouse") {
             errors.businessUnit = validateField("businessUnit", businessUnit);
@@ -183,17 +156,12 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             errors.warehouse = validateField("warehouse", warehouse);
         }
         console.log("errors", errors);
-
         setFormDataErr((prev) => ({
             ...prev,
             ...errors
         }));
         return Object.values(errors).some((error) => error);
     };
-
-
-
-
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({
@@ -212,11 +180,22 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             [name]: validateField(name, value)
         }));
     };
-
+    const handleAllotmentChange = (index, field, value) => {
+        const newAllotments = [...allotments];
+        newAllotments[index][field] = field === "allocated" ? parseInt(value) || 0 : value;
+        setAllotments(newAllotments);
+    };
+    const addAllotment = () => {
+        setAllotments([...allotments, { id: "", allocated: 0 }]);
+    };
+    const removeAllotment = (index) => {
+        if (allotments.length > 1) {
+            setAllotments(allotments.filter((_, i) => i !== index));
+        }
+    };
     useEffect(() => {
         if (level) {
             console.log("level", level);
-
             if (level === "vendor") {
                 setLevelResult(1);
             } else if (level === "business") {
@@ -230,8 +209,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             setLevelResult(0)
         }
     }, [level])
-
-
     useEffect(() => {
         if (businessUnit) {
             getBranchByBusiness(businessUnit);
@@ -246,7 +223,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             }
         }
     }, [businessUnit]);
-
     async function getBranchByBusiness(id) {
         try {
             const response = await warehouseService.getBranchByBusiness(id);
@@ -255,7 +231,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             console.log("error while getting branch by business unit");
         }
     }
-
     useEffect(() => {
         if (branch) {
             getWarehouseByBranch(branch);
@@ -270,7 +245,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             }
         }
     }, [branch]);
-
     async function getWarehouseByBranch(id) {
         try {
             const response = await warehouseService.getWarehouseByBranch(id);
@@ -279,7 +253,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             console.log("error while getting warehouse by branch");
         }
     }
-
     useEffect(() => {
         if (warehouse && level === "warehouse") {
             getDepartments(level, warehouse);
@@ -291,8 +264,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             })
         }
     }, [warehouse]);
-
-
     useEffect(() => {
         if (workingDepartment && level) {
             if (level == "business") {
@@ -304,32 +275,45 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             }
         }
     }, [workingDepartment]);
-
-
     async function getLeaveAllotments(level, levelid, workingDepartment) {
         try {
             const response = await leaveCategoryService.getLeaveAllotmentByDepartment(level, levelid, workingDepartment);
             if (response?.data?.leaveAllotment) {
-                setAllotments(response?.data?.leaveAllotment?.leaveCategories)
+                setAllotments(response?.data?.leaveAllotment?.leaveCategories);
             }
         } catch (error) {
             console.log("error while getting leave allotment", error);
         }
     }
-
-
     const onSubmit = async (e) => {
         e.preventDefault();
         setIsViewed(false);
         const error = validationFunction();
         setLoading(true);
         if (error) {
-
+            setLoading(false);
         } else {
-
+            try {
+                const payload = {
+                    level,
+                    levelId: level === "business" ? businessUnit : level === "branch" ? branch : level === "warehouse" ? warehouse : "",
+                    departmentId: workingDepartment,
+                    leaveCategories: allotments
+                };
+                if (id) {
+                    // Assuming update service exists
+                    await leaveCategoryService.updateLeaveAllotment(id, payload);
+                } else {
+                    // Assuming create service exists
+                    await leaveCategoryService.createLeaveAllotment(payload);
+                }
+                navigate("/leave-allotments"); // Adjust path as needed
+            } catch (err) {
+                console.log("Error saving leave allotment:", err);
+            }
+            setLoading(false);
         }
     };
-
     // -----setting the data if contain id ----------
     useEffect(() => {
         if (id) {
@@ -352,16 +336,12 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
                     }
-
-
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
                         businessUnit: baseAddress.businessUnit?._id,
                         branch: baseAddress.branch?._id,
                         warehouse: baseAddress.warehouse?._id,
-                        groupName: baseAddress.groupName,
-                        hasParent: baseAddress.hasParent,
                         workingDepartment: baseAddress.workingDepartment?._id
                     }));
                     setPageLoading(false)
@@ -375,7 +355,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             setPageLoading(false)
         }
     }, [id, parentLedgers]);
-
     async function getDepartments(level, levelId) {
         try {
             const response = await departmentService.all(level, levelId);
@@ -384,7 +363,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             console.log("error while fetching departments", error);
         }
     }
-
     async function getLeaveCategory(level, levelId) {
         try {
             const response = await leaveCategoryService.getAllLeaveCategory(level, levelId);
@@ -393,7 +371,6 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             console.log("error while fetching departments", error);
         }
     }
-
     useEffect(() => {
         async function getActiveBusinessUnit() {
             try {
@@ -406,10 +383,7 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
         }
         getActiveBusinessUnit();
     }, []);
-
-
     useEffect(() => {
-
         if (currentUser && isAuthenticated) {
             if (currentUser.isVendorLevel) {
                 setCurrentLevel("vendor");
@@ -426,13 +400,8 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                 setCurrentLevel("vendor");
             }
         } else {
-
-
         }
-
     }, [currentUser]);
-
-
     return (
         <>
             {
@@ -446,26 +415,19 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                             flexDirection: "column",
                         }}
                     >
-
                         <div className="flex flex-col justify-center mt-5 items-center gap-2">
                             <FormLoader />
-
                         </div>
-
                     </div>
-
                     :
-
                     <>
                         <div>
                             <div className={`${isDark ? "bg-darkSecondary text-white" : "bg-white text-black-900"} p-5 shadow-lg`}>
-
                                 <form onSubmit={onSubmit}>
-                                    <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
-
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
                                         {/* select level */}
                                         <div
-                                            className={`fromGroup   ${formDataErr?.level !== "" ? "has-error" : ""
+                                            className={`fromGroup ${formDataErr?.level !== "" ? "has-error" : ""
                                                 } `}
                                         >
                                             <label htmlFor="level" className="form-label ">
@@ -478,10 +440,9 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                 value={level}
                                                 onChange={handleChange}
                                                 disabled={isViewed || id}
-                                                className="form-control py-2  appearance-none relative flex-1"
+                                                className="form-control py-2 appearance-none relative flex-1"
                                             >
                                                 <option value="">None</option>
-
                                                 {levelList &&
                                                     levelList?.map((item) => (
                                                         <option value={item.value} key={item?.value}>
@@ -491,13 +452,10 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                             </select>
                                             {<p className="text-sm text-red-500">{formDataErr.level}</p>}
                                         </div>
-
-
                                         {
                                             (levelResult == 0 || levelResult == 1) ? "" :
-
                                                 <div
-                                                    className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
+                                                    className={`fromGroup ${formDataErr?.businessUnit !== "" ? "has-error" : ""
                                                         } `}
                                                 >
                                                     <label htmlFor=" hh" className="form-label ">
@@ -510,10 +468,9 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                         value={businessUnit}
                                                         onChange={handleChange}
                                                         disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
-                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                        className="form-control py-2 appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
-
                                                         {activeBusinessUnits &&
                                                             activeBusinessUnits?.map((item) => (
                                                                 <option value={item?._id} key={item?._id}>{item?.name}</option>
@@ -522,13 +479,10 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                     {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
                                                 </div>
                                         }
-
-
                                         {
                                             (levelResult == 0 || levelResult == 1 || levelResult == 2) ? "" :
-
                                                 <div
-                                                    className={`fromGroup   ${formDataErr?.branch !== "" ? "has-error" : ""
+                                                    className={`fromGroup ${formDataErr?.branch !== "" ? "has-error" : ""
                                                         } `}
                                                 >
                                                     <label htmlFor=" hh" className="form-label ">
@@ -541,10 +495,9 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                         value={branch}
                                                         onChange={handleChange}
                                                         disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
-                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                        className="form-control py-2 appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
-
                                                         {activeBranches &&
                                                             activeBranches?.map((item) => (
                                                                 <option value={item?._id} key={item?._id}>{item?.name}</option>
@@ -552,13 +505,11 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                     </select>
                                                     {<p className="text-sm text-red-500">{formDataErr.branch}</p>}
                                                 </div>
-
                                         }
-
                                         {
                                             (levelResult == 0 || levelResult == 1 || levelResult == 2 || levelResult == 3) ? "" :
                                                 <div
-                                                    className={`fromGroup   ${formDataErr?.warehouse !== "" ? "has-error" : ""
+                                                    className={`fromGroup ${formDataErr?.warehouse !== "" ? "has-error" : ""
                                                         } `}
                                                 >
                                                     <label htmlFor=" hh" className="form-label ">
@@ -571,10 +522,9 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                         value={warehouse}
                                                         onChange={handleChange}
                                                         disabled={isViewed || currentUser.isWarehouseLevel || id}
-                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                        className="form-control py-2 appearance-none relative flex-1"
                                                     >
                                                         <option value="">None</option>
-
                                                         {activeWarehouse &&
                                                             activeWarehouse?.map((item) => (
                                                                 <option value={item?._id} key={item?._id}>{item?.name}</option>
@@ -583,13 +533,11 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                     {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
                                                 </div>
                                         }
-
-
                                         {
                                             departments?.length > 0 ?
                                                 <>
                                                     <div
-                                                        className={`fromGroup md:col-span-2   ${formDataErr?.workingDepartment !== "" ? "has-error" : ""
+                                                        className={`fromGroup md:col-span-2 ${formDataErr?.workingDepartment !== "" ? "has-error" : ""
                                                             } `}
                                                     >
                                                         <label htmlFor=" hh" className="form-label ">
@@ -600,10 +548,9 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                         <select
                                                             name="workingDepartment"
                                                             disabled={isViewed || id}
-
                                                             value={workingDepartment}
                                                             onChange={handleChange}
-                                                            className="form-control py-2  appearance-none relative flex-1"
+                                                            className="form-control py-2 appearance-none relative flex-1"
                                                         >
                                                             <option value="">None</option>
                                                             {departments &&
@@ -614,53 +561,92 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                         {<p className="text-sm text-red-500">{formDataErr.workingDepartment}</p>}
                                                     </div>
                                                 </>
-
-                                                : <div>No Departments Available</div>
+                                                : ""
                                         }
                                     </div>
+                                    {
+                                        workingDepartment && leaveCategories &&
+                                        <div className="bg-white shadow-sm border rounded-lg mt-4 p-4">
+                                            {
+                                                allotments?.map((item, index) => {
+                                                    return (
+                                                        <div key={index} className="grid grid-cols-3 gap-4 mb-4">
+                                                            <div className={`fromGroup `}>
+                                                                <label htmlFor="name" className="form-label ">Select Leave Category</label>
+                                                                <select
+                                                                    className="form-control py-2 appearance-none relative flex-1"
+                                                                    name={`category-${index}`}
+                                                                    id={`category-${index}`}
+                                                                    value={item.id}
+                                                                    onChange={(e) => handleAllotmentChange(index, "id", e.target.value)}
+                                                                    disabled={isViewed}
+                                                                >
+                                                                    <option value="">Select one</option>
+                                                                    {
+                                                                        leaveCategories && leaveCategories?.length > 0 && leaveCategories?.map((cat) => {
+                                                                            return (
+                                                                                <option key={cat?._id} value={cat?._id}>{cat?.name}</option>
+                                                                            )
+                                                                        })
+                                                                    }
+                                                                </select>
+                                                            </div>
+                                                            <div className={`fromGroup `}>
+                                                                <label className="form-label " htmlFor="name">Days</label>
+                                                                <input
+                                                                    className="form-control py-2 appearance-none relative flex-1"
+                                                                    type="number"
+                                                                    placeholder="Enter number of days."
+                                                                    value={item.allocated}
+                                                                    onChange={(e) => handleAllotmentChange(index, "allocated", e.target.value)}
+                                                                    disabled={isViewed}
+                                                                />
+                                                            </div>
+                                                            {!isViewed && allotments.length > 1 && (
+                                                                <div className="flex items-end">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => removeAllotment(index)}
+                                                                        className="bg-red-500 text-white  p-2 rounded"
+                                                                    >
+                                                                        <BsTrash/>
+                                                                    </button>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )
+                                                })
+                                            }
+                                            {!isViewed && (
+                                                <div className="mt-4">
+                                                    <button
+                                                        type="button"
+                                                        onClick={addAllotment}
+                                                        className='mt-3 flex items-center px-3 py-2 text-sm hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md'
+                                                    >
+                                                        <span className='ml-1 text-lightHoverBgBtn dark:text-darkBtn'>Add More</span>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    }
+                                    {!isViewed && (
+                                        <div className="mt-6 flex justify-end">
+                                            <button
+                                                type="submit"
+                                                disabled={loading}
+                                                className="bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn inline-flex justify-center"
+                                            >
+                                                {loading ? "Saving..." : "Save"}
+                                            </button>
+                                        </div>
+                                    )}
                                 </form>
                             </div>
                         </div>
-
-
-                        <div className="bg-white shadow-lg mt-2 p-4">
-                            {
-                                allotments?.map((item) => {
-                                    return (
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className={`fromGroup `}>
-                                                <label htmlFor="name" className="form-label ">Select Leave Category</label>
-                                                <select className="form-control py-2  appearance-none relative flex-1" name="" id="">
-                                                    <option value="Select one"></option>
-                                                    {
-                                                        leaveCategories && leaveCategories?.length > 0 && leaveCategories?.map((cat, index) => {
-                                                            return (
-                                                                <option key={cat?._id} value={cat?._id}>{cat?.name}</option>
-                                                            )
-                                                        })
-                                                    }
-                                                </select>  
-                                            </div>
-                                            <div lassName={`fromGroup `}>
-                                                <label className="form-label " htmlFor="name">Days</label>
-                                                <input className="form-control py-2  appearance-none relative flex-1" type="number" placeholder="Enter number of days." />
-                                            </div>
-                                        </div>
-                                    )
-                                })
-                            }
-                        </div>
                     </>
-
-
-
-
-
-
             }
         </>
-
     );
 };
-
 export default LeaveAllotment;
