@@ -1,623 +1,665 @@
-
-
-
-
-import React, { useEffect, useState, useCallback, Fragment } from "react";
-import { Card } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { useLocation } from "react-router-dom";
-import { FaRegTrashAlt } from "react-icons/fa";
-import { Dialog, Transition } from "@headlessui/react";
-
-import useDarkMode from "@/hooks/useDarkMode";
-import FormLoader from "@/Common/formLoader/FormLoader";
-
-import warehouseService from "@/services/warehouse/warehouse.service";
-import productBlueprintService from "@/services/productBlueprint/productBlueprint.service";
-import stockService from "@/services/stock/stock.service";
-import productQaService from "@/services/productQa/productQa.service";
-
-import "../../assets/scss/common.scss";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import useDarkMode from "@/hooks/useDarkMode";
+import { useLocation, useNavigate } from "react-router-dom";
+import "../../assets/scss/common.scss"
+
+import { useSelector } from "react-redux";
+import FormLoader from "@/Common/formLoader/FormLoader";
+import warehouseService from "@/services/warehouse/warehouse.service";
+import departmentService from "@/services/department/department.service";
+import Button from "@/components/ui/Button";
+import ledgerGroupService from "@/services/ledgerGroup/ledgerGroup.service";
+import leaveCategoryService from "@/services/leaveCategory/leaveCategory.service";
+import { categories } from "@/constant/data";
+
+
+
 
 const LeaveAllotment = ({ noFade, scrollContent }) => {
-
-    const [showLoadingModal, setShowLoadingModal] = useState(false);
-    const handleCloseLoadingModal = () => {
-        setShowLoadingModal(false);
-    };
-
-    const [canOpenNewForm, setCanOpeNewForm] = useState(false);
+    const navigate = useNavigate();
+    const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
+    const [levelList, setLevelList] = useState([
+        {
+            name: "Business",
+            value: "business"
+        },
+        {
+            name: "Branch",
+            value: "branch"
+        },
+        {
+            name: "Warehouse",
+            value: "warehouse"
+        },
+    ])
 
     const [isDark] = useDarkMode();
-    const dispatch = useDispatch();
     const location = useLocation();
-    const { user: currentUser, isAuth: isAuthenticated } = useSelector(
-        (state) => state.auth
-    );
+    const row = location?.state?.row;
+    const name = location?.state?.name;
+    const id = location?.state?.id;
 
     const [pageLoading, setPageLoading] = useState(true);
-    const [loading, setLoading] = useState(false);
-    const [qaLoading, setQaLoading] = useState(false);
-
-    // Dropdown Data
     const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
+    const [levelResult, setLevelResult] = useState(0)
     const [activeBranches, setActiveBranches] = useState([]);
-    const [activeWarehouses, setActiveWarehouses] = useState([]);
-    const [activeProductBlueprints, setActiveProductBlueprints] = useState([]);
-    const [normalStocks, setNormalStocks] = useState([]);
+    const [activeWarehouse, setActiveWarehouse] = useState([]);
+    const [currentLevel, setCurrentLevel] = useState("");
+    const [levelId, setLevelId] = useState("");
+    const [parentLedgers, setParentLedgers] = useState([]);
+    const [departments, setDepartments] = useState([]);
+    const [leaveCategories, setLeaveCategories] = useState([]);
+    const [allotments, setAllotments] = useState([
+        {
+            categoryId: "",
+            allocated: 0,
+        }
+    ]);
 
-    // Form State
+
     const [formData, setFormData] = useState({
-        product: "",
-        productStock: "",
+        level: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-        productMainStockId: "",
+
+        workingDepartment: "",
     });
 
-    const [formErrors, setFormErrors] = useState({
-        product: "",
+
+    useEffect(() => {
+        if (currentUser && isAuthenticated) {
+            if (currentUser.isVendorLevel) {
+                setLevelList([
+                    {
+                        name: "Business",
+                        value: "business"
+                    },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ])
+            } else if (currentUser.isBuLevel) {
+                setLevelList([
+                    {
+                        name: "Business",
+                        value: "business"
+                    },
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ]);
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
+            } else if (currentUser.isBranchLevel) {
+                setLevelList([
+                    {
+                        name: "Branch",
+                        value: "branch"
+                    },
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ]);
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
+            } else if (currentUser.isWarehouseLevel) {
+                setLevelList([
+                    {
+                        name: "Warehouse",
+                        value: "warehouse"
+                    },
+                ])
+                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
+            }
+
+        }
+
+    }, [currentUser])
+
+    const [formDataErr, setFormDataErr] = useState({
+        level: "",
         businessUnit: "",
         branch: "",
         warehouse: "",
-        productMainStockId: "",
+
+        workingDepartment: "",
     });
 
-    // Q&A List
-    const [qaList, setQaList] = useState([]);
+    const {
+        level,
+        businessUnit,
+        branch,
+        warehouse,
 
-    console.log("qaList", qaList);
+        workingDepartment,
+    } = formData;
 
+    const [isViewed, setIsViewed] = useState(false);
+    const [showAddButton, setShowAddButton] = useState(true);
+    const [loading, setLoading] = useState(false);
 
-    // Helper: Format label
-    const formatLabel = (field) => {
-        return field
-            .replace(/([A-Z])/g, " $1")
-            .replace(/^./, (str) => str.toUpperCase());
+    const validateField = (name, value) => {
+        const rules = {
+            groupName: [
+                [!value, "Gruop Name is Required"],
+                [value.length <= 3, "Minimum 3 characters required."]
+            ],
+            level: [[!value, "Level is required"]],
+            businessUnit: [[!value && levelResult > 1, "Business Unit is required"]],
+            branch: [[!value && levelResult > 2, "Branch is required"]],
+            warehouse: [[!value && levelResult > 3, "Warehouse is required"]]
+        };
+        return (rules[name] || []).find(([condition]) => condition)?.[1] || "";
     };
 
-    // Validation
-    const validateForm = useCallback(() => {
-        const required = [
-            "productMainStockId",
-            "businessUnit",
-            "branch",
-            "warehouse",
-            "product",
-        ];
-        let hasError = false;
-        const newErrors = {};
 
-        required.forEach((field) => {
-            if (!formData[field]) {
-                newErrors[field] = `${formatLabel(field)} is Required.`;
-                hasError = true;
-            }
-        });
+    const validationFunction = () => {
+        const { level, businessUnit, branch, warehouse } = formData;
+        let errors = {
+            groupName: validateField("groupName", groupName),
+        };
+        if (hasParent && workingDepartment == "") {
+            errors.workingDepartment = "Parent group is required"
+        }
+        errors.level = validateField("level", level);
+        if (level === "business" || level === "branch" || level === "warehouse") {
+            errors.businessUnit = validateField("businessUnit", businessUnit);
+        }
+        if (level === "branch" || level === "warehouse") {
+            errors.branch = validateField("branch", branch);
+        }
+        if (level === "warehouse") {
+            errors.warehouse = validateField("warehouse", warehouse);
+        }
+        console.log("errors", errors);
 
-        setFormErrors((prev) => ({ ...prev, ...newErrors }));
-        return hasError;
-    }, [formData]);
+        setFormDataErr((prev) => ({
+            ...prev,
+            ...errors
+        }));
+        return Object.values(errors).some((error) => error);
+    };
 
-    // Handle Select Change
-    const handleSelectChange = (e) => {
+
+
+
+    const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
-        setFormErrors((prev) => ({ ...prev, [name]: "" }));
-    };
-
-    // Handle Q&A Input Change
-    const handleQAChange = (index, field, value) => {
-        setQaList((prev) => {
-            const updated = [...prev];
-            updated[index][field] = value;
-            return updated;
-        });
-    };
-
-    // Delete Q&A
-    const publish = async (index) => {
-        const qa = qaList[index];
-        if (qa._id) {
-            try {
-                setShowLoadingModal(true);
-                await productQaService.publishQaOut(qa._id);
-                setShowLoadingModal(false);
-
-                fetchQA()
-
-            } catch (error) {
-                console.error("Publish failed:", error);
-                setShowLoadingModal(false);
-                alert("Failed to publish Q&A");
-                return;
-            }
-        }
-        setQaList((prev) => prev.filter((_, i) => i !== index));
-    };
-
-    // Save or Update Q&A
-    const saveOrUpdateQA = async (index) => {
-        if (validateForm()) return;
-        const qa = qaList[index];
-
-
-        if (!qa?.question.trim() || !qa?.answer.trim()) {
-            alert("Both Question and Answer are required.");
-            return;
-        }
-
-        setLoading(true);
-        setShowLoadingModal(true);
-        try {
-            const clientId = localStorage.getItem("saas_client_clientId");
-            const payload = {
-                clientId,
-                businessUnit: formData.businessUnit,
-                branch: formData.branch,
-                warehouse: formData.warehouse,
-                product: formData.product,
-                productStock: formData.productStock,
-                productMainStockId: formData.productMainStockId,
-                question: qa.question,
-                answer: qa.answer,
-            };
-            let saved;
-            if (qa._id) {
-                saved = await productQaService.updateQaOut({ ...payload, qaId: qa._id, });
-                toast.success("updated successfully.");
-            } else {
-                saved = await productQaService.create(payload);
-                toast.success("Saved successfully.");
-
-            }
-            const newId = saved?._id || saved?.data?.workingDepartmentId || saved?.id;
-            fetchQA()
-
-        } catch (error) {
-            console.error("Save/Update failed:", error);
-            alert("Failed to save Q&A. Please try again.");
-        } finally {
-            setLoading(false);
-            setShowLoadingModal(false);
-            setCanOpeNewForm(true);
-
-        }
-    };
-
-    // Load Business Units
-    useEffect(() => {
-        const fetchBusinessUnits = async () => {
-            try {
-                const res = await warehouseService.getActiveBusinessUnit();
-                setActiveBusinessUnits(res?.data?.businessUnits || []);
-            } catch (error) {
-                console.error("Failed to load business units", error);
-            }
-        };
-        fetchBusinessUnits();
-    }, []);
-
-    // Load Branches
-    useEffect(() => {
-        if (!formData.businessUnit) {
+        setFormData((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+        if (name === "businessUnit" && value !== "") {
             setActiveBranches([]);
-            return;
+            setFormData((prev) => ({
+                ...prev,
+                branchId: ""
+            }));
         }
-        const fetchBranches = async () => {
-            try {
-                const res = await warehouseService.getBranchByBusiness(formData.businessUnit);
-                setActiveBranches(res?.data || []);
-            } catch (error) {
-                console.error("Failed to load branches", error);
-            }
-        };
-        fetchBranches();
-    }, [formData.businessUnit]);
-
-    // Load Warehouses
-    useEffect(() => {
-        if (!formData.branch) {
-            setActiveWarehouses([]);
-            return;
-        }
-        const fetchWarehouses = async () => {
-            try {
-                const res = await warehouseService.getWarehouseByBranch(formData.branch);
-                setActiveWarehouses(res?.data || []);
-            } catch (error) {
-                console.error("Failed to load warehouses", error);
-            }
-        };
-        fetchWarehouses();
-    }, [formData.branch]);
-
-    // Load Product Blueprints
-    useEffect(() => {
-        const fetchBlueprints = async () => {
-            try {
-                const res = await productBlueprintService.getActive();
-                setActiveProductBlueprints(res?.data?.roductBluePrints || []);
-            } catch (error) {
-                console.error("Failed to load product blueprints", error);
-            }
-        };
-        fetchBlueprints();
-    }, []);
-
-    // Load Normal Stocks
-    useEffect(() => {
-        if (!formData.product) {
-            setNormalStocks([]);
-            return;
-        }
-        const fetchStocks = async () => {
-            try {
-                const res = await stockService.getStockByProduct(formData.product);
-                const stockList = res?.data?.[0]?.normalSaleStock || [];
-                setNormalStocks(stockList);
-                if (stockList.length > 0) {
-                    setFormData((prev) => ({
-                        ...prev,
-                        productStock: res?.data?.[0]?._id || "",
-                    }));
-                }
-            } catch (error) {
-                console.error("Failed to load stocks", error);
-            }
-        };
-        fetchStocks();
-    }, [formData.product]);
-
-    // Load Existing Q&A
-    useEffect(() => {
-        if (!formData.productMainStockId) {
-            setQaList([]);
-            return;
-        }
-
-        fetchQA();
-    }, [formData.productMainStockId]);
-
-    const fetchQA = async () => {
-        try {
-            setQaLoading(true)
-            const res = await productQaService.getQaOutByProductMainStockId(
-                formData.productMainStockId
-            );
-            const data = res?.data || [];
-            setQaList(data.length > 0 ? data : []);
-            setQaLoading(false)
-        } catch (error) {
-            setQaLoading(false)
-            console.error("Failed to load Q&A", error);
-            setQaList([]);
-        }
+        setFormDataErr((prev) => ({
+            ...prev,
+            [name]: validateField(name, value)
+        }));
     };
 
-    // Auto-fill based on user level
     useEffect(() => {
-        if (!currentUser || !isAuthenticated) return;
+        if (level) {
+            console.log("level", level);
 
-        if (currentUser.isBuLevel) {
-            setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }));
-        } else if (currentUser.isBranchLevel) {
-            setFormData((prev) => ({
-                ...prev,
-                businessUnit: currentUser
-
-                    .businessUnit,
-                branch: currentUser.branch,
-            }));
-        } else if (currentUser.isWarehouseLevel) {
-            setFormData((prev) => ({
-                ...prev,
-                businessUnit: currentUser.businessUnit,
-                branch: currentUser.branch,
-                warehouse: currentUser.warehouse,
-            }));
-        }
-    }, [currentUser, isAuthenticated]);
-
-    // Page ready
-    useEffect(() => {
-        setPageLoading(false);
-    }, []);
-
-    useEffect(() => {
-
-        if (qaList?.length > 0) {
-            let count = 0;
-            for (let index = 0; index < qaList.length; index++) {
-                const element = qaList[index];
-                if (element._id == "") {
-                    count++
-                }
+            if (level === "vendor") {
+                setLevelResult(1);
+            } else if (level === "business") {
+                setLevelResult(2)
+            } else if (level === "branch") {
+                setLevelResult(3)
+            } else if (level === "warehouse") {
+                setLevelResult(4)
             }
+        } else {
+            setLevelResult(0)
+        }
+    }, [level])
 
-            if (count > 0) {
-                setCanOpeNewForm(false)
 
-            } else {
-                setCanOpeNewForm(true)
+    useEffect(() => {
+        if (businessUnit) {
+            getBranchByBusiness(businessUnit);
+            if (level === "business") {
+                getDepartments(level, businessUnit);
+                getLeaveCategory(level, businessUnit);
+            }
+            if (!id) {
+                setFormData((prev) => {
+                    return { ...prev, workingDepartment: "" }
+                })
             }
         }
+    }, [businessUnit]);
 
-    }, [qaList])
-
-    if (pageLoading) {
-        return (
-            <div className="flex h-screen items-center justify-center">
-                <FormLoader />
-            </div>
-        );
+    async function getBranchByBusiness(id) {
+        try {
+            const response = await warehouseService.getBranchByBusiness(id);
+            setActiveBranches(response.data)
+        } catch (error) {
+            console.log("error while getting branch by business unit");
+        }
     }
 
-    return (
-        <div className="p-4">
-            <Card className={`${isDark ? "bg-darkSecondary text-white" : ""}`}>
-                <div className="p-5">
-                    {/* Dropdowns */}
-                    <div className="grid lg:grid-cols-3 gap-4 mb-6">
-                        {/* Business Unit */}
-                        <div className={`formGroup ${formErrors.businessUnit ? "has-error" : ""}`}>
-                            <label className="form-label">
-                                Business Unit <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="businessUnit"
-                                value={formData.businessUnit}
-                                onChange={handleSelectChange}
-                                disabled={
-                                    currentUser?.isBuLevel ||
-                                    currentUser?.isBranchLevel ||
-                                    currentUser?.isWarehouseLevel
-                                }
-                                className="form-control py-2"
-                            >
-                                <option value="">None</option>
-                                {activeBusinessUnits.map((bu) => (
-                                    <option key={bu._id} value={bu._id}>
-                                        {bu.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-sm text-red-500">{formErrors.businessUnit}</p>
-                        </div>
+    useEffect(() => {
+        if (branch) {
+            getWarehouseByBranch(branch);
+            if (level === "branch") {
+                getDepartments(level, branch);
+                getLeaveCategory(level, branch);
+            }
+            if (!id) {
+                setFormData((prev) => {
+                    return { ...prev, workingDepartment: "" }
+                })
+            }
+        }
+    }, [branch]);
 
-                        {/* Branch */}
-                        <div className={`formGroup ${formErrors.branch ? "has-error" : ""}`}>
-                            <label className="form-label">
-                                Branch <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="branch"
-                                value={formData.branch}
-                                onChange={handleSelectChange}
-                                disabled={currentUser?.isBranchLevel || currentUser?.isWarehouseLevel}
-                                className="form-control py-2"
-                            >
-                                <option value="">None</option>
-                                {activeBranches.map((b) => (
-                                    <option key={b._id} value={b._id}>
-                                        {b.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-sm text-red-500">{formErrors.branch}</p>
-                        </div>
+    async function getWarehouseByBranch(id) {
+        try {
+            const response = await warehouseService.getWarehouseByBranch(id);
+            setActiveWarehouse(response.data)
+        } catch (error) {
+            console.log("error while getting warehouse by branch");
+        }
+    }
 
-                        {/* Warehouse */}
-                        <div className={`formGroup ${formErrors.warehouse ? "has-error" : ""}`}>
-                            <label className="form-label">
-                                Warehouse <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="warehouse"
-                                value={formData.warehouse}
-                                onChange={handleSelectChange}
-                                disabled={currentUser?.isWarehouseLevel}
-                                className="form-control py-2"
-                            >
-                                <option value="">None</option>
-                                {activeWarehouses.map((w) => (
-                                    <option key={w._id} value={w._id}>
-                                        {w.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-sm text-red-500">{formErrors.warehouse}</p>
-                        </div>
-
-                        {/* Product */}
-                        <div className={`formGroup ${formErrors.product ? "has-error" : ""}`}>
-                            <label className="form-label">
-                                Product <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="product"
-                                value={formData.product}
-                                onChange={handleSelectChange}
-                                className="form-control py-2"
-                            >
-                                <option value="">None</option>
-                                {activeProductBlueprints.map((p) => (
-                                    <option key={p._id} value={p._id}>
-                                        {p.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-sm text-red-500">{formErrors.product}</p>
-                        </div>
-
-                        {/* Item */}
-                        <div className={`formGroup ${formErrors.productMainStockId ? "has-error" : ""}`}>
-                            <label className="form-label">
-                                Item <span className="text-red-500">*</span>
-                            </label>
-                            <select
-                                name="productMainStockId"
-                                value={formData.productMainStockId}
-                                onChange={handleSelectChange}
-                                className="form-control py-2"
-                            >
-                                <option value="">None</option>
-                                {normalStocks.map((s) => (
-                                    <option key={s._id} value={s._id}>
-                                        {s.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="text-sm text-red-500">{formErrors.productMainStockId}</p>
-                        </div>
-                    </div>
-
-                    {/* Q&A Section */}
-
-                    {
-                        formData?.productMainStockId && <div className="mt-8">
-                            <h4 className="text-lg font-bold mb-4">Questions & Answers</h4>
-
-                            {
-                                qaLoading ?
-                                    <div className="flex flex-col justify-center mt-5 items-center gap-2">
-                                        <FormLoader />
-                                    </div>
-                                    :
-                                    <>
-                                        {qaList?.length > 0 ?
-                                            qaList.map((qa, index) => (
-                                                <div
-                                                    key={qa._id || index}
-                                                    className={`p-4 relative mb-4 border rounded  ${isDark ? "border-gray-700" : "border-gray-200"
-                                                        }`}
-                                                >
-                                                    <div className="mb-3">
-                                                        <label className="form-label">Question</label>
-                                                        <input
-                                                            className="form-control py-2 w-full"
-                                                            placeholder="Enter question"
-                                                            value={qa.question}
-                                                            onChange={(e) => handleQAChange(index, "question", e.target.value)}
-                                                        />
-                                                    </div>
-
-                                                    <div className="mb-3">
-                                                        <label className="form-label">Answer</label>
-                                                        <textarea
-                                                            className="form-control py-2 w-full"
-                                                            rows={3}
-                                                            placeholder="Enter answer"
-                                                            value={qa.answer}
-                                                            onChange={(e) => handleQAChange(index, "answer", e.target.value)}
-                                                        />
-                                                    </div>
-
-                                                    {
-                                                        qa?.hasAnswered &&
-
-                                                        <div className="flex gap-2 items-center top-2 right-4 absolute" >
-                                                            <p>{qa.isVerified ? "Unpublish" : "Publish"}</p>
-                                                            <div
-                                                                className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer ${qa.isVerified ? "bg-lightBtn" : "bg-gray-400"
-                                                                    }`}
-                                                                onClick={() => publish(index)}
-
-                                                            >
-                                                                <div
-                                                                    className={`w-4 h-4 bg-white rounded-full shadow-md transform ${qa.isVerified ? "translate-x-4" : "translate-x-0"
-                                                                        }`}
-                                                                    onClick={() => publish(index)}
-
-                                                                ></div>
-                                                            </div>
-                                                        </div>
-
-                                                    }
+    useEffect(() => {
+        if (warehouse && level === "warehouse") {
+            getDepartments(level, warehouse);
+            getLeaveCategory(level, warehouse);
+        }
+        if (!id) {
+            setFormData((prev) => {
+                return { ...prev, workingDepartment: "" }
+            })
+        }
+    }, [warehouse]);
 
 
-
-                                                    <div className="flex gap-2 justify-end">
-                                                        <button
-                                                            onClick={() => saveOrUpdateQA(index)}
-                                                            disabled={loading}
-                                                            className={`px-4 py-2 rounded text-white transition ${qa._id
-                                                                ? "bg-blue-600 hover:bg-blue-700"
-                                                                : "bg-green-600 hover:bg-green-700"
-                                                                }`}
-                                                        >
-                                                            {qa._id ? "Update" : "Save"}
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            )) :
-
-                                            <div className="flex justify-center bg-gray-300 p-4">
-                                                <span>No Question Found</span>
-                                            </div>
-                                        }
-
-                                    </>
-                            }
+    useEffect(() => {
+        if (workingDepartment && level) {
+            if (level == "business") {
+                getLeaveAllotments(level, businessUnit, workingDepartment)
+            } else if (level == "branch") {
+                getLeaveAllotments(level, branch, workingDepartment)
+            } else if (level == "warehouse") {
+                getLeaveAllotments(level, warehouse, workingDepartment)
+            }
+        }
+    }, [workingDepartment]);
 
 
-                        </div>
+    async function getLeaveAllotments(level, levelid, workingDepartment) {
+        try {
+            const response = await leaveCategoryService.getLeaveAllotmentByDepartment(level, levelid, workingDepartment);
+            if (response?.data?.leaveAllotment) {
+                setAllotments(response?.data?.leaveAllotment?.leaveCategories)
+            }
+        } catch (error) {
+            console.log("error while getting leave allotment", error);
+        }
+    }
+
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+        setIsViewed(false);
+        const error = validationFunction();
+        setLoading(true);
+        if (error) {
+
+        } else {
+
+        }
+    };
+
+    // -----setting the data if contain id ----------
+    useEffect(() => {
+        if (id) {
+            if (name == "view") {
+                setIsViewed(true)
+            } else {
+                setIsViewed(false)
+            }
+            async function getBranch() {
+                try {
+                    setPageLoading(true)
+                    const baseAddress = location?.state?.row;
+                    let level = "";
+                    if (baseAddress.isBuLevel) {
+                        level = "business"
+                    } else if (baseAddress.isVendorLevel) {
+                        level = "vendor"
+                    } else if (baseAddress.isWarehouseLevel) {
+                        level = "warehouse"
+                    } else if (baseAddress.isBranchLevel) {
+                        level = "branch"
                     }
 
-                </div>
-            </Card>
+
+                    setFormData((prev) => ({
+                        ...prev,
+                        level: level,
+                        businessUnit: baseAddress.businessUnit?._id,
+                        branch: baseAddress.branch?._id,
+                        warehouse: baseAddress.warehouse?._id,
+                        groupName: baseAddress.groupName,
+                        hasParent: baseAddress.hasParent,
+                        workingDepartment: baseAddress.workingDepartment?._id
+                    }));
+                    setPageLoading(false)
+                } catch (error) {
+                    setPageLoading(false)
+                    console.log("error in fetching vendor data");
+                }
+            }
+            getBranch();
+        } else {
+            setPageLoading(false)
+        }
+    }, [id, parentLedgers]);
+
+    async function getDepartments(level, levelId) {
+        try {
+            const response = await departmentService.all(level, levelId);
+            setDepartments(response?.data?.departments);
+        } catch (error) {
+            console.log("error while fetching departments", error);
+        }
+    }
+
+    async function getLeaveCategory(level, levelId) {
+        try {
+            const response = await leaveCategoryService.getAllLeaveCategory(level, levelId);
+            setLeaveCategories(response?.data?.leaveCategories)
+        } catch (error) {
+            console.log("error while fetching departments", error);
+        }
+    }
+
+    useEffect(() => {
+        async function getActiveBusinessUnit() {
+            try {
+                const response = await warehouseService.getActiveBusinessUnit();
+                console.log("respone active", response);
+                setActiveBusinessUnits(response?.data?.businessUnits)
+            } catch (error) {
+                console.log("error while getting the active business unit", error);
+            }
+        }
+        getActiveBusinessUnit();
+    }, []);
 
 
-            <Transition appear show={showLoadingModal} as={Fragment}>
-                <Dialog
-                    as="div"
-                    className="relative z-[99999]"
-                    onClose={handleCloseLoadingModal}
-                >
-                    {(
-                        <Transition.Child
-                            as={Fragment}
-                            enter={noFade ? "" : "duration-300 ease-out"}
-                            enterFrom={noFade ? "" : "opacity-0"}
-                            enterTo={noFade ? "" : "opacity-100"}
-                            leave={noFade ? "" : "duration-200 ease-in"}
-                            leaveFrom={noFade ? "" : "opacity-100"}
-                            leaveTo={noFade ? "" : "opacity-0"}
-                        >
-                            <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
-                        </Transition.Child>
-                    )}
+    useEffect(() => {
 
-                    <div className="fixed inset-0 overflow-y-auto">
-                        <div
-                            className={`flex min-h-full justify-center text-center p-6 items-center "
-                                    }`}
-                        >
-                            <Transition.Child
-                                as={Fragment}
-                                enter={noFade ? "" : "duration-300  ease-out"}
-                                enterFrom={noFade ? "" : "opacity-0 scale-95"}
-                                enterTo={noFade ? "" : "opacity-100 scale-100"}
-                                leave={noFade ? "" : "duration-200 ease-in"}
-                                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
-                                leaveTo={noFade ? "" : "opacity-0 scale-95"}
-                            >
-                                <Dialog.Panel
-                                    className={`w-full transform overflow-hidden rounded-md
-                                       bg-white dark:bg-darkSecondary text-left align-middle shadow-xl transition-alll max-w-[17rem] py-10 `}
-                                >
-                                    <div className="flex flex-col justify-center mt-5 items-center gap-2">
-                                        <FormLoader />
-                                    </div>
-                                </Dialog.Panel>
-                            </Transition.Child>
+        if (currentUser && isAuthenticated) {
+            if (currentUser.isVendorLevel) {
+                setCurrentLevel("vendor");
+            } else if (currentUser.isBuLevel) {
+                setCurrentLevel("business");
+                setLevelId(currentUser.businessUnit)
+            } else if (currentUser.isBranchLevel) {
+                setCurrentLevel("branch");
+                setLevelId(currentUser.branch)
+            } else if (currentUser.isWarehouseLevel) {
+                setCurrentLevel("warehouse");
+                setLevelId(currentUser.warehouse)
+            } else {
+                setCurrentLevel("vendor");
+            }
+        } else {
+
+
+        }
+
+    }, [currentUser]);
+
+
+    return (
+        <>
+            {
+                pageLoading ?
+                    <div
+                        style={{
+                            display: "flex",
+                            justifyContent: "center",
+                            height: "100vh",
+                            alignItems: "center",
+                            flexDirection: "column",
+                        }}
+                    >
+
+                        <div className="flex flex-col justify-center mt-5 items-center gap-2">
+                            <FormLoader />
+
                         </div>
+
                     </div>
-                </Dialog>
-            </Transition>
-        </div>
+
+                    :
+
+                    <>
+                        <div>
+                            <div className={`${isDark ? "bg-darkSecondary text-white" : "bg-white text-black-900"} p-5 shadow-lg`}>
+
+                                <form onSubmit={onSubmit}>
+                                    <div className="grid grid-cols-1 md:grid-cols-2  gap-5 ">
+
+                                        {/* select level */}
+                                        <div
+                                            className={`fromGroup   ${formDataErr?.level !== "" ? "has-error" : ""
+                                                } `}
+                                        >
+                                            <label htmlFor="level" className="form-label ">
+                                                <p className="form-label">
+                                                    Level <span className="text-red-500">*</span>
+                                                </p>
+                                            </label>
+                                            <select
+                                                name="level"
+                                                value={level}
+                                                onChange={handleChange}
+                                                disabled={isViewed || id}
+                                                className="form-control py-2  appearance-none relative flex-1"
+                                            >
+                                                <option value="">None</option>
+
+                                                {levelList &&
+                                                    levelList?.map((item) => (
+                                                        <option value={item.value} key={item?.value}>
+                                                            {item && item?.name}
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                            {<p className="text-sm text-red-500">{formDataErr.level}</p>}
+                                        </div>
+
+
+                                        {
+                                            (levelResult == 0 || levelResult == 1) ? "" :
+
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.businessUnit !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Business Unit <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="businessUnit"
+                                                        value={businessUnit}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed || currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeBusinessUnits &&
+                                                            activeBusinessUnits?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.businessUnit}</p>}
+                                                </div>
+                                        }
+
+
+                                        {
+                                            (levelResult == 0 || levelResult == 1 || levelResult == 2) ? "" :
+
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.branch !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Branch <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="branch"
+                                                        value={branch}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed || currentUser.isBranchLevel || currentUser.isWarehouseLevel || id}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeBranches &&
+                                                            activeBranches?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.branch}</p>}
+                                                </div>
+
+                                        }
+
+                                        {
+                                            (levelResult == 0 || levelResult == 1 || levelResult == 2 || levelResult == 3) ? "" :
+                                                <div
+                                                    className={`fromGroup   ${formDataErr?.warehouse !== "" ? "has-error" : ""
+                                                        } `}
+                                                >
+                                                    <label htmlFor=" hh" className="form-label ">
+                                                        <p className="form-label">
+                                                            Warehouse <span className="text-red-500">*</span>
+                                                        </p>
+                                                    </label>
+                                                    <select
+                                                        name="warehouse"
+                                                        value={warehouse}
+                                                        onChange={handleChange}
+                                                        disabled={isViewed || currentUser.isWarehouseLevel || id}
+                                                        className="form-control py-2  appearance-none relative flex-1"
+                                                    >
+                                                        <option value="">None</option>
+
+                                                        {activeWarehouse &&
+                                                            activeWarehouse?.map((item) => (
+                                                                <option value={item?._id} key={item?._id}>{item?.name}</option>
+                                                            ))}
+                                                    </select>
+                                                    {<p className="text-sm text-red-500">{formDataErr.warehouse}</p>}
+                                                </div>
+                                        }
+
+
+                                        {
+                                            departments?.length > 0 ?
+                                                <>
+                                                    <div
+                                                        className={`fromGroup md:col-span-2   ${formDataErr?.workingDepartment !== "" ? "has-error" : ""
+                                                            } `}
+                                                    >
+                                                        <label htmlFor=" hh" className="form-label ">
+                                                            <p className="form-label">
+                                                                Department <span className="text-red-500">*</span>
+                                                            </p>
+                                                        </label>
+                                                        <select
+                                                            name="workingDepartment"
+                                                            disabled={isViewed || id}
+
+                                                            value={workingDepartment}
+                                                            onChange={handleChange}
+                                                            className="form-control py-2  appearance-none relative flex-1"
+                                                        >
+                                                            <option value="">None</option>
+                                                            {departments &&
+                                                                departments?.map((item) => (
+                                                                    <option value={item?._id} key={item?._id}>{item?.departmentName}</option>
+                                                                ))}
+                                                        </select>
+                                                        {<p className="text-sm text-red-500">{formDataErr.workingDepartment}</p>}
+                                                    </div>
+                                                </>
+
+                                                : <div>No Departments Available</div>
+                                        }
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
+                        <div className="bg-white shadow-lg mt-2 p-4">
+                            {
+                                allotments?.map((item) => {
+                                    return (
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className={`fromGroup `}>
+                                                <label htmlFor="name" className="form-label ">Select Leave Category</label>
+                                                <select className="form-control py-2  appearance-none relative flex-1" name="" id="">
+                                                    <option value="Select one"></option>
+                                                    {
+                                                        leaveCategories && leaveCategories?.length > 0 && leaveCategories?.map((cat, index) => {
+                                                            return (
+                                                                <option key={cat?._id} value={cat?._id}>{cat?.name}</option>
+                                                            )
+                                                        })
+                                                    }
+                                                </select>  
+                                            </div>
+                                            <div lassName={`fromGroup `}>
+                                                <label className="form-label " htmlFor="name">Days</label>
+                                                <input className="form-control py-2  appearance-none relative flex-1" type="number" placeholder="Enter number of days." />
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
+                    </>
+
+
+
+
+
+
+            }
+        </>
+
     );
 };
 
