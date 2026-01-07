@@ -52,6 +52,8 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
         }
     ]);
     console.log("allotments", allotments);
+    console.log("id", id);
+
 
     const [formData, setFormData] = useState({
         level: "",
@@ -280,6 +282,15 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             const response = await leaveCategoryService.getLeaveAllotmentByDepartment(level, levelid, workingDepartment);
             if (response?.data?.leaveAllotment) {
                 setAllotments(response?.data?.leaveAllotment?.leaveCategories);
+            } else {
+
+                setAllotments([
+                    {
+                        id: "",
+                        allocated: 0,
+                    }
+                ])
+
             }
         } catch (error) {
             console.log("error while getting leave allotment", error);
@@ -294,10 +305,14 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
             setLoading(false);
         } else {
             try {
+                const clientId = localStorage.getItem("saas_client_clientId");
                 const payload = {
+                    clientId: clientId,
                     level,
-                    levelId: level === "business" ? businessUnit : level === "branch" ? branch : level === "warehouse" ? warehouse : "",
-                    departmentId: workingDepartment,
+                    businessUnit,
+                    branch,
+                    warehouse,
+                    workingDepartment: workingDepartment,
                     leaveCategories: allotments
                 };
                 if (id) {
@@ -307,7 +322,7 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                     // Assuming create service exists
                     await leaveCategoryService.createLeaveAllotment(payload);
                 }
-                navigate("/leave-allotments"); // Adjust path as needed
+                navigate("/leave-allotment-list"); // Adjust path as needed
             } catch (err) {
                 console.log("Error saving leave allotment:", err);
             }
@@ -609,7 +624,7 @@ const LeaveAllotment = ({ noFade, scrollContent }) => {
                                                                         onClick={() => removeAllotment(index)}
                                                                         className="bg-red-500 text-white  p-2 rounded"
                                                                     >
-                                                                        <BsTrash/>
+                                                                        <BsTrash />
                                                                     </button>
                                                                 </div>
                                                             )}

@@ -107,6 +107,17 @@ const getLeaveAllotmentByDepartment = async (currentLevel, levelId, department) 
     }
 };
 
+const createLeaveAllotment = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/leave/allotment/create/leave/allotment`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
 
 
 
@@ -143,6 +154,8 @@ export default {
     update,
     getAllLeaveCategory,
     getLeaveAllotmentByDepartment,
+    createLeaveAllotment,
+
     getList,
     activeInactive,
 
