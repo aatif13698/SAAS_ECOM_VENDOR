@@ -436,6 +436,15 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
         navigate('/payment-out-list');
     }
 
+     function formatDate(isoDate) {
+        const date = new Date(isoDate);
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+        const day = String(date.getUTCDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+
     return (
         <div className='bg-white dark:bg-darkSecondary rounded-lg relative'>
             <div className='bg-white shadow-sm flex gap-2 justify-between dark:bg-darkSecondary sticky z-[99] top-[3.54rem] p-4 border-b-2'>
@@ -449,6 +458,7 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
                             className='bg-red-600 text-white border border-gray-200 hover:bg-red-500 rounded-lg px-2 py-1'
                             onClick={() => {
                                 setFormData(defaultState);
+                                setUnpaidInvoices([])
                                 dispatch(resetPaymentOut());
                             }}
                         >
@@ -738,7 +748,7 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
                                                         />
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
-                                                        {alloc.piDate}
+                                                        {formatDate(alloc.piDate)}
                                                     </td>
                                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
                                                         {alloc.piNumber}
