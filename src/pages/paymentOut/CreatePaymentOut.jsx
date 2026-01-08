@@ -45,6 +45,11 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
 
     const [formData, setFormData] = useState(defaultState);
 
+    // console.log("formData", formData);
+    // console.log("paymentOutDrafData", paymentOutDrafData);
+
+
+
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
     const [levelResult, setLevelResult] = useState(0);
@@ -143,21 +148,23 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (!paymentOutDrafData?.level) return;
-        setFormData((prev) => ({
-            ...prev,
-            level: paymentOutDrafData.level ?? prev.level,
-            businessUnit: paymentOutDrafData.businessUnit ? paymentOutDrafData.businessUnit : prev.businessUnit,
-            branch: paymentOutDrafData.branch ? paymentOutDrafData.branch : prev.branch,
-            warehouse: paymentOutDrafData.warehouse ? paymentOutDrafData.warehouse : "",
-            supplier: paymentOutDrafData?.supplier ? paymentOutDrafData?.supplier : null,
-            paymentOutNumber: paymentOutDrafData?.paymentOutNumber,
-            paymentOutDate: paymentOutDrafData?.paymentOutDate,
-            notes: paymentOutDrafData?.notes,
-            paymentMethod: paymentOutDrafData?.paymentMethod,
-            paidAmount: paymentOutDrafData?.paidAmount,
-            payedFrom: paymentOutDrafData?.payedFrom,
-            balance: paymentOutDrafData?.balance
-        }));
+        setFormData((prev) => {
+            return ({
+                ...prev,
+                level: paymentOutDrafData.level ?? prev.level,
+                businessUnit: paymentOutDrafData.businessUnit ? paymentOutDrafData.businessUnit : prev.businessUnit,
+                branch: paymentOutDrafData.branch ? paymentOutDrafData.branch : prev.branch,
+                warehouse: paymentOutDrafData.warehouse ? paymentOutDrafData.warehouse : "",
+                supplier: paymentOutDrafData?.supplier ? paymentOutDrafData?.supplier : null,
+                paymentOutNumber: paymentOutDrafData?.paymentOutNumber,
+                paymentOutDate: paymentOutDrafData?.paymentOutDate,
+                notes: paymentOutDrafData?.notes,
+                paymentMethod: paymentOutDrafData?.paymentMethod,
+                paidAmount: paymentOutDrafData?.paidAmount,
+                payedFrom: paymentOutDrafData?.payedFrom,
+                balance: paymentOutDrafData?.balance
+            })
+        });
 
         const warehouseDetail = activeWarehouse.find((item) => item?._id === paymentOutDrafData.warehouse);
         if (warehouseDetail) setCurrentWarehouseDetal(warehouseDetail);
@@ -204,9 +211,8 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
                 a.applied += addAmount;
                 diff -= addAmount;
             }
-
             if (diff > 0) {
-                toast.warning("Not enough remaining balance to allocate the full amount.");
+                toast.success("Not enough remaining balance to allocate the full amount.");
                 const achievedPaid = currentSum + (target - currentSum - diff);
                 setFormData(prev => ({ ...prev, paidAmount: achievedPaid }));
                 dispatch(setPaidAmount(achievedPaid));
@@ -235,6 +241,12 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
 
         setAllocations(newAllocs);
     };
+
+    // useEffect(() => {
+    //     if (allocations && paymentOutDrafData) {
+    //         handleAutoAllocate(paymentOutDrafData?.paidAmount)
+    //     }
+    // }, [allocations, paymentOutDrafData])
 
     const handleCheckboxChange = (checked, alloc) => {
         let newAllocs = [...allocations];
@@ -421,7 +433,10 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
                     amount: a.applied
                 }))
             };
-            const response = await paymentOutService?.create(dataObject);
+
+            console.log("dataObject", dataObject);
+            
+            const response = await purchasePaymentConfigureService?.createPaymentOut(dataObject);
             toast.success('Payment Out submitted successfully!');
             resetAllAndNavigate();
         } catch (error) {
@@ -436,7 +451,7 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
         navigate('/payment-out-list');
     }
 
-     function formatDate(isoDate) {
+    function formatDate(isoDate) {
         const date = new Date(isoDate);
         const year = date.getUTCFullYear();
         const month = String(date.getUTCMonth() + 1).padStart(2, '0');

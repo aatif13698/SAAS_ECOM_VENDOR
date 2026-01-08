@@ -52,6 +52,37 @@ const getPaymentFromLedgers = async (currentLevel, levelId) => {
 };
 
 
+const createPaymentOut = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/create/payment/out`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+const getPaymentOut = async (page, keyWord, perPage, currentLevel, levelId) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/list/payment/out?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
 
 
 
@@ -60,5 +91,7 @@ const getPaymentFromLedgers = async (currentLevel, levelId) => {
 export default {
     upsert,
     getConfigure,
-    getPaymentFromLedgers
+    getPaymentFromLedgers,
+    createPaymentOut,
+    getPaymentOut
 }

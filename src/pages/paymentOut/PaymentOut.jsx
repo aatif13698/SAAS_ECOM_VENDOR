@@ -27,6 +27,7 @@ import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
 import purchaseInvoiceService from "@/services/purchaseInvoice/purchaseInvoice.service";
 import { formatDate } from "@fullcalendar/core";
+import purchasePaymentConfigureService from "@/services/purchasePaymentConfig/purchasePaymentConfigure.service";
 
 
 // const FormValidationSchema = yup
@@ -208,15 +209,15 @@ const PaymentOut = ({ noFade, scrollContent }) => {
     const columns = [
         {
             name: "Date",
-            selector: (row) => formatDate(row?.piDate),
+            selector: (row) => formatDate(row?.paymentOutDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "PO Number",
-            selector: (row) => row?.piNumber,
+            name: "Payment Number",
+            selector: (row) => row?.paymentOutNumber,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -228,45 +229,43 @@ const PaymentOut = ({ noFade, scrollContent }) => {
             sortable: false,
 
         },
-        {
-            name: "Status",
-            sortable: true,
+        // {
+        //     name: "Status",
+        //     sortable: true,
 
-            selector: (row) => {
+        //     selector: (row) => {
 
-                const status = row?.status
+        //         const status = row?.status
 
-                return (
-                    <span className="block w-full">
-                        <span
-                            className={`uppercase inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
-                                ${
-                                    status == "draft" ?  "text-gray-500 bg-gray-500" 
-                                    : status == "pending_approval" ? "text-yellow-500 bg-yellow-500" 
-                                    : status == "issued" ? "text-blue-500 bg-blue-500" 
-                                    : status == "paid" ? "text-green-500 bg-green-500" 
-                                    : status == "partially_paid" ? "text-violet-500 bg-violet-500" 
-                                    : status == "approved" ? "text-violet-500 bg-violet-500" 
-                                    : status == "closed" ? "text-orange-500 bg-orange-500" 
-                                    : status == "full_due" ? "text-red-500 bg-red-500" 
-                                    :  ""  
-                                }
-                               ${
-                                    row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
-                                }
-                                `}
-
-                        // onClick={() => handleActive(row)}
-                        >
-                            {row.status}
-                        </span>
-                    </span>
-                );
-            },
-        },
+        //         return (
+        //             <span className="block w-full">
+        //                 <span
+        //                     className={`uppercase inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
+        //                         ${
+        //                             status == "draft" ?  "text-gray-500 bg-gray-500" 
+        //                             : status == "pending_approval" ? "text-yellow-500 bg-yellow-500" 
+        //                             : status == "issued" ? "text-blue-500 bg-blue-500" 
+        //                             : status == "paid" ? "text-green-500 bg-green-500" 
+        //                             : status == "partially_paid" ? "text-violet-500 bg-violet-500" 
+        //                             : status == "approved" ? "text-violet-500 bg-violet-500" 
+        //                             : status == "closed" ? "text-orange-500 bg-orange-500" 
+        //                             : status == "full_due" ? "text-red-500 bg-red-500" 
+        //                             :  ""  
+        //                         }
+        //                        ${
+        //                             row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
+        //                         }
+        //                         `}
+        //                 >
+        //                     {row.status}
+        //                 </span>
+        //             </span>
+        //         );
+        //     },
+        // },
         {
             name: "Amount",
-            selector: (row) => row.totalOrderAmount,
+            selector: (row) => row.paidAmount,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -314,7 +313,7 @@ const PaymentOut = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await purchaseInvoiceService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await purchasePaymentConfigureService.getPaymentOut(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
                     setPaginationData(response?.data?.purchaseOrders);
                 } catch (error) {
@@ -329,9 +328,9 @@ const PaymentOut = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await purchasePaymentConfigureService.getPaymentOut(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseInvoices);
+            setPaginationData(response?.data?.paymentOut);
             setPending(false);
         } catch (error) {
             setPending(false);
@@ -349,7 +348,7 @@ const PaymentOut = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await purchasePaymentConfigureService.getPaymentOut(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
             setPaginationData(response?.data?.purchaseOrders);
             setPage(page);
@@ -360,7 +359,7 @@ const PaymentOut = ({ noFade, scrollContent }) => {
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await purchasePaymentConfigureService.getPaymentOut(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
             setPaginationData(response?.data?.purchaseOrders);
             setPerPage(perPage);
