@@ -517,7 +517,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
   // === Update balance when totals or paid amount change ===
   useEffect(() => {
     setFormData(prev => ({ ...prev, balance: totals.finalTotal - prev.paidAmount }));
-    // dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
+    dispatch(setBalance(totals.finalTotal - formData?.paidAmount))
   }, [totals.finalTotal, formData.paidAmount]);
 
   // === Fetch shipping addresses when supplier changes ===
