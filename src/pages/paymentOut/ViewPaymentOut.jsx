@@ -42,6 +42,7 @@ const ViewPaymentOut = () => {
     const [isDark] = useDarkmode();
     const navigate = useNavigate();
     const { id: encryptedId } = useParams();
+    
 
     const [paymentOut, setPaymentOut] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -122,9 +123,9 @@ const ViewPaymentOut = () => {
     const totalUnpaid = invoices.reduce((sum, item) => sum + (item.balance || 0), 0) + paidAmount;
 
     return (
-        <div className="bg-white dark:bg-darkSecondary rounded-lg shadow-sm overflow-hidden">
+        <div className="relative min-h-screen pb-8 bg-white rounded-md dark:bg-gray-900">
             {/* Header */}
-            <div className="bg-gray-50 dark:bg-darkSecondary border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
+            <div className="sticky top-14 z-10 bg-white dark:bg-gray-800 p-3 flex justify-between items-center shadow-md">
                 <div>
                     <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">
                         Payment Out #{paymentOutNumber || '—'}
@@ -145,7 +146,7 @@ const ViewPaymentOut = () => {
                 </div>
             </div>
 
-            <div className="p-6 space-y-8">
+            <div className="p-6 space-y-8 ">
                 {/* Party & Payment Info - 2 column layout */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Supplier / Bill From */}
