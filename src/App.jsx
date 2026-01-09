@@ -128,7 +128,7 @@ const PurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/PurchaseInvoi
 const ViewPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ViewPurchaseInvoice"));
 const PaymentOut = lazy(() => import("./pages/paymentOut/PaymentOut"))
 const CreatePaymentOut = lazy(() => import("./pages/paymentOut/CreatePaymentOut"));
-
+const ViewPaymentOut = lazy(() => import("./pages/paymentOut/ViewPaymentOut"));
 
 // system settings
 const SystemSettings = lazy(() => import("./pages/systemSettings/SystemSettings"))
@@ -353,6 +353,7 @@ function App() {
 
                 <Route path="payment-out-list" element={<PaymentOut />} />
                 <Route path="pcreate-payment-out" element={<CreatePaymentOut />} />
+                <Route path="view-payment-out" element={<ViewPaymentOut />} />
 
 
 
