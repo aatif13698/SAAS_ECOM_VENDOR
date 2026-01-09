@@ -85,6 +85,26 @@ const getPaymentOut = async (page, keyWord, perPage, currentLevel, levelId) => {
 
 
 
+const getParticularPaymentOut = async (id) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/get/payment/out/${id}/${clientId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
 
 
 
@@ -93,5 +113,6 @@ export default {
     getConfigure,
     getPaymentFromLedgers,
     createPaymentOut,
-    getPaymentOut
+    getPaymentOut,
+    getParticularPaymentOut
 }

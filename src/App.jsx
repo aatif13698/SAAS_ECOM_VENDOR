@@ -353,7 +353,7 @@ function App() {
 
                 <Route path="payment-out-list" element={<PaymentOut />} />
                 <Route path="pcreate-payment-out" element={<CreatePaymentOut />} />
-                <Route path="view-payment-out" element={<ViewPaymentOut />} />
+                <Route path="view-payment-out/:id" element={<ViewPaymentOut />} />
 
 
 

@@ -29,13 +29,15 @@ import purchaseInvoiceService from "@/services/purchaseInvoice/purchaseInvoice.s
 import { formatDate } from "@fullcalendar/core";
 import purchasePaymentConfigureService from "@/services/purchasePaymentConfig/purchasePaymentConfigure.service";
 
+import CryptoJS from "crypto-js";
 
-// const FormValidationSchema = yup
-//   .object({
-//     question: yup.string().required("Question is Required"),
-//     answer: yup.string().required("Answer is Required"),
-//   })
-//   .required();
+// Secret key for encryption
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
+
+const encryptId = (id) => {
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    return encodeURIComponent(encrypted);
+};
 
 
 const PaymentOut = ({ noFade, scrollContent }) => {
@@ -132,7 +134,7 @@ const PaymentOut = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate("/view/purchase-invoice", { state: { id, row, name } });
+        navigate(`/view-payment-out/${encryptId(row._id)}`);
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -141,70 +143,7 @@ const PaymentOut = ({ noFade, scrollContent }) => {
         setIsViewed(false);
         navigate("/create-employee", { state: { id, row, name } });
     };
-    //   --- Deletiing the Particulare Row
-    const handleDelete = (row) => {
-        const id = row._id;
-        Swal.fire({
-            title: `Are You Sure You Want To Permanantly Delete ${row?.firstName + " " + row?.lastName}?`,
-            icon: "error",
-            showCloseButton: true,
-            showCancelButton: true,
-            cancelButtonText: "Cancel",
 
-            customClass: {
-                popup: "sweet-alert-popup-dark-mode-style",
-            },
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                deleteOne(id)
-            }
-        });
-    };
-    async function deleteOne(id) {
-        try {
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                employeeId: id,
-            }
-            const response = await employeeService.deleteOne(dataObject);
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
-            toast.success(`Deleted Successfully`)
-        } catch (error) {
-            console.error("Error while fetching manufacturer:", error);
-        }
-    }
-    //   ---- Active And InActive the Row
-    const handleActive = async (row) => {
-        setShowLoadingModal(true)
-        const id = row._id;
-        let status = 1;
-        row.isActive == 1 ? (status = 0) : (status = 1);
-        try {
-            const clinetId = localStorage.getItem("saas_client_clientId");
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                status: status,
-                id: id,
-                clientId: clinetId
-            }
-            const response = await employeeService.activeInactive(dataObject);
-
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
-            toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
-            setShowLoadingModal(false)
-
-        } catch (error) {
-            setShowLoadingModal(false)
-            console.error("Error while activating:", error);
-        }
-
-    };
     //   ------- Data Table Columns ---
     const columns = [
         {
