@@ -28,13 +28,15 @@ import { useSelector } from "react-redux";
 import purchaseInvoiceService from "@/services/purchaseInvoice/purchaseInvoice.service";
 import { formatDate } from "@fullcalendar/core";
 
+import CryptoJS from "crypto-js";
 
-// const FormValidationSchema = yup
-//   .object({
-//     question: yup.string().required("Question is Required"),
-//     answer: yup.string().required("Answer is Required"),
-//   })
-//   .required();
+// Secret key for encryption
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
+
+const encryptId = (id) => {
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    return encodeURIComponent(encrypted);
+};
 
 
 const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
@@ -131,7 +133,8 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate("/view/purchase-invoice", { state: { id, row, name } });
+        navigate(`/view/purchase-invoice/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
+        // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -240,19 +243,17 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
                     <span className="block w-full">
                         <span
                             className={`uppercase inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
-                                ${
-                                    status == "draft" ?  "text-gray-500 bg-gray-500" 
-                                    : status == "pending_approval" ? "text-yellow-500 bg-yellow-500" 
-                                    : status == "issued" ? "text-blue-500 bg-blue-500" 
-                                    : status == "paid" ? "text-green-500 bg-green-500" 
-                                    : status == "partially_paid" ? "text-violet-500 bg-violet-500" 
-                                    : status == "approved" ? "text-violet-500 bg-violet-500" 
-                                    : status == "closed" ? "text-orange-500 bg-orange-500" 
-                                    : status == "full_due" ? "text-red-500 bg-red-500" 
-                                    :  ""  
+                                ${status == "draft" ? "text-gray-500 bg-gray-500"
+                                    : status == "pending_approval" ? "text-yellow-500 bg-yellow-500"
+                                        : status == "issued" ? "text-blue-500 bg-blue-500"
+                                            : status == "paid" ? "text-green-500 bg-green-500"
+                                                : status == "partially_paid" ? "text-violet-500 bg-violet-500"
+                                                    : status == "approved" ? "text-violet-500 bg-violet-500"
+                                                        : status == "closed" ? "text-orange-500 bg-orange-500"
+                                                            : status == "full_due" ? "text-red-500 bg-red-500"
+                                                                : ""
                                 }
-                               ${
-                                    row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
+                               ${row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
                                 }
                                 `}
 

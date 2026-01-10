@@ -21,6 +21,12 @@ const decryptId = (encryptedId) => {
     }
 };
 
+const encryptId = (id) => {
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    return encodeURIComponent(encrypted);
+};
+
+
 const formatDate = (isoDate) => {
     if (!isoDate) return '—';
     const date = new Date(isoDate);
@@ -42,7 +48,7 @@ const ViewPaymentOut = () => {
     const [isDark] = useDarkmode();
     const navigate = useNavigate();
     const { id: encryptedId } = useParams();
-    
+
 
     const [paymentOut, setPaymentOut] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -74,20 +80,25 @@ const ViewPaymentOut = () => {
 
     useEffect(() => {
         if (!encryptedId) return;
-
         const decryptedId = decryptId(encryptedId);
         if (!decryptedId) {
             toast.error('Invalid payment ID');
             navigate('/payment-outs');
             return;
         }
-
         fetchPaymentOut(decryptedId);
-
-
-
-
     }, [encryptedId, navigate]);
+
+
+
+    function navigateToInvoice(id) {
+        
+        navigate(`/view/purchase-invoice/${encryptId(id)}`, { state: { id: id, name: "view" } });
+
+    }
+
+
+
 
     if (loading) {
         return (
@@ -118,6 +129,9 @@ const ViewPaymentOut = () => {
         // Assuming these come from backend when you implement allocation
         invoices = [],
     } = paymentOut;
+
+    console.log("invoices", invoices);
+    
 
     const totalSettled = invoices.reduce((sum, item) => sum + (item.settlementAmount || 0), 0);
     const totalUnpaid = invoices.reduce((sum, item) => sum + (item.balance || 0), 0) + paidAmount;
@@ -292,6 +306,7 @@ const ViewPaymentOut = () => {
                                 <tbody className="bg-white dark:bg-transparent divide-y divide-gray-200 dark:divide-gray-700">
                                     {invoices.map((alloc) => (
                                         <tr
+                                            onClick={() => navigateToInvoice(alloc?.id?._id)}
                                             key={alloc._id}
                                             className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                                         >

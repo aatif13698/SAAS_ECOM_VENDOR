@@ -819,7 +819,6 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
     dispatch(resetPurchaseOrder());
     setFormData(defaultState);
     navigate('/purchase-invoices-list');
-
   }
 
 

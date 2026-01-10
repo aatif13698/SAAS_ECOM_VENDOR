@@ -1,65 +1,60 @@
 
 
 import React, { useState, useRef, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiDotsVerticalRounded } from "react-icons/bi";
 import { FiLoader } from 'react-icons/fi';
 import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
-import toast from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
-import { setPurchaseOrder } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
+
+import CryptoJS from "crypto-js";
+
+// Secret key for decryption (same as used for encryption)
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
+const decryptId = (encryptedId) => {
+    try {
+        const decoded = decodeURIComponent(encryptedId);
+        const bytes = CryptoJS.AES.decrypt(decoded, SECRET_KEY);
+        return bytes.toString(CryptoJS.enc.Utf8);
+    } catch (error) {
+        console.error("Decryption failed:", error);
+        return null;
+    }
+};
 
 function ViewPurchaseInvoice() {
     const navigate = useNavigate();
-    const dispatch = useDispatch();
-
-    const location = useLocation();
-    const [poData, setPoData] = useState(location.state?.row || {});
-    const [showDropdown, setShowDropdown] = useState(false);
-    const [sendingMail, setSendingMail] = useState(false); // Fixed typo: setSendingMale -> setSendingMail
-    const dropdownRef = useRef(null);
+    const { id: encryptedId } = useParams();
+    const [poData, setPoData] = useState({});
     const pdfRef = useRef(null); // Ref for the PDF content div
+
+    const [loading, setLoading] = useState(true)
 
     console.log("poData", poData);
 
-
     useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-                setShowDropdown(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
-
-    console.log("purchaseOrderData", poData);
-
-    const handleEdit = () => {
-        dispatch(setPurchaseOrder({ ...poData, level: "warehouse" }));
-        navigate('/edit-purchase-order', { state: { row: { ...poData, level: "warehouse" }, id: poData?._id } });
-    };
-
-    const handleSendMail = async () => {
-        try {
-            setSendingMail(true);
-            const dataObject = {
-                clientId: localStorage.getItem("saas_client_clientId"),
-                purchaseOrderId: poData?._id
-            };
-            const response = await purchaseInvoiceService.issueMail(dataObject);
-            setSendingMail(false);
-            toast.success("Mail sent successfully");
-            console.log("mail dataObject", response);
-        } catch (error) {
-            setSendingMail(false);
-            console.log("error while issuing the mail", error);
-            toast.error("Failed to send mail");
+        if (encryptedId) {
+            const decryptedId = decryptId(encryptedId);
+            getInvoice(decryptedId);
         }
-    };
+        async function getInvoice(id) {
+            try {
+                setLoading(true)
+                const response = await purchaseInvoiceService.getParticular(id);
+                console.log("response aaa", response?.data);
+                setPoData(response?.data);
+                setLoading(false)
+
+            } catch (error) {
+                setLoading(false)
+
+                console.log("error in fetching", error);
+            }
+        }
+    }, [encryptedId]);
+
+
 
     const calculateTotals = () => {
         const items = poData.items || [];
@@ -125,24 +120,6 @@ function ViewPurchaseInvoice() {
         generatePDF(true);
     };
 
-    const handleStatusChange = async (newStatus) => {
-        try {
-            const clientId = localStorage.getItem("saas_client_clientId");
-            const dataObject = {
-                id: poData?._id, status: newStatus, clientId: clientId,
-            }
-            const response = await purchaseInvoiceService.changeStauts(dataObject);
-            setPoData(prev => ({ ...prev, status: newStatus }));
-            setShowDropdown(false);
-            toast.success(`Status changed to: ${newStatus}`)
-        } catch (error) {
-            setShowDropdown(false);
-            console.log("error while changing the status", error);
-        }
-    };
-
-    const statuses = ['draft', 'received', 'verified', 'approved', 'paid', 'partially_paid', 'overdue', 'disputed', 'canceled', 'closed'];
-
     // Dynamic status badge text
     const getStatusBadge = () => {
         switch (poData.status) {
@@ -166,6 +143,15 @@ function ViewPurchaseInvoice() {
             case 'closed': return 'Closed';
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
+    }
+
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-[60vh]">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+        );
     }
 
     return (
@@ -212,8 +198,6 @@ function ViewPurchaseInvoice() {
                     </div> */}
                 </div>
             </div>
-
-            {/* PDF-like View - Matches Backend Design Exactly */}
             <div
                 ref={pdfRef}
                 className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0 print:bg-white"
@@ -365,7 +349,7 @@ function ViewPurchaseInvoice() {
                             poData?.payedFrom && poData?.payedFrom?.length > 0 && poData?.payedFrom?.map((ledg) => {
                                 const type = ledg?.paymentType
                                 return (
-                                    <p className={` font-semibold ${type == "Payment" ? "text-gray-600" : type == "Settlement" ? "text-gray-600" : "" } `} style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>{ledg?.paymentType}:</span> <span>(-) ₹{formatCurrency(ledg?.amount)}</span></p>
+                                    <p className={` font-semibold ${type == "Payment" ? "text-gray-600" : type == "Settlement" ? "text-gray-600" : ""} `} style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>{ledg?.paymentType}:</span> <span>(-) ₹{formatCurrency(ledg?.amount)}</span></p>
                                 )
                             })
                         }

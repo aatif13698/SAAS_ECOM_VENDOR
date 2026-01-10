@@ -349,7 +349,7 @@ function App() {
 
                 <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />
                 <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
-                <Route path="view/purchase-invoice" element={<ViewPurchaseInvoice />} />
+                <Route path="view/purchase-invoice/:id" element={<ViewPurchaseInvoice />} />
 
                 <Route path="payment-out-list" element={<PaymentOut />} />
                 <Route path="pcreate-payment-out" element={<CreatePaymentOut />} />
