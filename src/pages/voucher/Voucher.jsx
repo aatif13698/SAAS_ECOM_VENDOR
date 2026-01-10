@@ -328,9 +328,9 @@ const Voucher = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await voucherGroupService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await voucherService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.ledgerGroup);
+                    setPaginationData(response?.data?.vouchers);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }
@@ -363,23 +363,23 @@ const Voucher = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await voucherGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await voucherService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.voucherGroups);
+            setPaginationData(response?.data?.vouchers);
             setPage(page);
         } catch (error) {
-            console.log("error while fetching voucher group");
+            console.log("error while fetching voucher");
         }
     };
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await voucherGroupService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await voucherService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.voucherGroups);
+            setPaginationData(response?.data?.vouchers);
             setPerPage(perPage);
         } catch (error) {
-            console.log("error while fetching voucher group");
+            console.log("error while fetching voucher");
         }
         setPerPage(perPage);
     };
