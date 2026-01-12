@@ -140,6 +140,7 @@ const SystemSettings = lazy(() => import("./pages/systemSettings/SystemSettings"
 import ForgotPassword from "./Common/forgotPassword/ForgotPassword";
 import ResetPassword from "./Common/resetPassword/ResetPassword";
 import Error from "./pages/404";
+import AuditStock from "./pages/auditStock/AuditStock";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -317,6 +318,7 @@ function App() {
 
                 <Route path="stock-list" element={<Stock />} />
                 <Route path="create-stock" element={<CreateStock />} />
+                <Route path="audit-stock-list" element={<AuditStock />} />
                 <Route path="order-list" element={<Orders />} />
                 <Route path="order-view" element={<ViewOrder />} />
                 <Route path="create-order" element={<CreateOrder />} />

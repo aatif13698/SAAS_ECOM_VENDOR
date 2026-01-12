@@ -148,7 +148,8 @@ const Navmenu = ({ menus }) => {
       "Assets & Tools",
       "Leave Category",
       "Leave Allotment",
-      "Holiday"
+      "Holiday",
+      "Audit Stock"
     ]);
 
     const excludedMenus = new Set([
