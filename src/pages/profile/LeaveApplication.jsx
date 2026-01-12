@@ -4,49 +4,12 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import leaveCategoryService from '@/services/leaveCategory/leaveCategory.service';
 import { useSelector } from 'react-redux';
+import toast from 'react-hot-toast';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
 
-// Mock data - in real app these would come from API / context
-const mockLeaveBalances = [
-  { type: 'Annual Leave', available: 5, total: 14, color: 'bg-emerald-500' },
-  { type: 'Medical Leave', available: 8, total: 12, color: 'bg-blue-500' },
-  { type: 'Casual Leave', available: 3, total: 7, color: 'bg-amber-500' },
-  { type: 'Special Leave', available: 2, total: 3, color: 'bg-purple-500' },
-];
 
-const mockLeaveHistory = [
-  {
-    id: 'LR-2026010',
-    type: 'Annual Leave',
-    startDate: '2026-01-15',
-    endDate: '2026-01-18',
-    days: 4,
-    status: 'approved',
-    appliedAt: '2026-01-05',
-    approvedBy: 'Sarah Johnson',
-  },
-  {
-    id: 'LR-2026008',
-    type: 'Medical Leave',
-    startDate: '2025-12-20',
-    endDate: '2025-12-22',
-    days: 3,
-    status: 'approved',
-    appliedAt: '2025-12-15',
-    approvedBy: 'Michael Chen',
-  },
-  {
-    id: 'LR-2026012',
-    type: 'Casual Leave',
-    startDate: '2026-01-22',
-    endDate: '2026-01-22',
-    days: 1,
-    status: 'pending',
-    appliedAt: '2026-01-08',
-  },
-];
 
 const LeaveStatusBadge = ({ status }) => {
   const styles = {
@@ -72,6 +35,10 @@ function LeaveApplication() {
 
   const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
   const [leaveBalance, setLeaveBalance] = useState([]);
+  const [leaveHistory, setLeaveHistory] = useState([]);
+
+  console.log("leaveHistory", leaveHistory);
+  
 
 
   const [formData, setFormData] = useState({
@@ -82,8 +49,6 @@ function LeaveApplication() {
     halfDaySession: 'first_half',
     reason: '',
     attachment: null,
-    handoverTo: '',
-    handoverNotes: '',
   });
 
   console.log("formData", formData);
@@ -119,29 +84,40 @@ function LeaveApplication() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (calculatedDays <= 0) {
       alert('Please select valid start and end dates');
       return;
     }
-
-    // In real application → send to API
-    const submissionData = {
+    const clientId = localStorage.getItem("saas_client_clientId");
+    const dataObject = {
       ...formData,
       totalDays: calculatedDays,
+      clientId: clientId,
+      employeeId: currentUser?._id
     };
-
-    console.log('Leave Application Submitted:', submissionData);
-    alert('Leave application submitted successfully! (Demo)');
-
-    // Optional: reset form
-    // setFormData({ ...initial state });
+    try {
+      const response = await leaveCategoryService.applyLeave(dataObject);
+      toast.success("Applied successfully");
+      setFormData({
+        leaveTypeId: '',
+        startDate: '',
+        endDate: '',
+        isHalfDay: false,
+        halfDaySession: 'first_half',
+        reason: '',
+        attachment: null,
+      })
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
   useEffect(() => {
     if (currentUser) {
       getLeavesAvailable(currentUser._id);
+      getLeavesHistory(currentUser._id);
     }
   }, [currentUser]);
 
@@ -150,6 +126,16 @@ function LeaveApplication() {
     try {
       const response = await leaveCategoryService.getAllLeaveAvailable(id);
       setLeaveBalance(response?.data?.leaveBalance?.leaveCategories)
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+
+  async function getLeavesHistory(id) {
+    try {
+      const response = await leaveCategoryService.getAllLeaveHistory(id);
+      setLeaveHistory(response?.data?.leaveHistory)
+      // setLeaveBalance(response?.data?.leaveBalance?.leaveCategories)
     } catch (error) {
       console.log("error", error);
     }
@@ -399,16 +385,16 @@ function LeaveApplication() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {mockLeaveHistory.map((leave) => (
-                      <tr key={leave.id} className="hover:bg-gray-50">
+                    {leaveHistory.map((leave) => (
+                      <tr key={leave._id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                          {leave.type}
+                          {leave?.leaveTypeId?.name}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
                           {dayjs(leave.startDate).format('DD MMM')} — {dayjs(leave.endDate).format('DD MMM')}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-600">
-                          {leave.days}
+                          {leave.totalDays}
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <LeaveStatusBadge status={leave.status} />
@@ -419,7 +405,7 @@ function LeaveApplication() {
                 </table>
               </div>
 
-              {mockLeaveHistory.length === 0 && (
+              {leaveHistory.length === 0 && (
                 <div className="py-12 text-center text-gray-500">No leave requests found</div>
               )}
             </div>
