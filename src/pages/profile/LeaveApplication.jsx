@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import dayjs from 'dayjs';
 import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import leaveCategoryService from '@/services/leaveCategory/leaveCategory.service';
+import { useSelector } from 'react-redux';
 
 dayjs.extend(isSameOrBefore);
 dayjs.extend(isSameOrAfter);
@@ -57,9 +59,8 @@ const LeaveStatusBadge = ({ status }) => {
 
   return (
     <span
-      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-        styles[status] || 'bg-gray-100 text-gray-800'
-      }`}
+      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[status] || 'bg-gray-100 text-gray-800'
+        }`}
     >
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
@@ -67,6 +68,12 @@ const LeaveStatusBadge = ({ status }) => {
 };
 
 function LeaveApplication() {
+
+
+  const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
+  const [leaveBalance, setLeaveBalance] = useState([]);
+
+
   const [formData, setFormData] = useState({
     leaveTypeId: '',
     startDate: '',
@@ -78,6 +85,8 @@ function LeaveApplication() {
     handoverTo: '',
     handoverNotes: '',
   });
+
+  console.log("formData", formData);
 
   const [calculatedDays, setCalculatedDays] = useState(0);
 
@@ -112,7 +121,6 @@ function LeaveApplication() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     if (calculatedDays <= 0) {
       alert('Please select valid start and end dates');
       return;
@@ -131,6 +139,22 @@ function LeaveApplication() {
     // setFormData({ ...initial state });
   };
 
+  useEffect(() => {
+    if (currentUser) {
+      getLeavesAvailable(currentUser._id);
+    }
+  }, [currentUser]);
+
+
+  async function getLeavesAvailable(id) {
+    try {
+      const response = await leaveCategoryService.getAllLeaveAvailable(id);
+      setLeaveBalance(response?.data?.leaveBalance?.leaveCategories)
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 pb-12 rounded-lg">
       {/* Header - Leave Balances */}
@@ -139,18 +163,18 @@ function LeaveApplication() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Leave Management</h1>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {mockLeaveBalances.map((leave) => (
+            {leaveBalance.map((leave) => (
               <div
-                key={leave.type}
+                key={leave._id}
                 className="bg-white border rounded-lg p-4 shadow-sm hover:shadow transition-shadow"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-medium text-gray-700">{leave.type}</h3>
-                  <div className={`w-3 h-3 rounded-full ${leave.color}`}></div>
+                  <h3 className="text-sm font-medium text-gray-700">{leave?.id?.name}</h3>
+                  {/* <div className={`w-3 h-3 rounded-full ${leave.color}`}></div> */}
                 </div>
                 <div className="mt-2">
-                  <span className="text-2xl font-bold text-gray-900">{leave.available}</span>
-                  <span className="text-sm text-gray-500"> / {leave.total}</span>
+                  <span className="text-2xl font-bold text-gray-900">{Number(leave?.allocated) - Number(leave?.taken)}</span>
+                  <span className="text-sm text-gray-500"> / {leave?.allocated}</span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Available</p>
               </div>
@@ -181,21 +205,20 @@ function LeaveApplication() {
                       value={formData.leaveTypeId}
                       onChange={handleChange}
                       required
-                                            className="form-control py-2"
+                      className="form-control py-2"
                     >
                       <option value="">Select leave type</option>
-                      {mockLeaveBalances.map((leave) => (
-                        <option key={leave.type} value={leave.type}>
-                          {leave.type} ({leave.available} available)
+                      {leaveBalance.map((leave) => (
+                        <option key={leave?._id} value={leave?.id?._id}>
+                          {leave?.id?.name} ({Number(leave?.allocated) - Number(leave?.taken)} available)
                         </option>
                       ))}
                     </select>
                   </div>
-
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Number of Days</label>
-                    <div                                             className="form-control py-2"
->
+                    <div className="form-control py-2"
+                    >
                       {calculatedDays > 0 ? `${calculatedDays} day${calculatedDays !== 1 ? 's' : ''}` : '—'}
                     </div>
                   </div>
@@ -213,7 +236,7 @@ function LeaveApplication() {
                       value={formData.startDate}
                       onChange={handleChange}
                       required
-                                            className="form-control py-2"
+                      className="form-control py-2"
                     />
                   </div>
 
@@ -229,7 +252,7 @@ function LeaveApplication() {
                       onChange={handleChange}
                       min={formData.startDate}
                       required
-                                            className="form-control py-2"
+                      className="form-control py-2"
                     />
                   </div>
                 </div>
@@ -282,7 +305,7 @@ function LeaveApplication() {
                     value={formData.reason}
                     onChange={handleChange}
                     required
-                                            className="form-control py-2"
+                    className="form-control py-2"
                     placeholder="Please provide a detailed reason for your leave request..."
                   />
                 </div>

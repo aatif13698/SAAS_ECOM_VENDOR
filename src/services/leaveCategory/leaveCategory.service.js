@@ -28,7 +28,7 @@ const update = async (data) => {
 
 
 
-const getAllLeaveCategory = async ( currentLevel, levelId) => {
+const getAllLeaveCategory = async (currentLevel, levelId) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
@@ -122,6 +122,27 @@ const createLeaveAllotment = async (data) => {
 
 
 
+const getAllLeaveAvailable = async (id) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/hr/leavecategory/all/leave/balance?clientId=${clientId}&employeeId=${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
+
 
 
 
@@ -155,6 +176,7 @@ export default {
     getAllLeaveCategory,
     getLeaveAllotmentByDepartment,
     createLeaveAllotment,
+    getAllLeaveAvailable,
 
     getList,
     activeInactive,
