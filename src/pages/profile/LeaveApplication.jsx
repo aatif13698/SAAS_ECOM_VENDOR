@@ -38,7 +38,7 @@ function LeaveApplication() {
   const [leaveHistory, setLeaveHistory] = useState([]);
 
   console.log("leaveHistory", leaveHistory);
-  
+
 
 
   const [formData, setFormData] = useState({
@@ -108,7 +108,9 @@ function LeaveApplication() {
         halfDaySession: 'first_half',
         reason: '',
         attachment: null,
-      })
+      });
+      getLeavesAvailable(currentUser._id);
+      getLeavesHistory(currentUser._id);
     } catch (error) {
       console.log("error", error);
     }
