@@ -10,6 +10,26 @@ const create = async (data) => {
     });
 };
 
+const getAuditPurchaseInvoice = async (id) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/get/audit/purchaseInvoice/${clientId}/${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
 const issueMail = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/issue/purchaseInvoice/mail`, data, {
@@ -98,6 +118,8 @@ const getParticular = async (id) => {
 
 export default {
     create,
+    getAuditPurchaseInvoice,
+
     issueMail,
     getList,
     changeStauts,
