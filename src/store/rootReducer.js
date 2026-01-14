@@ -9,6 +9,9 @@ import purchaseOrderSlice from "./slices/purchaseOrder/purchaseOrderSclice";
 import purchaseInvoiceSlice from "./slices/purchaseInvoice/purhcaseInvoiceSclice";
 import paymentOutSlice from "./slices/paymentOut/paymentOutSlice";
 
+
+import toastReducer from "./slices/tostSlice"
+
 import SuperAdminNotification from "@/redux/slices/Notification/SuperAdminNotification";
 import resetSlice from "@/redux/slices/Auth/Logout";
 const rootReducer = {
@@ -27,7 +30,9 @@ const rootReducer = {
   capabilitySlice,
   purchaseOrderSlice,
   purchaseInvoiceSlice,
-  paymentOutSlice
+  paymentOutSlice,
+
+  toast: toastReducer,
 
 };
 export default rootReducer;

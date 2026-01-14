@@ -13,8 +13,9 @@ import { Toaster } from "react-hot-toast";
 import "./server";
 import store, { persistor } from "./store";
 import { PersistGate } from "redux-persist/integration/react";
-import { ToastContainer } from "react-toastify";
+// import { ToastContainer } from "react-toastify";
 // import "./i18n"
+import ToastContainer from "./components/ToastContainer";
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -23,6 +24,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <App />
+          <ToastContainer/>
           {/* <ToastContainer zIndex={999999} /> */}
           <Toaster zIndex={999999} />
         </PersistGate>
