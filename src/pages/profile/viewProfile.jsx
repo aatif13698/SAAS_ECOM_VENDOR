@@ -197,7 +197,7 @@ const ViewProfile = () => {
     <div>
       <div className=" profile-page min-h-[80vh] z-0">
         <div className=" profiel-wrap px-[35px] pb-10 md:pt-[84px] pt-10 rounded-lg rounded-br-none rounded-bl-none bg-white dark:bg-slate-800 lg:flex lg:space-y-0 mb-0 justify-between items-end relative z-0">
-          <div className="bg-emerald-400 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg"></div>
+          <div className="bg-gradient-to-r from-emerald-600 to-emerald-400 dark:bg-slate-700 absolute left-0 top-0 md:h-1/2 h-[150px] w-full z-[-1] rounded-t-lg"></div>
 
           {/* Profile Info */}
           <div className="profile-box flex-none md:text-start text-center">
