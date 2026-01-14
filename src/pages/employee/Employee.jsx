@@ -27,12 +27,15 @@ import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
 
 
-// const FormValidationSchema = yup
-//   .object({
-//     question: yup.string().required("Question is Required"),
-//     answer: yup.string().required("Answer is Required"),
-//   })
-//   .required();
+import CryptoJS from "crypto-js";
+
+// Secret key for encryption
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
+
+const encryptId = (id) => {
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    return encodeURIComponent(encrypted);
+};
 
 
 const Employee = ({ noFade, scrollContent }) => {
@@ -131,7 +134,9 @@ const Employee = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-employee", { state: { id, row, name } });
+        // navigate("/create-employee", { state: { id, row, name } });
+        navigate(`/view-employee/${encryptId(row._id)}`);
+
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -209,7 +214,7 @@ const Employee = ({ noFade, scrollContent }) => {
     const columns = [
         {
             name: "Department",
-            selector: (row) => row?.workingDepartment?.departmentName ?? "N/A" ,
+            selector: (row) => row?.workingDepartment?.departmentName ?? "N/A",
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -231,9 +236,9 @@ const Employee = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             },
         },
-         {
+        {
             name: "Designation",
-            selector: (row) => row?.role?.name  ? row?.role?.name : "N/A",
+            selector: (row) => row?.role?.name ? row?.role?.name : "N/A",
             sortable: false,
 
         },
@@ -254,16 +259,6 @@ const Employee = ({ noFade, scrollContent }) => {
                 width: "20px", // Set the desired width here
             },
         },
-
-        {
-            name: "City",
-            selector: (row) => row.city,
-            sortable: true,
-            style: {
-                width: "20px", // Set the desired width here
-            },
-        },
-
         {
             name: "Status",
             sortable: true,
