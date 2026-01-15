@@ -191,6 +191,16 @@ const getListLeaveRequests = async (page, keyWord, perPage, currentLevel, levelI
 };
 
 
+const actionLeaveRequest = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/leavecategory/action/on/leave/request`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
 
 
 
@@ -226,6 +236,7 @@ export default {
     getAllLeaveHistory,
     applyLeave,
     getListLeaveRequests,
+    actionLeaveRequest,
 
     getList,
     activeInactive,

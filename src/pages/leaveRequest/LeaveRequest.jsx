@@ -30,14 +30,6 @@ import assetService from "@/services/asset/asset.service";
 import leaveCategoryService from "@/services/leaveCategory/leaveCategory.service";
 
 
-// const FormValidationSchema = yup
-//   .object({
-//     question: yup.string().required("Question is Required"),
-//     answer: yup.string().required("Answer is Required"),
-//   })
-//   .required();
-
-
 const LeaveRequest = ({ noFade, scrollContent }) => {
 
     const { noDataStyle, customStyles } = tableConfigure();
@@ -114,18 +106,18 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
 
         const status = isApproveChecked ? 'approved' : 'rejected';
         setIsSubmitting(true);
-
+        const clientId = localStorage.getItem("saas_client_clientId");
         try {
-            // Assuming you have a method in leaveCategoryService to update the leave request status
             // Replace with actual API call, e.g., leaveCategoryService.updateLeaveRequestStatus(selectedLeaveRequest._id, status, remark)
-            const response = await leaveCategoryService.updateLeaveRequestStatus({
-                id: selectedLeaveRequest._id,
+            const response = await leaveCategoryService.actionLeaveRequest({
+                clientId: clientId,
+                leaveRequestId: selectedLeaveRequest._id,
                 status,
                 remark,
                 approvedBy: currentUser._id, // Assuming currentUser has _id
             });
 
-            if (response.success) { // Adjust based on your API response structure
+            if (response?.data?.success) { // Adjust based on your API response structure
                 toast.success(`Leave request ${status} successfully.`);
                 handleCloseModal();
                 setRefresh((prev) => prev + 1); // Refresh the list
@@ -142,16 +134,6 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
 
 
 
-
-    // const {
-    //   register,
-    //   reset,
-    //   formState: { errors },
-    //   handleSubmit,
-    //   setValue,
-    // } = useForm({
-    //   resolver: yupResolver(FormValidationSchema),
-    // });
 
 
     const [isDark] = useDarkMode();
@@ -174,94 +156,9 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
 
 
     const [refresh, setRefresh] = useState(0);
-
-    //  ---- Performing the Action After clicking on the view button---
-    // This function helps us to move on top side
-    const scrollToTop = () => {
-        window.scrollTo({
-            top: 0,
-            behavior: "smooth", // This makes the scrolling smooth
-        });
-    };
-    const scrollToBottom = () => {
-        const bottomElement = document.documentElement;
-        bottomElement.scrollIntoView({ behavior: "smooth", block: "end" });
-    };
     const handleView = (row) => {
         setSelectedLeaveRequest(row);
         setIsModalOpen(true);
-    };
-    const handleEdit = (row) => {
-        scrollToTop();
-        const id = row._id;
-        const name = "edit"
-        setUserId(id);
-        setIsViewed(false);
-        navigate("/create-leave-category", { state: { id, row, name } });
-    };
-    //   --- Deletiing the Particulare Row
-    const handleDelete = (row) => {
-        const id = row._id;
-        Swal.fire({
-            title: `Are You Sure You Want To Permanantly Delete ${row?.firstName + " " + row?.lastName}?`,
-            icon: "error",
-            showCloseButton: true,
-            showCancelButton: true,
-            cancelButtonText: "Cancel",
-
-            customClass: {
-                popup: "sweet-alert-popup-dark-mode-style",
-            },
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                deleteOne(id)
-            }
-        });
-    };
-    async function deleteOne(id) {
-        try {
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                employeeId: id,
-            }
-            const response = await employeeService.deleteOne(dataObject);
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
-            toast.success(`Deleted Successfully`)
-        } catch (error) {
-            console.error("Error while fetching manufacturer:", error);
-        }
-    }
-    //   ---- Active And InActive the Row
-    const handleActive = async (row) => {
-        setShowLoadingModal(true)
-        const id = row._id;
-        let status = 1;
-        row.isActive == 1 ? (status = 0) : (status = 1);
-        try {
-            const clinetId = localStorage.getItem("saas_client_clientId");
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                status: status,
-                id: id,
-                clientId: clinetId
-            }
-            const response = await leaveCategoryService.activeInactive(dataObject);
-
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.leaverequests);
-            toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
-            setShowLoadingModal(false)
-
-        } catch (error) {
-            setShowLoadingModal(false)
-            console.error("Error while activating:", error);
-        }
-
     };
 
     function formatDate(isoDate) {
@@ -382,35 +279,7 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
                                 <Icon icon="heroicons:eye" />
                             </button>
                         </Tooltip>
-                        <Tooltip
-                            content="Edit"
-                            placement="top"
-                            arrow
-                            animation="shift-away"
-                        >
-                            <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => handleEdit(row)}
-                            >
-                                <Icon icon="heroicons:pencil-square" />
-                            </button>
-                        </Tooltip>
-                        <Tooltip
-                            content="Delete"
-                            placement="top"
-                            arrow
-                            animation="shift-away"
-                            theme="danger"
-                        >
-                            <button
-                                className="action-btn"
-                                type="button"
-                                onClick={() => handleDelete(row)}
-                            >
-                                <Icon icon="heroicons:trash" />
-                            </button>
-                        </Tooltip>
+
                     </div>
                 );
             },
