@@ -139,16 +139,16 @@ const AuditStock = ({ noFade }) => {
 
     async function handleAudit(purchaseId, itemId) {
         try {
-            // Assuming purchaseInvoiceService.auditItem(purchaseId, itemId) exists and audits the item
-            await purchaseInvoiceService.auditItem(purchaseId, itemId);
-            // Update local state to reflect audited status
-            setAuditData((prev) => ({
-                ...prev,
-                items: prev.items.map((it) =>
-                    it._id === itemId ? { ...it, audited: true } : it
-                ),
-            }));
-            toast.success("Item audited successfully");
+
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                clientId: clientId,
+                purchaseInvoiceId: purchaseId,
+                productMainStock: itemId
+            }
+            await purchaseInvoiceService.auditItem(dataObject);
+            getAuditPurchaseInvoice(purchaseId)
+
         } catch (error) {
             toast.error("Error auditing item");
             console.error("Error auditing item:", error);
@@ -372,7 +372,7 @@ const AuditStock = ({ noFade }) => {
                                                                     {item.oldItemStock}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                                    {item.quantity + item.oldItemStock}
+                                                                    {item?.audited ? (item.oldItemStock) : (item.quantity + item.oldItemStock)}
                                                                 </td>
                                                                 <td className="px-6 py-4 whitespace-nowrap text-sm">
                                                                     {item.audited ? (
@@ -381,7 +381,7 @@ const AuditStock = ({ noFade }) => {
                                                                         </span>
                                                                     ) : (
                                                                         <button
-                                                                            onClick={() => handleAudit(auditData._id, item._id)}
+                                                                            onClick={() => handleAudit(auditData._id, item.itemName?.productMainStock)}
                                                                             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                                                                         // disabled={loadingAudit} // optional: add loading state if needed
                                                                         >

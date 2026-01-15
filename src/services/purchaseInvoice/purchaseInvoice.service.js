@@ -30,6 +30,17 @@ const getAuditPurchaseInvoice = async (id) => {
 };
 
 
+const auditItem = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/audit/item/purchaseInvoice`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 const issueMail = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/issue/purchaseInvoice/mail`, data, {
@@ -119,6 +130,7 @@ const getParticular = async (id) => {
 export default {
     create,
     getAuditPurchaseInvoice,
+    auditItem,
 
     issueMail,
     getList,
