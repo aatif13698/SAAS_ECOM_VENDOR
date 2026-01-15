@@ -81,6 +81,65 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
         setShowLoadingModal(false);
     };
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedLeaveRequest, setSelectedLeaveRequest] = useState(null);
+    const [isApproveChecked, setIsApproveChecked] = useState(false);
+    const [isRejectChecked, setIsRejectChecked] = useState(false);
+    const [remark, setRemark] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+        setSelectedLeaveRequest(null);
+        setIsApproveChecked(false);
+        setIsRejectChecked(false);
+        setRemark("");
+    };
+
+    const handleActionChange = (action) => {
+        if (action === 'approve') {
+            setIsApproveChecked(true);
+            setIsRejectChecked(false);
+        } else if (action === 'reject') {
+            setIsApproveChecked(false);
+            setIsRejectChecked(true);
+        }
+    };
+
+    const handleSubmitAction = async () => {
+        if (!isApproveChecked && !isRejectChecked) {
+            toast.error("Please select approve or reject.");
+            return;
+        }
+
+        const status = isApproveChecked ? 'approved' : 'rejected';
+        setIsSubmitting(true);
+
+        try {
+            // Assuming you have a method in leaveCategoryService to update the leave request status
+            // Replace with actual API call, e.g., leaveCategoryService.updateLeaveRequestStatus(selectedLeaveRequest._id, status, remark)
+            const response = await leaveCategoryService.updateLeaveRequestStatus({
+                id: selectedLeaveRequest._id,
+                status,
+                remark,
+                approvedBy: currentUser._id, // Assuming currentUser has _id
+            });
+
+            if (response.success) { // Adjust based on your API response structure
+                toast.success(`Leave request ${status} successfully.`);
+                handleCloseModal();
+                setRefresh((prev) => prev + 1); // Refresh the list
+            } else {
+                toast.error("Failed to update leave request.");
+            }
+        } catch (error) {
+            console.error("Error updating leave request:", error);
+            toast.error("An error occurred while updating the leave request.");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
 
 
 
@@ -129,12 +188,8 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
         bottomElement.scrollIntoView({ behavior: "smooth", block: "end" });
     };
     const handleView = (row) => {
-        scrollToTop();
-        const id = row._id;
-        const name = "view"
-        setUserId(id);
-        setIsViewed(true);
-        navigate("/create-leave-category", { state: { id, row, name } });
+        setSelectedLeaveRequest(row);
+        setIsModalOpen(true);
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -544,6 +599,262 @@ const LeaveRequest = ({ noFade, scrollContent }) => {
                 </Dialog>
             </Transition>
 
+            {/* Leave Request Details Modal */}
+            {/* Leave Request Details Modal */}
+            <Transition appear show={isModalOpen} as={Fragment}>
+                <Dialog as="div" className="relative z-[9999]" onClose={() => setOpenAuditTable(false)}>
+                    <Transition.Child
+                        as={Fragment}
+                        enter={noFade ? "" : "duration-300 ease-out"}
+                        enterFrom={noFade ? "" : "opacity-0"}
+                        enterTo={noFade ? "" : "opacity-100"}
+                        leave={noFade ? "" : "duration-200 ease-in"}
+                        leaveFrom={noFade ? "" : "opacity-100"}
+                        leaveTo={noFade ? "" : "opacity-0"}
+                    >
+                        <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300 ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                            >
+                                <Dialog.Panel
+                                    className={`w-full max-w-6xl transform overflow-hidden rounded-lg text-left align-middle shadow-2xl transition-all
+                             ${isDark ? "bg-darkSecondary text-white" : "bg-white"}`}
+                                >
+                                    {/* Header */}
+                                    <div
+                                        className={`relative flex items-center justify-between px-6 py-4 border-b 
+                ${isDark ? "border-darkBorder bg-darkInput" : "border-gray-200 bg-gray-50"}`}
+                                    >
+                                        <Dialog.Title
+                                            as="h3"
+                                            className="text-xl font-semibold leading-6 tracking-wide text-lightModalHeaderColor dark:text-darkTitleColor"
+                                        >
+                                            Leave Request Details
+                                        </Dialog.Title>
+
+                                        <button
+                                            type="button"
+                                            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 text-2xl transition-colors"
+                                            onClick={handleCloseModal}
+                                        >
+                                            <Icon icon="heroicons-outline:x" />
+                                        </button>
+                                    </div>
+
+                                    {/* Body */}
+                                    <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                                        {selectedLeaveRequest ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {/* Left Column - Main Info */}
+                                                <div className="space-y-5">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Employee Name
+                                                        </label>
+                                                        <p className="text-base font-medium text-gray-900 dark:text-white">
+                                                            {selectedLeaveRequest.employeeId?.firstName}{" "}
+                                                            {selectedLeaveRequest.employeeId?.lastName}
+                                                        </p>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Email
+                                                        </label>
+                                                        <p className="text-gray-800 dark:text-gray-200">
+                                                            {selectedLeaveRequest.employeeId?.email}
+                                                        </p>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Leave Type
+                                                        </label>
+                                                        <p className="text-gray-800 dark:text-gray-200">
+                                                            {selectedLeaveRequest.leaveTypeId?.name}
+                                                            <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                                                                ({selectedLeaveRequest.leaveTypeId?.code})
+                                                            </span>
+                                                        </p>
+                                                    </div>
+
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                                Start Date
+                                                            </label>
+                                                            <p className="text-gray-800 dark:text-gray-200">
+                                                                {formatDate(selectedLeaveRequest.startDate)}
+                                                            </p>
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                                End Date
+                                                            </label>
+                                                            <p className="text-gray-800 dark:text-gray-200">
+                                                                {formatDate(selectedLeaveRequest.endDate)}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Total Days
+                                                        </label>
+                                                        <p className="text-lg font-semibold text-indigo-600 dark:text-indigo-400">
+                                                            {selectedLeaveRequest.totalDays} day{selectedLeaveRequest.totalDays > 1 ? 's' : ''}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right Column - Reason & Status + Action */}
+                                                <div className="space-y-5">
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Reason
+                                                        </label>
+                                                        <div className="bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-800 dark:text-gray-200">
+                                                            {selectedLeaveRequest.reason || "No reason provided"}
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
+                                                        <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                            Current Status
+                                                        </label>
+                                                        <span
+                                                            className={`inline-flex px-4 py-1.5 rounded-full text-sm font-medium
+                          ${selectedLeaveRequest.status === "approved"
+                                                                    ? "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300"
+                                                                    : selectedLeaveRequest.status === "rejected"
+                                                                        ? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300"
+                                                                        : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300"
+                                                                }`}
+                                                        >
+                                                            {selectedLeaveRequest.status?.toUpperCase()}
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Action Section - Only for pending requests */}
+                                                    {selectedLeaveRequest.status === "pending" && (
+                                                        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                                                            <label className="block text-base font-medium text-gray-800 dark:text-gray-200 mb-3">
+                                                                Take Action
+                                                            </label>
+
+                                                            <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-5">
+                                                                <label className="flex items-center cursor-pointer">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="action"
+                                                                        checked={isApproveChecked}
+                                                                        onChange={() => handleActionChange("approve")}
+                                                                        className="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                                                                    />
+                                                                    <span className="ml-3 text-gray-900 dark:text-white font-medium">Approve</span>
+                                                                </label>
+
+                                                                <label className="flex items-center cursor-pointer">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="action"
+                                                                        checked={isRejectChecked}
+                                                                        onChange={() => handleActionChange("reject")}
+                                                                        className="h-5 w-5 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                                                                    />
+                                                                    <span className="ml-3 text-gray-900 dark:text-white font-medium">Reject</span>
+                                                                </label>
+                                                            </div>
+
+                                                            <div>
+                                                                <label
+                                                                    htmlFor="remark"
+                                                                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                                                >
+                                                                    Remark / Comments
+                                                                </label>
+                                                                <textarea
+                                                                    id="remark"
+                                                                    rows={4}
+                                                                    value={remark}
+                                                                    onChange={(e) => setRemark(e.target.value)}
+                                                                    placeholder="Add your remarks or reason for rejection..."
+                                                                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 
+                              bg-white dark:bg-gray-800 text-gray-900 dark:text-white 
+                              px-4 py-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 
+                              outline-none transition-all"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+                                                Loading leave request details...
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Footer */}
+                                    <div
+                                        className={`px-6 py-4 flex gap-2 justify-end border-t 
+                ${isDark ? "border-darkBorder bg-darkInput" : "border-gray-200 bg-gray-50"}`}
+                                    >
+                                        <button
+                                            type="button"
+                                            onClick={handleCloseModal}
+                                            className="px-6 py-2.5 bg-gray-600 hover:bg-gray-700 text-white rounded-lg 
+                  font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                                        >
+                                            Close
+                                        </button>
+
+                                        {selectedLeaveRequest?.status === "pending" && (
+                                            <button
+                                                type="button"
+                                                onClick={handleSubmitAction}
+                                                disabled={isSubmitting || (!isApproveChecked && !isRejectChecked)}
+                                                className={`px-6 py-2.5 rounded-lg font-medium text-white transition-all
+                    ${isSubmitting
+                                                        ? "bg-gray-500 cursor-not-allowed"
+                                                        : isApproveChecked
+                                                            ? "bg-green-600 hover:bg-green-700"
+                                                            : isRejectChecked
+                                                                ? "bg-red-600 hover:bg-red-700"
+                                                                : "bg-gray-400 cursor-not-allowed"
+                                                    } disabled:opacity-60`}
+                                            >
+                                                {isSubmitting ? (
+                                                    <span className="flex items-center">
+                                                        <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                                        </svg>
+                                                        Processing...
+                                                    </span>
+                                                ) : (
+                                                    "Submit Decision"
+                                                )}
+                                            </button>
+                                        )}
+                                    </div>
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
     );
 };
