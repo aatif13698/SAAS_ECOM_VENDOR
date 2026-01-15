@@ -144,7 +144,6 @@ import ResetPassword from "./Common/resetPassword/ResetPassword";
 import Error from "./pages/404";
 import AuditStock from "./pages/auditStock/AuditStock";
 import Example from "./components/Example";
-import SignIn from "./components/TestDesign/SignIn";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -205,7 +204,6 @@ function App() {
             <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
 
 
-              <Route path="/sss" element={<SignIn />}/>
               <Route path="/" element={<Layout />}>
                 <Route
                   path="*"
