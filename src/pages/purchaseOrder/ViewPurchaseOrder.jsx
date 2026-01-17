@@ -641,7 +641,7 @@ function ViewPurchaseOrder() {
         }
     };
 
-    const statuses = ['draft', 'issued', 'invoiced', 'partially_invoiced', 'pending_approval', 'approved', 'closed', 'canceled'];
+    const statuses = ['draft', 'issued', 'invoiced', 'approved', 'closed', 'canceled'];
 
     // Dynamic status badge text
     const getStatusBadge = () => {
