@@ -746,6 +746,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         paymentMethod: formData?.paymentMethod,
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
+        grandTotal:  totals.grandTotal,
       }
       const response = await purchaseOrderService?.create(dataObject);
       toast.success('Purchase Order submitted successfully!');
