@@ -236,7 +236,8 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
             value: "warehouse"
           },
         ]);
-        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }))
+        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit }));
+        dispatch(setBusinessUnit(currentUser.businessUnit));
       } else if (currentUser.isBranchLevel) {
         setLevelList([
           {
@@ -248,7 +249,10 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
             value: "warehouse"
           },
         ]);
-        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }))
+        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch }));
+        dispatch(setBusinessUnit(currentUser.businessUnit));
+        dispatch(setBranch(currentUser.branch));
+
       } else if (currentUser.isWarehouseLevel) {
         setLevelList([
           {
@@ -256,7 +260,10 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
             value: "warehouse"
           },
         ])
-        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }))
+        setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse }));
+        dispatch(setBusinessUnit(currentUser.businessUnit));
+        dispatch(setBranch(currentUser.branch));
+        dispatch(setWarehouse(currentUser.warehouse));
       }
     }
 
@@ -907,7 +914,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                       name="businessUnit"
                       value={businessUnit}
                       onChange={handleChange}
-                      disabled={formData?.items[0]?.itemName?.name ? true : false}
+                      disabled={(currentUser.isBuLevel || currentUser.isBranchLevel || currentUser.isWarehouseLevel) ? true : formData?.items[0]?.itemName?.name ? true : false}
                       className="form-control py-2  appearance-none relative flex-1"
                     >
                       <option value="">None</option>
@@ -938,7 +945,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                       name="branch"
                       value={branch}
                       onChange={handleChange}
-                      disabled={formData?.items[0]?.itemName?.name ? true : false}
+                      disabled={(currentUser.isBranchLevel || currentUser.isWarehouseLevel) ? true : formData?.items[0]?.itemName?.name ? true : false}
                       className="form-control py-2  appearance-none relative flex-1"
                     >
                       <option value="">None</option>
@@ -968,7 +975,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                       name="warehouse"
                       value={warehouse}
                       onChange={handleChange}
-                      disabled={formData?.items[0]?.itemName?.name ? true : false}
+                      disabled={(currentUser.isWarehouseLevel) ? true : formData?.items[0]?.itemName?.name ? true : false}
 
                       // disabled={isViewed || currentUser.isWarehouseLevel}
                       className="form-control py-2  appearance-none relative flex-1"
