@@ -1082,9 +1082,21 @@ const CreateEmployee = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         if (branch) {
-            getWarehouseByBranch(branch)
+            getWarehouseByBranch(branch);
+            if (branch && level == "branch") {
+                getDepartmentAndShift(level, branch)
+            }
         }
     }, [branch]);
+
+
+    useEffect(() => {
+
+         if (warehouse && level == "warehouse") {
+                getDepartmentAndShift(level, warehouse)
+            }
+
+    },[warehouse]);
 
     async function getWarehouseByBranch(id) {
         try {
