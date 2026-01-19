@@ -112,6 +112,13 @@ const CreateLedger = lazy(() => import("./pages/ledger/CreateLedger"));
 const ProductQaOut = lazy(() => import("./pages/ProudctQaOut/ProductQaOut"));
 
 
+
+// sale
+
+const SaleQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotationList"));
+const CreateQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotation"));
+
+
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 
@@ -364,6 +371,13 @@ function App() {
                 <Route path="payment-out-list" element={<PaymentOut />} />
                 <Route path="pcreate-payment-out" element={<CreatePaymentOut />} />
                 <Route path="view-payment-out/:id" element={<ViewPaymentOut />} />
+
+
+
+                {/* sale */}
+
+                <Route path="quotation-list" element={<SaleQuotation />}/>
+                <Route path="create-quotation" element={<CreateQuotation />}/>
 
 
 
