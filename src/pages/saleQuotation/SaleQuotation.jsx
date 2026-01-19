@@ -18,6 +18,8 @@ import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
+import customerService from '@/services/customer/customer.service';
+import SalesProductListModel from '../purchaseOrder/SalesProductListModel';
 
 const defaultState = {
   level: "",
@@ -524,7 +526,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
   // === Fetch supplier addresses ===
   const getShippingAddress = async (id, type) => {
     try {
-      const response = await supplierService.getSupplierAddress(id);
+      const response = await customerService.getCustomerAddress(id);
       const addresses = response?.data?.addresses?.reverse() || [];
       setAddresses(addresses);
 
@@ -639,8 +641,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
   useEffect(() => {
     const getParties = async () => {
       try {
-        const response = await supplierService.getAllActive();
-        setSuppliers(response?.data || []);
+        const response = await customerService.getAllActive();
+        setSuppliers(response?.data?.customers || []);
       } catch (error) {
         console.error("Error fetching suppliers:", error);
       }
@@ -929,11 +931,11 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Card 1: Supplier */}
               <div className={`bg-white dark:bg-transparent rounded-lg border border-gray-200 ${formData.supplier ? "lg:col-span-1 md:col-span-1" : "lg:col-span-2 md:col-span-2"}`}>
-                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white lg:h-[20%] md:h-[30%] p-2 rounded-t-lg flex justify-between items-center'>
-                  <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
+                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white  p-2 rounded-t-lg flex justify-between items-center'>
+                  <h3 className="text-lg font-medium text-gray-700">Bill To</h3>
                   {formData.supplier && (
                     <Button
-                      text="Change Supplier"
+                      text="Change Customer"
                       className="text-lightModalHeaderColor dark:text-darkBtn border py-1 border-lightModalHeaderColor dark:border-darkBtn hover:bg-lightModalHeaderColor/20"
                       onClick={() => setOpenModal(true)}
                     />
@@ -957,7 +959,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                       className={` ${!warehouse ? "cursor-not-allowed" : ""} flex items-center p-4 w-fill justify-center hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md`}
                     >
                       <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
-                      <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Supplier</span>
+                      <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Customer</span>
                     </button>
                   )}
                 </div>
@@ -1010,12 +1012,12 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
 
               {/* Card 3: PO Details */}
               <div className="bg-white dark:bg-transparent lg:col-span-1 md:col-span-2 rounded-lg border border-gray-200">
-                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white md:h-[20%] h-[12%] p-2 rounded-t-lg'>
-                  <h3 className="text-lg font-medium mb-2 text-gray-700">Purchase Order Details</h3>
+                <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white  p-2 rounded-t-lg'>
+                  <h3 className="text-lg font-medium  text-gray-700">Purchase Order Details</h3>
                 </div>
                 <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Inv No</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Quotation No</label>
                     <input
                       type="text"
                       name="poNumber"
@@ -1026,7 +1028,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Inv Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Quotation Date</label>
                     <input
                       type="date"
                       name="poDate"
@@ -1455,7 +1457,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                     className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                   >
                     <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-                      Select Supplier
+                      Select Customer
                     </h2>
                     <button onClick={() => setOpenModal(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                       <Icon icon="heroicons-outline:x" />
@@ -1472,8 +1474,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                           onClick={() => handleSelectSupplier(supplier)}
                         >
                           <div>
-                            <p className="font-medium">{supplier.name}</p>
-                            <p className="text-sm">{supplier.contactPerson} - {supplier.emailContact}</p>
+                            <p className="font-medium">{supplier.firstName}</p>
+                            <p className="text-sm">{supplier.email} - {supplier.phone}</p>
                           </div>
                           {formData.supplier?._id === supplier._id && (
                             <GoCheck className="text-green-500" />
@@ -1621,7 +1623,18 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
       />
 
       {/* Product List Modal */}
-      <ProductListModel
+      {/* <ProductListModel
+        items={formData?.items}
+        isInterState={formData?.isInterState}
+        setItem={setFormData}
+        openModal3={openModal4}
+        setOpenModal3={setOpenModal4}
+        getShippingAddress={getShippingAddress}
+        currentSupplierId={currentSupplierId}
+        supplier={formData?.supplier?._id}
+      /> */}
+
+       <SalesProductListModel
         items={formData?.items}
         isInterState={formData?.isInterState}
         setItem={setFormData}

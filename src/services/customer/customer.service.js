@@ -65,6 +65,27 @@ const getAll = async (page, keyWord, perPage, currentLevel, levelId) => {
 };
 
 
+const getAllActive = async (page, keyWord, perPage, currentLevel, levelId) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/customer/get/all/active/Customer?clientId=${clientId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
 
 
 const create = async (data) => {
@@ -145,7 +166,7 @@ const addAddress = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clinetId = localStorage.getItem("saas_client_clientId");
 
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/customer/vendor/addNewAddress`, {...data, clientId : clinetId}, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/customer/vendor/addNewAddress`, { ...data, clientId: clinetId }, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -155,7 +176,7 @@ const addAddress = async (data) => {
 const updateAddress = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clinetId = localStorage.getItem("saas_client_clientId");
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/customer/vendor/updateAddress`, {...data, clientId : clinetId}, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/customer/vendor/updateAddress`, { ...data, clientId: clinetId }, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -165,7 +186,7 @@ const updateAddress = async (data) => {
 const deleteAddress = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clinetId = localStorage.getItem("saas_client_clientId");
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/customer/vendor/deleteAddress`, {...data, clientId : clinetId}, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/customer/vendor/deleteAddress`, { ...data, clientId: clinetId }, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -247,7 +268,7 @@ export default {
     addAddress,
     updateAddress,
     deleteAddress,
-
+    getAllActive,
 
 
     updatewarehouse,
