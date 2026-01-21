@@ -65,7 +65,7 @@ const getAll = async (page, keyWord, perPage, currentLevel, levelId) => {
 };
 
 
-const getAllActive = async (page, keyWord, perPage, currentLevel, levelId) => {
+const getAllActive = async () => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
