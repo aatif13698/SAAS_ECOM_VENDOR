@@ -66,8 +66,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
 
         name: "",
         description: "",
-
-        totalStock: "",
+        openingStock: "",
         onlineStock: "",
         offlineStock: "",
         lowStockThreshold: "",
@@ -156,7 +155,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
         name: "",
         description: "",
 
-        totalStock: "",
+        openingStock: "",
         onlineStock: "",
         offlineStock: "",
         lowStockThreshold: "",
@@ -174,7 +173,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
         name,
         description,
 
-        totalStock,
+        openingStock,
         onlineStock,
         offlineStock,
         lowStockThreshold,
@@ -210,7 +209,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
             branch: "Branch is Required.",
             warehouse: "Warehouse is Required.",
             product: "Product is Required.",
-            totalStock: "Total Stock is Required.",
+            // openingStock: "Opening Stock is Required.",
             onlineStock: "Online Stock is Required.",
             offlineStock: "Offline Stock is Required.",
             lowStockThreshold: "Low Stock Threshold is Required.",
@@ -257,7 +256,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
             "product",
             "name",
             "description",
-            "totalStock",
+            // "openingStock",
             "onlineStock",
             "offlineStock",
             "lowStockThreshold",
@@ -396,7 +395,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 businessUnit: baseAddress?.businessUnit,
                 branch: baseAddress?.branch,
                 warehouse: baseAddress?.warehouse,
-                totalStock: baseAddress?.totalStock,
+                openingStock: baseAddress?.openingStock,
                 onlineStock: baseAddress?.onlineStock,
                 offlineStock: baseAddress?.offlineStock,
                 lowStockThreshold: baseAddress?.lowStockThreshold,
@@ -441,7 +440,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 payload.append("warehouse", warehouse);
                 payload.append("name", name);
                 payload.append("description", description);
-                payload.append("totalStock", totalStock);
+                payload.append("openingStock", openingStock);
                 payload.append("onlineStock", onlineStock);
                 payload.append("offlineStock", offlineStock);
                 payload.append("lowStockThreshold", lowStockThreshold);
@@ -472,7 +471,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 })
                 setFormData((prev) => ({
                     ...prev,
-                    totalStock: "",
+                    openingStock: "",
                     onlineStock: "",
                     offlineStock: "",
                     lowStockThreshold: "",
@@ -487,7 +486,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                     businessUnit: "",
                     branch: "",
                     warehouse: "",
-                    totalStock: "",
+                    openingStock: "",
                     onlineStock: "",
                     offlineStock: "",
                     lowStockThreshold: "",
@@ -595,7 +594,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                 ...prev,
                 name: data?.name,
                 description: data?.description,
-                totalStock: data?.totalStock,
+                openingStock: data?.openingStock,
                 onlineStock: data?.onlineStock,
                 offlineStock: data?.offlineStock,
                 lowStockThreshold: data?.lowStockThreshold,
@@ -612,7 +611,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
             name: "",
             description: "",
 
-            totalStock: "",
+            openingStock: "",
             onlineStock: "",
             offlineStock: "",
             lowStockThreshold: "",
@@ -903,23 +902,23 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                             </label>
 
                                             <label
-                                                className={`fromGroup   ${formDataErr?.totalStock !== "" ? "has-error" : ""
+                                                className={`fromGroup   ${formDataErr?.openingStock !== "" ? "has-error" : ""
                                                     } `}
                                             >
                                                 <p className="form-label">
-                                                    Total Stock <span className="text-red-500">*</span>
+                                                    Opening Stock 
                                                 </p>
                                                 <input
-                                                    name="totalStock"
+                                                    name="openingStock"
                                                     type="number"
-                                                    placeholder="Enter total Stock"
-                                                    value={totalStock}
+                                                    placeholder="Enter opening Stock"
+                                                    value={openingStock}
                                                     onChange={handleChange}
                                                     className="form-control py-2"
                                                 />
                                                 {
                                                     <p className="text-sm text-red-500">
-                                                        {formDataErr.totalStock}
+                                                        {formDataErr.openingStock}
                                                     </p>
                                                 }
                                             </label>
@@ -1484,7 +1483,7 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                     <div className="flex flex-col items-end gap-3 w-full md:w-auto">
                                                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                                                             <div className="text-gray-700 dark:text-gray-200">
-                                                                <span className="font-medium">Total:</span> {item?.totalStock}
+                                                                <span className="font-medium">Opening:</span> {item?.openingStock}
                                                             </div>
                                                             <div className="text-gray-700 dark:text-gray-200">
                                                                 <span className="font-medium">Online:</span> {item?.onlineStock}
