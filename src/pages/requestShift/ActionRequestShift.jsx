@@ -19,6 +19,7 @@ import { formatDate } from "@fullcalendar/core";
 
 
 const ActionRequestShift = ({ noFade, scrollContent }) => {
+    const navigate = useNavigate();
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
     const [levelList, setLevelList] = useState([
         {
@@ -47,6 +48,8 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
     const [activeWarehouse, setActiveWarehouse] = useState([]);
     const [shifts, setShifts] = useState([]);
 
+    const [status, setStatus] = useState("pending")
+
     const [formData, setFormData] = useState({
         level: "",
         businessUnit: "",
@@ -59,81 +62,84 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
 
     });
 
-    console.log("formData", formData);
+    console.log("status", status);
 
 
-    useEffect(() => {
-        if (currentUser && isAuthenticated) {
-            let level = "";
-            let levelId = "";
-            if (currentUser.isVendorLevel) {
-                setLevelList([
-                    // {
-                    //     name: "Vendor",
-                    //     value: "vendor"
-                    // },
-                    {
-                        name: "Business",
-                        value: "business"
-                    },
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ])
-            } else if (currentUser.isBuLevel) {
-                setLevelList([
-                    {
-                        name: "Business",
-                        value: "business"
-                    },
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ]);
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, level: "business" }));
-                level = "business";
-                levelId = currentUser.businessUnit;
-            } else if (currentUser.isBranchLevel) {
-                setLevelList([
-                    {
-                        name: "Branch",
-                        value: "branch"
-                    },
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ]);
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, level: "branch" }));
-                level = "branch";
-                levelId = currentUser.branch;
-            } else if (currentUser.isWarehouseLevel) {
-                setLevelList([
-                    {
-                        name: "Warehouse",
-                        value: "warehouse"
-                    },
-                ])
-                setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse, level: "warehouse" }));
-                level = "warehouse";
-                levelId = currentUser.warehouse;
-            }
 
-            getDepartmentAndShift(level, levelId)
 
-        }
 
-    }, [currentUser])
+    // useEffect(() => {
+    //     if (currentUser && isAuthenticated) {
+    //         let level = "";
+    //         let levelId = "";
+    //         if (currentUser.isVendorLevel) {
+    //             setLevelList([
+    //                 // {
+    //                 //     name: "Vendor",
+    //                 //     value: "vendor"
+    //                 // },
+    //                 {
+    //                     name: "Business",
+    //                     value: "business"
+    //                 },
+    //                 {
+    //                     name: "Branch",
+    //                     value: "branch"
+    //                 },
+    //                 {
+    //                     name: "Warehouse",
+    //                     value: "warehouse"
+    //                 },
+    //             ])
+    //         } else if (currentUser.isBuLevel) {
+    //             setLevelList([
+    //                 {
+    //                     name: "Business",
+    //                     value: "business"
+    //                 },
+    //                 {
+    //                     name: "Branch",
+    //                     value: "branch"
+    //                 },
+    //                 {
+    //                     name: "Warehouse",
+    //                     value: "warehouse"
+    //                 },
+    //             ]);
+    //             setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, level: "business" }));
+    //             level = "business";
+    //             levelId = currentUser.businessUnit;
+    //         } else if (currentUser.isBranchLevel) {
+    //             setLevelList([
+    //                 {
+    //                     name: "Branch",
+    //                     value: "branch"
+    //                 },
+    //                 {
+    //                     name: "Warehouse",
+    //                     value: "warehouse"
+    //                 },
+    //             ]);
+    //             setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, level: "branch" }));
+    //             level = "branch";
+    //             levelId = currentUser.branch;
+    //         } else if (currentUser.isWarehouseLevel) {
+    //             setLevelList([
+    //                 {
+    //                     name: "Warehouse",
+    //                     value: "warehouse"
+    //                 },
+    //             ])
+    //             setFormData((prev) => ({ ...prev, businessUnit: currentUser.businessUnit, branch: currentUser.branch, warehouse: currentUser.warehouse, level: "warehouse" }));
+    //             level = "warehouse";
+    //             levelId = currentUser.warehouse;
+    //         }
+
+    //         getDepartmentAndShift(level, levelId)
+
+    //     }
+
+    // }, [currentUser])
 
     const [formDataErr, setFormDataErr] = useState({
         level: "",
@@ -182,7 +188,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
             toast.error('New join date is required for approval.');
             return;
         }
-         if (actionForm.status === 'approved' && !actionForm.newShift) {
+        if (actionForm.status === 'approved' && !actionForm.newShift) {
             toast.error('New shift is required.');
             return;
         }
@@ -208,6 +214,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
             console.log('Submitting action:', actionForm);
             toast.success('Action taken successfully.');
             setIsAction(false);
+            navigate("/shift-change-request-list")
             // setActionForm({ status: 'pending', joinDate: '', remark: '' });
         } catch (error) {
             console.error('Error submitting action:', error);
@@ -284,14 +291,18 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                     const baseAddress = location?.state?.row;
                     console.log("baseAddress", baseAddress);
                     let level = "";
+                    let levelId = "";
                     if (baseAddress.isBuLevel) {
-                        level = "business"
+                        level = "business";
+                        levelId = baseAddress.businessUnit?._id;
                     } else if (baseAddress.isVendorLevel) {
                         level = "vendor"
                     } else if (baseAddress.isWarehouseLevel) {
                         level = "warehouse"
+                        levelId = baseAddress.warehouse?._id;
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
+                        levelId = baseAddress.branch?._id;
                     }
                     setFormData((prev) => ({
                         ...prev,
@@ -304,16 +315,19 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                         description: baseAddress?.description,
                     }));
 
+                    setStatus(baseAddress?.status)
+
                     if (baseAddress?.status !== "pending") {
                         setIsAction(true)
                     }
 
                     setActionForm((prev) => ({
-                        joinDate: baseAddress?.status == "approved" ?  formatDate(baseAddress?.newJoinDate) : "",
-                        newShift: baseAddress?.status == "approved" ?  baseAddress?.newShift : "",
+                        joinDate: baseAddress?.status == "approved" ? formatDate(baseAddress?.newJoinDate) : "",
+                        newShift: baseAddress?.status == "approved" ? baseAddress?.newShift : "",
                         status: baseAddress?.status,
                         remark: baseAddress?.actionRemark
                     }));
+                     getDepartmentAndShift(level, levelId)
                     setPageLoading(false)
                 } catch (error) {
                     setPageLoading(false)
@@ -379,8 +393,8 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                             <div className={`${isDark ? "bg-darkSecondary text-white" : ""} p-5`}>
 
                                 <div className="bg-gray-100 p-2 rounded-md w-fit mb-4">
-                                    <h3 className="text-base">Requested By: {`${row?.createdBy?.firstName + " "+ row?.createdBy?.lastName} - ${row?.createdBy?.email}`} </h3>
-                                </div> 
+                                    <h3 className="text-base">Requested By: {`${row?.createdBy?.firstName + " " + row?.createdBy?.lastName} - ${row?.createdBy?.email}`} </h3>
+                                </div>
 
                                 <div >
                                     <div className="grid grid-cols-1 md:grid-cols-3  gap-5 ">
@@ -509,7 +523,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                         >
                                             <label htmlFor=" hh" className="form-label ">
                                                 <p className="form-label">
-                                                   Chosen Shift <span className="text-red-500">*</span>
+                                                    Chosen Shift <span className="text-red-500">*</span>
                                                 </p>
                                             </label>
                                             <select
@@ -608,6 +622,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                     checked={actionForm.status === 'pending'}
                                                                     onChange={handleActionChange}
                                                                     className="mr-2"
+                                                                    disabled={status !== "pending"}
                                                                 />
                                                                 <span>Pending</span>
                                                             </label>
@@ -619,6 +634,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                     checked={actionForm.status === 'approved'}
                                                                     onChange={handleActionChange}
                                                                     className="mr-2"
+                                                                    disabled={status !== "pending"}
                                                                 />
                                                                 <span>Approved</span>
                                                             </label>
@@ -630,6 +646,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                     checked={actionForm.status === 'rejected'}
                                                                     onChange={handleActionChange}
                                                                     className="mr-2"
+                                                                    disabled={status !== "pending"}
                                                                 />
                                                                 <span>Rejected</span>
                                                             </label>
@@ -650,6 +667,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                     value={actionForm.joinDate}
                                                                     onChange={handleActionChange}
                                                                     className="form-control py-2"
+                                                                    disabled={status !== "pending"}
                                                                 />
                                                             </div>
                                                             <div
@@ -657,13 +675,14 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                             >
                                                                 <label htmlFor=" hh" className="form-label ">
                                                                     <p className="form-label">
-                                                                      Assign Shift <span className="text-red-500">*</span>
+                                                                        Assign Shift <span className="text-red-500">*</span>
                                                                     </p>
                                                                 </label>
                                                                 <select
                                                                     name="newShift"
                                                                     onChange={handleActionChange}
                                                                     value={actionForm?.newShift}
+                                                                    disabled={status !== "pending"}
                                                                     className="form-control py-2  appearance-none relative flex-1"
                                                                 >
                                                                     <option value="">None</option>
@@ -692,6 +711,7 @@ const ActionRequestShift = ({ noFade, scrollContent }) => {
                                                                 placeholder="Enter remark"
                                                                 className="form-control py-2"
                                                                 rows={3}
+                                                                disabled={status !== "pending"}
                                                             />
                                                         </div>
                                                     )}

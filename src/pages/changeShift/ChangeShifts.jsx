@@ -269,9 +269,13 @@ const ChangeShifts = ({ noFade, scrollContent }) => {
                 return (
                     <span className="block w-full">
                         <span
-                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 `}
+                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25
+                                  ${
+                                    row?.status == "approved" ? "text-green-500 bg-green-200" : row?.status ==  "rejected" ? "text-red-500 bg-red-200" : "text-blue-500 bg-blue-200"
+                                }
+                                 `}
                         >
-                            {row.status}
+                            {row?.status?.toUpperCase()}
                         </span>
                     </span>
                 );

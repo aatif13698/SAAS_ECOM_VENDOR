@@ -52,7 +52,12 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
             name: "Warehouse",
             value: "warehouse"
         },
-    ])
+    ]);
+
+    const [status, setStatus] = useState("pending");
+
+    console.log('status', status);
+
 
     const [isDark] = useDarkMode();
     const location = useLocation();
@@ -148,7 +153,7 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                 levelId = currentUser.warehouse;
             }
 
-             getDepartmentAndShift(level, levelId)
+            getDepartmentAndShift(level, levelId)
 
         }
 
@@ -383,6 +388,9 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                     } else if (baseAddress.isBranchLevel) {
                         level = "branch"
                     }
+
+                    setStatus(baseAddress?.status)
+
                     setFormData((prev) => ({
                         ...prev,
                         level: level,
@@ -595,7 +603,7 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                                                 name="chosenShift"
                                                 value={chosenShift}
                                                 onChange={handleChange}
-                                                disabled={isViewed}
+                                                disabled={isViewed || (id && status !== "pending")}
                                                 className="form-control py-2  appearance-none relative flex-1"
                                             >
                                                 <option value="">None</option>
@@ -622,7 +630,7 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                                                 value={reason}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                disabled={isViewed}
+                                                disabled={isViewed || (id && status !== "pending")}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
@@ -644,7 +652,7 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                                                 value={description}
                                                 onChange={handleChange}
                                                 className="form-control py-2"
-                                                disabled={isViewed}
+                                                disabled={isViewed || (id && status !== "pending")}
                                             />
                                             {
                                                 <p className="text-sm text-red-500">
@@ -656,15 +664,21 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                                     {
                                         isViewed && (
                                             <div className="lg:col-span-2 col-span-1">
-                                                <div className="flex justify-end py-5 ">
-                                                    <Button
-                                                        text="Edit"
-                                                        // className="border bg-blue-gray-300 rounded px-5 py-2"
-                                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                                        onClick={() => setIsViewed(false)}
-                                                        isLoading={loading}
-                                                    />
-                                                </div>
+
+                                                {
+                                                    (id && status !== "pending") ? "" :
+                                                        <div className="flex justify-end py-5 ">
+                                                            <Button
+                                                                text="Edit"
+                                                                // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                                className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
+                                                                onClick={() => setIsViewed(false)}
+                                                                isLoading={loading}
+                                                            />
+                                                        </div>
+                                                }
+
+
                                             </div>
                                         )
                                     }
@@ -673,46 +687,53 @@ const CreateChangeShift = ({ noFade, scrollContent }) => {
                                             <div className="lg:col-span-2 col-span-1">
                                                 <div className="ltr:text-right rtl:text-left p-5">
                                                     {showAddButton ? (
-                                                        <button
-                                                            disabled={loading}
-                                                            style={
-                                                                loading
-                                                                    ? { opacity: "0.5", cursor: "not-allowed" }
-                                                                    : { opacity: "1" }
-                                                            }
-                                                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
-                                                        >
-                                                            {loading
-                                                                ? ""
-                                                                : showAddButton && id
-                                                                    ? "Update"
-                                                                    : "Save"}
-                                                            {loading && (
-                                                                <>
-                                                                    <svg
-                                                                        className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
-                                                                        xmlns="http://www.w3.org/2000/svg"
-                                                                        fill="none"
-                                                                        viewBox="0 0 24 24"
+                                                        <>
+                                                            {
+                                                                (id && status !== "pending") ? "" :
+                                                                    <button
+                                                                        disabled={loading}
+                                                                        style={
+                                                                            loading
+                                                                                ? { opacity: "0.5", cursor: "not-allowed" }
+                                                                                : { opacity: "1" }
+                                                                        }
+                                                                        className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white  text-center btn btn inline-flex justify-center`}
                                                                     >
-                                                                        <circle
-                                                                            className="opacity-25"
-                                                                            cx="12"
-                                                                            cy="12"
-                                                                            r="10"
-                                                                            stroke="currentColor"
-                                                                            strokeWidth="4"
-                                                                        ></circle>
-                                                                        <path
-                                                                            className="opacity-75"
-                                                                            fill="currentColor"
-                                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                                                        ></path>
-                                                                    </svg>
-                                                                    Loading..
-                                                                </>
-                                                            )}
-                                                        </button>
+                                                                        {loading
+                                                                            ? ""
+                                                                            : showAddButton && id
+                                                                                ? "Update"
+                                                                                : "Save"}
+                                                                        {loading && (
+                                                                            <>
+                                                                                <svg
+                                                                                    className={`animate-spin ltr:-ml-1 ltr:mr-3 rtl:-mr-1 rtl:ml-3 h-5 w-5 unset-classname`}
+                                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                                    fill="none"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <circle
+                                                                                        className="opacity-25"
+                                                                                        cx="12"
+                                                                                        cy="12"
+                                                                                        r="10"
+                                                                                        stroke="currentColor"
+                                                                                        strokeWidth="4"
+                                                                                    ></circle>
+                                                                                    <path
+                                                                                        className="opacity-75"
+                                                                                        fill="currentColor"
+                                                                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                                                    ></path>
+                                                                                </svg>
+                                                                                Loading..
+                                                                            </>
+                                                                        )}
+                                                                    </button>
+                                                            }
+
+                                                        </>
+
                                                     ) : (
                                                         ""
                                                     )}
