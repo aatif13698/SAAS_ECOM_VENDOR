@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import employeeService from '@/services/employee/employee.service';
 import Leave from './Leave';
+import Assets from './Assets';
 
 // Use environment variable with fallback (but better to enforce in production)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY;
@@ -31,6 +32,7 @@ function ViewEmployee() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('attendance');
+
 
     const fetchEmployee = useCallback(async (id) => {
         if (!id) return;
@@ -211,7 +213,7 @@ function ViewEmployee() {
                         {activeTab === 'assets' && (
                             <TabContent title="Assigned Assets">
                                 {employee.assignedAssets?.length > 0 ? (
-                                    <div>Assets will be shown here...</div>
+                                    <Assets assignedAssets={employee.assignedAssets}/>
                                 ) : (
                                     <p className="text-gray-500">No assets assigned to this employee</p>
                                 )}
