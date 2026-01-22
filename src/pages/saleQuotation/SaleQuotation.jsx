@@ -19,7 +19,7 @@ import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import customerService from '@/services/customer/customer.service';
-import SalesProductListModel from '../purchaseOrder/SalesProductListModel';
+import SalesProductListModel from './SaleProductListModel';
 
 const defaultState = {
   level: "",
@@ -1124,6 +1124,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                           type="number"
                           name="quantity"
                           value={item.quantity}
+                          disabled={true}
                           onChange={(e) => handleItemChange(index, e)}
                           className="md:w-20 w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500"
                           min="1"
@@ -1138,6 +1139,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                           type="number"
                           name="mrp"
                           value={item.mrp}
+                            disabled={true}
                           onChange={(e) => handleItemChange(index, e)}
                           className="md:w-20 w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500"
                           min="0"
@@ -1151,6 +1153,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                         <input
                           type="number"
                           name="discount"
+                          disabled={true}
                           value={item.discount}
                           onChange={(e) => handleItemChange(index, e)}
                           className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500"
