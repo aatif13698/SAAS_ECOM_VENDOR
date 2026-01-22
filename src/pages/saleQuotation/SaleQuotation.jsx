@@ -12,7 +12,7 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from './AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseOrder/purchaseOrderSclice';
+import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setsqDate, setsqNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/quotation/quotationSlice';
 import { useDispatch } from 'react-redux';
 import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
 import { formatDate } from '@fullcalendar/core';
@@ -41,8 +41,8 @@ const defaultState = {
     houseNumber: "",
     _id: ""
   },
-  poNumber: '',
-  poDate: new Date().toISOString().split('T')[0],
+  sqNumber: '',
+  sqDate: new Date().toISOString().split('T')[0],
   items: [
     {
       srNo: 1,
@@ -91,8 +91,11 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
 
   // const {id, row} = location?.state;
  
-  const purhcaseOrderDraftData = useSelector((state) => state.purchaseOrderSlice);
+  const store = useSelector((state) => state);
+  const purhcaseOrderDraftData = useSelector((state) => state.quotationSlice);
   console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
+  console.log("store", store);
+  
 
   const [isDark] = useDarkmode();
   const [addresses, setAddresses] = useState([]);
@@ -118,8 +121,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
       houseNumber: "",
       _id: ""
     },
-    poNumber: '',
-    poDate: new Date().toISOString().split('T')[0],
+    sqNumber: '',
+    sqDate: new Date().toISOString().split('T')[0],
     items: [
       {
         srNo: 1,
@@ -324,8 +327,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
       shippingAddress: purhcaseOrderDraftData?.shippingAddress ? purhcaseOrderDraftData?.shippingAddress : prev.shippingAddress,
       items: purhcaseOrderDraftData?.items ? purhcaseOrderDraftData?.items : prev?.items,
       isInterState: purhcaseOrderDraftData?.isInterState,
-      poNumber: purhcaseOrderDraftData?.poNumber,
-      poDate: purhcaseOrderDraftData?.poDate,
+      sqNumber: purhcaseOrderDraftData?.sqNumber,
+      sqDate: purhcaseOrderDraftData?.sqDate,
       notes: purhcaseOrderDraftData?.notes,
       bankDetails: {
         bankName: purhcaseOrderDraftData?.bankDetails?.bankName || "",
@@ -385,18 +388,16 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
       }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
-      if (name == "poNumber") {
-        dispatch(setPoNumber(value))
+      if (name == "sqNumber") {
+        dispatch(setsqNumber(value))
       }
-      if (name == "poDate") {
-        dispatch(setPoDate(value))
+      if (name == "sqDate") {
+        dispatch(setsqDate(value))
       }
       if (name === "notes") {
         dispatch(setNotes(value));
       }
-      if (name == "paymentMethod") {
-        dispatch(setPaymentMethod(value));
-      }
+     
       if (name == "paidAmount") {
         dispatch(setPaidAmount(value));
       }
@@ -738,8 +739,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
 
         supplier: formData?.supplier?._id,
         shippingAddress: formData?.shippingAddress,
-        poNumber: formData?.poNumber,
-        poDate: formData?.poDate,
+        sqNumber: formData?.sqNumber,
+        sqDate: formData?.sqDate,
         items: formData?.items,
         notes: formData?.notes,
         bankDetails: formData?.bankDetails,
@@ -944,12 +945,11 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                 <div className='lg:h-[80%] md:h-[70%] p-4'>
                   {formData.supplier ? (
                     <div className="text-sm space-y-1">
-                      <p><strong>Name:</strong> {formData.supplier.name}</p>
-                      <p><strong>Contact Person:</strong> {formData.supplier.contactPerson}</p>
-                      <p><strong>Email:</strong> {formData.supplier.emailContact}</p>
-                      <p><strong>Contact Number:</strong> {formData.supplier.contactNumber}</p>
+                      <p><strong>Name:</strong> {formData.supplier.firstName+ " "+ formData.supplier.lastName}</p>
+                      <p><strong>Email:</strong> {formData.supplier.email}</p>
+                      <p><strong>Contact Number:</strong> {formData.supplier.phone}</p>
                       <p><strong>Address:</strong> {formData.supplier.address}, {formData.supplier.city}, {formData.supplier.state}, {formData.supplier.ZipCode}, {formData.supplier.country}</p>
-                      <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber}</p>
+                      <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber ? formData.supplier.GstVanNumber: "N/A"}</p>
                     </div>
                   ) : (
                     <button
@@ -1020,8 +1020,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Quotation No</label>
                     <input
                       type="text"
-                      name="poNumber"
-                      value={formData.poNumber}
+                      name="sqNumber"
+                      value={formData.sqNumber}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
@@ -1031,8 +1031,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Quotation Date</label>
                     <input
                       type="date"
-                      name="poDate"
-                      value={formData.poDate}
+                      name="sqDate"
+                      value={formData.sqDate}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required

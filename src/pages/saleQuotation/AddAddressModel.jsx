@@ -6,6 +6,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import useDarkmode from '@/hooks/useDarkMode';
 import Icon from "@/components/ui/Icon";
 import Button from '../../components/ui/Button';
+import customerService from '@/services/customer/customer.service';
 
 function AddAddressModel({ noFade, openModal3, setOpenModal3, getShippingAddress, currentSupplierId }) {
 
@@ -515,7 +516,7 @@ function AddAddressModel({ noFade, openModal3, setOpenModal3, getShippingAddress
                 city: countryData?.cityName
             }
             try {
-                const response = await supplierService.addAddress({ ...data, customerId: currentSupplierId })
+                const response = await customerService.addAddress({ ...data, customerId: currentSupplierId })
                 clearData();
                 setIsSubmitting(false);
                 setOpenModal3(false);
