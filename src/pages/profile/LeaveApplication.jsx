@@ -151,7 +151,7 @@ function LeaveApplication() {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Leave Management</h1>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {leaveBalance.map((leave) => (
+            { leaveBalance && leaveBalance?.map((leave) => (
               <div
                 key={leave._id}
                 className="bg-white border rounded-lg p-4 shadow-sm hover:shadow transition-shadow"
@@ -196,7 +196,7 @@ function LeaveApplication() {
                       className="form-control py-2"
                     >
                       <option value="">Select leave type</option>
-                      {leaveBalance.map((leave) => (
+                      {leaveBalance &&  leaveBalance.map((leave) => (
                         <option key={leave?._id} value={leave?.id?._id}>
                           {leave?.id?.name} ({Number(leave?.allocated) - Number(leave?.taken)} available)
                         </option>
@@ -387,7 +387,7 @@ function LeaveApplication() {
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
-                    {leaveHistory.map((leave) => (
+                    {leaveHistory && leaveHistory.map((leave) => (
                       <tr key={leave._id} className="hover:bg-gray-50">
                         <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
                           {leave?.leaveTypeId?.name}

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import employeeService from '@/services/employee/employee.service';
+import Leave from './Leave';
 
 // Use environment variable with fallback (but better to enforce in production)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY;
@@ -200,9 +201,11 @@ function ViewEmployee() {
                         )}
 
                         {activeTab === 'leaves' && (
-                            <TabContent title="Leave History">
-                                <p className="text-gray-500">No leave records found</p>
-                            </TabContent>
+
+                            <Leave empId={employee?._id}/>
+                            // <TabContent title="Leave History">
+                            //     <p className="text-gray-500">No leave records found</p>
+                            // </TabContent>
                         )}
 
                         {activeTab === 'assets' && (
