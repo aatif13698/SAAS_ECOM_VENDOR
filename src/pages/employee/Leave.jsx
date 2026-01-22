@@ -144,7 +144,7 @@ function Leave({empId}) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-12 rounded-lg">
+    <div className=" bg-gray-50 pb-12 rounded-lg">
       {/* Header - Leave Balances */}
       <div className="bg-white border-b shadow-sm rounded-lg">
         <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -172,7 +172,7 @@ function Leave({empId}) {
       </div>
 
       {/* Main Content */}
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className=" mx-auto text-left py-8">
         <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
           <div className="">
             <div className="bg-white shadow rounded-lg overflow-hidden">

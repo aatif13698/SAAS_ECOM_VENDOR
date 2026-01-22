@@ -4,6 +4,7 @@ import CryptoJS from 'crypto-js';
 import employeeService from '@/services/employee/employee.service';
 import Leave from './Leave';
 import Assets from './Assets';
+import Attendance from './Attendance';
 
 // Use environment variable with fallback (but better to enforce in production)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY;
@@ -198,13 +199,17 @@ function ViewEmployee() {
                         {/* You can later extract these into separate components */}
                         {activeTab === 'attendance' && (
                             <TabContent title="Attendance Records">
-                                <p className="text-gray-500">No attendance data available yet</p>
+                                <Attendance/>
                             </TabContent>
                         )}
 
                         {activeTab === 'leaves' && (
 
-                            <Leave empId={employee?._id}/>
+                            <TabContent title="Leave Records">
+                                <Leave empId={employee?._id}/>
+                            </TabContent>
+
+                            
                             // <TabContent title="Leave History">
                             //     <p className="text-gray-500">No leave records found</p>
                             // </TabContent>
