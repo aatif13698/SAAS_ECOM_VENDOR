@@ -2,6 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import CryptoJS from 'crypto-js';
 import employeeService from '@/services/employee/employee.service';
+import Leave from './Leave';
+import Assets from './Assets';
+import Attendance from './Attendance';
 
 // Use environment variable with fallback (but better to enforce in production)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY;
@@ -30,6 +33,7 @@ function ViewEmployee() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [activeTab, setActiveTab] = useState('attendance');
+
 
     const fetchEmployee = useCallback(async (id) => {
         if (!id) return;
@@ -195,20 +199,26 @@ function ViewEmployee() {
                         {/* You can later extract these into separate components */}
                         {activeTab === 'attendance' && (
                             <TabContent title="Attendance Records">
-                                <p className="text-gray-500">No attendance data available yet</p>
+                                <Attendance/>
                             </TabContent>
                         )}
 
                         {activeTab === 'leaves' && (
-                            <TabContent title="Leave History">
-                                <p className="text-gray-500">No leave records found</p>
+
+                            <TabContent title="Leave Records">
+                                <Leave empId={employee?._id}/>
                             </TabContent>
+
+                            
+                            // <TabContent title="Leave History">
+                            //     <p className="text-gray-500">No leave records found</p>
+                            // </TabContent>
                         )}
 
                         {activeTab === 'assets' && (
                             <TabContent title="Assigned Assets">
                                 {employee.assignedAssets?.length > 0 ? (
-                                    <div>Assets will be shown here...</div>
+                                    <Assets assignedAssets={employee.assignedAssets}/>
                                 ) : (
                                     <p className="text-gray-500">No assets assigned to this employee</p>
                                 )}

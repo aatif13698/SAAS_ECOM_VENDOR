@@ -48,7 +48,9 @@ const CreateAsset = ({ noFade, scrollContent }) => {
     const [activeWarehouse, setActiveWarehouse] = useState([]);
     const [currentLevelEmp, setCurrentLevelEmp] = useState([]);
 
-    console.log("currentLevelEmp", currentLevelEmp);
+    // console.log("currentLevelEmp", currentLevelEmp);
+    // console.log("id", id);
+    
 
 
 
@@ -504,6 +506,8 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                 assetId: id, empId: selectedEmp, clientId
             }
             const response = await assetService.assignToEmployee(dataObject);
+            toast.success("Assigned successfully");
+            navigate("/assets-&-tools-list")
             console.log("res assign to emp");
         } catch (error) {
             console.log("error while assigning", error);
@@ -1030,7 +1034,7 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                             </div>
 
                             {
-                                id && status == "available" ?
+                                id ? status == "available" ?
 
                                     <>
 
@@ -1158,6 +1162,8 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    : ""
                             }
 
 
