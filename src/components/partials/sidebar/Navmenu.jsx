@@ -151,7 +151,8 @@ const Navmenu = ({ menus }) => {
       "Holiday",
       "Audit Stock",
       "Leave Requests",
-      "Shift Change Request"
+      "Shift Change Request",
+      "Statements"
     ]);
 
     const excludedMenus = new Set([

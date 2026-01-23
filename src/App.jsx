@@ -392,7 +392,7 @@ function App() {
 
 
                 <Route path="create-statement" element={<CreateStatement />}/>
-                <Route path="statement-list" element={<Statement />}/>
+                <Route path="statements-list" element={<Statement />}/>
 
 
 
