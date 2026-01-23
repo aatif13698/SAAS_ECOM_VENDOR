@@ -167,7 +167,9 @@ const Navmenu = ({ menus }) => {
       "Change Shift",
       "Shift Change Request",
       "Leave Allotment",
-      "Leave Requests"
+      "Leave Requests",
+      "Statements"
+
     ]);
 
     const result = [];
