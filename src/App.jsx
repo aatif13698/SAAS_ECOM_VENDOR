@@ -119,6 +119,12 @@ const SaleQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotationList
 const CreateQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotation"));
 
 
+// statement
+
+const CreateStatement = lazy(() => import("./pages/statement/CreateStatement"));
+const Statement = lazy(() => import("./pages/statement/Statement"))
+
+
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 
@@ -140,7 +146,7 @@ const CreatePaymentOut = lazy(() => import("./pages/paymentOut/CreatePaymentOut"
 const ViewPaymentOut = lazy(() => import("./pages/paymentOut/ViewPaymentOut"));
 
 // system settings
-const SystemSettings = lazy(() => import("./pages/systemSettings/SystemSettings"))
+const SystemSettings = lazy(() => import("./pages/systemSettings/SystemSettings"));
 
 
 
@@ -378,6 +384,17 @@ function App() {
 
                 <Route path="quotation-list" element={<SaleQuotation />}/>
                 <Route path="create-quotation" element={<CreateQuotation />}/>
+
+
+
+
+                {/* statement */}
+
+
+                <Route path="create-statement" element={<CreateStatement />}/>
+                <Route path="statement-list" element={<Statement />}/>
+
+
 
 
 
