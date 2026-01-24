@@ -12,7 +12,7 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from './AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setsqDate, setsqNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/quotation/quotationSlice';
+import { removeItemsList, resetQuotation, setAccountNumber, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setsqDate, setsqNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/quotation/quotationSlice';
 import { useDispatch } from 'react-redux';
 import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service';
 import { formatDate } from '@fullcalendar/core';
@@ -20,6 +20,7 @@ import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import customerService from '@/services/customer/customer.service';
 import SalesProductListModel from './SaleProductListModel';
+import quotationService from "../../services/saleQuotation/quotation.service"
 
 const defaultState = {
   level: "",
@@ -160,6 +161,9 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
     paidAmount: 0,
     balance: 0,
   });
+
+  console.log("formData", formData);
+  
 
   const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
@@ -737,7 +741,8 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
         branch: branch,
         warehouse: warehouse,
 
-        supplier: formData?.supplier?._id,
+        customer: formData?.supplier?._id,
+        customerLedger: formData?.supplier?.ledgerLinkedId,
         shippingAddress: formData?.shippingAddress,
         sqNumber: formData?.sqNumber,
         sqDate: formData?.sqDate,
@@ -751,9 +756,11 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
         balance: formData?.balance,
         grandTotal:  totals.grandTotal,
       }
-      const response = await purchaseOrderService?.create(dataObject);
-      toast.success('Purchase Order submitted successfully!');
-      resetAllAndNavigate()
+
+      const response = await quotationService.create(dataObject);
+      // const response = await quotatio ?.create(dataObject);
+      toast.success('Quotation submitted successfully!');
+      resetAllAndNavigate();
 
     } catch (error) {
       const message = error?.response?.data?.message;
@@ -765,7 +772,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
   };
 
   function resetAllAndNavigate() {
-    dispatch(resetPurchaseOrder());
+    dispatch(resetQuotation());
     setFormData(defaultState);
     navigate('/purchase-order-list');
 
@@ -783,7 +790,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
         <div className='flex gap-2'>
           {
             purhcaseOrderDraftData?.level ? <button type='button' className='bg-red-600 text-white border border-gray-200 hover:bg-red-500 rounded-lg px-2 py-1 ' onClick={() => {
-              dispatch(resetPurchaseOrder());
+              dispatch(resetQuotation());
               setFormData(defaultState);
 
             }}>Reset</button> : ""
@@ -969,7 +976,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
               {formData.supplier && (
                 <div className="bg-white dark:bg-transparent lg:col-span-1 md:col-span-1 rounded-lg border border-gray-200">
                   <div className='bg-gray-100 dark:bg-transparent dark:border-b-[2px] dark:border-white md:h-[20%] p-2 rounded-t-lg flex justify-between items-center'>
-                    <h3 className="text-lg font-medium text-gray-700">Ship From</h3>
+                    <h3 className="text-lg font-medium text-gray-700">Ship To</h3>
                     {addresses.length > 0 && (
                       <Button
                         text={`${formData?.shippingAddress?.fullName ? "Change Shipping" : "Select Shipping"} `}

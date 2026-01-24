@@ -146,8 +146,8 @@ export const quotationSlice = createSlice({
         setBalance: (state, action) => {
             state.balance = action.payload;
         },
-        resetPurchaseOrder: () => initialState,
-        setPurchaseOrder: (state, action) => {
+        resetQuotation: () => initialState,
+        setSaleQuotation: (state, action) => {
             console.log("action.payload", action.payload);
 
             return action.payload
@@ -165,7 +165,7 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setItemsList,
     removeItemsList,
     setIsInterState,
-    resetPurchaseOrder,
+    resetQuotation,
     setsqNumber,
     setsqDate,
     setBankName,
@@ -176,7 +176,7 @@ export const { setLevel, setBusinessUnit, setBranch, remveBranch, setWarehouse, 
     setPaidAmount,
     setBaymentMethod,
     setPalance,
-    setPurchaseOrder,
+    setSaleQuotation,
     setPayedFrom
 } = quotationSlice.actions;
 export default quotationSlice.reducer;

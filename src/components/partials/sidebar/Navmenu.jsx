@@ -113,6 +113,20 @@ const Navmenu = ({ menus }) => {
       "Leave Category": "material-symbols:holiday-village-outline-rounded",
       "Holiday": "material-symbols:energy-savings-leaf-outline-rounded",
       "Leave Allotment": "material-symbols:assignment-outline",
+      "Supplier" :"material-symbols:person-apron-rounded",
+      "Purchase Invoices" :"material-symbols:assignment-outline",
+      "Payment Out" : "material-symbols:payment-arrow-down-rounded",
+      "Purchase Returns" : "material-symbols:assignment-return-outline",
+      "Debit Note" : "material-symbols:deblur-outline",
+      "Purchase Order" : "material-symbols:quick-reorder-outline",
+      "Sales Invoices" :"material-symbols:assignment-outline",
+      "Quotation" : "material-symbols:receipt-outline",
+      "Performa Invoice" : "material-symbols:receipt-long",
+      "Delivery Challan" : "material-symbols:receipt-long-off-outline",
+      "Sales Returns" : "material-symbols:receipt-long-off-rounded",
+      "Payment In" : "material-symbols:monetization-on"
+
+
     };
 
     const singleChildMenus = new Set([

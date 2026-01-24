@@ -25,16 +25,19 @@ import branchService from "@/services/branch/branch.service";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
-import purchaseOrderService from "@/services/purchaseOrder/purchaseOrder.service";
 import { formatDate } from "@fullcalendar/core";
+import quotationService from "@/services/saleQuotation/quotation.service";
 
 
-// const FormValidationSchema = yup
-//   .object({
-//     question: yup.string().required("Question is Required"),
-//     answer: yup.string().required("Answer is Required"),
-//   })
-//   .required();
+import CryptoJS from "crypto-js";
+
+// Secret key for encryption
+const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
+
+const encryptId = (id) => {
+    const encrypted = CryptoJS.AES.encrypt(id.toString(), SECRET_KEY).toString();
+    return encodeURIComponent(encrypted);
+};
 
 
 const SaleQuotationList = ({ noFade, scrollContent }) => {
@@ -122,101 +125,29 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
             behavior: "smooth", // This makes the scrolling smooth
         });
     };
-    const scrollToBottom = () => {
-        const bottomElement = document.documentElement;
-        bottomElement.scrollIntoView({ behavior: "smooth", block: "end" });
-    };
     const handleView = (row) => {
         scrollToTop();
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate("/view/purchase-order", { state: { id, row, name } });
+        navigate(`/view/quotation/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
+        // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
-    const handleEdit = (row) => {
-        scrollToTop();
-        const id = row._id;
-        const name = "edit"
-        setIsViewed(false);
-        navigate("/create-employee", { state: { id, row, name } });
-    };
-    //   --- Deletiing the Particulare Row
-    const handleDelete = (row) => {
-        const id = row._id;
-        Swal.fire({
-            title: `Are You Sure You Want To Permanantly Delete ${row?.firstName + " " + row?.lastName}?`,
-            icon: "error",
-            showCloseButton: true,
-            showCancelButton: true,
-            cancelButtonText: "Cancel",
+    
 
-            customClass: {
-                popup: "sweet-alert-popup-dark-mode-style",
-            },
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                deleteOne(id)
-            }
-        });
-    };
-    async function deleteOne(id) {
-        try {
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                employeeId: id,
-            }
-            const response = await employeeService.deleteOne(dataObject);
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
-            toast.success(`Deleted Successfully`)
-        } catch (error) {
-            console.error("Error while fetching manufacturer:", error);
-        }
-    }
-    //   ---- Active And InActive the Row
-    const handleActive = async (row) => {
-        setShowLoadingModal(true)
-        const id = row._id;
-        let status = 1;
-        row.isActive == 1 ? (status = 0) : (status = 1);
-        try {
-            const clinetId = localStorage.getItem("saas_client_clientId");
-            const dataObject = {
-                keyword: keyWord,
-                page: page,
-                perPage: perPage,
-                status: status,
-                id: id,
-                clientId: clinetId
-            }
-            const response = await employeeService.activeInactive(dataObject);
-
-            setTotalRows(response?.data?.data?.count);
-            setPaginationData(response?.data?.data?.employees);
-            toast.success(`${status == 0 ? "Deactivated Successfully" : "Activated Successfully"}`);
-            setShowLoadingModal(false)
-
-        } catch (error) {
-            setShowLoadingModal(false)
-            console.error("Error while activating:", error);
-        }
-
-    };
     //   ------- Data Table Columns ---
     const columns = [
         {
             name: "Date",
-            selector: (row) => formatDate(row?.poDate),
+            selector: (row) => formatDate(row?.sqDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "PO Number",
-            selector: (row) => row?.poNumber,
+            name: "SQ Number",
+            selector: (row) => row?.sqNumber,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -224,7 +155,7 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
         },
         {
             name: "Customer",
-            selector: (row) => row?.supplier?.name,
+            selector: (row) => row?.customer?.firstName + " " + row?.customer?.lastName,
             sortable: false,
 
         },
@@ -237,19 +168,17 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
                     <span className="block w-full">
                         <span
                             className={`uppercase inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25 
-                                ${
-                                    status == "draft" ?  "text-gray-500 bg-gray-500" 
-                                    : status == "pending_approval" ? "text-yellow-500 bg-yellow-500" 
-                                    : status == "issued" ? "text-blue-500 bg-blue-500" 
-                                    : status == "invoiced" ? "text-green-500 bg-green-500" 
-                                    : status == "partially_invoiced" ? "text-emerald-500 bg-emerald-500" 
-                                    : status == "approved" ? "text-violet-500 bg-violet-500" 
-                                    : status == "closed" ? "text-orange-500 bg-orange-500" 
-                                    : status == "canceled" ? "text-red-500 bg-red-500" 
-                                    :  ""  
+                                ${status == "draft" ? "text-gray-500 bg-gray-500"
+                                    : status == "pending_approval" ? "text-yellow-500 bg-yellow-500"
+                                        : status == "issued" ? "text-blue-500 bg-blue-500"
+                                            : status == "invoiced" ? "text-green-500 bg-green-500"
+                                                : status == "partially_invoiced" ? "text-emerald-500 bg-emerald-500"
+                                                    : status == "approved" ? "text-violet-500 bg-violet-500"
+                                                        : status == "closed" ? "text-orange-500 bg-orange-500"
+                                                            : status == "canceled" ? "text-red-500 bg-red-500"
+                                                                : ""
                                 }
-                               ${
-                                    row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
+                               ${row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
                                 }
                                 `}
                         >
@@ -309,9 +238,9 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await purchaseOrderService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await quotationService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.purchaseOrders);
+                    setPaginationData(response?.data?.quotations);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }
@@ -324,9 +253,9 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await purchaseOrderService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await quotationService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.quotations);
             setPending(false);
         } catch (error) {
             setPending(false);
@@ -344,9 +273,9 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await purchaseOrderService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await quotationService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.quotations);
             setPage(page);
         } catch (error) {
             console.log("error while fetching");
@@ -355,9 +284,9 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await purchaseOrderService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await quotationService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.quotations);
             setPerPage(perPage);
         } catch (error) {
             console.log("error while fetching");

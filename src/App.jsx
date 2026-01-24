@@ -117,6 +117,7 @@ const ProductQaOut = lazy(() => import("./pages/ProudctQaOut/ProductQaOut"));
 
 const SaleQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotationList"));
 const CreateQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotation"));
+const ViewSaleQuotation = lazy(() => import("./pages/saleQuotation/ViewSaleQuotation"))
 
 
 // statement
@@ -384,6 +385,7 @@ function App() {
 
                 <Route path="quotation-list" element={<SaleQuotation />}/>
                 <Route path="create-quotation" element={<CreateQuotation />}/>
+                <Route path="view/quotation/:id" element={<ViewSaleQuotation />} />
 
 
 
