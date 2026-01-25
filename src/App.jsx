@@ -160,6 +160,9 @@ import Error from "./pages/404";
 import AuditStock from "./pages/auditStock/AuditStock";
 import Example from "./components/Example";
 import Query from "./pages/query/Query";
+import SectionGrids from "./components/sections/SectionGrids";
+import SectionCards from "./components/sections/SectionCards";
+import CreateSection from "./components/sections/CreateSection";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -228,6 +231,10 @@ function App() {
 
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="example" element={<Example />} />
+
+                <Route path="sections/create" element={<CreateSection/>} />
+                <Route path="sections/grids" element={<SectionGrids/>} />
+                <Route path="sections/cards" element={<SectionCards/>} />
 
 
 
