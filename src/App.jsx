@@ -65,6 +65,7 @@ const CreateSupplierTransport = lazy(() => import("./pages/supplierTransport/Cre
 const Stock = lazy(() => import("./pages/stock/Srock"));
 const CreateStock = lazy(() => import("./pages/stock/CreateStock"));
 const AddProductQA = lazy(() => import("./pages/productQA/AddProductQA"));
+const query = lazy(() => import("./pages/query/Query"))
 
 const Orders = lazy(() => import("./pages/orders/Orders"));
 const ViewOrder = lazy(() => import("./pages/orders/ViewOrder"));
@@ -158,6 +159,7 @@ import ResetPassword from "./Common/resetPassword/ResetPassword";
 import Error from "./pages/404";
 import AuditStock from "./pages/auditStock/AuditStock";
 import Example from "./components/Example";
+import Query from "./pages/query/Query";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -345,6 +347,7 @@ function App() {
                 <Route path="order-view" element={<ViewOrder />} />
                 <Route path="create-order" element={<CreateOrder />} />
                 <Route path="create-product-qa" element={<AddProductQA />} />
+                <Route path="query-list" element={<Query />} />
 
 
 
