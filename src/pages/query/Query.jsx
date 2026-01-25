@@ -76,7 +76,7 @@ function Query({ centered, noFade, scrollContent }) {
                 try {
                     setPending(true)
                     const response = await queryService.getAllList({ page, keyword: nextValue, perPage })
-                    setPaginationData(response?.data?.brands)
+                    setPaginationData(response?.data?.queries)
                     setTotalRows(response?.data?.count)
                     setPending(false)
                 } catch (error) {
