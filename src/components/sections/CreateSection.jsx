@@ -29,7 +29,7 @@ function CreateSection({ noFade, }) {
     const handleSelectTemplate = (type) => {
         setFormData((prevData) => ({
             ...prevData,
-            template: `CardType${type}`,
+            template: type,
         }));
         setIsModalOpen(false);
     };

@@ -406,24 +406,24 @@ const CardType18 = () => {
 };
 
 const cardTypes = [
-    CardType1,
-    CardType2,
-    CardType3,
-    CardType4,
-    CardType5,
-    CardType6,
-    CardType7,
-    CardType8,
-    CardType9,
-    CardType10,
-    CardType11,
-    CardType12,
-    CardType13,
-    CardType14,
-    CardType15,
-    CardType16,
-    CardType17,
-    CardType18,
+    { name: "CardType1", value: CardType1 },
+    { name: "CardType2", value: CardType2 },
+    { name: "CardType3", value: CardType3 },
+    { name: "CardType4", value: CardType4 },
+    { name: "CardType5", value: CardType5 },
+    { name: "CardType6", value: CardType6 },
+    { name: "CardType7", value: CardType7 },
+    { name: "CardType8", value: CardType8 },
+    { name: "CardType9", value: CardType9 },
+    { name: "CardType10", value: CardType10 },
+    { name: "CardType11", value: CardType11 },
+    { name: "CardType12", value: CardType12 },
+    { name: "CardType13", value: CardType13 },
+    { name: "CardType14", value: CardType14 },
+    { name: "CardType15", value: CardType15 },
+    { name: "CardType16", value: CardType16 },
+    { name: "CardType17", value: CardType17 },
+    { name: "CardType18", value: CardType18 },
 ];
 
 function SectionCards({ onSelect, template }) {
@@ -435,6 +435,7 @@ function SectionCards({ onSelect, template }) {
 
 
     const handleSelect = (type) => {
+        
         setSelectedType(type);
         if (onSelect) {
             onSelect(type); // Callback to parent (e.g., for modal to close and store in page variable)
@@ -459,18 +460,18 @@ function SectionCards({ onSelect, template }) {
                     <div key={type} className="border bg-white p-4 rounded-md">
                         <div className="flex items-center mb-4">
                             <input
-                                id={`card-type-${type}`}
+                                id={`${CardComponent.name}`}
                                 type="radio"
                                 name="cardType"
-                                checked={selectedType == type}
-                                onChange={() => handleSelect(type)}
+                                checked={selectedType === CardComponent.name}
+                                onChange={() => handleSelect(CardComponent.name)}
                                 className="mr-3 h-5 w-5"
                             />
-                            <label htmlFor={`card-type-${type}`} className="text-lg font-medium">
-                                Select Card Type {type}
+                            <label htmlFor={`${CardComponent.name}`} className="text-lg font-medium">
+                                Select {CardComponent.name}
                             </label>
                         </div>
-                        <CardComponent />
+                        <CardComponent.value />
                     </div>
                 );
             })}
@@ -479,6 +480,3 @@ function SectionCards({ onSelect, template }) {
 }
 
 export default SectionCards;
-
-
-
