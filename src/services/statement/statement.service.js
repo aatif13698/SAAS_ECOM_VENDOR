@@ -68,11 +68,28 @@ const activeInactive = async (data) => {
 
 
 
+const createSection = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/cms/section/create/section`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+
 
 
 export default {
     create,
     update,
     getList,
-    activeInactive
+    activeInactive,
+
+
+    createSection
 }

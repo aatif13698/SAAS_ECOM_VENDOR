@@ -186,6 +186,20 @@ const getParticularStocks = async ( id) => {
 
 
 
+const getProductListForCms = async ( page, keyword, perPage, currentLevel, levelId, categoryFilter, subCategoryFilter ) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/list/all/blueprints/for/cms?keyword=${keyword}&&page=${page}&&perPage=${perPage}&&clientId=${clientId}&&level=${currentLevel}&&levelId=${levelId}&&categoryId=${categoryFilter}&&subCategoryId=${subCategoryFilter}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
+
 
 
 
@@ -203,5 +217,6 @@ export default {
     getStockListForCustomer,
     getStockByProduct,
     addItem,
-    removeItem
+    removeItem,
+    getProductListForCms
 }
