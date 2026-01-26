@@ -124,7 +124,8 @@ const ViewSaleQuotation = lazy(() => import("./pages/saleQuotation/ViewSaleQuota
 // statement
 
 const CreateStatement = lazy(() => import("./pages/statement/CreateStatement"));
-const Statement = lazy(() => import("./pages/statement/Statement"))
+const Statement = lazy(() => import("./pages/statement/Statement"));
+const ListSection = lazy(() => import("./components/sections/ListSection"))
 
 
 import ProtectedRoutes from "./routes/ProtectedRoutes";
@@ -405,6 +406,7 @@ function App() {
 
                 <Route path="create-statement" element={<CreateStatement />}/>
                 <Route path="statements-list" element={<Statement />}/>
+                <Route path="section-list" element={<ListSection />}/>
 
 
 
