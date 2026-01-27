@@ -164,6 +164,7 @@ import Query from "./pages/query/Query";
 import SectionGrids from "./components/sections/SectionGrids";
 import SectionCards from "./components/sections/SectionCards";
 import CreateSection from "./components/sections/CreateSection";
+import { EditSection, ViewSection } from "./components/sections/EditAndViewSection";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -233,9 +234,7 @@ function App() {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="example" element={<Example />} />
 
-                <Route path="sections/create" element={<CreateSection/>} />
-                <Route path="sections/grids" element={<SectionGrids/>} />
-                <Route path="sections/cards" element={<SectionCards/>} />
+
 
 
 
@@ -394,8 +393,8 @@ function App() {
 
                 {/* sale */}
 
-                <Route path="quotation-list" element={<SaleQuotation />}/>
-                <Route path="create-quotation" element={<CreateQuotation />}/>
+                <Route path="quotation-list" element={<SaleQuotation />} />
+                <Route path="create-quotation" element={<CreateQuotation />} />
                 <Route path="view/quotation/:id" element={<ViewSaleQuotation />} />
 
 
@@ -404,10 +403,14 @@ function App() {
                 {/* statement */}
 
 
-                <Route path="create-statement" element={<CreateStatement />}/>
-                <Route path="statements-list" element={<Statement />}/>
-                <Route path="section-list" element={<ListSection />}/>
-
+                <Route path="create-statement" element={<CreateStatement />} />
+                <Route path="statements-list" element={<Statement />} />
+                <Route path="section-list" element={<ListSection />} />
+                <Route path="sections/create" element={<CreateSection />} />
+                <Route path="sections/edit/:id" element={<EditSection />} />
+                <Route path="sections/view/:id" element={<ViewSection />} />
+                <Route path="sections/grids" element={<SectionGrids />} />
+                <Route path="sections/cards" element={<SectionCards />} />
 
 
 
@@ -415,7 +418,7 @@ function App() {
 
                 {/* system settings */}
 
-                <Route path="system/settings" element={<SystemSettings/>} />
+                <Route path="system/settings" element={<SystemSettings />} />
 
 
 
