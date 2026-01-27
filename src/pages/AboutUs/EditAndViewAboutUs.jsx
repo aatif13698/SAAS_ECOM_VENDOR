@@ -158,7 +158,8 @@ function EditAboutUs() {
             navigate('/about-us/list'); // Navigate back to list or dashboard after success; adjust as needed
         } catch (error) {
             console.error('Error while updating:', error);
-            setError('Failed to update About Us. Please try again.');
+            toast.error(error?.response?.data?.message)
+            // setError('Failed to update About Us. Please try again.');
         }
     };
 
