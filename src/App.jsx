@@ -168,6 +168,9 @@ import { EditSection, ViewSection } from "./components/sections/EditAndViewSecti
 import CreateBanner from "./components/Banner/CreateBanner";
 import ListBanner from "./components/Banner/ListBanner";
 import { EditBanner, ViewBanner } from "./components/Banner/EditAndViewBanner";
+import CreateAboutUs from "./pages/AboutUs/CreateAboutUs";
+import ListAboutUs from "./pages/AboutUs/ListAboutUs";
+import { EditAboutUs, ViewAboutUs } from "./pages/AboutUs/EditAndViewAboutUs";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -408,6 +411,12 @@ function App() {
 
                 <Route path="create-statement" element={<CreateStatement />} />
                 <Route path="statements-list" element={<Statement />} />
+
+                <Route path="create-about" element={<CreateAboutUs />} />
+                <Route path="about-us-list" element={<ListAboutUs />} />
+                 <Route path="about/edit/:id" element={<EditAboutUs />} />
+                <Route path="about/view/:id" element={<ViewAboutUs />} />
+
 
                 <Route path="section-list" element={<ListSection />} />
                 <Route path="sections/create" element={<CreateSection />} />
