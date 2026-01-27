@@ -165,6 +165,9 @@ import SectionGrids from "./components/sections/SectionGrids";
 import SectionCards from "./components/sections/SectionCards";
 import CreateSection from "./components/sections/CreateSection";
 import { EditSection, ViewSection } from "./components/sections/EditAndViewSection";
+import CreateBanner from "./components/Banner/CreateBanner";
+import ListBanner from "./components/Banner/ListBanner";
+import { EditBanner, ViewBanner } from "./components/Banner/EditAndViewBanner";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
@@ -405,12 +408,19 @@ function App() {
 
                 <Route path="create-statement" element={<CreateStatement />} />
                 <Route path="statements-list" element={<Statement />} />
+
                 <Route path="section-list" element={<ListSection />} />
                 <Route path="sections/create" element={<CreateSection />} />
                 <Route path="sections/edit/:id" element={<EditSection />} />
                 <Route path="sections/view/:id" element={<ViewSection />} />
                 <Route path="sections/grids" element={<SectionGrids />} />
                 <Route path="sections/cards" element={<SectionCards />} />
+
+                <Route path="banners/create" element={<CreateBanner />} />
+                <Route path="banners/list" element={<ListBanner />} />
+                <Route path="banners/edit/:id" element={<EditBanner />} />
+                <Route path="banners/view/:id" element={<ViewBanner />} />
+
 
 
 

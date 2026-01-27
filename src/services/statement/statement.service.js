@@ -149,6 +149,88 @@ const updateSection = async (data) => {
 
 
 
+const createBanner = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/cms/banner/create/banner`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+}
+
+
+const listBanner = async () => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/cms/banner/list/banner?clientId=${clientId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
+
+const arrangeOrderOfBanner = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/cms/banner/arraneg/order`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+const bannerById = async (id) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/cms/banner/get/banner/by/id/${clientId}/${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
+
+
+const updateBanner = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/cms/banner/update/banner`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+}
+
+
 export default {
     create,
     update,
@@ -160,5 +242,12 @@ export default {
     listSection,
     arrangeOrderOfSection,
     sectionById,
-    updateSection
+    updateSection,
+
+
+    createBanner,
+    listBanner,
+    arrangeOrderOfBanner,
+    bannerById,
+    updateBanner
 }
