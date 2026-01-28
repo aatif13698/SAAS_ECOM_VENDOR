@@ -118,7 +118,11 @@ const ProductQaOut = lazy(() => import("./pages/ProudctQaOut/ProductQaOut"));
 
 const SaleQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotationList"));
 const CreateQuotation = lazy(() => import("./pages/saleQuotation/SaleQuotation"));
-const ViewSaleQuotation = lazy(() => import("./pages/saleQuotation/ViewSaleQuotation"))
+const ViewSaleQuotation = lazy(() => import("./pages/saleQuotation/ViewSaleQuotation"));
+
+const SalePerformaList = lazy(() => import("./pages/SalePerforma/SalePerformaList"));
+const CreatePerforma = lazy(() => import("./pages/SalePerforma/CreatePerforma"));
+const ViewSalePerforma = lazy(() => import("./pages/SalePerforma/ViewSalePerforma"));
 
 
 // statement
@@ -402,6 +406,10 @@ function App() {
                 <Route path="quotation-list" element={<SaleQuotation />} />
                 <Route path="create-quotation" element={<CreateQuotation />} />
                 <Route path="view/quotation/:id" element={<ViewSaleQuotation />} />
+                <Route path="performa-invoice-list" element={<SalePerformaList />} />
+                <Route path="create-performa-invoice" element={<CreatePerforma />} />
+                <Route path="view/performa-invoice/:id" element={<ViewSalePerforma />} />
+
 
 
 

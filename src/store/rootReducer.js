@@ -8,7 +8,8 @@ import capabilitySlice from "./slices/auth/capabilitySclice";
 import purchaseOrderSlice from "./slices/purchaseOrder/purchaseOrderSclice";
 import purchaseInvoiceSlice from "./slices/purchaseInvoice/purhcaseInvoiceSclice";
 import paymentOutSlice from "./slices/paymentOut/paymentOutSlice";
-import  quotationSlice  from "./slices/quotation/quotationSlice";
+import quotationSlice from "./slices/quotation/quotationSlice";
+import performaSlice from "./slices/performa/performaSlice"
 
 
 import toastReducer from "./slices/tostSlice"
@@ -33,6 +34,7 @@ const rootReducer = {
   purchaseInvoiceSlice,
   paymentOutSlice,
   quotationSlice,
+  performaSlice,
 
   toast: toastReducer,
 
