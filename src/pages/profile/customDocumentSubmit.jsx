@@ -40,6 +40,8 @@ function CustomDocumentSubmit({ roleId, userId }) {
   const [ledgerGroups, setLedgerGroups] = useState([]);
 
 
+  
+
 
   // Cropper states
   const [cropModalOpen, setCropModalOpen] = useState(false);
@@ -396,6 +398,15 @@ function CustomDocumentSubmit({ roleId, userId }) {
                 />
               </div>
             )}
+            {  typeof (customizationValues[fieldName]) === "string" && (
+              <div className="mt-2">
+                <img
+                  src={(customizationValues[fieldName])}
+                  alt="Preview"
+                  className="max-w-[100px] max-h-[100px] object-cover"
+                />
+              </div>
+            )}
             {errors[fieldName] && (
               <p className="text-red-500 text-sm mt-1">{errors[fieldName]}</p>
             )}
@@ -549,7 +560,7 @@ function CustomDocumentSubmit({ roleId, userId }) {
           popup: "my-toast-size",
         },
       });
-      setCustomizationValues({});
+      // setCustomizationValues({});
       setErrors({});
     } catch (error) {
       setIsSubmitting(false);
