@@ -422,19 +422,19 @@ function App() {
 
                 <Route path="create-about" element={<CreateAboutUs />} />
                 <Route path="about-us-list" element={<ListAboutUs />} />
-                 <Route path="about/edit/:id" element={<EditAboutUs />} />
-                <Route path="about/view/:id" element={<ViewAboutUs />} />
+                 <Route path="about-us/edit/:id" element={<EditAboutUs />} />
+                <Route path="about-us/view/:id" element={<ViewAboutUs />} />
 
 
-                <Route path="section-list" element={<ListSection />} />
-                <Route path="sections/create" element={<CreateSection />} />
-                <Route path="sections/edit/:id" element={<EditSection />} />
-                <Route path="sections/view/:id" element={<ViewSection />} />
+                <Route path="landing-sections-list" element={<ListSection />} />
+                <Route path="landing-sections/create" element={<CreateSection />} />
+                <Route path="landing-sections/edit/:id" element={<EditSection />} />
+                <Route path="landing-sections/view/:id" element={<ViewSection />} />
                 <Route path="sections/grids" element={<SectionGrids />} />
                 <Route path="sections/cards" element={<SectionCards />} />
 
                 <Route path="banners/create" element={<CreateBanner />} />
-                <Route path="banners/list" element={<ListBanner />} />
+                <Route path="banners-list" element={<ListBanner />} />
                 <Route path="banners/edit/:id" element={<EditBanner />} />
                 <Route path="banners/view/:id" element={<ViewBanner />} />
 

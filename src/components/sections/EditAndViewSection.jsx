@@ -95,7 +95,7 @@ function EditSection({ noFade }) {
             };
             const res = await statementService.updateSection(dataObject); // Assuming updateSection method exists in the service
             console.log('Update response:', res);
-            navigate('/section-list'); // Navigate back to list or dashboard after success; adjust as needed
+            navigate('/landing-sections-list'); // Navigate back to list or dashboard after success; adjust as needed
         } catch (error) {
             console.error('Error while updating:', error);
             setError('Failed to update section. Please try again.');

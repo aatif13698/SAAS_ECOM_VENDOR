@@ -89,13 +89,13 @@ function ListSection({ centered, noFade, scrollContent }) {
                         </div>
                         <div className="flex gap-2">
                             <button
-                                onClick={() => navigate(`/sections/edit/${section._id}`)} // Adjust path as needed
+                                onClick={() => navigate(`/landing-sections/edit/${section._id}`)} // Adjust path as needed
                                 className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
                             >
                                 Edit
                             </button>
                             <button
-                                onClick={() => navigate(`/sections/view/${section._id}`)} // Adjust path as needed
+                                onClick={() => navigate(`/landing-sections/view/${section._id}`)} // Adjust path as needed
                                 className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
                             >
                                 View
@@ -111,12 +111,21 @@ function ListSection({ centered, noFade, scrollContent }) {
         <div className={`shadow-md ${isDark ? "bg-darkSecondary text-white" : "bg-white"} p-4`}>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Sections List</h2>
-                <button
-                    onClick={saveOrder}
-                    className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
-                >
-                    Adjust Order
-                </button>
+                <div className='flex gap-2'>
+                    <button
+                        onClick={() => navigate("/landing-sections/create")}
+                        className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
+                    >
+                        Create Section
+                    </button>
+                    <button
+                        onClick={saveOrder}
+                        className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
+                    >
+                        Adjust Order
+                    </button>
+                </div>
+
             </div>
             {pending ? (
                 <div className="text-center">Loading...</div>

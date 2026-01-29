@@ -124,7 +124,10 @@ const Navmenu = ({ menus }) => {
       "Performa Invoice" : "material-symbols:receipt-long",
       "Delivery Challan" : "material-symbols:receipt-long-off-outline",
       "Sales Returns" : "material-symbols:receipt-long-off-rounded",
-      "Payment In" : "material-symbols:monetization-on"
+      "Payment In" : "material-symbols:monetization-on",
+      "Banners" : "material-symbols:planner-banner-ad-pt-outline-rounded",
+      "Landing Sections" : "material-symbols:cards-rounded",
+      "About Us": "material-symbols:user-attributes-rounded"
 
 
     };
@@ -166,7 +169,9 @@ const Navmenu = ({ menus }) => {
       "Audit Stock",
       "Leave Requests",
       "Shift Change Request",
-      "Statements"
+      "Statements",
+      "Landing Sections",
+      "Banners"
     ]);
 
     const excludedMenus = new Set([
@@ -182,8 +187,10 @@ const Navmenu = ({ menus }) => {
       "Shift Change Request",
       "Leave Allotment",
       "Leave Requests",
-      "Statements"
-
+      "Statements",
+      "Banners",
+      "Landing Sections",
+      "About Us"
     ]);
 
     const result = [];

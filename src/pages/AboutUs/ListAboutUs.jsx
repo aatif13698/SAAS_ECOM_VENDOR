@@ -33,13 +33,13 @@ function ListAboutUs() {
     }, []);
 
     const handleView = () => {
-        navigate(`/about/view/${aboutUs._id}`)// Adjust path as needed
+        navigate(`/about-us/view/${aboutUs._id}`)// Adjust path as needed
     };
 
     const handleEdit = () => {
         // Placeholder for edit functionality, e.g., navigate to edit page
         console.log('Edit about us:', aboutUs);
-        navigate(`/about/edit/${aboutUs._id}`)// Adjust path as needed
+        navigate(`/about-us/edit/${aboutUs._id}`)// Adjust path as needed
         // Example: window.location.href = `/edit/${aboutUs._id}`;
     };
 

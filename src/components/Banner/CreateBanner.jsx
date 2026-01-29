@@ -67,7 +67,7 @@ function CreateBanner({ noFade }) {
 
     return (
         <div className="p-6 w-full bg-white rounded-lg shadow-md">
-            <h4 className="text-2xl font-bold mb-6">Create Section</h4>
+            <h4 className="text-2xl font-bold mb-6">Create Banner</h4>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                 <div>
                     {/* <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -122,7 +122,7 @@ function CreateBanner({ noFade }) {
                 <div className='flex justify-end'>
                     <button
                         type="submit"
-                        className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+                        className="bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover mt-2 text-white dark:hover:text-black-900 px-4 py-2 rounded"
                     >
                         Create Banner
                     </button>

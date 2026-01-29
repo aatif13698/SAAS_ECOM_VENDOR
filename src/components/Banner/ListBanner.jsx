@@ -125,12 +125,21 @@ function ListBanner({ centered, noFade, scrollContent }) {
         <div className={`shadow-md ${isDark ? "bg-darkSecondary text-white" : "bg-white"} p-4`}>
             <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">Sections List</h2>
-                <button
-                    onClick={saveOrder}
-                    className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
-                >
-                    Adjust Order
-                </button>
+                <div className='flex gap-2'>
+                    <button
+                        onClick={() => navigate("/banners/create")}
+                        className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
+                    >
+                        Create Banner
+                    </button>
+                    <button
+                        onClick={saveOrder}
+                        className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
+                    >
+                        Adjust Order
+                    </button>
+                </div>
+
             </div>
             {pending ? (
                 <div className="text-center">Loading...</div>

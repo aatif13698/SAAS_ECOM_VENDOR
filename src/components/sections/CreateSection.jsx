@@ -120,12 +120,16 @@ function CreateSection({ noFade }) {
                         </div>
                     )}
                 </div>
-                <button
-                    type="submit"
-                    className="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
-                >
-                    Create Section
-                </button>
+                <div className='flex justify-end'>
+                    <button
+                        type="submit"
+                        className="bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover mt-2 text-white dark:hover:text-black-900 px-4 py-2 rounded"
+                    >
+                        Create Section
+                    </button>
+
+                </div>
+
             </form>
 
             <Transition appear show={isModalOpen} as={Fragment}>
