@@ -774,7 +774,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
   function resetAllAndNavigate() {
     dispatch(resetQuotation());
     setFormData(defaultState);
-    navigate('/purchase-order-list');
+    navigate('/quotation-list');
 
   }
 

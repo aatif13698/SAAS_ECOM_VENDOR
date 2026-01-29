@@ -151,9 +151,11 @@ function ViewSaleQuotation() {
             case 'partially_paid': return 'Partially Paid';
             case 'overdue': return 'Overdue';
             case 'closed': return 'Closed';
-            case 'issued' :  return "Issued";
-            case 'canceled' : return "Cancelled";
-            case 'approved' : return "Approved"
+            case 'issued': return "Issued";
+            case 'canceled': return "Cancelled";
+            case 'approved': return "Approved";
+            case 'performa_conversion': return "Converted To Performa"
+
 
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
@@ -165,10 +167,11 @@ function ViewSaleQuotation() {
             case 'full_due': return 'bg-[#ef4444]';
             case 'paid': return 'bg-[#22c55e]';
             case 'partially_paid': return 'bg-[#8b5cf6]';
-            case 'issued' :  return "bg-[#00aeaf]";
+            case 'issued': return "bg-[#00aeaf]";
             case 'closed': return "bg-[#989898]";
-            case 'canceled' : return "bg-[#fe0000]";
-            case 'approved' : return "bg-[#50bf00]"
+            case 'canceled': return "bg-[#fe0000]";
+            case 'approved': return "bg-[#50bf00]";
+            case 'performa_conversion': return "bg-[#b200dd]"
 
 
 
@@ -180,6 +183,16 @@ function ViewSaleQuotation() {
     const handleStatusChange = async (newStatus) => {
         try {
             const clientId = localStorage.getItem("saas_client_clientId");
+            if (poData.status == "performa_conversion" && newStatus !== "closed") {
+                toast.error(`Can't change to: ${newStatus}`);
+                return
+            }
+
+            if(poData.status == "closed"){
+                toast.error(`Can't change status once closed`);
+                return
+            }
+
             const dataObject = {
                 id: poData?._id, status: newStatus, clientId: clientId,
             }
@@ -212,7 +225,10 @@ function ViewSaleQuotation() {
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-                    <button onClick={() => { }} title="Edit" className="bg-emerald-400 text-white px-2 rounded-md py-1 hover:bg-emerald-600">
+                    <button
+                        disabled={poData.status == "performa_conversion" || poData.status == "closed"}
+                        onClick={() => handleStatusChange("performa_conversion")}
+                        title="Edit" className={` text-white px-2 rounded-md py-1  ${poData.status == "performa_conversion" || poData.status == "closed" ? "cursor-not-allowed bg-gray-400 " : "bg-emerald-400 hover:bg-emerald-600"}`}>
                         Convert To Performa
                     </button>
                     <button onClick={() => { }} title="Edit" className="bg-green-600 text-white px-2 rounded-md py-1 hover:bg-green-700">
