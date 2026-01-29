@@ -221,7 +221,7 @@ function ViewSalePerforma() {
                 {/* Company & Supplier Info */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}>
                     <div style={{ width: '32%' }}>
-                        <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>From (Purchaser)</h3>
+                        <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>From (Seller)</h3>
                         <p><strong>Aestree</strong></p>
                         <p>West Bengal</p>
                         <p>India</p>

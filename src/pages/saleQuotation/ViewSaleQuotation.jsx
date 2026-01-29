@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import quotationService from '../../services/saleQuotation/quotation.service';
 
 import CryptoJS from "crypto-js";
+import toast from 'react-hot-toast';
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -24,11 +25,31 @@ const decryptId = (encryptedId) => {
     }
 };
 
+const statuses = ['draft', 'issued', 'approved', 'closed', 'canceled'];
+
+
 function ViewSaleQuotation() {
     const navigate = useNavigate();
     const { id: encryptedId } = useParams();
     const [poData, setPoData] = useState({});
+    const [showDropdown, setShowDropdown] = useState(false);
+
     const pdfRef = useRef(null); // Ref for the PDF content div
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+
 
     const [loading, setLoading] = useState(true)
 
@@ -130,6 +151,10 @@ function ViewSaleQuotation() {
             case 'partially_paid': return 'Partially Paid';
             case 'overdue': return 'Overdue';
             case 'closed': return 'Closed';
+            case 'issued' :  return "Issued";
+            case 'canceled' : return "Cancelled";
+            case 'approved' : return "Approved"
+
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
     };
@@ -140,11 +165,33 @@ function ViewSaleQuotation() {
             case 'full_due': return 'bg-[#ef4444]';
             case 'paid': return 'bg-[#22c55e]';
             case 'partially_paid': return 'bg-[#8b5cf6]';
-            case 'overdue': return 'Overdue';
-            case 'closed': return 'Closed';
+            case 'issued' :  return "bg-[#00aeaf]";
+            case 'closed': return "bg-[#989898]";
+            case 'canceled' : return "bg-[#fe0000]";
+            case 'approved' : return "bg-[#50bf00]"
+
+
+
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
     }
+
+
+    const handleStatusChange = async (newStatus) => {
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            const dataObject = {
+                id: poData?._id, status: newStatus, clientId: clientId,
+            }
+            const response = await quotationService.changeStauts(dataObject);
+            setPoData(prev => ({ ...prev, status: newStatus }));
+            setShowDropdown(false);
+            toast.success(`Status changed to: ${newStatus}`)
+        } catch (error) {
+            setShowDropdown(false);
+            console.log("error while changing the status", error);
+        }
+    };
 
 
     if (loading) {
@@ -165,17 +212,19 @@ function ViewSaleQuotation() {
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-
-                    {/* <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
-                        <BiEdit className="text-xl" />
-                    </button> */}
+                    <button onClick={() => { }} title="Edit" className="bg-emerald-400 text-white px-2 rounded-md py-1 hover:bg-emerald-600">
+                        Convert To Performa
+                    </button>
+                    <button onClick={() => { }} title="Edit" className="bg-green-600 text-white px-2 rounded-md py-1 hover:bg-green-700">
+                        Convert To Invoice
+                    </button>
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
                     <button onClick={handlePrint} title="Print PDF" className="hover:text-blue-500">
                         <BiPrinter className="text-xl" />
                     </button>
-                    {/* <div className="relative" ref={dropdownRef}>
+                    <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={() => setShowDropdown(!showDropdown)}
                             title="Change Status"
@@ -196,7 +245,7 @@ function ViewSaleQuotation() {
                                 ))}
                             </div>
                         )}
-                    </div> */}
+                    </div>
                 </div>
             </div>
             <div
@@ -231,7 +280,7 @@ function ViewSaleQuotation() {
                     </div>
                     <div style={{ width: '32%' }}>
                         <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Customer)</h3>
-                        <p><strong>{poData.customer?.firstName+" "+poData.customer?.lastName || 'N/A'}</strong></p>
+                        <p><strong>{poData.customer?.firstName + " " + poData.customer?.lastName || 'N/A'}</strong></p>
                         <p>{poData.customer?.address || 'N/A'}</p>
                         <p>{poData.customer?.city || ''}, {poData.customer?.state || ''} - {poData.customer?.ZipCode || ''}</p>
                         <p>Phone: {poData.customer?.phone || 'N/A'}</p>
