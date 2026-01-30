@@ -86,6 +86,22 @@ const getAssetsOfEmployee = async (id) => {
     }
 };
 
+
+const createAssetRequest = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/asset/create/asset/request`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+
+
 const update = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -237,6 +253,7 @@ export default {
     activeInactive,
     assignToEmployee,
     getAssetsOfEmployee,
+    createAssetRequest,
 
     getActiveBusinessUnit,
     updatewarehouse,
