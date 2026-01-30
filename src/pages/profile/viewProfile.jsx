@@ -38,6 +38,7 @@ import Swal from "sweetalert2";
 import AttendanceCalendar from "./AttendanceCalendar";
 import Leaves from "./LeaveApplication";
 import LeaveApplication from "./LeaveApplication";
+import Assets from "./Assets";
 
 const ViewProfile = () => {
   const navigate = useNavigate();
@@ -383,6 +384,18 @@ const ViewProfile = () => {
                   <span>Leaves</span>
                 </button>
               )}
+                {useData?.roleId !== 1 && (
+                <button
+                  className={`flex items-center space-x-1 font-medium text-sm uppercase tracking-wide ${activeTab === "assets"
+                    ? "text-emerald-500 border-2 rounded-2xl rounded-br-none rounded-bl-none px-2 py-2 border-emerald-500 bg-emerald-50"
+                    : "text-slate-600 dark:text-slate-300 hover:text-emerald-500 px-2 py-2"
+                    }`}
+                  onClick={() => setActiveTab("assets")}
+                >
+                  <Icon icon="heroicons:document-text" className="w-4 h-4" />
+                  <span>Assets</span>
+                </button>
+              )}
             </nav>
           </div>
 
@@ -447,6 +460,9 @@ const ViewProfile = () => {
 
              {activeTab === "leaves" && useData?.roleId !== 1 && (
               <LeaveApplication />
+            )}
+               {activeTab === "assets" && useData?.roleId !== 1 && (
+              <Assets />
             )}
           </div>
         </div>

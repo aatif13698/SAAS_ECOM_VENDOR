@@ -65,6 +65,27 @@ const assignToEmployee = async (data) => {
 };
 
 
+
+const getAssetsOfEmployee = async (id) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/hr/asset/get/assest/of/employee/${clientId}/${id}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
 const update = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -215,6 +236,7 @@ export default {
     update,
     activeInactive,
     assignToEmployee,
+    getAssetsOfEmployee,
 
     getActiveBusinessUnit,
     updatewarehouse,
