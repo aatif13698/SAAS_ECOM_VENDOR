@@ -125,6 +125,9 @@ const SalePerformaList = lazy(() => import("./pages/SalePerforma/SalePerformaLis
 const CreatePerforma = lazy(() => import("./pages/SalePerforma/CreatePerforma"));
 const ViewSalePerforma = lazy(() => import("./pages/SalePerforma/ViewSalePerforma"));
 
+const SaleInvoiceList = lazy(() => import("./pages/saleInvoice/SaleInvoiceList"));
+const SaleInvoice = lazy(() => import("./pages/saleInvoice/SaleInvoice"))
+
 
 // statement
 
@@ -413,6 +416,10 @@ function App() {
                 <Route path="performa-invoice-list" element={<SalePerformaList />} />
                 <Route path="create-performa-invoice" element={<CreatePerforma />} />
                 <Route path="view/performa-invoice/:id" element={<ViewSalePerforma />} />
+                <Route path="sales-invoices-list" element={<SaleInvoiceList />} />
+                <Route path="create-sale-invoice" element={<SaleInvoice />} />
+
+
 
 
 
