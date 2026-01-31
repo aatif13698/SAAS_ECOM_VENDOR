@@ -16,7 +16,7 @@ import {
 } from 'react-icons/fi';
 import PurchaseSettings from './PurchaseSettings';
 import RoleList from '../rolesAndPermission/RolesList';
-
+import SaleSetting from "./SaleSettings"
 const menuItems = [
   { id: 'general', label: 'General', icon: FiSettings },
   { id: 'inventory', label: 'Inventory', icon: FiBox },
@@ -56,10 +56,9 @@ function SystemSettings() {
                     onClick={() => setActiveSection(item.id)}
                     className={`
                       flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors
-                      ${
-                        isActive
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
-                          : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                      ${isActive
+                        ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400'
+                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
                       }
                     `}
                   >
@@ -100,7 +99,7 @@ function SystemSettings() {
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto">
         <div className="mx-auto  px-2 pt-2 sm:px-2 lg:px-2">
-          
+
 
           {/* Content - placeholder sections */}
           <div className="">
@@ -142,24 +141,28 @@ function SystemSettings() {
             )}
 
             {activeSection === 'purchase' && (
-              <PurchaseSettings/>
+              <PurchaseSettings />
+            )}
+
+            {activeSection === 'sales' && (
+              <SaleSetting />
             )}
 
             {activeSection === 'users-roles' && (
-              <RoleList/>
+              <RoleList />
             )}
             {/* Quick placeholder for other sections */}
             {['stocks', 'sales', 'accounting', 'vendors', 'notifications', 'integrations']
               .includes(activeSection) && (
-              <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                  {menuItems.find((item) => item.id === activeSection)?.label}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-300">
-                  Manage {activeSection.replace('-', ' ')} related configurations here...
-                </p>
-              </div>
-            )}
+                <div className="rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
+                  <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+                    {menuItems.find((item) => item.id === activeSection)?.label}
+                  </h3>
+                  <p className="text-gray-600 dark:text-gray-300">
+                    Manage {activeSection.replace('-', ' ')} related configurations here...
+                  </p>
+                </div>
+              )}
           </div>
         </div>
       </main>
