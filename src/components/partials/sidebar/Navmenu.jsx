@@ -190,7 +190,8 @@ const Navmenu = ({ menus }) => {
       "Statements",
       "Banners",
       "Landing Sections",
-      "About Us"
+      "About Us",
+      "Asset Requests"
     ]);
 
     const result = [];

@@ -5,12 +5,14 @@ import assetService from '@/services/asset/asset.service';
 import { useSelector } from 'react-redux';
 import { Dialog, Transition } from "@headlessui/react";
 import Icon from "@/components/ui/Icon";
+import toast from 'react-hot-toast';
 
 function Assets({ noFade }) {
     const [isDark] = useDarkmode();
     const { profileData: profile } = useSelector((state) => state.profile);
 
     const [assignedAssets, setAssignedAssets] = useState([]);
+    const [requests, setRequests] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentAssetId, setCurrentAssetId] = useState(null);
     const [formData, setFormData] = useState({
@@ -19,18 +21,28 @@ function Assets({ noFade }) {
         notes: '',
     });
     console.log("currentAssetId", currentAssetId);
-    
+
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
         getAssignedAssets();
+        getAssetRequests();
     }, []);
 
     async function getAssignedAssets() {
         try {
             const response = await assetService.getAssetsOfEmployee(profile?._id);
             setAssignedAssets(response?.data);
+        } catch (error) {
+            console.log("error", error);
+        }
+    }
+
+     async function getAssetRequests() {
+        try {
+            const response = await assetService.getListAssetRequest(profile?._id);
+            setRequests(response?.data);
         } catch (error) {
             console.log("error", error);
         }
@@ -65,7 +77,7 @@ function Assets({ noFade }) {
         setError(null);
 
         try {
-                const clientId = localStorage.getItem("saas_client_clientId");
+            const clientId = localStorage.getItem("saas_client_clientId");
 
             const requestPayload = {
                 clientId: clientId,
@@ -77,6 +89,7 @@ function Assets({ noFade }) {
             };
             await assetService.createAssetRequest(requestPayload); // Assuming this method exists in assetService
             handleCloseModal();
+            toast.success("Request submitted successfully.")
             // Optionally refresh assigned assets if needed
             // await getAssignedAssets();
         } catch (err) {
@@ -103,6 +116,67 @@ function Assets({ noFade }) {
                 ) : (
                     <p>No assigned assets found.</p>
                 )}
+
+                {
+                    <>
+
+                        <div className="bg-white shadow rounded-lg overflow-hidden">
+                            <div className="px-6 py-5 border-b border-gray-200">
+                                <h2 className="text-lg font-medium text-gray-900">Asset Requests</h2>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
+                                                Asset
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
+                                                Type
+                                            </th>
+                                           
+                                            <th
+                                                scope="col"
+                                                className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
+                                                Status
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {requests && requests.map((req) => (
+                                            <tr key={req._id} className="hover:bg-gray-50">
+                                                 <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                    {req?.assetId?.assetName}
+                                                </td>
+                                                <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                    {req?.requestType}
+                                                </td>
+                                               
+                                               
+                                                <td className="px-4 py-3 whitespace-nowrap">
+                                                    {req?.status.toUpperCase()} 
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            {requests.length === 0 && (
+                                <div className="py-12 text-center text-gray-500">No requests found</div>
+                            )}
+                        </div>
+
+                    </>
+                }
             </div>
 
 
@@ -156,11 +230,11 @@ function Assets({ noFade }) {
                                     {error && <p className="text-red-500 mb-4">{error}</p>}
                                     <form
                                         className='flex flex-col p-4'
-                                        // onSubmit={handleSubmit}
-                                        >
-                                            <div className='mb-4'> 
-                                                <label htmlFor=""> Asset Name: <span className='font-bold'>{currentAssetId?.assetName}</span> </label>
-                                            </div>
+                                    // onSubmit={handleSubmit}
+                                    >
+                                        <div className='mb-4'>
+                                            <label htmlFor=""> Asset Name: <span className='font-bold'>{currentAssetId?.assetName}</span> </label>
+                                        </div>
                                         <div className="mb-4">
                                             <label htmlFor="requestType" className="block text-sm font-medium mb-1">
                                                 Request Type
@@ -205,7 +279,7 @@ function Assets({ noFade }) {
                                                 rows="3"
                                             />
                                         </div>
-                                        
+
                                     </form>
 
                                     {(
