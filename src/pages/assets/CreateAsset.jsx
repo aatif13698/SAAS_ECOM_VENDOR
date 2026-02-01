@@ -823,7 +823,7 @@ const CreateAsset = ({ noFade, scrollContent }) => {
                                             >
                                                 <option value="">Select</option>
                                                 <option value="available">Available</option>
-                                                <option value="assigned">Assigned</option>
+                                                {/* <option value="assigned">Assigned</option> */}
                                                 <option value="in-maintenance">In-maintenance</option>
                                                 <option value="defective">Defective</option>
                                                 <option value="disposed">Disposed</option>

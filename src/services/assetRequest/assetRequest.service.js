@@ -13,6 +13,18 @@ const create = async (data) => {
 };
 
 
+const actionRequestAsset = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/asset/asset/request/action`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 
 
 
@@ -157,6 +169,8 @@ const getOne = async (id) => {
 
 export default {
     create,
+    actionRequestAsset, 
+
     getList,
     update,
     activeInactive,

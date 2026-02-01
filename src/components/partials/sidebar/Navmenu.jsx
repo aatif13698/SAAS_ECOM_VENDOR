@@ -171,7 +171,8 @@ const Navmenu = ({ menus }) => {
       "Shift Change Request",
       "Statements",
       "Landing Sections",
-      "Banners"
+      "Banners",
+      "Asset Requests"
     ]);
 
     const excludedMenus = new Set([
