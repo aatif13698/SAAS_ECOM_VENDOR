@@ -130,7 +130,7 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate(`/view/quotation/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
+        navigate(`/view/sale-invoice/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
         // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
 
