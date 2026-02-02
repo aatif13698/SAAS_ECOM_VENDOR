@@ -164,17 +164,32 @@ const punch = async (type, data) => {
 
 
 const check = async (id) => {
-    const authToken = localStorage.getItem("saas_client_token");
-    const clinetId = localStorage.getItem("saas_client_clientId");
-    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/attendance/can-punch-in/attendance/${clinetId}/${id}`, {
-        headers: {
-            Authorization: `Bearer ${authToken}`,
-        }
+  const authToken = localStorage.getItem("saas_client_token");
+  const clinetId = localStorage.getItem("saas_client_clientId");
+  const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/hr/attendance/can-punch-in/attendance/${clinetId}/${id}`, {
+    headers: {
+      Authorization: `Bearer ${authToken}`,
+    }
 
-    });
-    return response.data
-    
+  });
+  return response.data
+
 }
+
+
+
+const getAttendanceData = async (id, start, end) => {
+  const authToken = localStorage.getItem("saas_client_token");
+  const clinetId = localStorage.getItem("saas_client_clientId");
+  return await axios.get(
+    `${import.meta.env.VITE_BASE_URL}/api/vendor/hr/attendance/get/attendance/${clinetId}/${id}?startDate=${start}&&endDate=${end}`,
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      }
+    }
+  );
+};
 
 
 
@@ -185,6 +200,7 @@ const check = async (id) => {
 // };
 
 /* eslint import/no-anonymous-default-export: [2, {"allowObject": true}] */
-export default { Login, LoginStaff, OtpSignIn, staffOtpSignIn, getProfile, updateProfile, forgotPassword, resetPassword, punch,
-  check
- };
+export default {
+  Login, LoginStaff, OtpSignIn, staffOtpSignIn, getProfile, updateProfile, forgotPassword, resetPassword, punch,
+  check, getAttendanceData
+};
