@@ -160,6 +160,7 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
         isInterState: false,
         roundOff: false,
         paymentMethod: '',
+        payedFrom: '',
         paidAmount: 0,
         balance: 0,
     });
@@ -815,11 +816,12 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
                 paidAmount: formData?.paidAmount,
                 balance: formData?.balance,
                 grandTotal: totals.grandTotal,
+                receivedIn: formData?.payedFrom,
             }
 
             const response = await saleInvoiceService.create(dataObject);
             // const response = await quotatio ?.create(dataObject);
-            toast.success('Quotation submitted successfully!');
+            toast.success('Sale invoice submitted successfully!');
             resetAllAndNavigate();
 
         } catch (error) {
@@ -834,7 +836,7 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
     function resetAllAndNavigate() {
         dispatch(resetQuotation());
         setFormData(defaultState);
-        navigate('/quotation-list');
+        navigate('/sales-invoices-list');
 
     }
 

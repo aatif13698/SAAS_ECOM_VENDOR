@@ -26,10 +26,10 @@ import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
 import { formatDate } from "@fullcalendar/core";
-import quotationService from "@/services/saleQuotation/quotation.service";
 
 
 import CryptoJS from "crypto-js";
+import saleInvoiceService from "@/services/saleInvoice/saleInvoice.service";
 
 // Secret key for encryption
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -133,13 +133,13 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
         navigate(`/view/quotation/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
         // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
-    
+
 
     //   ------- Data Table Columns ---
     const columns = [
         {
             name: "Date",
-            selector: (row) => formatDate(row?.sqDate),
+            selector: (row) => formatDate(row?.siDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -147,7 +147,7 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
         },
         {
             name: "SQ Number",
-            selector: (row) => row?.sqNumber,
+            selector: (row) => row?.siNumber,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -162,6 +162,7 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
         {
             name: "Status",
             sortable: true,
+
             selector: (row) => {
                 const status = row?.status
                 return (
@@ -171,17 +172,17 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
                                 ${status == "draft" ? "text-gray-500 bg-gray-500"
                                     : status == "pending_approval" ? "text-yellow-500 bg-yellow-500"
                                         : status == "issued" ? "text-blue-500 bg-blue-500"
-                                            : status == "invoiced" ? "text-green-500 bg-green-500"
-                                                : status == "partially_invoiced" ? "text-emerald-500 bg-emerald-500"
+                                            : status == "paid" ? "text-green-500 bg-green-500"
+                                                : status == "partially_paid" ? "text-violet-500 bg-violet-500"
                                                     : status == "approved" ? "text-violet-500 bg-violet-500"
                                                         : status == "closed" ? "text-orange-500 bg-orange-500"
-                                                            : status == "canceled" ? "text-red-500 bg-red-500"
-                                                            : status == "performa_conversion" ? "text-green-500 bg-green-500"
+                                                            : status == "full_due" ? "text-red-500 bg-red-500"
                                                                 : ""
                                 }
                                ${row?.status == 0 ? "text-warning-500 bg-warning-500" : ""
                                 }
                                 `}
+
                         >
                             {row.status}
                         </span>
@@ -239,9 +240,9 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await quotationService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await saleInvoiceService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.quotations);
+                    setPaginationData(response?.data?.invoices);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }
@@ -254,9 +255,9 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await quotationService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await saleInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.quotations);
+            setPaginationData(response?.data?.invoices);
             setPending(false);
         } catch (error) {
             setPending(false);
@@ -274,9 +275,9 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await quotationService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await saleInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.quotations);
+            setPaginationData(response?.data?.invoices);
             setPage(page);
         } catch (error) {
             console.log("error while fetching");
@@ -285,9 +286,9 @@ const SaleInvoiceList = ({ noFade, scrollContent }) => {
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await quotationService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await saleInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.quotations);
+            setPaginationData(response?.data?.invoices);
             setPerPage(perPage);
         } catch (error) {
             console.log("error while fetching");
