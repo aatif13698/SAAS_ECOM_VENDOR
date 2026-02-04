@@ -73,7 +73,7 @@ const BusinessUnit = ({ noFade, scrollContent }) => {
         setUserId(id);
         const name = "edit";
         setIsViewed(false);
-        navigate("/create-businessunit", { state: { id, row, name } });
+        navigate(`/edit-business-unit/${encryptId(id)}`, { state: { id, row, name } });
     };
 
     const handleDelete = (row) => {

@@ -13,6 +13,12 @@ import Button from "@/components/ui/Button";
 
 import CryptoJS from "crypto-js";
 
+
+// map
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+
+const libraries = ["places"];
+
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
 const encryptId = (id) => {
@@ -33,9 +39,19 @@ const decryptId = (encryptedId) => {
 
 
 const CreateBusinessUnit = () => {
+    const { isLoaded } = useLoadScript({
+        googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAP_KEY}`,
+        libraries,
+    });
+
+    const [locationMap, setLocationMap] = useState({
+        lat: 28.613939,
+        lng: 77.209021,
+    });
+
     const [isDark] = useDarkMode();
     const location = useLocation();
-    const {id: encryptedId} = useParams();
+    const { id: encryptedId } = useParams();
     const mode = location?.state?.name;
     const id = location?.state?.id;
     const [pageLoading, setPageLoading] = useState(true);
@@ -56,7 +72,10 @@ const CreateBusinessUnit = () => {
         landmark: "",
         address: "",
         ZipCode: "",
+        radiusInMeter: ""
     });
+    console.log("formData", formData);
+    
     const [formDataErr, setFormDataErr] = useState({
         name: "",
         emailContact: "",
@@ -80,6 +99,7 @@ const CreateBusinessUnit = () => {
         tanImage: "",
         businessLicenseImage: "",
         panImage: "",
+        radiusInMeter: ""
     });
     const {
         name,
@@ -98,6 +118,7 @@ const CreateBusinessUnit = () => {
         landmark,
         address,
         ZipCode,
+        radiusInMeter
     } = formData;
     const [countryData, setCountryData] = useState({
         countryList: "",
@@ -373,6 +394,9 @@ const CreateBusinessUnit = () => {
             payload.append("landmark", landmark);
             payload.append("address", address);
             payload.append("ZipCode", ZipCode);
+            payload.append("lat", locationMap.lat);
+            payload.append("lng", locationMap.lng);
+            payload.append("radiusInMeter", radiusInMeter);
             if (id) {
                 payload.append("businessUnitId", id);
                 const response = await businessUnitService.updateBusinessUnit(payload)
@@ -475,8 +499,8 @@ const CreateBusinessUnit = () => {
                         contactNumber: baseAddress?.contactNumber,
                         tinNumber: baseAddress?.tinNumber,
                         businessLicenseNumber: baseAddress?.businessLicenseNumber,
-                        cinNumber: baseAddress?.cinNumber,
-                        tanNumber: baseAddress?.tanNumber,
+                        cinNumber: baseAddress?.cinNumber !== "null" ? baseAddress?.cinNumber : "",
+                        tanNumber: baseAddress?.tanNumber !== "null" ?  baseAddress?.tanNumber : "",
                         panNumber: baseAddress?.panNumber,
                         country: baseAddress?.country,
                         state: baseAddress?.state,
@@ -486,7 +510,12 @@ const CreateBusinessUnit = () => {
                         landmark: baseAddress?.landmark || "",
                         ZipCode: baseAddress?.ZipCode,
                         address: baseAddress?.address,
+                        radiusInMeter: baseAddress?.radiusInMeter
                     }));
+                    setLocationMap({
+                        lat: baseAddress?.lat,
+                        lng: baseAddress?.lng
+                    })
                     setImgPreview(baseAddress?.icon ? `${baseAddress?.icon}` : null);
                     setTinPreview(baseAddress?.tinDocument ? `${baseAddress?.tinDocument}` : null);
                     setCinPreview(baseAddress?.cinDocument ? `${baseAddress?.cinDocument}` : null);
@@ -560,6 +589,25 @@ const CreateBusinessUnit = () => {
                 ...prev,
                 icon: !id ? "Logo is required." : "",
             }));
+        }
+    };
+
+    const handleGetCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocationMap({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error(error);
+                    toast.error("Unable to retrieve your location");
+                }
+            );
+        } else {
+            toast.error("Geolocation is not supported by this browser");
         }
     };
     const handleTinFileChange = (e) => {
@@ -1435,6 +1483,62 @@ const CreateBusinessUnit = () => {
                                                 }
                                             </div>
                                         </label>
+                                        <div className={`space-y-1 ${formDataErr.ZipCode ? "text-red-500" : ""}`}>
+                                            <label className="form-label">
+                                                Radius(meter) <span className="text-red-500">*</span>
+                                            </label>
+                                            <input
+                                                name="radiusInMeter"
+                                                type="number"
+                                                placeholder="Enter radius..."
+                                                value={radiusInMeter}
+                                                onChange={handleChange}
+                                                disabled={isViewed}
+                                                className="form-control py-2"
+                                            />
+                                            {formDataErr.radiusInMeter && <p className="text-sm">{formDataErr.radiusInMeter}</p>}
+                                        </div>
+                                        {!isViewed && (
+                                            <Button
+                                                text="Capture Current Location"
+                                                onClick={handleGetCurrentLocation}
+                                                className={`bg-lightBtn dark:bg-darkBtn p-3 my-3 rounded-md text-white text-center btn btn inline-flex justify-center mb-4`}
+                                            />
+                                        )}
+                                        {isLoaded ? (
+                                            <GoogleMap
+                                                zoom={18}
+                                                center={locationMap}
+                                                mapContainerStyle={{ height: "400px", width: "100%" }}
+                                                onClick={!isViewed ? (e) =>
+                                                    setLocationMap({
+                                                        lat: e.latLng.lat(),
+                                                        lng: e.latLng.lng(),
+                                                    }) : null
+                                                }
+                                                options={{
+                                                    gestureHandling: isViewed ? 'none' : 'greedy',
+                                                }}
+                                            >
+                                                <Marker
+                                                    position={locationMap}
+                                                    draggable={!isViewed}
+                                                    onDragEnd={(e) =>
+                                                        setLocationMap({
+                                                            lat: e.latLng.lat(),
+                                                            lng: e.latLng.lng(),
+                                                        })
+                                                    }
+                                                />
+                                            </GoogleMap>
+                                        ) : (
+                                            <div>Loading Map...</div>
+                                        )}
+
+                                        <div style={{ marginTop: 10 }}>
+                                            <strong>Latitude:</strong> {locationMap.lat}<br />
+                                            <strong>Longitude:</strong> {locationMap.lng}
+                                        </div>
                                     </div>
                                     {
                                         isViewed && (

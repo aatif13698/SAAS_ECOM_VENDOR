@@ -8,8 +8,21 @@ import DocImage from "../../assets/images/demo-doc.avif";
 import FormLoader from "@/Common/formLoader/FormLoader";
 import branchService from "@/services/branch/branch.service";
 import Button from "@/components/ui/Button";
+import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
+
+const libraries = ["places"];
 
 const CreateBranch = () => {
+    const { isLoaded } = useLoadScript({
+        googleMapsApiKey: `${import.meta.env.VITE_GOOGLE_MAP_KEY}`,
+        libraries,
+    });
+
+    const [locationMap, setLocationMap] = useState({
+        lat: 28.613939,
+        lng: 77.209021,
+    });
+
     const [isDark] = useDarkMode();
     const location = useLocation();
     const mode = location?.state?.name;
@@ -30,6 +43,7 @@ const CreateBranch = () => {
         state: "",
         address: "",
         ZipCode: "",
+        radiusInMeter: ""
     });
 
     const [formDataErr, setFormDataErr] = useState({
@@ -47,6 +61,7 @@ const CreateBranch = () => {
         address: "",
         ZipCode: "",
         gstDocument: "",
+        radiusInMeter: ""
     });
 
     const {
@@ -63,6 +78,7 @@ const CreateBranch = () => {
         state,
         address,
         ZipCode,
+        radiusInMeter
     } = formData;
 
     const [countryData, setCountryData] = useState({
@@ -249,7 +265,13 @@ const CreateBranch = () => {
                         landmark: data.landmark || "",
                         ZipCode: data.ZipCode || "",
                         address: data.address || "",
+                        radiusInMeter: data?.radiusInMeter || ""
                     }));
+
+                    setLocationMap({
+                        lat: data?.lat,
+                        lng: data?.lng
+                    })
 
                     setGstPreview(data.gstInDocument || null);
 
@@ -304,6 +326,26 @@ const CreateBranch = () => {
         }
     };
 
+    const handleGetCurrentLocation = () => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setLocationMap({
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    console.error(error);
+                    toast.error("Unable to retrieve your location");
+                }
+            );
+        } else {
+            toast.error("Geolocation is not supported by this browser");
+        }
+    };
+
+
     const onSubmit = async (e) => {
         e.preventDefault();
         const hasError = validationFunction();
@@ -330,6 +372,9 @@ const CreateBranch = () => {
             payload.append("city", countryData.cityName);
             payload.append("address", address);
             payload.append("ZipCode", ZipCode);
+            payload.append("lat", locationMap.lat);
+            payload.append("lng", locationMap.lng);
+            payload.append("radiusInMeter", radiusInMeter);
 
             if (selectedGstFile) payload.append("gstDocument", selectedGstFile);
 
@@ -601,6 +646,65 @@ const CreateBranch = () => {
                                 </label>
                                 {gstImgErr && <p className="text-sm">{gstImgErr}</p>}
                                 {formDataErr.gstDocument && <p className="text-sm">{formDataErr.gstDocument}</p>}
+                            </div>
+
+
+                            <div className={`space-y-1 ${formDataErr.ZipCode ? "text-red-500" : ""} my-3`}>
+                                <label className="form-label">
+                                    Radius(meter) <span className="text-red-500">*</span>
+                                </label>
+                                <input
+                                    name="radiusInMeter"
+                                    type="number"
+                                    placeholder="Enter radius..."
+                                    value={radiusInMeter}
+                                    onChange={handleChange}
+                                    disabled={isViewed}
+                                    className="form-control py-2"
+                                />
+                                {formDataErr.radiusInMeter && <p className="text-sm">{formDataErr.radiusInMeter}</p>}
+                            </div>
+
+                            {!isViewed && (
+                                <Button
+                                    text="Capture Current Location"
+                                    onClick={handleGetCurrentLocation}
+                                    className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn btn inline-flex justify-center mb-4`}
+                                />
+                            )}
+                            {isLoaded ? (
+                                <GoogleMap
+                                    zoom={18}
+                                    center={locationMap}
+                                    mapContainerStyle={{ height: "400px", width: "100%" }}
+                                    onClick={!isViewed ? (e) =>
+                                        setLocationMap({
+                                            lat: e.latLng.lat(),
+                                            lng: e.latLng.lng(),
+                                        }) : null
+                                    }
+                                    options={{
+                                        gestureHandling: isViewed ? 'none' : 'greedy',
+                                    }}
+                                >
+                                    <Marker
+                                        position={locationMap}
+                                        draggable={!isViewed}
+                                        onDragEnd={(e) =>
+                                            setLocationMap({
+                                                lat: e.latLng.lat(),
+                                                lng: e.latLng.lng(),
+                                            })
+                                        }
+                                    />
+                                </GoogleMap>
+                            ) : (
+                                <div>Loading Map...</div>
+                            )}
+
+                            <div style={{ marginTop: 10 }}>
+                                <strong>Latitude:</strong> {locationMap.lat}<br />
+                                <strong>Longitude:</strong> {locationMap.lng}
                             </div>
 
                             {/* Action Buttons */}
