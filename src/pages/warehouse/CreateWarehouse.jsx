@@ -721,6 +721,9 @@ const CreateWarehouse = () => {
         lng: 77.209021,
     });
 
+
+
+
     const [isDark] = useDarkMode();
     const location = useLocation();
     const mode = location?.state?.name;
@@ -741,6 +744,7 @@ const CreateWarehouse = () => {
         state: "",
         address: "",
         ZipCode: "",
+        radiusInMeter: ""
     });
 
     const [formDataErr, setFormDataErr] = useState({
@@ -758,6 +762,7 @@ const CreateWarehouse = () => {
         address: "",
         ZipCode: "",
         icon: "",
+        radiusInMeter: ""
     });
 
     const {
@@ -774,6 +779,7 @@ const CreateWarehouse = () => {
         state,
         address,
         ZipCode,
+        radiusInMeter
     } = formData;
 
     const [countryData, setCountryData] = useState({
@@ -830,6 +836,7 @@ const CreateWarehouse = () => {
             city: [[!value, "City is Required"]],
             ZipCode: [[!value, "Zip Code is Required"]],
             address: [[!value, "Address is Required"]],
+            radiusInMeter: [[!value, "Radius is Required"]],
         };
         return (rules[fieldName] || []).find(([condition]) => condition)?.[1] || "";
     };
@@ -846,6 +853,7 @@ const CreateWarehouse = () => {
             city: validateField("city", countryData.cityName),
             ZipCode: validateField("ZipCode", ZipCode),
             address: validateField("address", address),
+            radiusInMeter: validateField("radiusInMeter", radiusInMeter),
 
         };
         setFormDataErr((prev) => ({ ...prev, ...errors }));
@@ -980,7 +988,20 @@ const CreateWarehouse = () => {
                         landmark: fetchedData.landmark || "",
                         ZipCode: fetchedData.ZipCode || "",
                         address: fetchedData.address || "",
+                        radiusInMeter: fetchedData?.radiusInMeter || ""
                     }));
+
+                    console.log("fetchedData?.lat)", fetchedData?.lat);
+
+
+                    const lat = Number(fetchedData?.lat);
+                    const lng = Number(fetchedData?.lng);
+                    setLocationMap({
+                        lat: isNaN(lat) ? 28.613939 : lat,
+                        lng: isNaN(lng) ? 77.209021 : lng,
+                    });
+
+
 
                     setImgPreview(fetchedData.icon || null);
 
@@ -997,10 +1018,6 @@ const CreateWarehouse = () => {
                         cityName: fetchedData.city || "",
                     }));
 
-                    setLocationMap({
-                        lat: fetchedData.latitude || 28.613939,
-                        lng: fetchedData.longitude || 77.209021,
-                    });
 
                     setPageLoading(false);
                 } catch (error) {
@@ -1085,8 +1102,9 @@ const CreateWarehouse = () => {
             payload.append("city", countryData.cityName);
             payload.append("address", address);
             payload.append("ZipCode", ZipCode);
-            payload.append("latitude", locationMap.lat);
-            payload.append("longitude", locationMap.lng);
+            payload.append("lat", locationMap.lat);
+            payload.append("lng", locationMap.lng);
+            payload.append("radiusInMeter", radiusInMeter);
 
             if (selectedFile) payload.append("icon", selectedFile);
 
@@ -1115,7 +1133,7 @@ const CreateWarehouse = () => {
                 </div>
             ) : (
                 <div>
-                   
+
 
                     <div className={`p-6 ${isDark ? "bg-darkSecondary text-white" : "bg-white"}`}>
                         <form onSubmit={onSubmit}>
@@ -1335,49 +1353,64 @@ const CreateWarehouse = () => {
                                     />
                                     {formDataErr.address && <p className="text-sm">{formDataErr.address}</p>}
                                 </div>
+                                <div className={`space-y-1 ${formDataErr.ZipCode ? "text-red-500" : ""}`}>
+                                    <label className="form-label">
+                                        Radius(meter) <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        name="radiusInMeter"
+                                        type="number"
+                                        placeholder="Enter radius..."
+                                        value={radiusInMeter}
+                                        onChange={handleChange}
+                                        disabled={isViewed}
+                                        className="form-control py-2"
+                                    />
+                                    {formDataErr.radiusInMeter && <p className="text-sm">{formDataErr.radiusInMeter}</p>}
+                                </div>
                             </div>
 
-                             {!isViewed && (
-                        <Button
-                            text="Capture Current Location"
-                            onClick={handleGetCurrentLocation}
-                            className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn btn inline-flex justify-center mb-4`}
-                        />
-                    )}
-                    {isLoaded ? (
-                        <GoogleMap
-                            zoom={18}
-                            center={locationMap}
-                            mapContainerStyle={{ height: "400px", width: "100%" }}
-                            onClick={!isViewed ? (e) =>
-                                setLocationMap({
-                                    lat: e.latLng.lat(),
-                                    lng: e.latLng.lng(),
-                                }) : null
-                            }
-                            options={{
-                                gestureHandling: isViewed ? 'none' : 'greedy',
-                            }}
-                        >
-                            <Marker
-                                position={locationMap}
-                                draggable={!isViewed}
-                                onDragEnd={(e) =>
-                                    setLocationMap({
-                                        lat: e.latLng.lat(),
-                                        lng: e.latLng.lng(),
-                                    })
-                                }
-                            />
-                        </GoogleMap>
-                    ) : (
-                        <div>Loading Map...</div>
-                    )}
+                            {!isViewed && (
+                                <Button
+                                    text="Capture Current Location"
+                                    onClick={handleGetCurrentLocation}
+                                    className={`bg-lightBtn dark:bg-darkBtn p-3 rounded-md text-white text-center btn btn inline-flex justify-center mb-4`}
+                                />
+                            )}
+                            {isLoaded ? (
+                                <GoogleMap
+                                    zoom={18}
+                                    center={locationMap}
+                                    mapContainerStyle={{ height: "400px", width: "100%" }}
+                                    onClick={!isViewed ? (e) =>
+                                        setLocationMap({
+                                            lat: e.latLng.lat(),
+                                            lng: e.latLng.lng(),
+                                        }) : null
+                                    }
+                                    options={{
+                                        gestureHandling: isViewed ? 'none' : 'greedy',
+                                    }}
+                                >
+                                    <Marker
+                                        position={locationMap}
+                                        draggable={!isViewed}
+                                        onDragEnd={(e) =>
+                                            setLocationMap({
+                                                lat: e.latLng.lat(),
+                                                lng: e.latLng.lng(),
+                                            })
+                                        }
+                                    />
+                                </GoogleMap>
+                            ) : (
+                                <div>Loading Map...</div>
+                            )}
 
-                    <div style={{ marginTop: 10 }}>
-                        <strong>Latitude:</strong> {locationMap.lat}<br />
-                        <strong>Longitude:</strong> {locationMap.lng}
-                    </div>
+                            <div style={{ marginTop: 10 }}>
+                                <strong>Latitude:</strong> {locationMap.lat}<br />
+                                <strong>Longitude:</strong> {locationMap.lng}
+                            </div>
 
                             {/* Action Buttons */}
                             <div className="flex justify-end gap-4 mt-8">
@@ -1398,7 +1431,7 @@ const CreateWarehouse = () => {
                                 )}
                             </div>
                         </form>
-                        
+
                     </div>
                 </div>
             )}
