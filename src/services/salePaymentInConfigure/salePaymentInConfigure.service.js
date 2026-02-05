@@ -52,9 +52,9 @@ const getPaymentFromLedgers = async (currentLevel, levelId) => {
 };
 
 
-const createPaymentOut = async (data) => {
+const createPaymentIn = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/create/payment/out`, data, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/sale/payment/in/create/payment/in`, data, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }
@@ -63,13 +63,13 @@ const createPaymentOut = async (data) => {
 };
 
 
-const getPaymentOut = async (page, keyWord, perPage, currentLevel, levelId) => {
+const getPaymentIn = async (page, keyWord, perPage, currentLevel, levelId) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/list/payment/out?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/sale/payment/in/list/payment/in?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -85,12 +85,12 @@ const getPaymentOut = async (page, keyWord, perPage, currentLevel, levelId) => {
 
 
 
-const getParticularPaymentOut = async (id) => {
+const getParticularPaymentIn = async (id) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/get/payment/out/${id}/${clientId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/sale/payment/in/get/payment/in/${id}/${clientId}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -112,7 +112,7 @@ export default {
     upsert,
     getConfigure,
     getPaymentFromLedgers,
-    createPaymentOut,
-    getPaymentOut,
-    getParticularPaymentOut
+    createPaymentIn,
+    getPaymentIn,
+    getParticularPaymentIn
 }

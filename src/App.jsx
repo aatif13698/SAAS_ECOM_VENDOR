@@ -129,6 +129,10 @@ const SaleInvoiceList = lazy(() => import("./pages/saleInvoice/SaleInvoiceList")
 const SaleInvoice = lazy(() => import("./pages/saleInvoice/SaleInvoice"));
 const ViewSaleInvoice = lazy(() => import("./pages/saleInvoice/ViewSaleInvoice"));
 
+const PaymentIn = lazy(() => import("./pages/paymentIn/PaymentIn"));
+const CreatePaymentIn = lazy(() => import("./pages/paymentIn/CreatePaymentIn"));
+const ViewPaymentIn = lazy(() => import("./pages/paymentIn/ViewPaymentIn"));
+
 
 // statement
 
@@ -420,6 +424,11 @@ function App() {
                 <Route path="sales-invoices-list" element={<SaleInvoiceList />} />
                 <Route path="create-sale-invoice" element={<SaleInvoice />} />
                 <Route path="view/sale-invoice/:id" element={<ViewSaleInvoice />} />
+
+                <Route path="payment-in-list" element={<PaymentIn />} />
+                <Route path="create-payment-in" element={<CreatePaymentIn />} />
+                <Route path="view-payment-in/:id" element={<ViewPaymentIn />} />
+
 
 
 

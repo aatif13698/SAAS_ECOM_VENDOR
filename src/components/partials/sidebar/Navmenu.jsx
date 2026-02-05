@@ -176,23 +176,23 @@ const Navmenu = ({ menus }) => {
     ]);
 
     const excludedMenus = new Set([
-      "Department",
-      "Shift",
-      "Documents",
-      "Assets & Tools",
-      "Leave Category",
-      "Holiday",
-      "Product QA",
-      "Product QA Out",
-      "Change Shift",
-      "Shift Change Request",
-      "Leave Allotment",
-      "Leave Requests",
-      "Statements",
-      "Banners",
-      "Landing Sections",
-      "About Us",
-      "Asset Requests"
+      // "Department",
+      // "Shift",
+      // "Documents",
+      // "Assets & Tools",
+      // "Leave Category",
+      // "Holiday",
+      // "Product QA",
+      // "Product QA Out",
+      // "Change Shift",
+      // "Shift Change Request",
+      // "Leave Allotment",
+      // "Leave Requests",
+      // "Statements",
+      // "Banners",
+      // "Landing Sections",
+      // "About Us",
+      // "Asset Requests"
     ]);
 
     const result = [];

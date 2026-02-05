@@ -86,13 +86,13 @@ const changeStauts = async (data) => {
 }
 
 
-const getUnpaidInvoices = async (currentLevel, levelId, supplier, supplierLedger) => {
+const getUnpaidInvoices = async (currentLevel, levelId, customer, customerLedger) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
 
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/sale/si/unpaid/purchaseInvoice?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}&supplier=${supplier}&supplierLedger=${supplierLedger}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/sale/si/unpaid/invoice?clientId=${clientId}&level=${currentLevel}&levelId=${levelId}&customer=${customer}&customerLedger=${customerLedger}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -125,6 +125,9 @@ const getParticular = async (id) => {
         throw error;
     }
 };
+
+
+
 
 
 export default {
