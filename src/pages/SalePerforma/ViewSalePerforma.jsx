@@ -1,6 +1,6 @@
 
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Fragment } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiDotsVerticalRounded } from "react-icons/bi";
 import { FiLoader } from 'react-icons/fi';
@@ -9,6 +9,12 @@ import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import { useDispatch } from 'react-redux';
 import CryptoJS from "crypto-js";
 import salePerformaService from '../../services/salePerforma/salePerforma.service';
+import { Dialog, Transition } from "@headlessui/react";
+import useDarkmode from '@/hooks/useDarkMode';
+import Icon from "@/components/ui/Icon";
+import Button from '../../components/ui/Button';
+import toast from 'react-hot-toast';
+
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -23,13 +29,54 @@ const decryptId = (encryptedId) => {
     }
 };
 
-function ViewSalePerforma() {
+function ViewSalePerforma({ noFade }) {
+    const [isDark] = useDarkmode();
+
     const navigate = useNavigate();
     const { id: encryptedId } = useParams();
     const [poData, setPoData] = useState({});
     const pdfRef = useRef(null); // Ref for the PDF content div
 
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(true);
+    const [workOrderModel, setWorkOrderModel] = useState(false);
+    const [actionStatus, setActionStatus] = useState(null);
+    const [workOrder, setWorkOrder] = useState({
+        workOrderNumber: "",
+        workOrderDate: ""
+    });
+
+    const handlePerforma = async () => {
+        try {
+            const clientId = localStorage.getItem("saas_client_clientId");
+            if (poData.status == "closed") {
+                toast.error(`Can't change status once closed`);
+                return
+            }
+
+            const dataObject = {
+                id: poData?._id, status: actionStatus, clientId: clientId,
+            }
+
+            if (workOrder?.workOrderNumber) {
+                dataObject.workOrderNumber = workOrder?.workOrderNumber
+            }
+            if (workOrder?.workOrderDate) {
+                dataObject.workOrderDate = workOrder?.workOrderDate
+            }
+
+            const response = await salePerformaService.changeStauts(dataObject);
+            setPoData(prev => ({ ...prev, status: actionStatus }));
+            setWorkOrderModel(false);
+            setWorkOrder({
+                workOrderNumber: "",
+                workOrderDate: ""
+            })
+            toast.success(`Status changed to: ${actionStatus}`)
+        } catch (error) {
+            setShowDropdown(false);
+            console.log("error while changing the status", error);
+        }
+    };
 
     console.log("poData", poData);
 
@@ -129,6 +176,7 @@ function ViewSalePerforma() {
             case 'partially_paid': return 'Partially Paid';
             case 'overdue': return 'Overdue';
             case 'closed': return 'Closed';
+            case 'invoiced' : return 'Invoiced'
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
     };
@@ -141,6 +189,7 @@ function ViewSalePerforma() {
             case 'partially_paid': return 'bg-[#8b5cf6]';
             case 'overdue': return 'Overdue';
             case 'closed': return 'Closed';
+             case 'invoiced' : return 'bg-[#16a34a]'
             default: return poData.status?.replace('_', ' ') || 'Unknown';
         }
     }
@@ -165,9 +214,12 @@ function ViewSalePerforma() {
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
 
-                    {/* <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
-                        <BiEdit className="text-xl" />
-                    </button> */}
+                    <button onClick={() => {
+                        setActionStatus("invoiced")
+                        setWorkOrderModel(true)
+                    }} title="Edit" className="bg-green-600 text-white px-2 rounded-md py-1 hover:bg-green-700">
+                        Convert To Invoice
+                    </button>
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
@@ -230,7 +282,7 @@ function ViewSalePerforma() {
                     </div>
                     <div style={{ width: '32%' }}>
                         <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Customer)</h3>
-                        <p><strong>{poData.customer?.firstName+" "+poData.customer?.lastName || 'N/A'}</strong></p>
+                        <p><strong>{poData.customer?.firstName + " " + poData.customer?.lastName || 'N/A'}</strong></p>
                         <p>{poData.customer?.address || 'N/A'}</p>
                         <p>{poData.customer?.city || ''}, {poData.customer?.state || ''} - {poData.customer?.ZipCode || ''}</p>
                         <p>Phone: {poData.customer?.phone || 'N/A'}</p>
@@ -367,6 +419,118 @@ function ViewSalePerforma() {
                 {/* <div style={{ marginTop: '50px', textAlign: 'center', fontSize: '9pt', color: '#777', paddingTop: '15px', borderTop: '1px solid #eee' }}>
                     This is a computer-generated Purchase Order. No signature required.
                 </div> */}
+
+
+                <Transition appear show={workOrderModel} as={Fragment}>
+                    <Dialog
+                        as="div"
+                        className="relative z-[999]"
+                        onClose={() => { setWorkOrderModel(false) }}
+                    >
+                        {(
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300 ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0"}
+                                enterTo={noFade ? "" : "opacity-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100"}
+                                leaveTo={noFade ? "" : "opacity-0"}
+                            >
+                                <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                            </Transition.Child>
+                        )}
+                        <div
+                            className="fixed inset-0 "
+                        >
+                            <div
+                                className={`flex min-h-full justify-center text-center p-6 items-center `}
+                            >
+                                <Transition.Child
+                                    as={Fragment}
+                                    enter={noFade ? "" : "duration-300  ease-out"}
+                                    enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                    enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                    leave={noFade ? "" : "duration-200 ease-in"}
+                                    leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                    leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                                >
+                                    <Dialog.Panel
+                                        className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-3xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                    >
+                                        <div
+                                            className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                                        >
+                                            <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                                                Work Order Details
+                                            </h2>
+                                            <button onClick={() => setWorkOrderModel(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                                                <Icon icon="heroicons-outline:x" />
+                                            </button>
+                                        </div>
+
+                                        <div className="p-4 flex flex-col gap-3 overflow-y-auto max-h-[50vh]">
+
+                                            <div className="fromGroup">
+                                                <label className="form-label">
+                                                    <p>
+                                                        Work Order Number
+                                                    </p>
+                                                </label>
+                                                <input
+                                                    name="workOrderNumber"
+                                                    type="text"
+                                                    placeholder="Enter work order number."
+                                                    value={workOrder?.workOrderNumber}
+                                                    onChange={(e) => setWorkOrder((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            workOrderNumber: e.target.value
+                                                        }
+                                                    })}
+                                                    className="form-control py-2"
+                                                />
+                                            </div>
+                                            <div className="fromGroup">
+                                                <label className="form-label">
+                                                    <p>
+                                                        Work Order Date
+                                                    </p>
+                                                </label>
+                                                <input
+                                                    name="workOrderDate"
+                                                    type="date"
+                                                    placeholder="Enter work order number."
+                                                    value={workOrder?.workOrderDate}
+                                                    onChange={(e) => setWorkOrder((prev) => {
+                                                        return {
+                                                            ...prev,
+                                                            workOrderDate: e.target.value
+                                                        }
+                                                    })} className="form-control py-2"
+                                                />
+                                            </div>
+
+                                        </div>
+
+                                        <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary bg-white dark:bg-darkInput">
+                                            <Button
+                                                text="Cancel"
+                                                className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText px-4 py-2 rounded"
+                                                onClick={() => setWorkOrderModel(false)}
+                                            />
+                                            <Button
+                                                text="Proceed"
+                                                className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
+                                                onClick={() => handlePerforma()}
+                                            />
+                                        </div>
+                                    </Dialog.Panel>
+                                </Transition.Child>
+                            </div>
+                        </div>
+                    </Dialog>
+                </Transition>
 
 
             </div>
