@@ -325,15 +325,13 @@ function ViewSalePerforma() {
 
                             </div>
                         )}
-                        {/* {poData.bankDetails && (
-                            <div style={{ marginTop: '30px',  }}>
-                                <strong>Bank Details:</strong><br />
-                                <p>Bank: {poData.bankDetails.bankName} </p>
-                                <p>A/c No: {poData.bankDetails.accountNumber}</p>
-                                <p> IFSC: {poData.bankDetails.ifscCode}</p>
-                                <p> Branch: {poData.bankDetails.branch}</p>
+                        {poData.workOrderNumber && (
+                            <div style={{ marginTop: '30px', }}>
+                                <strong className='underline mb-4'>Work Order Details</strong><br />
+                                <p>Work Order Number: <span className='font-bold'> {poData.workOrderNumber}</span> </p>
+                                <p>Work Order Date: <span className='font-bold'> {formatDate(poData.workOrderDate)}</span>  </p>
                             </div>
-                        )} */}
+                        )}
                     </div>
 
                     <div className='bg-green-200' style={{ float: 'right', width: '50%', padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>

@@ -177,6 +177,7 @@ const SaleQuotationList = ({ noFade, scrollContent }) => {
                                                         : status == "closed" ? "text-orange-500 bg-orange-500"
                                                             : status == "canceled" ? "text-red-500 bg-red-500"
                                                             : status == "performa_conversion" ? "text-green-500 bg-green-500"
+                                                            : status == "invoice_conversion" ? "text-green-700 bg-green-700"
                                                                 : ""
                                 }
                                ${row?.status == 0 ? "text-warning-500 bg-warning-500" : ""

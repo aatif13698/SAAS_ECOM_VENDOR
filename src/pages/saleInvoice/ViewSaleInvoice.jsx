@@ -41,7 +41,7 @@ function ViewSaleInvoice() {
         async function getInvoice(id) {
             try {
                 setLoading(true)
-                const response = await saleInvoiceService .getParticular(id);
+                const response = await saleInvoiceService.getParticular(id);
                 console.log("response aaa", response?.data);
                 setPoData(response?.data);
                 setLoading(false)
@@ -228,9 +228,9 @@ function ViewSaleInvoice() {
                         <p>91-9851199912</p>
                         <p>aayesha@yopmail.com</p>
                     </div>
-                  <div style={{ width: '32%' }}>
+                    <div style={{ width: '32%' }}>
                         <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Customer)</h3>
-                        <p><strong>{poData.customer?.firstName+" "+poData.customer?.lastName || 'N/A'}</strong></p>
+                        <p><strong>{poData.customer?.firstName + " " + poData.customer?.lastName || 'N/A'}</strong></p>
                         <p>{poData.customer?.address || 'N/A'}</p>
                         <p>{poData.customer?.city || ''}, {poData.customer?.state || ''} - {poData.customer?.ZipCode || ''}</p>
                         <p>Phone: {poData.customer?.phone || 'N/A'}</p>
@@ -318,22 +318,20 @@ function ViewSaleInvoice() {
                 // style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}
                 >
 
-                    <div className=' w-[40%]'>
+                    <div className=' w-[100%] '>
                         {poData.notes && (
                             <div style={{ marginTop: '20px', }}>
                                 <strong>Notes:</strong> {poData.notes}
 
                             </div>
                         )}
-                        {/* {poData.bankDetails && (
-                            <div style={{ marginTop: '30px',  }}>
-                                <strong>Bank Details:</strong><br />
-                                <p>Bank: {poData.bankDetails.bankName} </p>
-                                <p>A/c No: {poData.bankDetails.accountNumber}</p>
-                                <p> IFSC: {poData.bankDetails.ifscCode}</p>
-                                <p> Branch: {poData.bankDetails.branch}</p>
+                        {poData.workOrderNumber && (
+                            <div style={{ marginTop: '30px', }}>
+                                <strong className='underline mb-4'>Work Order Details</strong><br />
+                                <p>Work Order Number: <span className='font-bold'> {poData.workOrderNumber}</span> </p>
+                                <p>Work Order Date: <span className='font-bold'> {formatDate(poData.workOrderDate)}</span>  </p>
                             </div>
-                        )} */}
+                        )}
                     </div>
 
                     <div className='bg-green-200' style={{ float: 'right', width: '50%', padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>

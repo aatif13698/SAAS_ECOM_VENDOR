@@ -58,7 +58,8 @@ function ViewSaleQuotation({ noFade }) {
 
 
     const [loading, setLoading] = useState(true)
-    const [workOrderModel, setWorkOrderModel] = useState(false)
+    const [workOrderModel, setWorkOrderModel] = useState(false);
+    const [actionStatus, setActionStatus] = useState(null);
     const [workOrder, setWorkOrder] = useState({
         workOrderNumber: "",
         workOrderDate: ""
@@ -166,6 +167,7 @@ function ViewSaleQuotation({ noFade }) {
             case 'canceled': return "Cancelled";
             case 'approved': return "Approved";
             case 'performa_conversion': return "Converted To Performa"
+            case 'invoice_conversion': return "Converted To Invoice"
 
 
             default: return poData.status?.replace('_', ' ') || 'Unknown';
@@ -182,7 +184,9 @@ function ViewSaleQuotation({ noFade }) {
             case 'closed': return "bg-[#989898]";
             case 'canceled': return "bg-[#fe0000]";
             case 'approved': return "bg-[#50bf00]";
-            case 'performa_conversion': return "bg-[#b200dd]"
+            case 'performa_conversion': return "bg-[#34d399]"
+            case 'invoice_conversion': return "bg-[#16a34a]"
+
 
 
 
@@ -217,7 +221,7 @@ function ViewSaleQuotation({ noFade }) {
         }
     };
 
-    const handlePerforma = async (newStatus) => {
+    const handlePerforma = async () => {
         try {
             const clientId = localStorage.getItem("saas_client_clientId");
             if (poData.status == "closed") {
@@ -226,7 +230,7 @@ function ViewSaleQuotation({ noFade }) {
             }
 
             const dataObject = {
-                id: poData?._id, status: newStatus, clientId: clientId,
+                id: poData?._id, status: actionStatus, clientId: clientId,
             }
 
             if (workOrder?.workOrderNumber) {
@@ -237,14 +241,14 @@ function ViewSaleQuotation({ noFade }) {
             }
 
             const response = await quotationService.changeStauts(dataObject);
-            setPoData(prev => ({ ...prev, status: newStatus }));
+            setPoData(prev => ({ ...prev, status: actionStatus }));
             setShowDropdown(false);
             setWorkOrderModel(false);
             setWorkOrder({
                 workOrderNumber: "",
                 workOrderDate: ""
             })
-            toast.success(`Status changed to: ${newStatus}`)
+            toast.success(`Status changed to: ${actionStatus}`)
         } catch (error) {
             setShowDropdown(false);
             console.log("error while changing the status", error);
@@ -273,11 +277,17 @@ function ViewSaleQuotation({ noFade }) {
                     <button
                         disabled={poData.status == "performa_conversion" || poData.status == "closed"}
                         // onClick={() => handleStatusChange("performa_conversion")}
-                        onClick={() => setWorkOrderModel(true)}
+                        onClick={() => {
+                            setActionStatus("performa_conversion")
+                            setWorkOrderModel(true)
+                        }}
                         title="Edit" className={` text-white px-2 rounded-md py-1  ${poData.status == "performa_conversion" || poData.status == "closed" ? "cursor-not-allowed bg-gray-400 " : "bg-emerald-400 hover:bg-emerald-600"}`}>
                         Convert To Performa
                     </button>
-                    <button onClick={() => { }} title="Edit" className="bg-green-600 text-white px-2 rounded-md py-1 hover:bg-green-700">
+                    <button onClick={() => {
+                        setActionStatus("invoice_conversion")
+                        setWorkOrderModel(true)
+                    }} title="Edit" className="bg-green-600 text-white px-2 rounded-md py-1 hover:bg-green-700">
                         Convert To Invoice
                     </button>
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
@@ -430,22 +440,20 @@ function ViewSaleQuotation({ noFade }) {
                 // style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '25px' }}
                 >
 
-                    <div className=' w-[40%]'>
+                    <div className=' w-[100%]'>
                         {poData.notes && (
                             <div style={{ marginTop: '20px', }}>
                                 <strong>Notes:</strong> {poData.notes}
 
                             </div>
                         )}
-                        {/* {poData.bankDetails && (
-                            <div style={{ marginTop: '30px',  }}>
-                                <strong>Bank Details:</strong><br />
-                                <p>Bank: {poData.bankDetails.bankName} </p>
-                                <p>A/c No: {poData.bankDetails.accountNumber}</p>
-                                <p> IFSC: {poData.bankDetails.ifscCode}</p>
-                                <p> Branch: {poData.bankDetails.branch}</p>
+                        {poData.workOrderNumber && (
+                            <div style={{ marginTop: '30px', }}>
+                                <strong className='underline mb-4'>Work Order Details</strong><br />
+                                <p>Work Order Number: <span className='font-bold'> {poData.workOrderNumber}</span> </p>
+                                <p>Work Order Date: <span className='font-bold'> {formatDate(poData.workOrderDate)}</span>  </p>
                             </div>
-                        )} */}
+                        )}
                     </div>
 
                     <div className='bg-green-200' style={{ float: 'right', width: '50%', padding: '12px', background: '#f9f9f9', marginTop: '20px', fontSize: '11pt' }}>
@@ -588,7 +596,7 @@ function ViewSaleQuotation({ noFade }) {
                                         <Button
                                             text="Proceed"
                                             className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
-                                            onClick={() => handlePerforma("performa_conversion")}
+                                            onClick={() => handlePerforma()}
                                         />
                                     </div>
                                 </Dialog.Panel>
