@@ -895,7 +895,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                                                     onClick={() => handleSelectSupplier(supplier)}
                                                 >
                                                     <div>
-                                                        <p className="font-medium">{supplier.firstName+" "+supplier?.lastName ?? ""}</p>
+                                                        <p className="font-medium">{supplier.firstName+" "+supplier?.lastName}</p>
                                                         <p className="text-sm">{supplier.phone} - {supplier.email}</p>
                                                     </div>
                                                     {formData.supplier?._id === supplier._id && <GoCheck className="text-green-500" />}
