@@ -167,6 +167,7 @@ function TransactionSeries() {
               <th className="px-6 py-4 text-left font-semibold text-gray-700">Transaction Type</th>
               <th className="px-6 py-4 text-left font-semibold text-gray-700 w-48">Prefix</th>
               <th className="px-6 py-4 text-left font-semibold text-gray-700 w-48">Starting Number</th>
+              <th className="px-6 py-4 text-left font-semibold text-gray-700 w-48">Preview</th>
             </tr>
           </thead>
           <tbody>
@@ -199,6 +200,9 @@ function TransactionSeries() {
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                       min="1"
                     />
+                  </td>
+                   <td className="px-6 py-5">
+                   <p>{item?.prefix}-{item.nextNum}</p>
                   </td>
                 </tr>
               ))
