@@ -5,6 +5,8 @@ import employeeService from '@/services/employee/employee.service';
 import Leave from './Leave';
 import Assets from './Assets';
 import Attendance from './Attendance';
+import AttendanceCalendar from './AttendanceCalander';
+import CustomDocument from './CustomDocument';
 
 // Use environment variable with fallback (but better to enforce in production)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY;
@@ -199,7 +201,7 @@ function ViewEmployee() {
                         {/* You can later extract these into separate components */}
                         {activeTab === 'attendance' && (
                             <TabContent title="Attendance Records">
-                                <Attendance/>
+                                <AttendanceCalendar employee={employee}/>
                             </TabContent>
                         )}
 
@@ -227,7 +229,7 @@ function ViewEmployee() {
 
                         {activeTab === 'documents' && (
                             <TabContent title="Documents">
-                                <p className="text-gray-500">No documents uploaded yet</p>
+                                <CustomDocument roleId={employee?.role?._id} userId={employee?._id}/>
                             </TabContent>
                         )}
                     </div>
@@ -250,7 +252,7 @@ function TabContent({ title, children }) {
     return (
         <>
             <h2 className="text-xl font-semibold text-gray-800 mb-6">{title}</h2>
-            <div className="bg-gray-50 rounded-xl p-8 text-center border border-gray-100">
+            <div >
                 {children}
             </div>
         </>
