@@ -16,7 +16,8 @@ import {
 } from 'react-icons/fi';
 import PurchaseSettings from './PurchaseSettings';
 import RoleList from '../rolesAndPermission/RolesList';
-import SaleSetting from "./SaleSettings"
+import SaleSetting from "./SaleSettings";
+import GeneralSettings from "./GeneralSettings"
 const menuItems = [
   { id: 'general', label: 'General', icon: FiSettings },
   { id: 'inventory', label: 'Inventory', icon: FiBox },
@@ -104,18 +105,7 @@ function SystemSettings() {
           {/* Content - placeholder sections */}
           <div className="">
             {activeSection === 'general' && (
-              <section>
-                <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-                  General Settings
-                </h3>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                    <h4 className="mb-3 font-medium text-gray-900 dark:text-white">Company Details</h4>
-                    {/* Company name, logo, timezone, currency etc. */}
-                  </div>
-                  {/* Add more cards */}
-                </div>
-              </section>
+              <GeneralSettings/>
             )}
 
             {activeSection === 'inventory' && (
