@@ -9,7 +9,7 @@
 
 
 //     console.log("series", series);
-    
+
 
 
 
@@ -82,8 +82,9 @@ function TransactionSeries() {
       const response = await transactionSeriesService.getSeriesList(year);
       setSeries(response?.data || []);
     } catch (err) {
-      console.error('Error fetching transaction series:', err);
-      setError('Failed to load transaction series. Please try again.');
+      console.error('Error fetching transaction series:', err?.response?.data?.message);
+      setError(err?.response?.data?.message || 'Failed to load transaction series. Please try again.');
+      setSeries([])
     } finally {
       setLoading(false);
     }
@@ -100,9 +101,9 @@ function TransactionSeries() {
       prev.map((item) =>
         item._id === id
           ? {
-              ...item,
-              [field]: field === 'nextNum' ? Number(value) || 10001 : value,
-            }
+            ...item,
+            [field]: field === 'nextNum' ? Number(value) || 10001 : value,
+          }
           : item
       )
     );
@@ -173,12 +174,12 @@ function TransactionSeries() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={3} className="text-center py-12 text-gray-500">
+                <td colSpan={4} className="text-center py-16 text-gray-500">
                   Loading series...
                 </td>
               </tr>
             ) : (
-              series.map((item) => (
+              series && series?.length > 0 ? series?.map((item) => (
                 <tr key={item._id} className="border-b hover:bg-gray-50">
                   <td className="px-6 py-5 font-medium text-gray-800">
                     {collectionLabels[item.collectionName] || item.collectionName}
@@ -201,11 +202,20 @@ function TransactionSeries() {
                       min="1"
                     />
                   </td>
-                   <td className="px-6 py-5">
-                   <p>{item?.prefix}-{item.nextNum}</p>
+                  <td className="px-6 py-5">
+                    <p>{item?.prefix}-{item.nextNum}</p>
                   </td>
                 </tr>
-              ))
+              )) :
+
+                <tr>
+                  <td
+                    colSpan={4}
+                    className="text-center py-16 text-gray-500 font-medium"
+                  >
+                    No Series Found.
+                  </td>
+                </tr>
             )}
           </tbody>
         </table>
