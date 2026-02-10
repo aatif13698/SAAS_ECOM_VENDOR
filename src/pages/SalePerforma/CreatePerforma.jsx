@@ -19,6 +19,8 @@ import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import customerService from '@/services/customer/customer.service';
 import performaService from "../../services/salePerforma/salePerforma.service"
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service"
+
 
 const defaultState = {
   level: "",
@@ -89,12 +91,12 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
   const location = useLocation();
 
   // const {id, row} = location?.state;
- 
+
   const store = useSelector((state) => state);
   const purhcaseOrderDraftData = useSelector((state) => state.performaSlice);
   console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
   console.log("store", store);
-  
+
 
   const [isDark] = useDarkmode();
   const [addresses, setAddresses] = useState([]);
@@ -161,7 +163,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
   });
 
   console.log("formData", formData);
-  
+
 
   const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
@@ -318,7 +320,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-    if (!purhcaseOrderDraftData?.level ) return;
+    if (!purhcaseOrderDraftData?.level) return;
     setFormData((prev) => ({
       ...prev,
       level: purhcaseOrderDraftData.level ?? prev.level,
@@ -351,13 +353,37 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
     }
   }, [purhcaseOrderDraftData]);
 
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      spNumber: purhcaseOrderDraftData?.spNumber,
+    }))
+  }, [purhcaseOrderDraftData?.spNumber])
 
-  // useEffect(() => {
-  //   if(id && purhcaseOrderDraftData){
+  useEffect(() => {
+    getNextSerial();
+  }, []);
 
-  //   }
+  function getFiscalYearRange(date) {
+    const year = date.getFullYear();
+    const nextYear = year + 1;
+    const nextYearShort = nextYear % 100; // Gets the last two digits
+    return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+  }
 
-  // },[id])
+  async function getNextSerial(params) {
+    try {
+      const currentDate = new Date();
+      const financialYear = getFiscalYearRange(currentDate);
+      const response = await transactionSeriesService.getNextSerialNumber(financialYear, "sale_performa");
+      const nextNumber = Number(response?.data?.nextNum) + 1;
+      const series = `${response?.data?.prefix + "" + nextNumber}`;
+      dispatch(setspNumber(series))
+    } catch (error) {
+      console.log("error while getting the next series", error);
+    }
+  }
+
 
 
 
@@ -399,7 +425,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
       if (name === "notes") {
         dispatch(setNotes(value));
       }
-     
+
       if (name == "paidAmount") {
         dispatch(setPaidAmount(value));
       }
@@ -752,7 +778,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
         paymentMethod: formData?.paymentMethod,
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
-        grandTotal:  totals.grandTotal,
+        grandTotal: totals.grandTotal,
       }
 
       const response = await performaService.create(dataObject);
@@ -950,11 +976,11 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
                 <div className='lg:h-[80%] md:h-[70%] p-4'>
                   {formData.supplier ? (
                     <div className="text-sm space-y-1">
-                      <p><strong>Name:</strong> {formData.supplier.firstName+ " "+ formData.supplier.lastName}</p>
+                      <p><strong>Name:</strong> {formData.supplier.firstName + " " + formData.supplier.lastName}</p>
                       <p><strong>Email:</strong> {formData.supplier.email}</p>
                       <p><strong>Contact Number:</strong> {formData.supplier.phone}</p>
                       <p><strong>Address:</strong> {formData.supplier.address}, {formData.supplier.city}, {formData.supplier.state}, {formData.supplier.ZipCode}, {formData.supplier.country}</p>
-                      <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber ? formData.supplier.GstVanNumber: "N/A"}</p>
+                      <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber ? formData.supplier.GstVanNumber : "N/A"}</p>
                     </div>
                   ) : (
                     <button
@@ -1022,7 +1048,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
                 </div>
                 <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Quotation No</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Performa No</label>
                     <input
                       type="text"
                       name="spNumber"
@@ -1030,10 +1056,11 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
+                      disabled={true}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Quotation Date</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Performa Date</label>
                     <input
                       type="date"
                       name="spDate"
@@ -1144,7 +1171,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
                           type="number"
                           name="mrp"
                           value={item.mrp}
-                            disabled={true}
+                          disabled={true}
                           onChange={(e) => handleItemChange(index, e)}
                           className="md:w-20 w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500"
                           min="0"
@@ -1642,7 +1669,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
         supplier={formData?.supplier?._id}
       /> */}
 
-       <SaleProductListModel
+      <SaleProductListModel
         items={formData?.items}
         isInterState={formData?.isInterState}
         setItem={setFormData}

@@ -203,7 +203,7 @@ function TransactionSeries() {
                     />
                   </td>
                   <td className="px-6 py-5">
-                    <p>{item?.prefix}-{item.nextNum}</p>
+                    <p>{item?.prefix}{item.nextNum}</p>
                   </td>
                 </tr>
               )) :

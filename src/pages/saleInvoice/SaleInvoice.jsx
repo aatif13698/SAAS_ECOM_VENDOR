@@ -22,6 +22,7 @@ import SaleProductListModel from './SaleProductListModel';
 import saleInvoiceService from "../../services/saleInvoice/saleInvoice.service"
 import purchasePaymentConfigureService from '../../services/purchasePaymentConfig/purchasePaymentConfigure.service';
 import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service"
 
 const defaultState = {
     level: "",
@@ -403,12 +404,37 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
     }, [purhcaseOrderDraftData]);
 
 
-    // useEffect(() => {
-    //   if(id && purhcaseOrderDraftData){
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            siNumber: purhcaseOrderDraftData?.siNumber,
+        }))
+    }, [purhcaseOrderDraftData?.siNumber])
 
-    //   }
+    useEffect(() => {
+        getNextSerial();
+    }, []);
 
-    // },[id])
+    function getFiscalYearRange(date) {
+        const year = date.getFullYear();
+        const nextYear = year + 1;
+        const nextYearShort = nextYear % 100; // Gets the last two digits
+        return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+    }
+
+    async function getNextSerial() {
+        try {
+            const currentDate = new Date();
+            const financialYear = getFiscalYearRange(currentDate);
+            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "sale_invoice");
+            const nextNumber = Number(response?.data?.nextNum) + 1;
+            const series = `${response?.data?.prefix + "" + nextNumber}`;
+            dispatch(setsiNumber(series))
+        } catch (error) {
+            console.log("error while getting the next series", error);
+        }
+    }
+
 
 
 
@@ -1094,6 +1120,7 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
                                             onChange={handleInputChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             required
+                                            disabled={true}
                                         />
                                     </div>
                                     <div>
