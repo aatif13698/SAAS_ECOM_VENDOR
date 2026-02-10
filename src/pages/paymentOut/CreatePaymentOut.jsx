@@ -15,6 +15,8 @@ import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.s
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service";
+
 
 const defaultState = {
     level: "",
@@ -169,6 +171,44 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
         const warehouseDetail = activeWarehouse.find((item) => item?._id === paymentOutDrafData.warehouse);
         if (warehouseDetail) setCurrentWarehouseDetal(warehouseDetail);
     }, [paymentOutDrafData]);
+
+
+
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            paymentOutNumber: paymentOutDrafData?.paymentOutNumber,
+        }))
+    }, [paymentOutDrafData?.paymentOutNumber])
+
+    useEffect(() => {
+        getNextSerial();
+    }, []);
+
+    function getFiscalYearRange(date) {
+        const year = date.getFullYear();
+        const nextYear = year + 1;
+        const nextYearShort = nextYear % 100; // Gets the last two digits
+        return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+    }
+
+    async function getNextSerial() {
+        try {
+            const currentDate = new Date();
+            const financialYear = getFiscalYearRange(currentDate);
+            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_out");
+            const nextNumber = Number(response?.data?.nextNum) + 1;
+            const series = `${response?.data?.prefix + "" + nextNumber}`;
+            dispatch(setPaymentOutNumber(series))
+        } catch (error) {
+            console.log("error while getting the next series", error);
+        }
+    }
+
+
+
+
 
     const [suppliers, setSuppliers] = useState([]);
     const [openModal, setOpenModal] = useState(false);
@@ -435,7 +475,7 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
             };
 
             console.log("dataObject", dataObject);
-            
+
             const response = await purchasePaymentConfigureService?.createPaymentOut(dataObject);
             toast.success('Payment Out submitted successfully!');
             resetAllAndNavigate();

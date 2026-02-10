@@ -19,6 +19,7 @@ import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service"
 
 const defaultState = {
   level: "",
@@ -356,13 +357,37 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
   }, [purhcaseOrderDraftData]);
 
 
-  // useEffect(() => {
-  //   if(id && purhcaseOrderDraftData){
 
-  //   }
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      poNumber: purhcaseOrderDraftData?.poNumber,
+    }))
+  }, [purhcaseOrderDraftData?.poNumber])
 
-  // },[id])
+  useEffect(() => {
+    getNextSerial();
+  }, []);
 
+  function getFiscalYearRange(date) {
+    const year = date.getFullYear();
+    const nextYear = year + 1;
+    const nextYearShort = nextYear % 100; // Gets the last two digits
+    return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+  }
+
+  async function getNextSerial() {
+    try {
+      const currentDate = new Date();
+      const financialYear = getFiscalYearRange(currentDate);
+      const response = await transactionSeriesService.getNextSerialNumber(financialYear, "purchase_invoice");
+      const nextNumber = Number(response?.data?.nextNum) + 1;
+      const series = `${response?.data?.prefix + "" + nextNumber}`;
+      dispatch(setPoNumber(series))
+    } catch (error) {
+      console.log("error while getting the next series", error);
+    }
+  }
 
 
   const [suppliers, setSuppliers] = useState([]);

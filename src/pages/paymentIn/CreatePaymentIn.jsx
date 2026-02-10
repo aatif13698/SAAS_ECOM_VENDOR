@@ -9,7 +9,7 @@ import Icon from "@/components/ui/Icon";
 import Button from '../../components/ui/Button';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import {  setBranch, setBusinessUnit, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPaymentInDate, setPaymentInNumber, setcustomer, setWarehouse, resetPaymentIn } from '../../store/slices/paymentIn/paymentInSlice';
+import { setBranch, setBusinessUnit, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPaymentInDate, setPaymentInNumber, setcustomer, setWarehouse, resetPaymentIn } from '../../store/slices/paymentIn/paymentInSlice';
 import { useDispatch } from 'react-redux';
 import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
 import toast from 'react-hot-toast';
@@ -18,6 +18,8 @@ import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/pu
 import customerService from '@/services/customer/customer.service';
 import saleInvoiceService from "../../services/saleInvoice/saleInvoice.service"
 import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service";
+
 
 const defaultState = {
     level: "",
@@ -173,11 +175,51 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
         if (warehouseDetail) setCurrentWarehouseDetal(warehouseDetail);
     }, [paymentInDrafData]);
 
+
+
+    useEffect(() => {
+        setFormData((prev) => ({
+            ...prev,
+            paymentInNumber: paymentInDrafData?.paymentInNumber,
+        }))
+    }, [paymentInDrafData?.paymentInNumber])
+
+    useEffect(() => {
+        getNextSerial();
+    }, []);
+
+    function getFiscalYearRange(date) {
+        const year = date.getFullYear();
+        const nextYear = year + 1;
+        const nextYearShort = nextYear % 100; // Gets the last two digits
+        return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+    }
+
+    async function getNextSerial() {
+        try {
+            const currentDate = new Date();
+            const financialYear = getFiscalYearRange(currentDate);
+            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_in");
+            const nextNumber = Number(response?.data?.nextNum) + 1;
+            const series = `${response?.data?.prefix + "" + nextNumber}`;
+            dispatch(setPaymentInNumber(series))
+        } catch (error) {
+            console.log("error while getting the next series", error);
+        }
+    }
+
+
+
+
+
+
+
+
     const [suppliers, setSuppliers] = useState([]);
     const [openModal, setOpenModal] = useState(false);
 
     console.log("suppliers", suppliers);
-    
+
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -286,9 +328,9 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
 
     async function getUnPaidInvoices(customer, customerLedger) {
         try {
-            const response = await  saleInvoiceService.getUnpaidInvoices(level, formData[level], customer, customerLedger);
+            const response = await saleInvoiceService.getUnpaidInvoices(level, formData[level], customer, customerLedger);
             console.log("response", response);
-            
+
             if (response?.data?.invoices?.length > 0) {
                 const formatedInvoices = response.data.invoices.map(inv => ({
                     _id: inv._id,
@@ -632,7 +674,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                                 <div className='lg:h-[80%] md:h-[70%] p-4'>
                                     {formData.supplier ? (
                                         <div className="text-sm space-y-1">
-                                            <p><strong>Name:</strong> {formData?.supplier?.firstName +" "+ formData?.supplier?.lastName}</p>
+                                            <p><strong>Name:</strong> {formData?.supplier?.firstName + " " + formData?.supplier?.lastName}</p>
                                             <p><strong>Email:</strong> {formData?.supplier?.email}</p>
                                             <p><strong>Contact Number:</strong> {formData?.supplier?.phone}</p>
                                         </div>
@@ -656,7 +698,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                                 </div>
                                 <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-2">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Payment I No</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Payment In No</label>
                                         <input
                                             type="text"
                                             name="paymentInNumber"
@@ -664,6 +706,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                                             onChange={handleInputChange}
                                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                                             required
+                                            disabled={true}
                                         />
                                     </div>
                                     <div>
@@ -895,7 +938,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                                                     onClick={() => handleSelectSupplier(supplier)}
                                                 >
                                                     <div>
-                                                        <p className="font-medium">{supplier.firstName+" "+supplier?.lastName}</p>
+                                                        <p className="font-medium">{supplier.firstName + " " + supplier?.lastName}</p>
                                                         <p className="text-sm">{supplier.phone} - {supplier.email}</p>
                                                     </div>
                                                     {formData.supplier?._id === supplier._id && <GoCheck className="text-green-500" />}

@@ -18,6 +18,7 @@ import purchaseOrderService from '@/services/purchaseOrder/purchaseOrder.service
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service"
 
 const defaultState = {
   level: "",
@@ -88,7 +89,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   const location = useLocation();
 
   // const {id, row} = location?.state;
- 
+
   const purhcaseOrderDraftData = useSelector((state) => state.purchaseOrderSlice);
   console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
 
@@ -311,7 +312,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   };
 
   useEffect(() => {
-    if (!purhcaseOrderDraftData?.level ) return;
+    if (!purhcaseOrderDraftData?.level) return;
     setFormData((prev) => ({
       ...prev,
       level: purhcaseOrderDraftData.level ?? prev.level,
@@ -345,13 +346,36 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
   }, [purhcaseOrderDraftData]);
 
 
-  // useEffect(() => {
-  //   if(id && purhcaseOrderDraftData){
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      poNumber: purhcaseOrderDraftData?.poNumber,
+    }))
+  }, [purhcaseOrderDraftData?.poNumber])
 
-  //   }
+  useEffect(() => {
+    getNextSerial();
+  }, []);
 
-  // },[id])
+  function getFiscalYearRange(date) {
+    const year = date.getFullYear();
+    const nextYear = year + 1;
+    const nextYearShort = nextYear % 100; // Gets the last two digits
+    return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+  }
 
+  async function getNextSerial() {
+    try {
+      const currentDate = new Date();
+      const financialYear = getFiscalYearRange(currentDate);
+      const response = await transactionSeriesService.getNextSerialNumber(financialYear, "purchase_order");
+      const nextNumber = Number(response?.data?.nextNum) + 1;
+      const series = `${response?.data?.prefix + "" + nextNumber}`;
+      dispatch(setPoNumber(series))
+    } catch (error) {
+      console.log("error while getting the next series", error);
+    }
+  }
 
 
   const [suppliers, setSuppliers] = useState([]);
@@ -746,7 +770,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
         paymentMethod: formData?.paymentMethod,
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
-        grandTotal:  totals.grandTotal,
+        grandTotal: totals.grandTotal,
       }
       const response = await purchaseOrderService?.create(dataObject);
       toast.success('Purchase Order submitted successfully!');
