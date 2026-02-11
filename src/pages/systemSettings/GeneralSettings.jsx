@@ -13,14 +13,14 @@ function GeneralSettings() {
 
     return (
         <>
-            <div className="mb-4">
+            {/* <div className="mb-4">
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                       General Settings
                 </h2>
                 <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                     Configure your multi-vendor e-commerce platform settings
                 </p>
-            </div>
+            </div> */}
 
             <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 {/* Tabs */}

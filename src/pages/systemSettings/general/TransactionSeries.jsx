@@ -132,10 +132,10 @@ function TransactionSeries() {
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="md:p-6 p-2  mx-auto">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Transaction Series Settings</h1>
+      <div className="flex md:flex-row flex-col gap-2 justify-between items-center mb-8">
+        <h1 className="text-xl font-bold text-gray-800">Transaction Series Settings</h1>
 
         {/* Year Selector */}
         <div className="flex items-center gap-3">
@@ -161,8 +161,8 @@ function TransactionSeries() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl shadow overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white rounded-xl shadow overflow-auto">
+        <table className="w-full ">
           <thead className="bg-gray-50 border-b">
             <tr>
               <th className="px-6 py-4 text-left font-semibold text-gray-700">Transaction Type</th>

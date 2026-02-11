@@ -243,6 +243,10 @@ function App() {
           <Route path="/" element={<AuthLayout />}>
             <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
 
+             {/* system settings */}
+
+              <Route path="/system/settings" element={<SystemSettings />} />
+
 
               <Route path="/" element={<Layout />}>
                 <Route
@@ -465,9 +469,7 @@ function App() {
 
 
 
-                {/* system settings */}
-
-                <Route path="system/settings" element={<SystemSettings />} />
+               
 
 
 
