@@ -3,11 +3,11 @@ import PaymentAndLedger from './purchase/PaymentAndLedger';
 import TransactionSeries from './general/TransactionSeries';
 
 function GeneralSettings() {
-    const [activeTab, setActiveTab] = useState('general');
+    const [activeTab, setActiveTab] = useState('transactionSeries');
 
     const tabs = [
-        { id: 'general', label: 'General' },
-        { id: 'validation', label: 'Validation Rules' },
+        // { id: 'general', label: 'General' },
+        // { id: 'validation', label: 'Validation Rules' },
         { id: 'transactionSeries', label: 'Transaction Series' },
     ];
 
