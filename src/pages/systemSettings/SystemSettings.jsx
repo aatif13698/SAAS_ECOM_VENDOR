@@ -126,7 +126,7 @@ export default function SystemSettings() {
           </div>
            <div className="ml-auto flex items-center gap-4">
            
-              <div className="">
+              <div className="px-4">
                 <button onClick={() => navigate('/dashboard')} className='bg-red-600 hover:bg-red-400 hover:right-2 ring-red-100 px-2 py-1 rounded-lg text-white'>Close</button>
               </div>
 

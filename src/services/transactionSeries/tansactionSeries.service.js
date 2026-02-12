@@ -46,7 +46,22 @@ const getNextSerialNumber = async (year = "2026-27", type) => {
 
 
 
+
+const update = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/settings/general/ts/update/serial`, {...data, clientId : clinetId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+
+
 export default {
     getSeriesList,
-    getNextSerialNumber
+    getNextSerialNumber,
+    update
 }
