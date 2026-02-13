@@ -1,48 +1,16 @@
-// import React, { useEffect, useState } from 'react'
-// import tansactionSeriesService from '../../../services/transactionSeries/tansactionSeries.service';
-
-// function TransactionSeries() {
-
-//     const currentYear = "2026-2027";
-
-//     const [series, setSeries] = useState([]);
-
-
-//     console.log("series", series);
-
-
-
-
-
-//     useEffect(() => {
-//         getTransactionSeries()
-//     },[]);
-
-
-//     async function getTransactionSeries(params) {
-//         try {
-//             const response = await tansactionSeriesService.getSeriesList(currentYear);
-//             setSeries(response?.data)
-//         } catch (error) {
-//             console.log("error while getting the series", error);
-//         }
-//     }
-
-
-
-//   return (
-//     <div>TransactionSeries</div>
-//   )
-// }
-
-// export default TransactionSeries
-
-
-
-import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useRef, useMemo, Fragment } from 'react';
 import transactionSeriesService from "../../../services/transactionSeries/tansactionSeries.service";
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import toast from "react-hot-toast"
+import { Dialog, Transition } from "@headlessui/react";
+import Icon from "@/components/ui/Icon";
+import useDarkmode from '@/hooks/useDarkMode';
+import Button from '../../../components/ui/Button';
+
+
+import CreateTransactionSeries from "./CreateTransactionSeries";
+import CopyTransactionSeries from "./CopyTransactionSeries";
+
 
 // Human-readable labels for collection names
 const collectionLabels = {
@@ -60,12 +28,18 @@ const collectionLabels = {
   delivery_challan: 'Delivery Challan',
 };
 
-function TransactionSeries() {
+function TransactionSeries({ noFade }) {
+  const [isDark] = useDarkmode();
   const [series, setSeries] = useState([]);
   const [selectedYear, setSelectedYear] = useState('2026-27');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
+
+
+  const [copyModel, setCopyModel] = useState(false);
+  const [crearteModel, SetCreateModel] = useState(false);
+
 
   // Generate financial years from 2000-01 to 3000-01
 
@@ -191,7 +165,7 @@ function TransactionSeries() {
           {/* <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             {years.map((year) => (
               <option key={year} value={year}>
@@ -205,7 +179,7 @@ function TransactionSeries() {
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="w-48 px-4 py-2.5  border border-gray-300 rounded-lg bg-white hover:bg-gray-50 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              className="w-48 px-4 py-2.5  border border-gray-300 rounded-lg bg-white hover:bg-gray-50 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
             >
               <span className="font-medium text-gray-900">{selectedYear}</span>
               <span className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
@@ -224,7 +198,7 @@ function TransactionSeries() {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search year..."
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
                   />
                 </div>
 
@@ -239,12 +213,12 @@ function TransactionSeries() {
                       <div
                         key={year}
                         onClick={() => handleSelect(year)}
-                        className={`px-4 py-3 text-sm cursor-pointer hover:bg-blue-50 flex items-center justify-between transition-colors
-                    ${year === selectedYear ? "bg-blue-50 text-blue-700 font-medium" : "text-gray-700"}
+                        className={`px-4 py-3 text-sm cursor-pointer hover:bg-emerald-50 flex items-center justify-between transition-colors
+                    ${year === selectedYear ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700"}
                   `}
                       >
                         <span>{year}</span>
-                        {year === selectedYear && <span className="text-blue-600">✓</span>}
+                        {year === selectedYear && <span className="text-emerald-600">✓</span>}
                       </div>
                     ))
                   )}
@@ -294,7 +268,7 @@ function TransactionSeries() {
                       type="text"
                       value={item.prefix || ''}
                       onChange={(e) => handleChange(item._id, 'prefix', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       maxLength={10}
                     />
                   </td>
@@ -303,7 +277,7 @@ function TransactionSeries() {
                       type="number"
                       value={item.nextNum || ''}
                       onChange={(e) => handleChange(item._id, 'nextNum', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
                       min="1"
                     />
                   </td>
@@ -313,12 +287,35 @@ function TransactionSeries() {
                 </tr>
               )) :
 
-                <tr>
+                <tr >
                   <td
                     colSpan={4}
-                    className="text-center py-16 text-gray-500 font-medium"
+                    className="text-center  gap-2 py-16 text-gray-500 font-medium"
                   >
-                    No Series Found.
+
+
+                    <div className='mb-8'> No Series Found.</div>
+
+                    <div className='flex justify-center gap-2'>
+
+                      <button
+                        className="px-8 py-3 bg-emerald-600/20 hover:bg-emerald-800/40 border border-dashed border-emerald-700 disabled:bg-emerald-400 text-black font-semibold rounded-lg transition-colors flex items-center gap-2"
+                        onClick={() => setCopyModel(true)}
+                      >
+                        Copy Series
+                      </button>
+
+                      <button
+                        className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+                        onClick={() => SetCreateModel(true)}
+                      >
+                        Create New Series
+                      </button>
+
+
+                    </div>
+
+
                   </td>
                 </tr>
             )}
@@ -331,11 +328,152 @@ function TransactionSeries() {
         <button
           onClick={handleSave}
           disabled={saving || loading}
-          className="px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+          className="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
         >
           {saving ? 'Saving...' : 'Save All Changes'}
         </button>
       </div>
+
+
+
+      {/* create model */}
+
+      <Transition appear show={crearteModel} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-[999]"
+          onClose={() => { }}
+        >
+          {(
+            <Transition.Child
+              as={Fragment}
+              enter={noFade ? "" : "duration-300 ease-out"}
+              enterFrom={noFade ? "" : "opacity-0"}
+              enterTo={noFade ? "" : "opacity-100"}
+              leave={noFade ? "" : "duration-200 ease-in"}
+              leaveFrom={noFade ? "" : "opacity-100"}
+              leaveTo={noFade ? "" : "opacity-0"}
+            >
+              <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+            </Transition.Child>
+          )}
+          <div
+            className="fixed inset-0 "
+          >
+            <div
+              className={`flex min-h-full justify-center text-center p-6 items-center `}
+            >
+              <Transition.Child
+                as={Fragment}
+                enter={noFade ? "" : "duration-300  ease-out"}
+                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                leave={noFade ? "" : "duration-200 ease-in"}
+                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+              >
+                <Dialog.Panel
+                  className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-7xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                >
+                  <div
+                    className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                  >
+                    <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                      Create Series
+                    </h2>
+                    <button onClick={() => SetCreateModel(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                      <Icon icon="heroicons-outline:x" />
+                    </button>
+                  </div>
+
+                  <div className="p-4 overflow-y-auto max-h-[80vh]">
+
+                    <CreateTransactionSeries selectedYear={selectedYear} />
+
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+
+      {/* copy model */}
+
+      <Transition appear show={copyModel} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-[999]"
+          onClose={() => { }}
+        >
+          {(
+            <Transition.Child
+              as={Fragment}
+              enter={noFade ? "" : "duration-300 ease-out"}
+              enterFrom={noFade ? "" : "opacity-0"}
+              enterTo={noFade ? "" : "opacity-100"}
+              leave={noFade ? "" : "duration-200 ease-in"}
+              leaveFrom={noFade ? "" : "opacity-100"}
+              leaveTo={noFade ? "" : "opacity-0"}
+            >
+              <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+            </Transition.Child>
+          )}
+          <div
+            className="fixed inset-0 "
+          >
+            <div
+              className={`flex min-h-full justify-center text-center p-6 items-center `}
+            >
+              <Transition.Child
+                as={Fragment}
+                enter={noFade ? "" : "duration-300  ease-out"}
+                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                leave={noFade ? "" : "duration-200 ease-in"}
+                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+              >
+                <Dialog.Panel
+                  className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-7xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                >
+                  <div
+                    className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                  >
+                    <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                      Copy Series
+                    </h2>
+                    <button onClick={() => setCopyModel(false)} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                      <Icon icon="heroicons-outline:x" />
+                    </button>
+                  </div>
+
+                  <div className="p-4 overflow-y-auto max-h-[80vh]">
+
+                    <CopyTransactionSeries selectedYear={selectedYear} />
+
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     </div>
   );
 }

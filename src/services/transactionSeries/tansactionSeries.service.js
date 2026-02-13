@@ -58,10 +58,23 @@ const update = async (data) => {
     });
 };
 
+const createSeries = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clinetId = localStorage.getItem("saas_client_clientId");
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/settings/general/ts/create/serial`, {...data, clientId : clinetId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+
 
 
 export default {
     getSeriesList,
     getNextSerialNumber,
-    update
+    update,
+    createSeries
 }
