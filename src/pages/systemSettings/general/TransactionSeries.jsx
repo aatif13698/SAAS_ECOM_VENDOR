@@ -449,9 +449,9 @@ function TransactionSeries({ noFade }) {
                     </button>
                   </div>
 
-                  <div className="p-4 overflow-y-auto max-h-[80vh]">
+                  <div className="p-4 overflow-y-auto max-h-[80vh] min-h-[40vh]">
 
-                    <CopyTransactionSeries selectedYear={selectedYear} />
+                    <CopyTransactionSeries creationYear={selectedYear} />
 
                   </div>
                 </Dialog.Panel>
