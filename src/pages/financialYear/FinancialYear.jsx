@@ -642,13 +642,13 @@ function FinancialYear({ centered, noFade, scrollContent }) {
                                                         <input
                                                             name="name"
                                                             type="text"
-                                                            placeholder="eg. 2023-2024"
+                                                            placeholder="eg. 2023-24"
                                                             value={formData.name}
                                                             onChange={handleChange}
                                                             readOnly={isViewed}
                                                             maxLength="7" // Restrict to 9 characters (YYYY-YYYY)
                                                             pattern="\d{4}-\d{2}" // HTML5 pattern for basic validation
-                                                            title="Please enter a valid year range (e.g., 2023-2024)"
+                                                            title="Please enter a valid year range (e.g., 2023-24)"
                                                             className="form-control py-2"
                                                         />
                                                         {<p className="text-red-600  text-xs"> {formDataErr.name}</p>}
