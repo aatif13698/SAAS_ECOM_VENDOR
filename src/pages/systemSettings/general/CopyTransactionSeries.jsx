@@ -19,7 +19,7 @@ const collections = [
     { collectionName: 'delivery_challan', label: 'Delivery Challan' },
 ];
 
-function CopyTransactionSeries({ creationYear }) {
+function CopyTransactionSeries({ creationYear, setCreationSuccess }) {
 
     console.log("abc", creationYear);
 
@@ -165,6 +165,9 @@ function CopyTransactionSeries({ creationYear }) {
                     nextNum: 10001,
                 }))
             );
+
+            setCreationSuccess(true);
+
         } catch (err) {
             console.error(err);
             const msg = err?.response?.data?.message || 'Failed to create transaction series';

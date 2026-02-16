@@ -40,6 +40,8 @@ function TransactionSeries({ noFade }) {
   const [copyModel, setCopyModel] = useState(false);
   const [crearteModel, SetCreateModel] = useState(false);
 
+  const [creationSuccess, setCreationSuccess] = useState(false);
+
 
   // Generate financial years from 2000-01 to 3000-01
 
@@ -136,6 +138,15 @@ function TransactionSeries({ noFade }) {
       )
     );
   }, []);
+
+
+  useEffect(() => {
+    if (creationSuccess) {
+      setCopyModel(false);
+      fetchSeries(selectedYear);
+      setCreationSuccess(false)
+    }
+  }, [creationSuccess])
 
   // Save all changes
   const handleSave = async () => {
@@ -300,7 +311,10 @@ function TransactionSeries({ noFade }) {
 
                       <button
                         className="px-8 py-3 bg-emerald-600/20 hover:bg-emerald-800/40 border border-dashed border-emerald-700 disabled:bg-emerald-400 text-black font-semibold rounded-lg transition-colors flex items-center gap-2"
-                        onClick={() => setCopyModel(true)}
+                        onClick={() => {
+                          setCreationSuccess(false);
+                          setCopyModel(true)
+                        }}
                       >
                         Copy Series
                       </button>
@@ -451,7 +465,7 @@ function TransactionSeries({ noFade }) {
 
                   <div className="p-4 overflow-y-auto max-h-[80vh] min-h-[40vh]">
 
-                    <CopyTransactionSeries creationYear={selectedYear} />
+                    <CopyTransactionSeries creationYear={selectedYear} setCreationSuccess={setCreationSuccess} />
 
                   </div>
                 </Dialog.Panel>

@@ -17,13 +17,20 @@ import IconImg from "../../assets/images/aestree-logo.png"
 import tableConfigure from '../common/tableConfigure';
 import loadingImg from "../../assets/images/aestree-logo.png"
 import financialYearService from '@/services/financialYear/financialYear.service';
+import CopyTransactionSeries from '../systemSettings/general/CopyTransactionSeries';
 
 
 
 
 function FinancialYear({ centered, noFade, scrollContent }) {
     const [isDark] = useDarkmode()
-    const { noDataStyle, customStyles } = tableConfigure()
+    const { noDataStyle, customStyles } = tableConfigure();
+
+
+    const [copyModel, setCopyModel] = useState(false);
+    const [currentFY, setCurrentFY] = useState(false);
+    const [creationSuccess, setCreationSuccess] = useState(false);
+
 
     const [loading, setLoading] = useState(false);
     const [pending, setPending] = useState(true);
@@ -80,8 +87,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             name: [
                 [!value, 'Name is Required'],
                 [
-                    value && !/^\d{4}-\d{4}$/.test(value),
-                    'Please enter a valid year range (e.g., 2023-2024)',
+                    value && !/^\d{4}-\d{2}$/.test(value),
+                    'Please enter a valid year range (e.g., 2023-24)',
                 ],
             ],
             alias: [
@@ -362,8 +369,19 @@ function FinancialYear({ centered, noFade, scrollContent }) {
         },
 
         {
-            name: "Notes",
-            selector: (row) => row.notes,
+            name: "Series",
+            selector: (row) => {
+                if (row.isSeriesCreated) {
+                    return <div className='bg-green-500/30 p-2 rounded-xl text-green-500'>Created</div>
+                } else {
+                    return <div onClick={() => {
+                        setCurrentFY(row?.name);
+                          setCreationSuccess(false);
+                        setCopyModel(true);
+                      
+                    }} className='bg-red-500/30 p-2 rounded-xl text-red-500'>Create Now</div>
+                }
+            },
             sortable: true,
         },
 
@@ -490,6 +508,14 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             }));
         }
     };
+
+
+    useEffect(() => {
+        if (creationSuccess) {
+            setCopyModel(false)
+            setRefresh((prev) => prev + 1);
+        }
+    }, [creationSuccess]);
 
 
     const subHeaderComponent = (
@@ -620,8 +646,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
                                                             value={formData.name}
                                                             onChange={handleChange}
                                                             readOnly={isViewed}
-                                                            maxLength="9" // Restrict to 9 characters (YYYY-YYYY)
-                                                            pattern="\d{4}-\d{4}" // HTML5 pattern for basic validation
+                                                            maxLength="7" // Restrict to 9 characters (YYYY-YYYY)
+                                                            pattern="\d{4}-\d{2}" // HTML5 pattern for basic validation
                                                             title="Please enter a valid year range (e.g., 2023-2024)"
                                                             className="form-control py-2"
                                                         />
@@ -814,6 +840,71 @@ function FinancialYear({ centered, noFade, scrollContent }) {
                         </div>
                     </Dialog>
                 </Transition>
+
+                <Transition appear show={copyModel} as={Fragment}>
+                    <Dialog
+                        as="div"
+                        className="relative z-[999]"
+                        onClose={() => { }}
+                    >
+                        {(
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300 ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0"}
+                                enterTo={noFade ? "" : "opacity-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100"}
+                                leaveTo={noFade ? "" : "opacity-0"}
+                            >
+                                <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                            </Transition.Child>
+                        )}
+                        <div
+                            className="fixed inset-0 "
+                        >
+                            <div
+                                className={`flex min-h-full justify-center text-center p-6 items-center `}
+                            >
+                                <Transition.Child
+                                    as={Fragment}
+                                    enter={noFade ? "" : "duration-300  ease-out"}
+                                    enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                    enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                    leave={noFade ? "" : "duration-200 ease-in"}
+                                    leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                    leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                                >
+                                    <Dialog.Panel
+                                        className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-7xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                    >
+                                        <div
+                                            className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                                        >
+                                            <h2 className="capitalize leading-6 tracking-wider text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                                                Copy Series
+                                            </h2>
+                                            <button onClick={() => {
+                                                setCurrentFY(null)
+                                                setCopyModel(false)
+                                            }} className="text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                                                <Icon icon="heroicons-outline:x" />
+                                            </button>
+                                        </div>
+
+                                        <div className="p-4 overflow-y-auto max-h-[80vh] min-h-[40vh]">
+
+                                            <CopyTransactionSeries creationYear={currentFY} setCreationSuccess={setCreationSuccess} />
+
+                                        </div>
+                                    </Dialog.Panel>
+                                </Transition.Child>
+                            </div>
+                        </div>
+                    </Dialog>
+                </Transition>
+
+
             </div>
         </>
     )
