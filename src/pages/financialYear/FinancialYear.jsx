@@ -876,7 +876,7 @@ function FinancialYear({ centered, noFade, scrollContent }) {
                                     leaveTo={noFade ? "" : "opacity-0 scale-95"}
                                 >
                                     <Dialog.Panel
-                                        className={`w-full transform rounded-md text-left align-middle shadow-xl transition-all max-w-7xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
+                                        className={`w-full  transform rounded-md text-left align-middle shadow-xl transition-all max-w-7xl ${isDark ? "bg-darkSecondary text-white" : "bg-light"}`}
                                     >
                                         <div
                                             className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
@@ -892,7 +892,7 @@ function FinancialYear({ centered, noFade, scrollContent }) {
                                             </button>
                                         </div>
 
-                                        <div className="p-4 overflow-y-auto max-h-[80vh] min-h-[40vh]">
+                                        <div className="p-4 overflow-y-auto max-h-[80vh] min-h-[60vh]">
 
                                             <CopyTransactionSeries creationYear={currentFY} setCreationSuccess={setCreationSuccess} />
 
