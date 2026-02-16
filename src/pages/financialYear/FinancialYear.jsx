@@ -161,8 +161,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             async (nextValue) => {
                 try {
                     setPending(true)
-                    const response = await subcategoryService.getAllList({ page, keyword: nextValue, perPage })
-                    setPaginationData(response?.data?.subCategories)
+                    const response = await financialYearService.getList({ page, keyword: nextValue, perPage })
+                    setPaginationData(response?.data?.financialYears)
                     setTotalRows(response?.data?.count)
                     setPending(false)
                 } catch (error) {
@@ -342,6 +342,25 @@ function FinancialYear({ centered, noFade, scrollContent }) {
     }
 
 
+     const handleActive = async (row) => {
+            const id = row._id
+            let status = "1"
+            setToggleWord(false)
+            setShowLoadingModal(true)
+            row.isWorking ? (status = "0") : (status = "1")
+            try {
+                const response = await financialYearService.activeInactive({ id, status, page, keyword: keyWord, perPage });
+                setPaginationData(response?.data?.data?.financialYears)
+                setTotalRows(response?.data?.data?.count)
+                setShowLoadingModal(false)
+            } catch (error) {
+                setShowLoadingModal(false)
+    
+                console.log("Error While doing active and inactive", error);
+            }
+        }
+
+
     const columns = [
         {
             name: "Name",
@@ -372,17 +391,42 @@ function FinancialYear({ centered, noFade, scrollContent }) {
             name: "Series",
             selector: (row) => {
                 if (row.isSeriesCreated) {
-                    return <div className='bg-green-500/30 p-2 rounded-xl text-green-500'>Created</div>
+                    return <div className='bg-green-500/30 p-2 rounded-xl text-green-500 text-sm'>Created</div>
                 } else {
                     return <div onClick={() => {
                         setCurrentFY(row?.name);
-                          setCreationSuccess(false);
+                        setCreationSuccess(false);
                         setCopyModel(true);
-                      
-                    }} className='bg-red-500/30 p-2 rounded-xl text-red-500'>Create Now</div>
+
+                    }} className='bg-red-500/30 p-2 rounded-xl text-red-500 text-sm'> <span className='text-sm'>Create Now</span> </div>
                 }
             },
             sortable: true,
+        },
+
+        {
+            name: "Working",
+            sortable: true,
+            selector: (row) => {
+                return (
+                    <span className="block w-full">
+                        <span
+                            className={` inline-block px-3 min-w-[90px] text-center mx-auto py-1 rounded-[999px] bg-opacity-25  ${row?.isWorking === true ? "text-success-500 bg-success-500 cursor-not-allowed " : ""
+                                } 
+                ${row?.isWorking === false ? "text-warning-500 bg-warning-500" : ""}
+                 `}
+                            title={
+                                row?.isWorking === true
+                                    ? "Click to deactivate"
+                                    : "Click to activate"
+                            }
+                            onClick={() => row?.isWorking === true ? "" : handleActive(row)}
+                        >
+                            {row.isWorking === true ? "Working Year" : "Non Working"}
+                        </span>
+                    </span>
+                );
+            },
         },
 
         {
@@ -471,8 +515,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
 
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await subcategoryService.getAllList(page, keyWord, perPage)
-            setPaginationData(response?.data?.subCategories)
+            const response = await financialYearService.getList(page, keyWord, perPage)
+            setPaginationData(response?.data?.financialYears)
             setTotalRows(response?.data?.count)
             setPerPage(perPage)
             setPending(false)
@@ -484,8 +528,8 @@ function FinancialYear({ centered, noFade, scrollContent }) {
 
     const handlePageChange = async (page) => {
         try {
-            const response = await subcategoryService.getAllList(page, keyWord, perPage)
-            setPaginationData(response?.data?.subCategories)
+            const response = await financialYearService.getList(page, keyWord, perPage)
+            setPaginationData(response?.data?.financialYears)
             setTotalRows(response?.data?.count)
             setPage(page)
             setPending(false)

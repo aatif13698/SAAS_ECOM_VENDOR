@@ -48,6 +48,20 @@ const update = async (data) => {
 };
 
 
+const activeInactive = async (data) => {
+
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/activeInactive/financialYear`, {...data, clientId: clientId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
+
+
 
 
 
@@ -55,5 +69,6 @@ const update = async (data) => {
 export default {
     create,
     getList,
-    update
+    update,
+    activeInactive
 }
