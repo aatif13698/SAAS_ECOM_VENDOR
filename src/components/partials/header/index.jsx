@@ -123,15 +123,21 @@ const Header = ({ className = "custom-class" }) => {
             </div>
           )}
 
+
+
           {/* Nav Tools  */}
           <div className="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse">
 
-           
+            <div className="bg-emerald-500 p-2 rounded-lg">
+              <span className="text-white"> FY: 2026-27</span>
+            </div>
+
+
 
             <GoogleLanguage />
             {/* <SwitchDark /> */}
             <MonoChrome />
-             <span>
+            <span>
               <div
                 className="lg:h-[32px] lg:w-[32px]  dark:text-white text-slate-900 cursor-pointer rounded-full text-[20px] flex flex-col items-center justify-center"
                 onClick={() => navigate("/system/settings")}
