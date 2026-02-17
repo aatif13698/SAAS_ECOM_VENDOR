@@ -82,7 +82,36 @@ const getWorkingFy = async () => {
     }
 };
 
+const allFyies = async () => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
 
+    try {
+        const response = await axios.get(
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/all/nonworking/financialYear/${clientId}`,
+            {
+                headers: {
+                    Authorization: `Bearer ${authToken}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error in getting role list:", error);
+        throw error;
+    }
+};
+
+
+const setWorking = async (data) => {
+    const authToken = await localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/accounts/fy/set/working/financialYear`, {...data, clientId: clientId}, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
 
 
 
@@ -91,5 +120,7 @@ export default {
     getList,
     update,
     getWorkingFy,
-    activeInactive
+    allFyies,
+    activeInactive,
+    setWorking
 }

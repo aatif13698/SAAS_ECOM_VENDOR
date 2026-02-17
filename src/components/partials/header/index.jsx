@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, useRef } from "react";
 import Icon from "@/components/ui/Icon";
 import SwitchDark from "./Tools/SwitchDark";
 import useWidth from "@/hooks/useWidth";
@@ -24,7 +25,13 @@ const Header = ({ className = "custom-class" }) => {
   const navigate = useNavigate();
 
   const [currentFy, setCurrentFy] = useState(null);
-  const [fyLoading, setFyLoading] = useState(false)
+  const [allFyies, setAllFyies] = useState([]);
+  const [fyLoading, setFyLoading] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const popupRef = useRef(null);
+  const triggerRef = useRef(null);
+
 
   const [collapsed, setMenuCollapsed] = useSidebar();
   const { width, breakpoints } = useWidth();
@@ -66,19 +73,77 @@ const Header = ({ className = "custom-class" }) => {
 
   useEffect(() => {
 
-    getWorkingFy()
+    getWorkingFy();
+    getAllFyies()
 
   }, []);
 
-  async function getWorkingFy(params) {
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target) &&
+        triggerRef.current &&
+        !triggerRef.current.contains(event.target)
+      ) {
+        setIsPopupOpen(false);
+      }
+    };
+
+    if (isPopupOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isPopupOpen]);
+
+  async function getWorkingFy() {
     try {
-      setFyLoading(true)
+      setFyLoading(true);
       const response = await financialYearService.getWorkingFy();
       setCurrentFy(response?.data);
-      setFyLoading(false)
+      setFyLoading(false);
     } catch (error) {
-      setFyLoading(false)
+      setFyLoading(false);
       console.log("error", error);
+    }
+  }
+
+  async function getAllFyies() {
+    try {
+      const response = await financialYearService.allFyies();
+      setAllFyies(response?.data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  }
+
+  async function handleFySelect(fy) {
+    if (fy._id === currentFy?._id) {
+      setIsPopupOpen(false);
+      return;
+    }
+
+    try {
+      setFyLoading(true);
+      // Assuming financialYearService has a setWorkingFy method that takes fy.id
+      // If not, implement it in the service as per your API (e.g., POST /set-working-fy with { id: fy.id });
+
+      const dataObject = {
+        id : fy?._id, status : "1",
+      }
+
+
+      await financialYearService.setWorking(dataObject);
+      await getWorkingFy(); // Refresh current FY after update
+      setIsPopupOpen(false);
+    } catch (error) {
+      console.error("Error setting working FY:", error);
+      // Optionally, show a toast or error message to the user
+    } finally {
+      setFyLoading(false);
     }
   }
 
@@ -152,27 +217,54 @@ const Header = ({ className = "custom-class" }) => {
           {/* Nav Tools  */}
           <div className="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse">
 
-            <div className="bg-emerald-500 h-8 p-2 flex items-center rounded-lg">
-              {
-                fyLoading ?
+            <div className="relative">
+              <div
+                ref={triggerRef}
+                className="bg-emerald-500 h-8 p-2 flex items-center rounded-lg cursor-pointer"
+                onClick={() => setIsPopupOpen(!isPopupOpen)}
+              >
+                {fyLoading ? (
                   <div className="flex gap-1 items-center">
                     <div
                       className="w-4 h-4 rounded-full animate-spin
-                    border-2 border-solid border-white dark:border-slate-200 border-t-transparent"
+                      border-2 border-solid border-white dark:border-slate-200 border-t-transparent"
                     ></div>
-
                     <span className="text-white">Loading..</span>
                   </div>
-                  :
+                ) : (
                   <>
-                    {
-                      currentFy ?
-                        <span className="text-white"> FY: {currentFy?.name}</span>
-                        :
-                        <span className="text-white"> Set Cuurent FY</span>
-                    }
+                    {currentFy ? (
+                      <span className="text-white"> FY: {currentFy?.name}</span>
+                    ) : (
+                      <span className="text-white"> Set Current FY</span>
+                    )}
                   </>
-              }
+                )}
+              </div>
+
+              {isPopupOpen && (
+                <div
+                  ref={popupRef}
+                  className="absolute top-full h-[12rem] left-0 mt-2 bg-white dark:bg-darkSecondary shadow-lg rounded-lg p-2 z-50 min-w-[200px] max-h-60 overflow-y-auto border border-slate-200 dark:border-slate-700"
+                >
+                  <ul className="list-none m-0 p-0">
+                    {allFyies.map((fy) => (
+                      <li
+                        key={fy.id}
+                        className={`p-2 my-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer flex items-center justify-between rounded-md ${
+                          fy.id === currentFy?.id ? "bg-slate-200 dark:bg-slate-600" : ""
+                        }`}
+                        onClick={() => handleFySelect(fy)}
+                      >
+                        <span>{fy.name}</span>
+                        {fy._id === currentFy?._id && (
+                          <Icon icon="heroicons:check" className="text-emerald-500 ml-2" />
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
 
