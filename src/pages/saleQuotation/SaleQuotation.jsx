@@ -93,10 +93,13 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
 
   // const {id, row} = location?.state;
 
+  const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
+
+
+
+
   const store = useSelector((state) => state);
   const purhcaseOrderDraftData = useSelector((state) => state.quotationSlice);
-  console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
-  console.log("store", store);
 
 
   const [isDark] = useDarkmode();
@@ -383,8 +386,9 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
       const currentDate = new Date();
       const financialYear = getFiscalYearRange(currentDate);
       const response = await transactionSeriesService.getNextSerialNumber(financialYear, "sale_quotation");
-      const nextNumber = Number(response?.data?.nextNum) + 1;
-      const series = `${response?.data?.prefix + "" + nextNumber}`;
+      setCurrentWorkingFy(response?.data?.financialYear)
+      const nextNumber = Number(response?.data?.series?.nextNum) + 1;
+      const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
       dispatch(setsqNumber(series))
     } catch (error) {
       console.log("error while getting the next series", error);
@@ -785,6 +789,10 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
         grandTotal: totals.grandTotal,
+      }
+
+      if (currentWorkingFy && currentWorkingFy?._id) {
+        dataObject.financialYear = currentWorkingFy?._id
       }
 
       const response = await quotationService.create(dataObject);

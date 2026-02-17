@@ -162,6 +162,10 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
   const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
+  const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
+
+
+
   const [levelResult, setLevelResult] = useState(0);
   const [activeBusinessUnits, setActiveBusinessUnits] = useState([]);
   const [activeBranches, setActiveBranches] = useState([]);
@@ -381,8 +385,9 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
       const currentDate = new Date();
       const financialYear = getFiscalYearRange(currentDate);
       const response = await transactionSeriesService.getNextSerialNumber(financialYear, "purchase_invoice");
-      const nextNumber = Number(response?.data?.nextNum) + 1;
-      const series = `${response?.data?.prefix + "" + nextNumber}`;
+      setCurrentWorkingFy(response?.data?.financialYear)
+      const nextNumber = Number(response?.data?.series?.nextNum) + 1;
+      const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
       dispatch(setPoNumber(series))
     } catch (error) {
       console.log("error while getting the next series", error);
@@ -834,6 +839,13 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
         paidAmount: formData?.paidAmount,
         balance: formData?.balance,
       }
+
+      if (currentWorkingFy && currentWorkingFy?._id) {
+        dataObject.financialYear = currentWorkingFy?._id
+      }
+
+
+
       const response = await purchaseInvoiceService?.create(dataObject);
       toast.success('Purchase Order submitted successfully!');
       resetAllAndNavigate()
@@ -1120,6 +1132,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
+                      disabled={true}
                     />
                   </div>
                   <div>

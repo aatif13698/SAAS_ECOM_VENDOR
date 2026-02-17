@@ -94,9 +94,10 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
 
     // const {id, row} = location?.state;
 
+    const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
+
     const store = useSelector((state) => state);
     const purhcaseOrderDraftData = useSelector((state) => state.saleInvoiceSlice);
-    console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
     const [paymentFrom, setPaymentFrom] = useState([]);
 
 
@@ -427,9 +428,10 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
             const currentDate = new Date();
             const financialYear = getFiscalYearRange(currentDate);
             const response = await transactionSeriesService.getNextSerialNumber(financialYear, "sale_invoice");
-            const nextNumber = Number(response?.data?.nextNum) + 1;
-            const series = `${response?.data?.prefix + "" + nextNumber}`;
-            dispatch(setsiNumber(series))
+            setCurrentWorkingFy(response?.data?.financialYear);
+            const nextNumber = Number(response?.data?.series?.nextNum) + 1;
+            const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
+            dispatch(setsiNumber(series));
         } catch (error) {
             console.log("error while getting the next series", error);
         }
@@ -843,6 +845,10 @@ const SaleInvoice = ({ noFade, scrollContent }) => {
                 balance: formData?.balance,
                 grandTotal: totals.grandTotal,
                 receivedIn: formData?.payedFrom,
+            }
+
+            if (currentWorkingFy && currentWorkingFy?._id) {
+                dataObject.financialYear = currentWorkingFy?._id
             }
 
             const response = await saleInvoiceService.create(dataObject);
