@@ -19,10 +19,13 @@ import { FiAlignJustify } from "react-icons/fi";
 import { IoIosSettings } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import financialYearService from "@/services/financialYear/financialYear.service";
+import { setIncreaseCount } from "@/store/slices/financialYearChange/financialYearChangeSlice";
+import { useDispatch } from "react-redux";
 
 
 const Header = ({ className = "custom-class" }) => {
   const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const [currentFy, setCurrentFy] = useState(null);
   const [allFyies, setAllFyies] = useState([]);
@@ -139,6 +142,8 @@ const Header = ({ className = "custom-class" }) => {
       await financialYearService.setWorking(dataObject);
       await getWorkingFy(); // Refresh current FY after update
       setIsPopupOpen(false);
+      dispatch(setIncreaseCount());
+      
     } catch (error) {
       console.error("Error setting working FY:", error);
       // Optionally, show a toast or error message to the user

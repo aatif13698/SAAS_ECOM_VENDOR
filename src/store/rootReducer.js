@@ -18,6 +18,8 @@ import toastReducer from "./slices/tostSlice"
 
 import SuperAdminNotification from "@/redux/slices/Notification/SuperAdminNotification";
 import resetSlice from "@/redux/slices/Auth/Logout";
+
+import financialYearChangeSclice from "../store/slices/financialYearChange/financialYearChangeSlice"
 const rootReducer = {
   layout,
   auth,
@@ -39,6 +41,7 @@ const rootReducer = {
   performaSlice,
   saleInvoiceSlice,
   paymentInSlice,
+  financialYearChangeSclice,
 
   toast: toastReducer,
 

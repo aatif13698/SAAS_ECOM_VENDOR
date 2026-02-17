@@ -88,6 +88,9 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
   const location = useLocation();
 
+  const {changeCount} = useSelector((state) => state.financialYearChangeSclice);
+  
+
   // const {id, row} = location?.state;
 
   const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
@@ -357,7 +360,7 @@ const PurchaseOrderPage = ({ noFade, scrollContent }) => {
 
   useEffect(() => {
     getNextSerial();
-  }, []);
+  }, [changeCount]);
 
   function getFiscalYearRange(date) {
     const year = date.getFullYear();
