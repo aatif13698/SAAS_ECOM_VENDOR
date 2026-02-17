@@ -342,23 +342,26 @@ function FinancialYear({ centered, noFade, scrollContent }) {
     }
 
 
-     const handleActive = async (row) => {
-            const id = row._id
-            let status = "1"
-            setToggleWord(false)
-            setShowLoadingModal(true)
-            row.isWorking ? (status = "0") : (status = "1")
-            try {
-                const response = await financialYearService.activeInactive({ id, status, page, keyword: keyWord, perPage });
-                setPaginationData(response?.data?.data?.financialYears)
-                setTotalRows(response?.data?.data?.count)
-                setShowLoadingModal(false)
-            } catch (error) {
-                setShowLoadingModal(false)
-    
-                console.log("Error While doing active and inactive", error);
-            }
+    const handleActive = async (row) => {
+        const id = row._id
+        let status = "1"
+        setToggleWord(false)
+        setShowLoadingModal(true)
+        row.isWorking ? (status = "0") : (status = "1")
+        try {
+            const response = await financialYearService.activeInactive({ id, status, page, keyword: keyWord, perPage });
+            setPaginationData(response?.data?.data?.financialYears)
+            setTotalRows(response?.data?.data?.count)
+            setShowLoadingModal(false);
+
+           window.location.reload();
+
+        } catch (error) {
+            setShowLoadingModal(false)
+
+            console.log("Error While doing active and inactive", error);
         }
+    }
 
 
     const columns = [

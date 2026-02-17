@@ -17,10 +17,15 @@ import logo from "../../../assets/images/logo/logo.png"
 import { FiAlignJustify } from "react-icons/fi";
 import { IoIosSettings } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
+import financialYearService from "@/services/financialYear/financialYear.service";
 
 
 const Header = ({ className = "custom-class" }) => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  const [currentFy, setCurrentFy] = useState(null);
+  const [fyLoading, setFyLoading] = useState(false)
+
   const [collapsed, setMenuCollapsed] = useSidebar();
   const { width, breakpoints } = useWidth();
   const [navbarType] = useNavbarType();
@@ -57,6 +62,25 @@ const Header = ({ className = "custom-class" }) => {
       return "dark:border-b dark:border-slate-700 dark:border-opacity-60";
     }
   };
+
+
+  useEffect(() => {
+
+    getWorkingFy()
+
+  }, []);
+
+  async function getWorkingFy(params) {
+    try {
+      setFyLoading(true)
+      const response = await financialYearService.getWorkingFy();
+      setCurrentFy(response?.data);
+      setFyLoading(false)
+    } catch (error) {
+      setFyLoading(false)
+      console.log("error", error);
+    }
+  }
 
   return (
     <header className={className + " " + navbarTypeClass()}>
@@ -128,8 +152,27 @@ const Header = ({ className = "custom-class" }) => {
           {/* Nav Tools  */}
           <div className="nav-tools flex items-center lg:space-x-6 space-x-3 rtl:space-x-reverse">
 
-            <div className="bg-emerald-500 p-2 rounded-lg">
-              <span className="text-white"> FY: 2026-27</span>
+            <div className="bg-emerald-500 h-8 p-2 flex items-center rounded-lg">
+              {
+                fyLoading ?
+                  <div className="flex gap-1 items-center">
+                    <div
+                      className="w-4 h-4 rounded-full animate-spin
+                    border-2 border-solid border-white dark:border-slate-200 border-t-transparent"
+                    ></div>
+
+                    <span className="text-white">Loading..</span>
+                  </div>
+                  :
+                  <>
+                    {
+                      currentFy ?
+                        <span className="text-white"> FY: {currentFy?.name}</span>
+                        :
+                        <span className="text-white"> Set Cuurent FY</span>
+                    }
+                  </>
+              }
             </div>
 
 
