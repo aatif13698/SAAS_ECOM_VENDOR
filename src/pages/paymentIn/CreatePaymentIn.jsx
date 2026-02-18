@@ -41,6 +41,9 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { changeCount } = useSelector((state) => state.financialYearChangeSclice);
+    const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
+
 
     const paymentInDrafData = useSelector((state) => state.paymentInSlice);
     const store = useSelector((state) => state);
@@ -186,7 +189,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         getNextSerial();
-    }, []);
+    }, [changeCount]);
 
     function getFiscalYearRange(date) {
         const year = date.getFullYear();
@@ -200,8 +203,9 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
             const currentDate = new Date();
             const financialYear = getFiscalYearRange(currentDate);
             const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_in");
-            const nextNumber = Number(response?.data?.nextNum) + 1;
-            const series = `${response?.data?.prefix + "" + nextNumber}`;
+            setCurrentWorkingFy(response?.data?.financialYear)
+            const nextNumber = Number(response?.data?.series?.nextNum) + 1;
+            const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
             dispatch(setPaymentInNumber(series))
         } catch (error) {
             console.log("error while getting the next series", error);
@@ -509,8 +513,9 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                 }))
             };
 
-            console.log("dataObject", dataObject);
-
+            if (currentWorkingFy && currentWorkingFy?._id) {
+                dataObject.financialYear = currentWorkingFy?._id
+            }
             const response = await salePaymentInConfigureService?.createPaymentIn(dataObject);
             toast.success('Payment Out submitted successfully!');
             resetAllAndNavigate();

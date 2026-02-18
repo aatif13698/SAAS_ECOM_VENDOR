@@ -89,6 +89,10 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
   const location = useLocation();
 
+
+  const { changeCount } = useSelector((state) => state.financialYearChangeSclice);
+
+
   // const {id, row} = location?.state;
 
   const purhcaseOrderDraftData = useSelector((state) => state.purchaseInvoiceSlice);
@@ -371,7 +375,7 @@ const PurchaseInvoice = ({ noFade, scrollContent }) => {
 
   useEffect(() => {
     getNextSerial();
-  }, []);
+  }, [changeCount]);
 
   function getFiscalYearRange(date) {
     const year = date.getFullYear();

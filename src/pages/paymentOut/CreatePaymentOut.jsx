@@ -50,6 +50,8 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
     // console.log("formData", formData);
     // console.log("paymentOutDrafData", paymentOutDrafData);
 
+    const { changeCount } = useSelector((state) => state.financialYearChangeSclice);
+    const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
 
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
@@ -184,7 +186,7 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
 
     useEffect(() => {
         getNextSerial();
-    }, []);
+    }, [changeCount]);
 
     function getFiscalYearRange(date) {
         const year = date.getFullYear();
@@ -198,8 +200,9 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
             const currentDate = new Date();
             const financialYear = getFiscalYearRange(currentDate);
             const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_out");
-            const nextNumber = Number(response?.data?.nextNum) + 1;
-            const series = `${response?.data?.prefix + "" + nextNumber}`;
+            setCurrentWorkingFy(response?.data?.financialYear);
+            const nextNumber = Number(response?.data?.series?.nextNum) + 1;
+            const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
             dispatch(setPaymentOutNumber(series))
         } catch (error) {
             console.log("error while getting the next series", error);
@@ -473,9 +476,10 @@ const CreatePaymentOut = ({ noFade, scrollContent }) => {
                     amount: a.applied
                 }))
             };
-
+            if (currentWorkingFy && currentWorkingFy?._id) {
+                dataObject.financialYear = currentWorkingFy?._id
+            }
             console.log("dataObject", dataObject);
-
             const response = await purchasePaymentConfigureService?.createPaymentOut(dataObject);
             toast.success('Payment Out submitted successfully!');
             resetAllAndNavigate();

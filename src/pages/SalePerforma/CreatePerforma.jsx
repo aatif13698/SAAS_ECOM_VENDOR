@@ -91,6 +91,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
   const location = useLocation();
 
   // const {id, row} = location?.state;
+  const { changeCount } = useSelector((state) => state.financialYearChangeSclice);
 
   const store = useSelector((state) => state);
   const purhcaseOrderDraftData = useSelector((state) => state.performaSlice);
@@ -362,7 +363,7 @@ const CreatePerforma = ({ noFade, scrollContent }) => {
 
   useEffect(() => {
     getNextSerial();
-  }, []);
+  }, [changeCount]);
 
   function getFiscalYearRange(date) {
     const year = date.getFullYear();

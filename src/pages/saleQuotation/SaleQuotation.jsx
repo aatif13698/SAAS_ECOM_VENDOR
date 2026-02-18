@@ -92,6 +92,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
   const location = useLocation();
 
   // const {id, row} = location?.state;
+  const { changeCount } = useSelector((state) => state.financialYearChangeSclice);
 
   const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
 
@@ -370,7 +371,7 @@ const SaleQuotation = ({ noFade, scrollContent }) => {
 
     getNextSerial();
 
-  }, []);
+  }, [changeCount]);
 
 
   function getFiscalYearRange(date) {
