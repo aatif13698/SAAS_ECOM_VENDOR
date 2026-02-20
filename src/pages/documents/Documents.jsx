@@ -134,7 +134,7 @@ const Documents = ({ noFade, scrollContent }) => {
         const name = "view"
         setUserId(id);
         setIsViewed(true);
-        navigate("/create-documents", { state: { id, row, name } });
+        navigate("/create-document-type", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         scrollToTop();
@@ -142,7 +142,7 @@ const Documents = ({ noFade, scrollContent }) => {
         const name = "edit"
         setUserId(id);
         setIsViewed(false);
-        navigate("/create-documents", { state: { id, row, name } });
+        navigate("/create-document-type", { state: { id, row, name } });
     };
     //   --- Deletiing the Particulare Row
     const handleDelete = (row) => {
@@ -373,7 +373,7 @@ const Documents = ({ noFade, scrollContent }) => {
     const subHeaderComponent = (
         <div className="w-full grid xl:grid-cols-2 md:grid-cols-1 md:text-start gap-3  items-center">
             <button className={`w-fit bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-3 py-2 rounded   `}
-                onClick={() => navigate("/create-documents")}
+                onClick={() => navigate("/create-document-type")}
             >
                 Create Document
             </button>            

@@ -79,7 +79,7 @@ const Navmenu = ({ menus }) => {
     const iconMap = {
       "Roles & Permissions": "material-symbols:developer-board-off-outline",
       "Employee": "material-symbols:group-outline",
-      "Documents": "material-symbols:unknown-document-outline",
+      "Document Type": "material-symbols:unknown-document-outline",
       "Customer": "material-symbols:sensor-occupied-outline",
       "BusinessUnit": "material-symbols:crown-outline",
       "Branch": "material-symbols:polyline-outline",

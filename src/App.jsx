@@ -317,8 +317,8 @@ function App() {
                 <Route path="roles-&-permissions-list" element={<RoleList />} />
                 <Route path="assignPermission" element={<AssignPermission />} />
 
-                <Route path="documents-list" element={<Documents />} />
-                <Route path="create-documents" element={<CreateDocument />} />
+                <Route path="document-type-list" element={<Documents />} />
+                <Route path="create-document-type" element={<CreateDocument />} />
                 <Route path="documents/custom-field" element={<DocCustomField />} />
                 <Route path="documents/adjust-order" element={<DocAdjustOrder />} />
 
