@@ -379,8 +379,8 @@ function App() {
                 <Route path="order-list" element={<Orders />} />
                 <Route path="order-view" element={<ViewOrder />} />
                 <Route path="create-order" element={<CreateOrder />} />
-                <Route path="create-product-qa" element={<AddProductQA />} />
-                <Route path="query-list" element={<Query />} />
+                <Route path="faqs-list" element={<AddProductQA />} />
+                <Route path="customer-query-list" element={<Query />} />
 
 
 

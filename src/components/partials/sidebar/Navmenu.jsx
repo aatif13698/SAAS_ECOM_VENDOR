@@ -90,7 +90,7 @@ const Navmenu = ({ menus }) => {
       "Brand": "material-symbols:library-add-check-outline",
       "Manufacturer": "material-symbols:precision-manufacturing-outline",
       "Product": "material-symbols:garden-cart-outline",
-      "Product QA": "material-symbols:stacks-outline",
+      "FAQs": "material-symbols:stacks-outline",
       "Product QA Out": "material-symbols:garden-cart-outline",
       "Attribute": "material-symbols:stacks-outline",
       "Variant": "material-symbols:blur-linear-outline",
