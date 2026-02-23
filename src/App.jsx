@@ -154,6 +154,9 @@ const PurchaseOrderPage = lazy(() => import("./pages/purchaseOrder/PurchaseOrder
 const ListPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ListPurchaseOrder"));
 const ViewPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ViewPurchaseOrder"));
 
+const PurchaseReturn = lazy(() => import("./pages/purchaseReturn/PurchaseReturn"));
+const ListPurchaseReturn = lazy(() => import("./pages/purchaseReturn/ListPurchaseReturn"));
+
 const ListPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ListPurchaseInvoice"));
 const PurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/PurchaseInvoice"));
 const ViewPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ViewPurchaseInvoice"));
@@ -406,6 +409,9 @@ function App() {
                 <Route path="edit-purchase-order" element={<PurchaseOrderPage />} />
                 <Route path="purchase-order-list" element={<ListPurchaseOrder />} />
                 <Route path="view/purchase-order" element={<ViewPurchaseOrder />} />
+
+                <Route path="create-purchase-returns" element={<PurchaseReturn/>} />
+                <Route path="purchase-returns-list" element={<ListPurchaseReturn/>} />
 
                 <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />
                 <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />

@@ -101,6 +101,20 @@ const getStockListOfSupplier = async ( page, keyword, perPage, currentLevel, lev
     return response.data
 }
 
+
+const getStockListOfSupplierByPurchaseId = async ( supplier , id) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    const clientId = localStorage.getItem("saas_client_clientId");
+
+    const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/api/vendor/stock/listStock/all/of/supplier/by/purchaseInv?supplierId=${supplier}&&purchaseInvId=${id}&&clientId=${clientId}`, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+    return response.data
+}
+
 const getStockListForCustomer = async ( page, keyword, perPage, currentLevel, levelId, categoryFilter, subCategoryFilter, supplier ) => {
     const authToken = localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -214,6 +228,7 @@ export default {
     getParticularStocks,
     getStockList,
     getStockListOfSupplier,
+    getStockListOfSupplierByPurchaseId,
     getStockListForCustomer,
     getStockByProduct,
     addItem,
