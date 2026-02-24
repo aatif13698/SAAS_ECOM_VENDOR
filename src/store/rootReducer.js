@@ -7,6 +7,7 @@ import roleSclice from "./slices/roles/roleSclice";
 import capabilitySlice from "./slices/auth/capabilitySclice";
 import purchaseOrderSlice from "./slices/purchaseOrder/purchaseOrderSclice";
 import purchaseInvoiceSlice from "./slices/purchaseInvoice/purhcaseInvoiceSclice";
+import purchaseReturns from "./slices/purchaseReturn/purchaseReturnSclice"
 import paymentOutSlice from "./slices/paymentOut/paymentOutSlice";
 import quotationSlice from "./slices/quotation/quotationSlice";
 import performaSlice from "./slices/performa/performaSlice";
@@ -36,6 +37,7 @@ const rootReducer = {
   capabilitySlice,
   purchaseOrderSlice,
   purchaseInvoiceSlice,
+  purchaseReturns,
   paymentOutSlice,
   quotationSlice,
   performaSlice,

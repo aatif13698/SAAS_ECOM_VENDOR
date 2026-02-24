@@ -1,5 +1,5 @@
 
-import React, { useEffect, Fragment, useState, useRef } from 'react';
+import React, { useEffect, Fragment, useState, useRef, useMemo } from 'react';
 import { BsPlus } from "react-icons/bs";
 import useDarkmode from '@/hooks/useDarkMode';
 import { GoTrash, GoCheck } from "react-icons/go";
@@ -12,9 +12,9 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from '../purchaseOrder/AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { removeItemsList, resetPurchaseOrder, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
+import { removeItemsList, setSelectedInv, resetPurchaseReturn, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseReturn/purchaseReturnSclice';
 import { useDispatch } from 'react-redux';
-import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
+import purchaseReturnService from '@/services/purchaseReturn/purchaseReturn.service';
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -96,16 +96,26 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
 
     // const {id, row} = location?.state;
 
-    const purhcaseOrderDraftData = useSelector((state) => state.purchaseInvoiceSlice);
-
+    const purhcaseOrderDraftData = useSelector((state) => state.purchaseReturns);
 
 
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [purchaseInvoices, setPurchaseInvoices] = useState([]);
-    const [selectedInv, setSelectedInv] = useState(null);
+    const [selectedInv, setSelectedInvoice] = useState(null);
+
+    console.log("selectedInv", selectedInv);
+
 
     const searchInputRef = useRef(null);
+
+
+
+    const filteredPurchaseInvoices = useMemo(() => {
+        if (!searchTerm) return purchaseInvoices;
+        const term = searchTerm.toLowerCase();
+        return purchaseInvoices.filter((inv) => inv?.piNumber.toLowerCase().includes(term));
+    }, [purchaseInvoices, searchTerm]);
 
 
     useEffect(() => {
@@ -115,30 +125,11 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
     }, [isOpen]);
 
     const handleSelect = (inv) => {
-        setSelectedInv(inv);
+        dispatch(setSelectedInv(inv?._id));
+        setSelectedInvoice(inv);
         setIsOpen(false);
         setSearchTerm("");
-    };
-
-
-
-
-
-
-
-
-
-
-
-
-    const store = useSelector((state) => state);
-    console.log("store", purhcaseOrderDraftData);
-
-    const [isDark] = useDarkmode();
-    const [addresses, setAddresses] = useState([]);
-    const [currentSupplierId, setCurrentSupplierId] = useState("");
-
-    const [tempItems, setTempItems] = useState([
+        dispatch(removeItemsList([
             {
                 srNo: 1,
                 itemName: {
@@ -161,13 +152,45 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 tax: 0,
                 totalAmount: 0
             }
-        ])
- 
+        ]))
+    };
+
+    console.log("purhcaseOrderDraftData", purhcaseOrderDraftData);
+
+    const [isDark] = useDarkmode();
+    const [addresses, setAddresses] = useState([]);
+    const [currentSupplierId, setCurrentSupplierId] = useState("");
+
+    const [tempItems, setTempItems] = useState([
+        {
+            srNo: 1,
+            itemName: {
+                name: "",
+                productStock: "",
+                productMainStock: "",
+                purchasePrice: ""
+            },
+            quantity: 1,
+            mrp: 0,
+            discount: 0,
+            taxableAmount: 0,
+            gstPercent: 0,
+            cgstPercent: 0,
+            sgstPercent: 0,
+            igstPercent: 0,
+            cgst: 0,
+            sgst: 0,
+            igst: 0,
+            tax: 0,
+            totalAmount: 0
+        }
+    ])
+
     const [formData, setFormData] = useState({
         level: purhcaseOrderDraftData?.level,
         businessUnit: purhcaseOrderDraftData?.businessUnit,
         branch: purhcaseOrderDraftData?.branch,
-        warehouse: purhcaseOrderDraftData.warehouse,
+        warehouse: purhcaseOrderDraftData?.warehouse,
         supplier: null,
         shippingAddress: {
             fullName: "",
@@ -461,19 +484,22 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 ifscCode: purhcaseOrderDraftData?.bankDetails?.ifscCode || "",
                 branch: purhcaseOrderDraftData?.bankDetails?.branch || ""
             },
-
             paymentMethod: purhcaseOrderDraftData?.paymentMethod,
             paidAmount: purhcaseOrderDraftData?.paidAmount,
             payedFrom: purhcaseOrderDraftData?.payedFrom,
             balance: purhcaseOrderDraftData?.balance
-
         }));
+
+        if (purhcaseOrderDraftData?.selectedInv && purchaseInvoices?.length > 0) {
+            const filteredInvoice = purchaseInvoices.find((inv) => inv?._id === purhcaseOrderDraftData?.selectedInv);
+            setSelectedInvoice(filteredInvoice)
+        }
 
         const warehouseDetail = activeWarehouse.find((item) => item?._id == purhcaseOrderDraftData.warehouse);
         if (warehouseDetail) {
             setCurrentWarehouseDetal(warehouseDetail);
         }
-    }, [purhcaseOrderDraftData]);
+    }, [purhcaseOrderDraftData, purchaseInvoices]);
 
 
 
@@ -684,7 +710,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
 
     async function getSupplierPurchaseInvoice(id) {
         try {
-            const response = await purchaseInvoiceService.getAll(id);
+            const response = await purchaseReturnService.getAll(id);
             setPurchaseInvoices(response?.data?.purchaseInvoices)
         } catch (error) {
             console.log("error", error);
@@ -950,6 +976,10 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 branch: branch,
                 warehouse: warehouse,
 
+                purchaseInvId: selectedInv?._id,
+                purchaseInvLinkedNumber: selectedInv?.piNumber,
+
+
                 supplier: formData?.supplier?._id,
                 supplierLedger: formData?.supplier?.ledgerLinkedId,
                 shippingAddress: formData?.shippingAddress,
@@ -972,8 +1002,8 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
 
 
 
-            const response = await purchaseInvoiceService?.create(dataObject);
-            toast.success('Purchase Order submitted successfully!');
+            const response = await purchaseReturnService?.create(dataObject);
+            toast.success('Purchase return submitted successfully!');
             resetAllAndNavigate()
 
         } catch (error) {
@@ -986,7 +1016,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
     };
 
     function resetAllAndNavigate() {
-        dispatch(resetPurchaseOrder());
+        dispatch(resetPurchaseReturn());
         setFormData(defaultState);
         navigate('/purchase-invoices-list');
     }
@@ -1005,7 +1035,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 <div className='flex gap-2'>
                     {
                         purhcaseOrderDraftData?.level ? <button type='button' className='bg-red-600 text-white border border-gray-200 hover:bg-red-500 rounded-lg px-2 py-1 ' onClick={() => {
-                            dispatch(resetPurchaseOrder());
+                            dispatch(resetPurchaseReturn());
                             setFormData(defaultState);
 
                         }}>Reset</button> : ""
@@ -1304,12 +1334,12 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
 
                                                 {/* Scrollable List - Max 400px height */}
                                                 <div className="max-h-[18rem] overflow-y-auto py-2 custom-scroll">
-                                                    {purchaseInvoices.length === 0 ? (
+                                                    {filteredPurchaseInvoices.length === 0 ? (
                                                         <div className="px-4 py-10 text-center text-gray-500 text-sm">
                                                             No matching year found
                                                         </div>
                                                     ) : (
-                                                        purchaseInvoices.map((inv) => (
+                                                        filteredPurchaseInvoices.map((inv) => (
                                                             <div
                                                                 key={inv._id}
                                                                 onClick={() => handleSelect(inv)}

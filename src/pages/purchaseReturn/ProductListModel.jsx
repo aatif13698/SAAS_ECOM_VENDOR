@@ -19,7 +19,7 @@ import categoryService from '@/services/category/category.service';
 import subcategoryService from '@/services/subCategory/subcategory.service';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { setItemsList } from '@/store/slices/purchaseInvoice/purhcaseInvoiceSclice';
+import { setItemsList } from '@/store/slices/purchaseReturn/purchaseReturnSclice';
 
 /* --------------------------------------------------------------
    Main Component
@@ -519,7 +519,7 @@ function ProductListModel({
                                         ) : (
                                             <>
                                                 {/* ----- Filters (sticky) ----- */}
-                                                <div className="p-4 sticky top-0 bg-white dark:bg-darkInput z-10 flex flex-wrap gap-3 mb-6 items-center">
+                                                {/* <div className="p-4 sticky top-0 bg-white dark:bg-darkInput z-10 flex flex-wrap gap-3 mb-6 items-center">
                                                     <input
                                                         type="text"
                                                         placeholder="Search by name..."
@@ -581,7 +581,7 @@ function ProductListModel({
                                                             </option>
                                                         ))}
                                                     </select>
-                                                </div>
+                                                </div> */}
 
                                                 {/* ----- Product groups (tables) ----- */}
                                                 <div className="space-y-8 p-4">
