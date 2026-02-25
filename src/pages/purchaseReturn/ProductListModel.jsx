@@ -55,10 +55,6 @@ function ProductListModel({
     const [keyWord, setKeyWord] = useState('');
     const [searchInput, setSearchInput] = useState('');
 
-    console.log("paginationData", paginationData);
-
-    console.log("items", items);
-
 
 
     const [categories, setCategories] = useState([]);
@@ -69,7 +65,61 @@ function ProductListModel({
     /* ---------------------- selected variants (qty only) ---------------------- */
     const [selectedVariants, setSelectedVariants] = useState({}); // { variantId: {variant, stock, qty} }
 
-    console.log("selectedVariants", selectedVariants);
+    // useEffect(() => {
+   
+    //        if (selectedInv && tempPaginationData?.length > 0) {
+   
+    //            const invItems = selectedInv?.items;
+   
+    //            const filtered = tempPaginationData?.map((item) => {
+    //                const mainStock = item?.itemName?.productMainStock;
+   
+    //                const matchedItem = invItems.find(
+    //                    (element) =>
+    //                        element?.itemName?.productMainStock === mainStock
+    //                );
+   
+    //                if (matchedItem) {
+    //                    console.log("mainStock asaa", mainStock);
+   
+    //                    return {
+    //                        ...item,
+    //                        mrp: matchedItem.mrp,
+    //                        quantity: matchedItem.quantity,
+    //                        cgst: matchedItem.cgst,
+    //                        cgstPercent: matchedItem.cgstPercent,
+    //                        discount: matchedItem.discount,
+    //                        gstPercent: matchedItem.gstPercent,
+    //                        igst: matchedItem.igst,
+    //                        igstPercent: matchedItem.igstPercent,
+    //                        sgst: matchedItem.sgst,
+    //                        sgstPercent: matchedItem.sgstPercent,
+    //                        tax: matchedItem.tax,
+    //                        taxableAmount: matchedItem.taxableAmount,
+    //                        totalAmount: matchedItem.totalAmount,
+    //                    };
+    //                }
+   
+    //                // return original item if no match found
+    //                return item;
+    //            });
+   
+    //            console.log("filtered", filtered);
+   
+   
+    //            // setFormData((prev) => {
+    //            //     return {
+    //            //         ...prev,
+    //            //         items: filtered
+    //            //     }
+    //            // });
+   
+    //            // dispatch(setItemsList(filtered))
+   
+    //        }
+   
+    //    }, [selectedInv, tempPaginationData])
+   
 
 
 
@@ -164,7 +214,7 @@ function ProductListModel({
                 selectedInv._id
             );
             setTotalRows(res?.data?.count || 0);
-                setPaginationData(res?.data?.stocks || []);
+            setPaginationData(res?.data?.stocks || []);
         } catch (error) {
             console.log("error", error);
         }
@@ -385,14 +435,12 @@ function ProductListModel({
         });
 
         setItem((prev) => {
-            return {
-                ...prev,
+            return [
                 ...itemsArray
-
-            }
+            ]
         });
 
-        dispatch(setItemsList(itemsArray))
+        // dispatch(setItemsList(itemsArray))
 
 
 
@@ -607,7 +655,7 @@ function ProductListModel({
                                                                         <tr className="text-left text-sm font-medium">
                                                                             <th className="px-4 py-2">Select</th>
                                                                             <th className="px-4 py-2">Item</th>
-                                                                            <th className="px-4 py-2 text-center">Quantity</th>
+                                                                            {/* <th className="px-4 py-2 text-center">Quantity</th> */}
                                                                         </tr>
                                                                     </thead>
 
@@ -672,7 +720,7 @@ function ProductListModel({
                                                                                     </td>
 
                                                                                     {/* QUANTITY */}
-                                                                                    <td className="px-4 py-2">
+                                                                                    {/* <td className="px-4 py-2">
                                                                                         <div className="flex items-center justify-center space-x-2">
                                                                                             <button
                                                                                                 onClick={() => changeQty(variant, -1)}
@@ -687,7 +735,6 @@ function ProductListModel({
                                                                                             >
                                                                                                 -
                                                                                             </button>
-                                                                                            {/* <input className="w-8 text-center " type="number" value={qty} /> */}
                                                                                             <input
                                                                                                 type="text"
                                                                                                 inputMode="numeric"
@@ -704,7 +751,6 @@ function ProductListModel({
                                                                                                         : 'bg-white border-gray-300 text-gray-900'
                                                                                                     } focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                                                                                             />
-                                                                                            {/* <input className="w-8 text-center">{qty}</span> */}
                                                                                             <button
                                                                                                 onClick={() => changeQty(variant, 1)}
                                                                                                 disabled={!isSelected}
@@ -719,7 +765,7 @@ function ProductListModel({
                                                                                                 +
                                                                                             </button>
                                                                                         </div>
-                                                                                    </td>
+                                                                                    </td> */}
                                                                                 </tr>
                                                                             );
                                                                         })}
@@ -731,11 +777,9 @@ function ProductListModel({
 
                                                         {
                                                             supplier ? paginationData?.length == 0 ?
-                                                                <div className="flex flex-col items-center">
-                                                                    <p className='text-center text-gray-500'>No items linked to this supplier yet. Please link items first.</p>
-                                                                    <button
-                                                                        onClick={() => navigate(`/create-supplier/link/items`, { state: { supplierId: supplier } })}
-                                                                        className='bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover mt-2 text-white dark:hover:text-black-900 px-4 py-2 rounded'>Link now</button>
+                                                                <div className="flex flex-col items-center justify-center h-20 ">
+                                                                    <p className='text-center text-gray-500'>No items found for invoice.</p>
+                                                                   
                                                                 </div> : "" :
                                                                 <div className="">
                                                                     <p className='text-center text-gray-500'> No supplier selected yet.</p>

@@ -21,6 +21,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
 import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service"
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
+import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+
 
 const defaultState = {
     level: "",
@@ -125,7 +127,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
     }, [isOpen]);
 
     const handleSelect = (inv) => {
-        dispatch(setSelectedInv(inv?._id));
+        // dispatch(setSelectedInv(inv?._id));
         setSelectedInvoice(inv);
         setIsOpen(false);
         setSearchTerm("");
@@ -184,7 +186,11 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
             tax: 0,
             totalAmount: 0
         }
-    ])
+    ]);
+
+
+    console.log("tempItems", tempItems);
+
 
     const [formData, setFormData] = useState({
         level: purhcaseOrderDraftData?.level,
@@ -247,14 +253,49 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
         balance: 0,
     });
 
+    useEffect(() => {
+        const emptyItem = [
+            {
+                srNo: 1,
+                itemName: {
+                    name: "",
+                    productStock: "",
+                    productMainStock: "",
+                    purchasePrice: ""
+                },
+                quantity: 1,
+                mrp: 0,
+                discount: 0,
+                taxableAmount: 0,
+                gstPercent: 0,
+                cgstPercent: 0,
+                sgstPercent: 0,
+                igstPercent: 0,
+                cgst: 0,
+                sgst: 0,
+                igst: 0,
+                tax: 0,
+                totalAmount: 0
+            }
+        ]
+
+        if (selectedInv) {
+            dispatch(setItemsList(emptyItem));
+            setTempItems(emptyItem)
+
+        }
+
+    }, [selectedInv])
+
+
 
     useEffect(() => {
 
-        if (selectedInv && formData?.items?.length > 0) {
+        if (selectedInv && tempItems?.length > 0) {
 
             const invItems = selectedInv?.items;
 
-            const filtered = formData?.items?.map((item) => {
+            const filtered = tempItems?.map((item) => {
                 const mainStock = item?.itemName?.productMainStock;
 
                 const matchedItem = invItems.find(
@@ -287,16 +328,48 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 return item;
             });
 
-            // setFormData((prev) => {
-            //     return {
-            //         ...prev,
-            //         items: filtered
-            //     }
-            // })
             console.log("filtered", filtered);
+
+
+            setFormData((prev) => {
+                return {
+                    ...prev,
+                    items: filtered
+                }
+            });
+
+            dispatch(setItemsList(filtered))
+
+        } else {
+
+            dispatch(setItemsList([
+                {
+                    srNo: 1,
+                    itemName: {
+                        name: "",
+                        productStock: "",
+                        productMainStock: "",
+                        purchasePrice: ""
+                    },
+                    quantity: 1,
+                    mrp: 0,
+                    discount: 0,
+                    taxableAmount: 0,
+                    gstPercent: 0,
+                    cgstPercent: 0,
+                    sgstPercent: 0,
+                    igstPercent: 0,
+                    cgst: 0,
+                    sgst: 0,
+                    igst: 0,
+                    tax: 0,
+                    totalAmount: 0
+                }
+            ]))
+
         }
 
-    }, [selectedInv, formData?.items])
+    }, [selectedInv, tempItems])
 
     const { user: currentUser, isAuth: isAuthenticated } = useSelector((state) => state.auth);
 
@@ -490,10 +563,10 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
             balance: purhcaseOrderDraftData?.balance
         }));
 
-        if (purhcaseOrderDraftData?.selectedInv && purchaseInvoices?.length > 0) {
-            const filteredInvoice = purchaseInvoices.find((inv) => inv?._id === purhcaseOrderDraftData?.selectedInv);
-            setSelectedInvoice(filteredInvoice)
-        }
+        // if (purhcaseOrderDraftData?.selectedInv && purchaseInvoices?.length > 0) {
+        //     const filteredInvoice = purchaseInvoices.find((inv) => inv?._id === purhcaseOrderDraftData?.selectedInv);
+        //     setSelectedInvoice(filteredInvoice)
+        // }
 
         const warehouseDetail = activeWarehouse.find((item) => item?._id == purhcaseOrderDraftData.warehouse);
         if (warehouseDetail) {
@@ -588,6 +661,13 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
 
     // === Tax calculation logic ===
     const calculateTaxes = (item, name, parsedValue) => {
+
+        console.log("item.quantity", item.quantity);
+
+
+
+
+
         const rate = item.gstPercent;
         const taxable = item.mrp * item.quantity - item.discount;
 
@@ -631,8 +711,37 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
     };
 
     // === Item change handler (quantity, mrp, discount, gst) ===
-    const handleItemChange = (index, e) => {
+    const handleItemChange = (index, e, h) => {
+        console.log("h0", h);
+
         const { name, value } = e.target;
+
+
+        for (let index = 0; index < selectedInv?.items.length; index++) {
+            const element = selectedInv?.items[index];
+            if (element?.itemName?.productMainStock == h?.itemName?.productMainStock) {
+
+                console.log("elm", element);
+
+                if (element?.quantity < value) {
+
+                    toast.error("Can't accept more than ordered quantity.")
+
+                    return
+
+                }
+
+
+            }
+
+
+        }
+
+
+
+
+
+
 
         const newItems = [...formData.items];
         const parsedValue = name === 'itemName' ? value : (parseFloat(value) || 0);
@@ -902,7 +1011,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
 
     const loadData = async (currentLevel, levelId, method) => {
         try {
-            const configures = await purchasePaymentConfigureService.getPaymentFromLedgers(currentLevel, levelId);
+            const configures = await salePaymentInConfigureService.getPaymentFromLedgers(currentLevel, levelId);
             console.log("configures", configures);
             let ledgerArray = [];
             if (method == "cash" && configures.data.cashLedgers?.length > 0) {
@@ -1443,7 +1552,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                                     type="number"
                                                     name="quantity"
                                                     value={item.quantity}
-                                                    onChange={(e) => handleItemChange(index, e)}
+                                                    onChange={(e) => handleItemChange(index, e, item)}
                                                     className="md:w-20 w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                     min="1"
                                                     step="1"
@@ -1462,6 +1571,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                                     min="0"
                                                     step="0.01"
                                                     required
+                                                    disabled
                                                 />
                                             </td>
 
@@ -1475,6 +1585,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                                     className="w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500"
                                                     min="0"
                                                     step="0.01"
+                                                    disabled
                                                 />
                                             </td>
 
@@ -1485,11 +1596,11 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                             {formData?.isInterState ? (
                                                 <>
                                                     <td className="py-2 px-4 border border-gray-300">
-                                                        <input type="number" name="cgstPercent" value={item.cgstPercent} onChange={(e) => handleItemChange(index, e)}
+                                                        <input type="number" name="cgstPercent" value={item.cgstPercent} disabled onChange={(e) => handleItemChange(index, e)}
                                                             className="md:w-14 w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500" min="0" step="0.01" />
                                                     </td>
                                                     <td className="py-2 px-4 border border-gray-300">
-                                                        <input type="number" name="sgstPercent" value={item.sgstPercent} onChange={(e) => handleItemChange(index, e)}
+                                                        <input type="number" name="sgstPercent" value={item.sgstPercent} disabled onChange={(e) => handleItemChange(index, e)}
                                                             className="md:w-14 w-full px-2 py-1 border border-gray-300 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500" min="0" step="0.01" />
                                                     </td>
                                                 </>
@@ -1673,84 +1784,9 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                 )}
                             </div>
 
-                            {/* <section>
-                <h2 className="text-xl font-semibold mb-4 text-gray-700">Payment Options</h2>
-                <div className="space-y-3">
-                  <div className='grid md:grid-cols-2'>
-                    <div>
-                      <label className=" text-sm font-medium text-gray-700 mb-1">Paid Amount</label>
-                      <input
-                        type="number"
-                        name="paidAmount"
-                        value={formData.paidAmount}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button
-                        text="Full Payment"
-                        className="bg-indigo-600 h-fit text-white px-4 py-2 rounded hover:bg-indigo-700 text-sm"
-                        onClick={() => {
-                          setFormData(prev => ({ ...prev, paidAmount: totals.finalTotal, balance: 0 }));
-                          dispatch(setPaidAmount(totals.finalTotal));
-                        }}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-                    <select
-                      disabled={!warehouse}
-                      name="paymentMethod"
-                      value={formData.paymentMethod}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                    >
-                      <option value="">Select Method</option>
-                      <option value="cash">Cash</option>
-                      <option value="cheque">Cheque</option>
-                      <option value="online">Online</option>
-                      <option value="bank_transfer">Bank Transfer</option>
-                      <option value="UPI">UPI</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Payment From</label>
-                    <select
-                      disabled={!warehouse}
-                      name="paymentMethod"
-                      // value={formData.paymentMethod}
-                      // onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                    >
-                      <option value="">Select Ledger</option>
-                      {paymentFrom &&
-                        paymentFrom?.map((item) => (
-                          <option value={item._id} key={item?._id}>
-                            {item && item?.ledgerName}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <div className="flex justify-between text-sm font-medium">
-                    <span>Balance Due:</span>
-                    <span className={formData.balance > 0 ? "text-red-600" : "text-green-600"}>
-                      {formData.balance.toFixed(2)}
-                    </span>
-                  </div>
-
-                </div>
-              </section> */}
 
                             <section className="space-y-6">
                                 <h2 className="text-lg font-semibold text-gray-800">Payment Details</h2>
-
                                 {/* Paid Amount + Quick Full Payment */}
                                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                     <div className="space-y-1">
@@ -1758,7 +1794,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                             htmlFor="paidAmount"
                                             className="block text-sm font-medium text-gray-700"
                                         >
-                                            Amount Paid
+                                            Amount Received
                                         </label>
                                         <div className="relative">
                                             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
@@ -1836,7 +1872,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                             htmlFor="payedFrom"
                                             className="block text-sm font-medium text-gray-700"
                                         >
-                                            Paid From
+                                           Received In
                                         </label>
                                         <select
                                             id="payedFrom"
@@ -1862,7 +1898,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                 {/* Balance Summary */}
                                 <div className="pt-4 border-t border-gray-200">
                                     <dl className="flex justify-between items-center text-sm">
-                                        <dt className="font-medium text-gray-700">Balance Due</dt>
+                                        <dt className="font-medium text-gray-700">Balance Amount</dt>
                                         <dd
                                             className={`font-semibold ${formData.balance > 0
                                                 ? 'text-red-600'
@@ -2092,9 +2128,11 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
             {/* Product List Modal */}
             <ProductListModel
                 selectedInv={selectedInv}
-                items={formData?.items}
+                // items={formData?.items}
+                items={tempItems}
                 isInterState={formData?.isInterState}
-                setItem={setFormData}
+                // setItem={setFormData}
+                setItem={setTempItems}
                 openModal3={openModal4}
                 setOpenModal3={setOpenModal4}
                 getShippingAddress={getShippingAddress}
