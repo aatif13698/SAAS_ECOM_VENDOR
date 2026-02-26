@@ -306,12 +306,12 @@ const Navmenu = ({ menus }) => {
                 </span>
                 <div className="text-box">{item.title}</div>
               </div>
-              <div
+              {/* <div
                 className={`menu-arrow transform transition-transform duration-300 ${activeSubmenu === i ? "rotate-90" : ""
                   }`}
               >
                 <Icon icon="heroicons-outline:chevron-right" />
-              </div>
+              </div> */}
             </button>
           )}
 
