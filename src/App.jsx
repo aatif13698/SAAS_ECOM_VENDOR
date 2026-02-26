@@ -1,4 +1,4 @@
-import React, { lazy, Suspense, useEffect, useState } from "react";
+import React, { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 
 const Login = lazy(() => import("./pages/auth/login"));
@@ -190,6 +190,8 @@ import { EditAboutUs, ViewAboutUs } from "./pages/AboutUs/EditAndViewAboutUs";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
+import {useGlobalKeyboardShortcuts} from "./hooks/useGlobalKeyboardShortCuts"
+
 
 
 function App() {
@@ -234,6 +236,26 @@ function App() {
     const intervalId = setInterval(clearLocalStorageIfTokenExpired, 60000); // Check every minute (adjust as needed)
     return () => clearInterval(intervalId); // Clean up the interval when component unmounts
   }, []); // Run only once on component mount
+
+
+
+  // short cut key navigation
+
+  // All global shortcuts in one place (easy to maintain)
+  const shortcuts = useMemo(() => ({
+    'alt+s': () => navigate('/sales/create'),      // Sale Creation
+    'shift+p': () => navigate('/create-purchase-order'),  // Purchase Creation
+    'alt+i': () => navigate('/invoices/create'),   // Invoice
+    'alt+r': () => navigate('/receipts/create'),   // Receipt / Payment
+    'alt+q': () => navigate('/quotations/create'), // Quotation
+    'alt+j': () => navigate('/journals/create'),   // Journal Entry
+    'alt+c': () => navigate('/customers/new'),     // New Customer
+    'alt+v': () => navigate('/vendors/new'),       // New Vendor
+    // Add more shortcuts here as needed
+  }), [navigate]);
+
+  // Register shortcuts once at the top level
+  useGlobalKeyboardShortcuts(shortcuts);
 
   return (
     <>
