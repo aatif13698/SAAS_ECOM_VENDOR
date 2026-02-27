@@ -189,7 +189,8 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
     ]);
 
 
-    console.log("tempItems", tempItems);
+
+
 
 
     const [formData, setFormData] = useState({
@@ -252,6 +253,9 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
         paidAmount: 0,
         balance: 0,
     });
+
+    console.log("tempItems", tempItems);
+    console.log("formaaa", formData);
 
     useEffect(() => {
         const emptyItem = [
@@ -770,7 +774,8 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
             const newItems = formData.items
                 .filter((_, i) => i !== index)
                 .map((item, i) => ({ ...item, srNo: i + 1 }));
-            setFormData(prev => ({ ...prev, items: newItems }));
+            // setFormData(prev => ({ ...prev, items: newItems }));
+            setTempItems(prev => [...newItems]);
         }
     };
 
@@ -1466,27 +1471,6 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                         )}
 
                                     </div>
-                                    {/* <div className='col-span-1 md:col-span-2 border-dashed border-2 p-3 rounded-md'>
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Due Date</label>
-                          <input
-                          name='due'
-                            type="date"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Due Days</label>
-                          <input
-                            type="number"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            placeholder="e.g. 30"
-                          />
-                        </div>
-                      </div>
-                    </div> */}
                                 </div>
                             </div>
                         </div>
@@ -1872,7 +1856,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                                             htmlFor="payedFrom"
                                             className="block text-sm font-medium text-gray-700"
                                         >
-                                           Received In
+                                            Received In
                                         </label>
                                         <select
                                             id="payedFrom"
