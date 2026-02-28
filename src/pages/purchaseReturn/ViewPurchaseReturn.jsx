@@ -1,14 +1,18 @@
 
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Fragment } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiDotsVerticalRounded } from "react-icons/bi";
 import { FiLoader } from 'react-icons/fi';
 import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import { useDispatch } from 'react-redux';
 import purchaseReturnService from "@/services/purchaseReturn/purchaseReturn.service";
+import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+import { Dialog, Transition } from "@headlessui/react";
+import Icon from "@/components/ui/Icon";
 
 import CryptoJS from "crypto-js";
+import toast from 'react-hot-toast';
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -23,13 +27,141 @@ const decryptId = (encryptedId) => {
     }
 };
 
-function ViewPurchaseReturn() {
+function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
     const navigate = useNavigate();
     const { id: encryptedId } = useParams();
     const [poData, setPoData] = useState({});
     const pdfRef = useRef(null); // Ref for the PDF content div
 
-    const [loading, setLoading] = useState(true)
+
+    console.log("poData", poData);
+
+
+    const [loading, setLoading] = useState(true);
+
+    const [openPaymentForm, setOpenPaymentForm] = useState(false);
+    const [loading2, setLoading2] = useState(true);
+
+    const [formData, setFormData] = useState({
+        totalAmount: 0,
+        paidAmount: 0,
+        balance: 0,
+        paymentMethod: "",
+        payedFrom: "",
+        paymentInDate: new Date().toISOString().split('T')[0],
+        notes: ""
+
+    });
+
+
+    console.log("formData", formData);
+
+
+
+    const [formDataErr, setFormDataErr] = useState({})
+    const [paymentFrom, setPaymentFrom] = useState([]);
+
+
+
+    useEffect(() => {
+        if (poData) {
+            setFormData((prev) => {
+                return {
+                    ...prev,
+                    totalAmount: poData?.grandTotal,
+                    balance: poData?.balance
+                }
+            })
+        }
+    }, [poData])
+
+
+    const closeModal = () => {
+        setOpenPaymentForm(false);
+        setLoading2(false)
+        setFormData((prev) => ({
+            ...prev,
+            totalAmount: 0,
+            paidAmount: 0,
+            paymentMethod: "",
+            payedFrom: "",
+            paymentInDate: new Date().toISOString().split('T')[0],
+            notes: ""
+        }));
+        setFormDataErr((prev) => ({
+            ...prev,
+            name: "",
+            description: "",
+            slug: "",
+            icon: "",
+        }));
+        // setRefresh((prev) => prev + 1)
+    };
+
+    function handleInputChange(e) {
+        const { name, value } = e.target;
+        if (name == "paidAmount") {
+            if (value > formData?.balance) {
+                toast.error("Can not enter more that balance");
+                return
+            }
+        }
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    }
+
+    const loadData = async (currentLevel, levelId, method) => {
+        try {
+            const configures = await salePaymentInConfigureService.getPaymentFromLedgers(currentLevel, levelId);
+            console.log("configures", configures);
+            let ledgerArray = [];
+            if (method == "cash" && configures.data.cashLedgers?.length > 0) {
+                if (configures.data.cashLedgers?.length > 0) {
+                    const cashArray = configures.data.cashLedgers?.map((cash) => {
+                        return {
+                            ...cash.id,
+
+                        }
+                    });
+                    ledgerArray = cashArray
+                }
+            } else {
+                if (configures.data.bankLedgers?.length > 0) {
+                    const bankArray = configures.data.bankLedgers?.map((bank) => {
+                        return {
+                            ...bank.id,
+                        }
+                    });
+                    ledgerArray = bankArray
+                }
+            }
+            setPaymentFrom(ledgerArray)
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+
+
+    useEffect(() => {
+        if (poData?.warehouse && formData.paymentMethod) {
+            console.log("formData.paymentMethod", formData.paymentMethod);
+            loadData("warehouse", poData?.warehouse, formData.paymentMethod)
+        }
+    }, [poData?.warehouse, formData.paymentMethod]);
+
+
+
+
+
+
+
+
+
+
+
 
     console.log("poData", poData);
 
@@ -41,7 +173,7 @@ function ViewPurchaseReturn() {
         async function getInvoice(id) {
             try {
                 setLoading(true)
-                const response = await  purchaseReturnService.getParticular(id);
+                const response = await purchaseReturnService.getParticular(id);
                 console.log("response aaa", response?.data);
                 setPoData(response?.data);
                 setLoading(false)
@@ -168,6 +300,11 @@ function ViewPurchaseReturn() {
                     {/* <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
                         <BiEdit className="text-xl" />
                     </button> */}
+                    <button onClick={() => setOpenPaymentForm(true)} title="Download PDF"
+                        className="bg-emerald-500 h-8 p-2 flex items-center text-white rounded-lg cursor-pointer"
+                    >
+                        Receive Amount
+                    </button>
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
@@ -368,8 +505,262 @@ function ViewPurchaseReturn() {
                     This is a computer-generated Purchase Order. No signature required.
                 </div> */}
 
-
             </div>
+
+            <Transition appear show={openPaymentForm} as={Fragment}>
+                <Dialog
+                    as="div"
+                    className="relative z-[99999]"
+                    onClose={closeModal}
+                >
+                    {(
+                        <Transition.Child
+                            as={Fragment}
+                            enter={noFade ? "" : "duration-300 ease-out"}
+                            enterFrom={noFade ? "" : "opacity-0"}
+                            enterTo={noFade ? "" : "opacity-100"}
+                            leave={noFade ? "" : "duration-200 ease-in"}
+                            leaveFrom={noFade ? "" : "opacity-100"}
+                            leaveTo={noFade ? "" : "opacity-0"}
+                        >
+                            <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                        </Transition.Child>
+                    )}
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div
+                            className={`flex min-h-full justify-center text-center p-6 items-center "
+                                    }`}
+                        >
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300  ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                            >
+                                <Dialog.Panel
+                                    className={`w-full transform overflow-hidden rounded-md
+                                        text-left align-middle shadow-xl transition-alll max-w-3xl bg-light`}
+                                >
+                                    <div
+                                        className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                                    >
+                                        <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                                            Receive Payment
+                                        </h2>
+                                        <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                                            <Icon icon="heroicons-outline:x" />
+                                        </button>
+                                    </div>
+
+                                    <div
+                                        className={`px-0 py-8 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
+                                            }`}
+                                    >
+
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4 bg-gray-100 rounded-lg mx-4">
+
+                                            <div>
+                                                <span>Total Balance: {formData?.balance}</span>
+                                            </div>
+
+                                            <div>
+                                                <span>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
+                                            </div>
+
+                                        </div>
+                                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4">
+                                            <div className="space-y-1">
+                                                <label
+                                                    htmlFor="paidAmount"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    Amount Received
+                                                </label>
+                                                <div className="relative">
+                                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                                                        {'₹'}
+                                                    </span>
+                                                    <input
+                                                        id="paidAmount"
+                                                        name="paidAmount"
+                                                        type="number"
+                                                        value={formData.paidAmount ?? ''}
+                                                        onChange={handleInputChange}
+                                                        step="0.01"
+                                                        min="0"
+                                                        className="block w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                     disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                                                        placeholder="0.00"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex items-end pb-0.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setFormData(prev => ({
+                                                            ...prev,
+                                                            paidAmount: poData?.balance,
+
+                                                        }));
+
+                                                    }}
+                                                    // disabled={totals.finalTotal <= 0}
+                                                    className="px-4 py-2 border border-dashed w-full border-emerald-500 text-emerald-500 text-sm font-medium rounded-lg
+                   hover:bg-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:ring-offset-2
+                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                                >
+                                                    Mark Full Amount
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
+
+                                            <div className="space-y-1">
+                                                <label
+                                                    htmlFor="paymentMethod"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    Payment Method
+                                                </label>
+                                                <select
+                                                    id="paymentMethod"
+                                                    name="paymentMethod"
+                                                    value={formData.paymentMethod || ''}
+                                                    onChange={handleInputChange}
+                                                    // disabled={!warehouse}
+                                                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
+                   bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                   disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                                                >
+                                                    <option value="">Select payment method</option>
+                                                    <option value="cash">Cash</option>
+                                                    <option value="cheque">Cheque</option>
+                                                    <option value="online">Online Payment</option>
+                                                    <option value="bank_transfer">Bank Transfer</option>
+                                                    <option value="UPI">UPI</option>
+                                                </select>
+                                            </div>
+
+                                            {/* Payment From (Ledger) */}
+                                            <div className="space-y-1">
+                                                <label
+                                                    htmlFor="payedFrom"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    Received In
+                                                </label>
+                                                <select
+                                                    id="payedFrom"
+                                                    name="payedFrom"           // ← fixed name!
+                                                    value={formData.payedFrom || ''}
+                                                    onChange={handleInputChange}
+                                                    // disabled={!warehouse || !paymentFrom?.length}
+                                                    className="block w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm
+                   bg-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                   disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                                                >
+                                                    <option value="">Select ledger / account</option>
+                                                    {paymentFrom?.map((ledger) => (
+                                                        <option key={ledger._id} value={ledger._id}>
+                                                            {ledger.ledgerName}
+                                                            {/* {ledger.accountNumber && ` • ${ledger.accountNumber}`} */}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1"> Date</label>
+                                                <input
+                                                    type="date"
+                                                    name="paymentInDate"
+                                                    value={formData?.paymentInDate}
+                                                    onChange={handleInputChange}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                    required
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label
+                                                    htmlFor="notes"
+                                                    className="block text-sm font-medium text-gray-700"
+                                                >
+                                                    Notes
+                                                </label>
+                                                <textarea
+                                                    id="notes"
+                                                    name="notes"
+                                                    type="text"
+                                                    value={formData?.notes ?? ''}
+                                                    onChange={handleInputChange}
+                                                    step="0.01"
+                                                    min="0"
+                                                    className="block w-full pl-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                     disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                                                    placeholder="notes"
+                                                />
+                                            </div>
+
+
+                                        </div>
+                                    </div>
+
+                                    {/* {(
+                                        <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    text="Cancel"
+                                                    // className="border bg-red-300 rounded px-5 py-2"
+                                                    className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
+                                                    onClick={() => closeModal()}
+                                                />
+
+                                                {
+                                                    isViewed && (
+                                                        <Button
+                                                            text="Edit"
+                                                            // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                            className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
+                                                            onClick={() => setIsViewed(false)}
+                                                            isLoading={loading}
+                                                        />
+
+                                                    )
+                                                }
+                                                {
+                                                    !isViewed && (
+                                                        <Button
+                                                            text={`${id ? "Update" : "Save"}`}
+                                                            // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                            className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
+                                                            onClick={handleSubmit}
+                                                            isLoading={loading}
+                                                        />
+
+                                                    )
+                                                }
+
+
+                                            </div>
+                                        </div>
+                                    )} */}
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+
+
+
         </div>
     );
 }
