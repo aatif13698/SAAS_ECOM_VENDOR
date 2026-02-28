@@ -26,7 +26,7 @@ const getList = async (page, keyWord, perPage, currentLevel, levelId) => {
     const clientId = localStorage.getItem("saas_client_clientId");
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/list/purchaseInvoice?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pr/list/purchaseReturn?keyword=${keyWord}&perPage=${perPage}&page=${page}&clientId=${clientId}&level=${currentLevel}&levelId=${levelId}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -78,7 +78,7 @@ const getParticular = async (id) => {
     const clientId = localStorage.getItem("saas_client_clientId");
     try {
         const response = await axios.get(
-            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pi/get/${clientId}/${id}`,
+            `${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/pr/get/${clientId}/${id}`,
             {
                 headers: {
                     Authorization: `Bearer ${authToken}`,
@@ -91,6 +91,8 @@ const getParticular = async (id) => {
         throw error;
     }
 };
+
+
 
 
 export default {

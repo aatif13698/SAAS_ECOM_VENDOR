@@ -156,6 +156,7 @@ const ViewPurchaseOrder = lazy(() => import("./pages/purchaseOrder/ViewPurchaseO
 
 const PurchaseReturn = lazy(() => import("./pages/purchaseReturn/PurchaseReturn"));
 const ListPurchaseReturn = lazy(() => import("./pages/purchaseReturn/ListPurchaseReturn"));
+const ViewPurchaseReturn = lazy(() => import("./pages/purchaseReturn/ViewPurchaseReturn"));
 
 const ListPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ListPurchaseInvoice"));
 const PurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/PurchaseInvoice"));
@@ -190,7 +191,7 @@ import { EditAboutUs, ViewAboutUs } from "./pages/AboutUs/EditAndViewAboutUs";
 // import PurchaseOrderPage from "./pages/purchaseOrder/PurchaseOrder";
 // import BusinessUnit from "./components/BusinessUnit/BusinessUnit";
 
-import {useGlobalKeyboardShortcuts} from "./hooks/useGlobalKeyboardShortCuts"
+import { useGlobalKeyboardShortcuts } from "./hooks/useGlobalKeyboardShortCuts"
 
 
 
@@ -268,7 +269,7 @@ function App() {
           <Route path="/" element={<AuthLayout />}>
             <Route element={<ProtectedRoutes isLoggedIn={isLoggedIn} />}>
 
-             {/* system settings */}
+              {/* system settings */}
 
               <Route path="/system/settings" element={<SystemSettings />} />
 
@@ -432,8 +433,10 @@ function App() {
                 <Route path="purchase-order-list" element={<ListPurchaseOrder />} />
                 <Route path="view/purchase-order" element={<ViewPurchaseOrder />} />
 
-                <Route path="create-purchase-returns" element={<PurchaseReturn/>} />
-                <Route path="purchase-returns-list" element={<ListPurchaseReturn/>} />
+                <Route path="create-purchase-returns" element={<PurchaseReturn />} />
+                <Route path="purchase-returns-list" element={<ListPurchaseReturn />} />
+                <Route path="view/purchase-returns/:id" element={<ViewPurchaseReturn />} />
+
 
                 <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />
                 <Route path="create-purchase-invoice" element={<PurchaseInvoice />} />
@@ -476,7 +479,7 @@ function App() {
 
                 <Route path="create-about" element={<CreateAboutUs />} />
                 <Route path="about-us-list" element={<ListAboutUs />} />
-                 <Route path="about-us/edit/:id" element={<EditAboutUs />} />
+                <Route path="about-us/edit/:id" element={<EditAboutUs />} />
                 <Route path="about-us/view/:id" element={<ViewAboutUs />} />
 
 
@@ -497,7 +500,7 @@ function App() {
 
 
 
-               
+
 
 
 

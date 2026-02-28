@@ -606,7 +606,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
             setCurrentWorkingFy(response?.data?.financialYear)
             const nextNumber = Number(response?.data?.series?.nextNum) + 1;
             const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
-            dispatch(setPoNumber(series))
+            dispatch(setPoNumber(series));
         } catch (error) {
             console.log("error while getting the next series", error);
         }
@@ -1097,8 +1097,8 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 supplier: formData?.supplier?._id,
                 supplierLedger: formData?.supplier?.ledgerLinkedId,
                 shippingAddress: formData?.shippingAddress,
-                piNumber: formData?.poNumber,
-                piDate: formData?.poDate,
+                prNumber: formData?.poNumber,
+                prDate: formData?.poDate,
                 items: formData?.items,
                 notes: formData?.notes,
                 bankDetails: formData?.bankDetails,
@@ -1108,6 +1108,10 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
                 payedFrom: formData?.payedFrom,
                 paidAmount: formData?.paidAmount,
                 balance: formData?.balance,
+
+                grandTotal: totals.grandTotal,
+
+                receivedIn: formData?.payedFrom
             }
 
             if (currentWorkingFy && currentWorkingFy?._id) {

@@ -25,10 +25,10 @@ import branchService from "@/services/branch/branch.service";
 import warehouseService from "@/services/warehouse/warehouse.service";
 import employeeService from "@/services/employee/employee.service";
 import { useSelector } from "react-redux";
-import purchaseInvoiceService from "@/services/purchaseInvoice/purchaseInvoice.service";
 import { formatDate } from "@fullcalendar/core";
 
 import CryptoJS from "crypto-js";
+import purchaseReturnService from "@/services/purchaseReturn/purchaseReturn.service";
 
 // Secret key for encryption
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -133,7 +133,7 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate(`/view/purchase-invoice/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
+        navigate(`/view/purchase-returns/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
         // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
@@ -258,7 +258,7 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
         },
         {
             name: "Date",
-            selector: (row) => formatDate(row?.piDate),
+            selector: (row) => formatDate(row?.prDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -266,7 +266,7 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
         },
         {
             name: "PO Number",
-            selector: (row) => row?.piNumber,
+            selector: (row) => row?.prNumber,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
@@ -362,9 +362,9 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await purchaseInvoiceService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await purchaseReturnService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.purchaseOrders);
+                    setPaginationData(response?.data?.purchaseReturns);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }
@@ -377,9 +377,9 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await purchaseReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseInvoices);
+            setPaginationData(response?.data?.purchaseReturns);
             setPending(false);
         } catch (error) {
             setPending(false);
@@ -397,9 +397,9 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await purchaseReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.purchaseReturns);
             setPage(page);
         } catch (error) {
             console.log("error while fetching");
@@ -408,9 +408,9 @@ const ListPurchaseReturn = ({ noFade, scrollContent }) => {
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await purchaseReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.purchaseReturns);
             setPerPage(perPage);
         } catch (error) {
             console.log("error while fetching");
