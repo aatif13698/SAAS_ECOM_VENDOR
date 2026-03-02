@@ -10,7 +10,8 @@ import purchaseReturnService from "@/services/purchaseReturn/purchaseReturn.serv
 import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
 import { Dialog, Transition } from "@headlessui/react";
 import Icon from "@/components/ui/Icon";
-
+import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service";
+import Button from '../../components/ui/Button';
 import CryptoJS from "crypto-js";
 import toast from 'react-hot-toast';
 
@@ -40,7 +41,8 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
     const [loading, setLoading] = useState(true);
 
     const [openPaymentForm, setOpenPaymentForm] = useState(false);
-    const [loading2, setLoading2] = useState(true);
+    const [loading2, setLoading2] = useState(false);
+    const [refreshCount, setRefreshCount] = useState(0);
 
     const [formData, setFormData] = useState({
         totalAmount: 0,
@@ -60,6 +62,11 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
 
     const [formDataErr, setFormDataErr] = useState({})
     const [paymentFrom, setPaymentFrom] = useState([]);
+    const [currentWorkingFy, setCurrentWorkingFy] = useState(null);
+    const [series, setSeries] = useState(null);
+
+    console.log("series", series);
+
 
 
 
@@ -152,6 +159,75 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
         }
     }, [poData?.warehouse, formData.paymentMethod]);
 
+    useEffect(() => {
+        getNextSerial()
+    }, [])
+
+    function getFiscalYearRange(date) {
+        const year = date.getFullYear();
+        const nextYear = year + 1;
+        const nextYearShort = nextYear % 100; // Gets the last two digits
+        return `${year}-${nextYearShort.toString().padStart(2, '0')}`; // Ensures two digits, e.g., 2025-26
+    }
+
+    async function getNextSerial() {
+        try {
+            const currentDate = new Date();
+            const financialYear = getFiscalYearRange(currentDate);
+            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_in");
+            setCurrentWorkingFy(response?.data?.financialYear)
+            const nextNumber = Number(response?.data?.series?.nextNum) + 1;
+            const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
+            setSeries(series)
+        } catch (error) {
+            console.log("error while getting the next series", error);
+        }
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const dataObject = {
+                clientId: localStorage.getItem("saas_client_clientId"),
+                level: "warehouse",
+                businessUnit: poData?.businessUnit,
+                branch: poData?.branch,
+                warehouse: poData?.warehouse,
+                supplier: poData?.supplier?._id,
+                supplierLedger: poData?.supplierLedger,
+                paymentInNumber: series,
+                paymentInDate: formData.paymentInDate,
+                notes: formData.notes,
+                paymentMethod: formData.paymentMethod,
+                receivedIn: formData.payedFrom,
+                paidAmount: formData.paidAmount,
+                balance: formData.balance,
+                payments: [{
+                    saleInvoice: poData?._id,
+                    amount: formData?.paidAmount
+                }],
+            };
+
+            if (currentWorkingFy && currentWorkingFy?._id) {
+                dataObject.financialYear = currentWorkingFy?._id
+            }
+
+            console.log("dataObject", dataObject);
+
+            setLoading2(true);
+            const response = await salePaymentInConfigureService?.createPaymentReceived(dataObject);
+            setLoading2(false);
+            setRefreshCount((prev) => prev + 1);
+            closeModal();
+            toast.success('Payment received submitted successfully!');
+        } catch (error) {
+            setLoading2(false);
+            const message = error?.response?.data?.message;
+            toast.error(message);
+            console.log("Error submitting payment out:", message);
+        }
+    };
+
 
 
 
@@ -184,7 +260,7 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                 console.log("error in fetching", error);
             }
         }
-    }, [encryptedId]);
+    }, [encryptedId, refreshCount]);
 
 
 
@@ -289,7 +365,7 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
     return (
         <div className="relative min-h-screen pb-8 bg-gray-300 rounded-md dark:bg-gray-900">
             <div className="sticky top-14 z-10 bg-white dark:bg-gray-800 p-4 flex justify-between items-center shadow-md">
-                <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/sales-invoices-list")}>
+                <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-returns-list")}>
                     <BiArrowBack className="text-xl" />
                     <h3 className="md:text-lg text-sm font-semibold text-gray-800 dark:text-gray-200">
                         Purchase Returns # {poData?.prNumber || 'N/A'}
@@ -300,11 +376,16 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                     {/* <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
                         <BiEdit className="text-xl" />
                     </button> */}
-                    <button onClick={() => setOpenPaymentForm(true)} title="Download PDF"
-                        className="bg-emerald-500 h-8 p-2 flex items-center text-white rounded-lg cursor-pointer"
-                    >
-                        Receive Amount
-                    </button>
+                    {
+                        poData?.balance > 0 ?
+                            <button onClick={() => setOpenPaymentForm(true)} title="Download PDF"
+                                className="bg-emerald-500 h-8 p-2 flex items-center text-white rounded-lg cursor-pointer"
+                            >
+                                Receive Amount
+                            </button>
+                            : ""
+                    }
+
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
@@ -481,7 +562,7 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                             <span className="label">Grand Total:</span> <span>₹{formatCurrency(grandTotal)}</span>
                         </p>
                         {
-                            poData?.payedFrom && poData?.payedFrom?.length > 0 && poData?.payedFrom?.map((ledg) => {
+                            poData?.receivedIn && poData?.receivedIn?.length > 0 && poData?.receivedIn?.map((ledg) => {
                                 const type = ledg?.paymentType
                                 return (
                                     <p className={` font-semibold ${type == "Payment" ? "text-gray-600" : type == "Settlement" ? "text-gray-600" : ""} `} style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>{ledg?.paymentType}:</span> <span>(-) ₹{formatCurrency(ledg?.amount)}</span></p>
@@ -572,6 +653,17 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
 
                                         </div>
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4">
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment In No</label>
+                                                <input
+                                                    type="text"
+                                                    name="paymentInNumber"
+                                                    value={series}
+                                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                                    required
+                                                    disabled={true}
+                                                />
+                                            </div>
                                             <div className="space-y-1">
                                                 <label
                                                     htmlFor="paidAmount"
@@ -596,10 +688,17 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                      disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
                                                         placeholder="0.00"
                                                     />
+
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <input type="checkbox"
+                                                        onChange={(e) => { if (e.target.checked) { setFormData((prev) => ({ ...prev, paidAmount: poData?.balance, })); } }}
+                                                    />
+                                                    <span>Mark full amount</span>
                                                 </div>
                                             </div>
 
-                                            <div className="flex items-end pb-0.5">
+                                            {/* <div className="flex items-end pb-0.5">
                                                 <button
                                                     type="button"
                                                     onClick={() => {
@@ -617,8 +716,10 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                                                 >
                                                     Mark Full Amount
                                                 </button>
-                                            </div>
+                                            </div> */}
                                         </div>
+
+                                        <hr />
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
 
                                             <div className="space-y-1">
@@ -712,7 +813,7 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                                         </div>
                                     </div>
 
-                                    {/* {(
+                                    {(
                                         <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
                                             <div className="flex gap-2">
                                                 <Button
@@ -722,35 +823,18 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                                                     onClick={() => closeModal()}
                                                 />
 
-                                                {
-                                                    isViewed && (
-                                                        <Button
-                                                            text="Edit"
-                                                            // className="border bg-blue-gray-300 rounded px-5 py-2"
-                                                            className={` bg-lightBtn dark:bg-darkBtn px-4 py-2 rounded`}
-                                                            onClick={() => setIsViewed(false)}
-                                                            isLoading={loading}
-                                                        />
-
-                                                    )
-                                                }
-                                                {
-                                                    !isViewed && (
-                                                        <Button
-                                                            text={`${id ? "Update" : "Save"}`}
-                                                            // className="border bg-blue-gray-300 rounded px-5 py-2"
-                                                            className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
-                                                            onClick={handleSubmit}
-                                                            isLoading={loading}
-                                                        />
-
-                                                    )
-                                                }
+                                                <Button
+                                                    text={`Save`}
+                                                    // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                    className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
+                                                    onClick={handleSubmit}
+                                                    isLoading={loading2}
+                                                />
 
 
                                             </div>
                                         </div>
-                                    )} */}
+                                    )}
                                 </Dialog.Panel>
                             </Transition.Child>
                         </div>

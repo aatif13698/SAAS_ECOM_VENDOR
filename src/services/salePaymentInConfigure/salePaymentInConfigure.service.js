@@ -62,6 +62,17 @@ const createPaymentIn = async (data) => {
     });
 };
 
+const createPaymentReceived = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/sale/payment/in/create/received-payment`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 
 const getPaymentIn = async (page, keyWord, perPage, currentLevel, levelId) => {
     const authToken = await localStorage.getItem("saas_client_token");
@@ -113,6 +124,7 @@ export default {
     getConfigure,
     getPaymentFromLedgers,
     createPaymentIn,
+    createPaymentReceived,
     getPaymentIn,
     getParticularPaymentIn
 }

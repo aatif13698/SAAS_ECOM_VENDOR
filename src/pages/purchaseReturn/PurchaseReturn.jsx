@@ -1136,7 +1136,7 @@ const PurchaseReturn = ({ noFade, scrollContent }) => {
     function resetAllAndNavigate() {
         dispatch(resetPurchaseReturn());
         setFormData(defaultState);
-        navigate('/purchase-invoices-list');
+        navigate('/purchase-returns-list');
     }
 
 
