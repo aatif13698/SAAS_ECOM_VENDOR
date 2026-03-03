@@ -33,11 +33,18 @@ export const useNetworkStatus = (pingInterval = 5000) => { // More frequent ping
                 signal: AbortSignal.timeout(3000), // Shorter timeout for unstable detection
             });
             const latency = performance.now() - start;
+            console.log("latency", latency);
+            
             const success = response.ok && latency < 2000; // High latency = unstable
+
+            console.log("success", success);
+            
 
             if (success) {
                 setConfirmationCount((prev) => prev + 1);
                 if (confirmationCount + 1 >= requiredConfirmations) {
+                    console.log("yess");
+                    
                     updateStatus(true);
                     setConfirmationCount(0); // Reset
                 }

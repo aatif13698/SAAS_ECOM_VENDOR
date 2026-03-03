@@ -200,7 +200,10 @@ import { useNetworkStatus } from './hooks/useNetworkStatus';
 
 function App() {
 
-  const isOnline = useNetworkStatus()
+  const isOnline = useNetworkStatus();
+
+  console.log("isOnline", isOnline);
+  
 
 
   let isLoggedIn = false;
