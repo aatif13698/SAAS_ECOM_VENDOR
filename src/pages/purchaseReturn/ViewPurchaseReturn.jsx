@@ -569,7 +569,7 @@ function ViewPurchaseReturn({ centered, noFade, scrollContent }) {
                                 )
                             })
                         }
-                        <p className='text-green-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p>
+                        {/* <p className='text-green-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p> */}
                         <p className='text-blue-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Balance Due:</span> <span>₹{formatCurrency(poData.balance)}</span></p>
                     </div>
                 </div>
