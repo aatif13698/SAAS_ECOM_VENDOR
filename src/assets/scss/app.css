@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 @layer base {
+
+  .offline-main {
+  pointer-events: none; /* Blocks clicks/touches */
+  opacity: 0.5; /* Visual cue */
+  user-select: none; /* Prevents text selection */
+}
+
+
   body {
     @apply h-full overflow-x-hidden dark:text-slate-300 text-slate-600 font-normal;
   }

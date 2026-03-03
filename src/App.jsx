@@ -194,8 +194,15 @@ import { EditAboutUs, ViewAboutUs } from "./pages/AboutUs/EditAndViewAboutUs";
 import { useGlobalKeyboardShortcuts } from "./hooks/useGlobalKeyboardShortCuts"
 
 
+import NetworkModal from "./components/NetworkModel"
+import { useNetworkStatus } from './hooks/useNetworkStatus';
+
 
 function App() {
+
+  const isOnline = useNetworkStatus()
+
+
   let isLoggedIn = false;
   const [refresh, setRefresh] = useState(0);
   const { user: currentUser, isAuth: auth } = useSelector(
@@ -263,7 +270,9 @@ function App() {
 
 
 
-      <main className="App  relative">
+      <main className="App  relative" >
+
+        <NetworkModal isOpen={!isOnline} />
 
         <Routes>
           <Route path="/" element={<AuthLayout />}>
