@@ -200,9 +200,8 @@ import { useNetworkStatus } from './hooks/useNetworkStatus';
 
 function App() {
 
-  const isOnline = useNetworkStatus();
+  // const isOnline = useNetworkStatus();
 
-  console.log("isOnline", isOnline);
   
 
 
@@ -275,7 +274,7 @@ function App() {
 
       <main className="App  relative" >
 
-        <NetworkModal isOpen={!isOnline} />
+        {/* <NetworkModal isOpen={!isOnline} /> */}
 
         <Routes>
           <Route path="/" element={<AuthLayout />}>
