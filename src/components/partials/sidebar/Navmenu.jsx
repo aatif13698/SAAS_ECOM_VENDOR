@@ -113,20 +113,20 @@ const Navmenu = ({ menus }) => {
       "Leave Category": "material-symbols:holiday-village-outline-rounded",
       "Holiday": "material-symbols:energy-savings-leaf-outline-rounded",
       "Leave Allotment": "material-symbols:assignment-outline",
-      "Supplier" :"material-symbols:person-apron-rounded",
-      "Purchase Invoices" :"material-symbols:assignment-outline",
-      "Payment Out" : "material-symbols:payment-arrow-down-rounded",
-      "Purchase Returns" : "material-symbols:assignment-return-outline",
-      "Debit Note" : "material-symbols:deblur-outline",
-      "Purchase Order" : "material-symbols:quick-reorder-outline",
-      "Sales Invoices" :"material-symbols:assignment-outline",
-      "Quotation" : "material-symbols:receipt-outline",
-      "Performa Invoice" : "material-symbols:receipt-long",
-      "Delivery Challan" : "material-symbols:receipt-long-off-outline",
-      "Sales Returns" : "material-symbols:receipt-long-off-rounded",
-      "Payment In" : "material-symbols:monetization-on",
-      "Banners" : "material-symbols:planner-banner-ad-pt-outline-rounded",
-      "Landing Sections" : "material-symbols:cards-rounded",
+      "Supplier": "material-symbols:person-apron-rounded",
+      "Purchase Invoices": "material-symbols:assignment-outline",
+      "Payment Out": "material-symbols:payment-arrow-down-rounded",
+      "Purchase Returns": "material-symbols:assignment-return-outline",
+      "Debit Note": "material-symbols:deblur-outline",
+      "Purchase Order": "material-symbols:quick-reorder-outline",
+      "Sales Invoices": "material-symbols:assignment-outline",
+      "Quotation": "material-symbols:receipt-outline",
+      "Performa Invoice": "material-symbols:receipt-long",
+      "Delivery Challan": "material-symbols:receipt-long-off-outline",
+      "Sales Returns": "material-symbols:receipt-long-off-rounded",
+      "Payment In": "material-symbols:monetization-on",
+      "Banners": "material-symbols:planner-banner-ad-pt-outline-rounded",
+      "Landing Sections": "material-symbols:cards-rounded",
       "About Us": "material-symbols:user-attributes-rounded"
 
 
@@ -238,13 +238,37 @@ const Navmenu = ({ menus }) => {
 
   // Check if any child item is active for a given menu
   const isParentActive = (item) => {
+    // console.log("item", item);
+    const links = [
+      {
+        name: "Purchase Returns",
+        array: ["purchase-returns-list", "create-purchase-returns"]
+      }
+    ];
+    const filteredItem = links.find((link) => link?.name == item?.title);
+
+    console.log("filteredItem", filteredItem);
+
+    console.log("locationName.startsWith(`${targetLocation}/`)", locationName);
+    
+    
+
+
     if (!item.child) return isLocationMatch(item.link);
-    return item.child.some((childItem) =>
-      isLocationMatch(childItem.childlink) ||
-      (childItem.multi_menu &&
-        childItem.multi_menu.some((nestedItem) =>
-          isLocationMatch(nestedItem.multiLink)
-        ))
+    return item.child.some((childItem) => {
+
+      // console.log("childItem", childItem);
+
+
+      return isLocationMatch(childItem.childlink) ||
+        (childItem.multi_menu &&
+          childItem.multi_menu.some((nestedItem) =>
+            isLocationMatch(nestedItem.multiLink)
+          )) 
+          // || filteredItem?.array.includes()
+
+    }
+
     );
   };
 
