@@ -247,9 +247,9 @@ const Navmenu = ({ menus }) => {
     ];
     const filteredItem = links.find((link) => link?.name == item?.title);
 
-    console.log("filteredItem", filteredItem);
+    // console.log("filteredItem", filteredItem);
 
-    console.log("locationName.startsWith(`${targetLocation}/`)", locationName);
+    // console.log("locationName.startsWith(`${targetLocation}/`)", locationName);
     
     
 

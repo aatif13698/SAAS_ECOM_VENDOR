@@ -158,6 +158,10 @@ const PurchaseReturn = lazy(() => import("./pages/purchaseReturn/PurchaseReturn"
 const ListPurchaseReturn = lazy(() => import("./pages/purchaseReturn/ListPurchaseReturn"));
 const ViewPurchaseReturn = lazy(() => import("./pages/purchaseReturn/ViewPurchaseReturn"));
 
+const DebitNote = lazy(() => import("./pages/debitNote/DebitNote"));
+const ListDebitNote = lazy(() => import("./pages/debitNote/ListDabitNote"));
+const ViewDebitNote = lazy(() => import("./pages/debitNote/ViewDebitNote"));
+
 const ListPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ListPurchaseInvoice"));
 const PurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/PurchaseInvoice"));
 const ViewPurchaseInvoice = lazy(() => import("./pages/purchaseInvoice/ViewPurchaseInvoice"));
@@ -447,6 +451,13 @@ function App() {
                 <Route path="create-purchase-returns" element={<PurchaseReturn />} />
                 <Route path="purchase-returns-list" element={<ListPurchaseReturn />} />
                 <Route path="view/purchase-returns/:id" element={<ViewPurchaseReturn />} />
+
+                <Route path="create-debit-note" element={<DebitNote />} />
+                <Route path="debit-note-list" element={<ListDebitNote />} />
+                <Route path="view/debit-note/:id" element={<ViewDebitNote />} />
+
+
+
 
 
                 <Route path="purchase-invoices-list" element={<ListPurchaseInvoice />} />

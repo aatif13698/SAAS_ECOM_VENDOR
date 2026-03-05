@@ -14,6 +14,8 @@ import performaSlice from "./slices/performa/performaSlice";
 import saleInvoiceSlice from "./slices/saleInvoice/saleInvoiceSlice";
 import paymentInSlice from "./slices/paymentIn/paymentInSlice";
 
+import debitNoteSlice from "./slices/debitNote/debitNoteSlice";
+
 
 import toastReducer from "./slices/tostSlice"
 
@@ -38,6 +40,7 @@ const rootReducer = {
   purchaseOrderSlice,
   purchaseInvoiceSlice,
   purchaseReturns,
+  debitNoteSlice,
   paymentOutSlice,
   quotationSlice,
   performaSlice,
