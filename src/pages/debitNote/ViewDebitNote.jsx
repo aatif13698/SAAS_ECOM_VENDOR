@@ -927,7 +927,7 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                     )}
                     <div className="fixed inset-0 overflow-y-auto">
                         <div
-                            className={`flex min-h-full justify-center text-center p-6 items-center "
+                            className={`flex min-h-full justify-center items-start text-center p-6  "
                                     }`}
                         >
                             <Transition.Child
@@ -955,7 +955,7 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                                     </div>
 
                                     <div
-                                        className={`px-0 py-8 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
+                                        className={`px-0  ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
                                             }`}
                                     >
 
@@ -1093,6 +1093,19 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                                                         No unpaid invoices available.
                                                     </div>
                                                 )}
+                                            </div>
+
+                                            <div className='flex justify-end mx-2 my-4'>
+                                                <div className='flex flex-col p-2 rounded-md bg-gray-300 min-w-[20rem]'>
+                                                    <div className='flex justify-between'>
+                                                        <span>Total Amount To Credit:</span>
+                                                        <span className='text-right min-w-[10rem] font-bold'>{totalSettled !== 0 ? totalSettled.toFixed(2) : "0.00"}</span>
+                                                    </div>
+                                                    <div className='flex justify-between'>
+                                                        <span>Remaining Credit:</span>
+                                                        <span className='text-right min-w-[10rem] font-bold'>{(Number(poData?.balance) - Number(totalSettled)).toFixed(2)} <span className='text-red-600 text-sm'>{Number(poData?.balance) - Number(totalSettled) < 0 ? "(Over Credit)" : ""}</span></span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
