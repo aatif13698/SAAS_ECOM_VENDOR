@@ -72,6 +72,14 @@ const createPaymentReceived = async (data) => {
     });
 };
 
+const createPaymentReceivedDn = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/sale/payment/in/create/received-payment-dn`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+    });
+};
 
 
 const getPaymentIn = async (page, keyWord, perPage, currentLevel, levelId) => {
@@ -136,6 +144,7 @@ export default {
     getPaymentFromLedgers,
     createPaymentIn,
     createPaymentReceived,
+    createPaymentReceivedDn,
     getPaymentIn,
     getParticularPaymentIn,
     applyCreditToInv

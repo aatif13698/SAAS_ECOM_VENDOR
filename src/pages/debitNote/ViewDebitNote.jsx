@@ -239,7 +239,7 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
             console.log("dataObject", dataObject);
 
             setLoading2(true);
-            const response = await salePaymentInConfigureService?.createPaymentReceived(dataObject);
+            const response = await salePaymentInConfigureService?.createPaymentReceivedDn(dataObject);
             setLoading2(false);
             setRefreshCount((prev) => prev + 1);
             closeModal();
