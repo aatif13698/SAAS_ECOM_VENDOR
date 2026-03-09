@@ -263,6 +263,8 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
 
 
 
+
+
     console.log("poData", poData);
 
     useEffect(() => {
@@ -383,6 +385,8 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
     const [allocations, setAllocations] = useState([]);
     const [totalUnpaid, setTotalUnpaid] = useState(0);
     const [totalSettled, setTotalSettled] = useState(0);
+    const [loading3, setLoading3] = useState(false);
+
     console.log("totalSettled", totalSettled);
 
     const [formData2, setFormData2] = useState({
@@ -436,6 +440,57 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
             console.log("Error fetching unpaid invoices:", error);
         }
     }
+
+    const [overCreditError, setOverCreditError] = useState(null)
+
+    const handleSubmit2 = async (e) => {
+        e.preventDefault();
+        try {
+
+            if (Number(poData?.balance) - Number(totalSettled) < 0) {
+                setOverCreditError("Over credit can't be proceed.");
+                return
+            } else if (Number(totalSettled) == 0) {
+                setOverCreditError("Please enter amount to apply credit");
+                return
+            } else {
+                setOverCreditError(null)
+            }
+
+
+            const dataObject = {
+                debitNoteId: poData?._id,
+                clientId: localStorage.getItem("saas_client_clientId"),
+                level: "warehouse",
+                businessUnit: poData?.businessUnit,
+                branch: poData?.branch,
+                warehouse: poData?.warehouse,
+                paidAmount: formData2.paidAmount,
+                payments: allocations.filter(a => a.applied > 0).map(a => ({
+                    purchaseInvoice: a._id,
+                    amount: a.applied
+                }))
+            };
+
+            if (currentWorkingFy && currentWorkingFy?._id) {
+                dataObject.financialYear = currentWorkingFy?._id
+            }
+
+            console.log("dataObject1111", dataObject);
+
+            setLoading3(true);
+            const response = await salePaymentInConfigureService?.applyCreditToInv(dataObject);
+            setLoading3(false);
+            setRefreshCount((prev) => prev + 1);
+            closeInvoiceModal();
+            toast.success('Credit submitted successfully!');
+        } catch (error) {
+            setLoading3(false);
+            const message = error?.response?.data?.message;
+            toast.error(message);
+            console.log("Error submitting credit:", message);
+        }
+    };
 
     useEffect(() => {
         if (unPaidInvoices.length > 0) {
@@ -965,6 +1020,16 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                                                 <span>Available Credits: {'₹'} <span className='font-bold'>{poData?.balance}</span></span>
                                             </div>
 
+                                            {
+                                                overCreditError &&
+                                                <div className='text-center text-red-700 bg-red-100 my-2 p-2 rounded-md mx-3'>
+                                                    <span>{overCreditError}</span>
+
+                                                </div>
+
+                                            }
+
+
                                             <div className="overflow-x-auto">
                                                 {allocations.length > 0 ? (
                                                     <>
@@ -1018,27 +1083,15 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                                                                                         value={alloc.applied ?? ''}
                                                                                         onChange={(e) => {
                                                                                             const value = e.target.value;
-                                                                                            // if (poData?.balance < (Number(totalSettled)  + Number(value))) {
-                                                                                            //     toast.error("Amount exceeds the credit balance")
-                                                                                            // } else {
-
-                                                                                            //     const newAllocations = allocations.map((item) => {
-                                                                                            //         if (item?._id == alloc._id) {
-                                                                                            //             return {
-                                                                                            //                 ...item,
-                                                                                            //                 applied: Number(value) 
-                                                                                            //             }
-                                                                                            //         } else {
-                                                                                            //             return item
-                                                                                            //         }
-                                                                                            //     })
-                                                                                            //     setAllocations(newAllocations)
-                                                                                            // }
                                                                                             const newAllocations = allocations.map((item) => {
                                                                                                 if (item?._id == alloc._id) {
-                                                                                                    return {
-                                                                                                        ...item,
-                                                                                                        applied: Number(value)
+                                                                                                    if (item.balance < Number(value)) {
+                                                                                                        return item
+                                                                                                    } else {
+                                                                                                        return {
+                                                                                                            ...item,
+                                                                                                            applied: Number(value)
+                                                                                                        }
                                                                                                     }
                                                                                                 } else {
                                                                                                     return item
@@ -1122,7 +1175,7 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                                                     text={`Save`}
                                                     // className="border bg-blue-gray-300 rounded px-5 py-2"
                                                     className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
-                                                    onClick={handleSubmit}
+                                                    onClick={handleSubmit2}
                                                     isLoading={loading2}
                                                 />
                                             </div>

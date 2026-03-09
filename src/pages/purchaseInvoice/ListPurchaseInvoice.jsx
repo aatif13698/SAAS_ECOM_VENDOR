@@ -364,7 +364,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
                 try {
                     const response = await purchaseInvoiceService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.purchaseOrders);
+                    setPaginationData(response?.data?.purchaseInvoices);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }
@@ -399,7 +399,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
         try {
             const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.purchaseInvoices);
             setPage(page);
         } catch (error) {
             console.log("error while fetching");
@@ -410,7 +410,7 @@ const ListPurchaseInvoice = ({ noFade, scrollContent }) => {
         try {
             const response = await purchaseInvoiceService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseOrders);
+            setPaginationData(response?.data?.purchaseInvoices);
             setPerPage(perPage);
         } catch (error) {
             console.log("error while fetching");
