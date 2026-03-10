@@ -589,12 +589,12 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                         <p>aayesha@yopmail.com</p>
                     </div>
                     <div style={{ width: '32%' }}>
-                        <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Customer)</h3>
-                        <p><strong>{poData.customer?.firstName + " " + poData.customer?.lastName || 'N/A'}</strong></p>
-                        <p>{poData.customer?.address || 'N/A'}</p>
-                        <p>{poData.customer?.city || ''}, {poData.customer?.state || ''} - {poData.customer?.ZipCode || ''}</p>
-                        <p>Phone: {poData.customer?.phone || 'N/A'}</p>
-                        <p>Email: {poData.customer?.email || 'N/A'}</p>
+                        <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Supplier)</h3>
+                        <p><strong>{poData.supplier?.name || 'N/A'}</strong></p>
+                        <p>{poData.supplier?.address || 'N/A'}</p>
+                        <p>{poData.supplier?.city || ''}, {poData.supplier?.state || ''} - {poData.supplier?.ZipCode || ''}</p>
+                        <p>Phone: {poData.supplier?.phone || 'N/A'}</p>
+                        <p>Email: {poData.supplier?.email || 'N/A'}</p>
                     </div>
 
                     <div style={{ width: '32%' }}>
