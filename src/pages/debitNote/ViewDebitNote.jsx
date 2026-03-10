@@ -78,7 +78,8 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                 return {
                     ...prev,
                     totalAmount: poData?.grandTotal,
-                    balance: poData?.balance
+                    balance: poData?.balance,
+                    paidAmount: poData?.balance
                 }
             })
         }
@@ -789,9 +790,9 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
                                                 <span>Total Balance: {formData?.balance}</span>
                                             </div>
 
-                                            <div>
+                                            {/* <div>
                                                 <span>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
-                                            </div>
+                                            </div> */}
 
                                         </div>
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4">
@@ -833,10 +834,11 @@ function ViewDebitNote({ centered, noFade, scrollContent }) {
 
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <input type="checkbox"
+                                                    <span className='text-green-500'>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
+                                                    {/* <input type="checkbox"
                                                         onChange={(e) => { if (e.target.checked) { setFormData((prev) => ({ ...prev, paidAmount: poData?.balance, })); } }}
                                                     />
-                                                    <span>Mark full amount</span>
+                                                    <span>Mark full amount</span> */}
                                                 </div>
                                             </div>
                                         </div>
