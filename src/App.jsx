@@ -403,7 +403,7 @@ function App() {
                 <Route path="attribute-list" element={<Attribute />} />
                 <Route path="product-list" element={<ProductBluePrint />} />
                 <Route path="create-product" element={<CreateProductBluePrint />} />
-                <Route path="product-qa-out-list" element={<ProductQaOut />} />
+                <Route path="product-query-list" element={<ProductQaOut />} />
 
                 <Route path="variant-list" element={<Variant2 />} />
 
@@ -504,8 +504,8 @@ function App() {
                 {/* statement */}
 
 
-                <Route path="create-statement" element={<CreateStatement />} />
-                <Route path="statements-list" element={<Statement />} />
+                <Route path="create-legal-statements" element={<CreateStatement />} />
+                <Route path="legal-statements-list" element={<Statement />} />
 
                 <Route path="create-about" element={<CreateAboutUs />} />
                 <Route path="about-us-list" element={<ListAboutUs />} />

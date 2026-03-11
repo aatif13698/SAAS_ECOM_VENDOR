@@ -162,7 +162,7 @@ function Statement({ centered, noFade, scrollContent }) {
     );
 
     function handleCreate() {
-        navigate("/create-statement")
+        navigate("/create-legal-statements")
     }
 
     function handleChange(e) {
@@ -220,12 +220,12 @@ function Statement({ centered, noFade, scrollContent }) {
     const handleView = (row) => {
         const id = row._id;
         const name = "view"
-        navigate("/create-statement", { state: { id, row, name } });
+        navigate("/create-legal-statements", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
         const id = row._id;
         const name = "edit"
-        navigate("/create-statement", { state: { id, row, name } });
+        navigate("/create-legal-statements", { state: { id, row, name } });
     };
 
     const handleDelete = (row) => {
