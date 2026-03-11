@@ -133,6 +133,10 @@ const PaymentIn = lazy(() => import("./pages/paymentIn/PaymentIn"));
 const CreatePaymentIn = lazy(() => import("./pages/paymentIn/CreatePaymentIn"));
 const ViewPaymentIn = lazy(() => import("./pages/paymentIn/ViewPaymentIn"));
 
+const ListSaleReturn = lazy(() => import("./pages/saleReturn/ListSaleReturn"));
+const SaleReturn = lazy(() => import("./pages/saleReturn/SaleReturn"));
+const ViewSaleReturn = lazy(() => import("./pages/saleReturn/ViewSaleReturn"));
+
 
 // statement
 
@@ -485,6 +489,10 @@ function App() {
                 <Route path="payment-in-list" element={<PaymentIn />} />
                 <Route path="create-payment-in" element={<CreatePaymentIn />} />
                 <Route path="view-payment-in/:id" element={<ViewPaymentIn />} />
+
+
+                <Route path="sales-returns-list" element={<ListSaleReturn />} />
+                <Route path="create-sales-returns" element={<SaleReturn />} />
 
 
 
