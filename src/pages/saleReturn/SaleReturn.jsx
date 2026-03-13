@@ -12,9 +12,9 @@ import ProductListModel from './ProductListModel';
 import AddTransportModel from '../purchaseOrder/AddTransportModel';
 import { useSelector } from 'react-redux';
 import warehouseService from '@/services/warehouse/warehouse.service';
-import { removeItemsList, setSelectedInv, resetPurchaseReturn, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '@/store/slices/purchaseReturn/purchaseReturnSclice';
+import { removeItemsList, setSelectedInv, resetPurchaseReturn, setAccountNumber, setBalance, setBankName, setBranch, setBranchName, setBusinessUnit, setIfscCode, setIsInterState, setItemsList, setLevel, setNotes, setPaidAmount, setPayedFrom, setPaymentMethod, setPoDate, setPoNumber, setShippingAddress, setSupplier, setWarehouse } from '../../store/slices/saleReturns/saleReturnSlice';
 import { useDispatch } from 'react-redux';
-import purchaseReturnService from '@/services/purchaseReturn/purchaseReturn.service';
+import saleReturnService from "../../services/saleReturn/saleReturn.service"
 import { formatDate } from '@fullcalendar/core';
 import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -22,6 +22,7 @@ import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/pu
 import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service"
 import { MdOutlineKeyboardArrowDown } from "react-icons/md";
 import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+import customerService from '@/services/customer/customer.service';
 
 
 const defaultState = {
@@ -95,11 +96,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
 
     const { changeCount } = useSelector((state) => state.financialYearChangeSclice);
 
-
-    // const {id, row} = location?.state;
-
-    const purhcaseOrderDraftData = useSelector((state) => state.purchaseReturns);
-
+    const purhcaseOrderDraftData = useSelector((state) => state.saleReturnSlice);
 
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
@@ -116,7 +113,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
     const filteredPurchaseInvoices = useMemo(() => {
         if (!searchTerm) return purchaseInvoices;
         const term = searchTerm.toLowerCase();
-        return purchaseInvoices.filter((inv) => inv?.piNumber.toLowerCase().includes(term));
+        return purchaseInvoices.filter((inv) => inv?.siNumber.toLowerCase().includes(term));
     }, [purchaseInvoices, searchTerm]);
 
 
@@ -602,7 +599,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
         try {
             const currentDate = new Date();
             const financialYear = getFiscalYearRange(currentDate);
-            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "purchase_return");
+            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "sale_return");
             setCurrentWorkingFy(response?.data?.financialYear)
             const nextNumber = Number(response?.data?.series?.nextNum) + 1;
             const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
@@ -824,8 +821,8 @@ const SaleReturn = ({ noFade, scrollContent }) => {
 
     async function getSupplierPurchaseInvoice(id) {
         try {
-            const response = await purchaseReturnService.getAll(id);
-            setPurchaseInvoices(response?.data?.purchaseInvoices)
+            const response = await saleReturnService.getAll(id);
+            setPurchaseInvoices(response?.data?.saleInvoices)
         } catch (error) {
             console.log("error", error);
         }
@@ -834,16 +831,15 @@ const SaleReturn = ({ noFade, scrollContent }) => {
     // === Fetch supplier addresses ===
     const getShippingAddress = async (id, type) => {
         try {
-            const response = await supplierService.getSupplierAddress(id);
+            const response = await customerService.getCustomerAddress(id);
             const addresses = response?.data?.addresses?.reverse() || [];
             setAddresses(addresses);
 
             if (addresses.length > 0) {
-                // setFormData(prev => ({
-                //   ...prev,
-                //   shippingAddress: addresses[0]
-                // }));
-                // dispatch(setShippingAddress(addresses[0]))
+                setFormData(prev => ({
+                    ...prev,
+                    shippingAddress: null,
+                }));
 
             } else {
                 setFormData(prev => ({
@@ -949,8 +945,8 @@ const SaleReturn = ({ noFade, scrollContent }) => {
     useEffect(() => {
         const getParties = async () => {
             try {
-                const response = await supplierService.getAllActive();
-                setSuppliers(response?.data || []);
+                const response = await customerService.getAllActive();
+                setSuppliers(response?.data?.customers || []);
             } catch (error) {
                 console.error("Error fetching suppliers:", error);
             }
@@ -1016,7 +1012,8 @@ const SaleReturn = ({ noFade, scrollContent }) => {
 
     const loadData = async (currentLevel, levelId, method) => {
         try {
-            const configures = await salePaymentInConfigureService.getPaymentFromLedgers(currentLevel, levelId);
+            // const configures = await salePaymentInConfigureService.getPaymentFromLedgers(currentLevel, levelId);
+            const configures = await purchasePaymentConfigureService.getPaymentFromLedgers(currentLevel, levelId);
             console.log("configures", configures);
             let ledgerArray = [];
             if (method == "cash" && configures.data.cashLedgers?.length > 0) {
@@ -1037,7 +1034,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                         }
                     });
                     ledgerArray = bankArray
-                }
+                }  
             }
             setPaymentFrom(ledgerArray)
         } catch (err) {
@@ -1091,14 +1088,14 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                 warehouse: warehouse,
 
                 purchaseInvId: selectedInv?._id,
-                purchaseInvLinkedNumber: selectedInv?.piNumber,
+                purchaseInvLinkedNumber: selectedInv?.siNumber,
 
 
-                supplier: formData?.supplier?._id,
-                supplierLedger: formData?.supplier?.ledgerLinkedId,
+                customer: formData?.supplier?._id,
+                customerLedger: formData?.supplier?.ledgerLinkedId,
                 shippingAddress: formData?.shippingAddress,
-                prNumber: formData?.poNumber,
-                prDate: formData?.poDate,
+                srNumber: formData?.poNumber,
+                srDate: formData?.poDate,
                 items: formData?.items,
                 notes: formData?.notes,
                 bankDetails: formData?.bankDetails,
@@ -1118,11 +1115,9 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                 dataObject.financialYear = currentWorkingFy?._id
             }
 
-
-
-            const response = await purchaseReturnService?.create(dataObject);
-            toast.success('Purchase return submitted successfully!');
-            resetAllAndNavigate()
+            const response = await saleReturnService?.create(dataObject);
+            toast.success('Sale return submitted successfully!');
+            resetAllAndNavigate();
 
         } catch (error) {
             const message = error?.response?.data?.message;
@@ -1136,7 +1131,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
     function resetAllAndNavigate() {
         dispatch(resetPurchaseReturn());
         setFormData(defaultState);
-        navigate('/purchase-returns-list');
+        navigate('/sale-returns-list');
     }
 
 
@@ -1316,7 +1311,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                     <h3 className="text-lg font-medium text-gray-700">Bill From</h3>
                                     {formData.supplier && (
                                         <Button
-                                            text="Change Supplier"
+                                            text="Change Customer"
                                             className="text-lightModalHeaderColor dark:text-darkBtn border py-1 border-lightModalHeaderColor dark:border-darkBtn hover:bg-lightModalHeaderColor/20"
                                             onClick={() => setOpenModal(true)}
                                         />
@@ -1325,12 +1320,11 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                 <div className='lg:h-[80%] md:h-[70%] p-4'>
                                     {formData.supplier ? (
                                         <div className="text-sm space-y-1">
-                                            <p><strong>Name:</strong> {formData.supplier.name}</p>
-                                            <p><strong>Contact Person:</strong> {formData.supplier.contactPerson}</p>
-                                            <p><strong>Email:</strong> {formData.supplier.emailContact}</p>
-                                            <p><strong>Contact Number:</strong> {formData.supplier.contactNumber}</p>
+                                            <p><strong>Name:</strong> {formData.supplier.firstName + " " + formData.supplier.lastName}</p>
+                                            <p><strong>Email:</strong> {formData.supplier.email}</p>
+                                            <p><strong>Contact Number:</strong> {formData.supplier.phone}</p>
                                             <p><strong>Address:</strong> {formData.supplier.address}, {formData.supplier.city}, {formData.supplier.state}, {formData.supplier.ZipCode}, {formData.supplier.country}</p>
-                                            <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber}</p>
+                                            <p><strong>GST/VAT:</strong> {formData.supplier.GstVanNumber ? formData.supplier.GstVanNumber : "N/A"}</p>
                                         </div>
                                     ) : (
                                         <button
@@ -1340,7 +1334,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                             className={` ${!warehouse ? "cursor-not-allowed" : ""} flex items-center p-4 w-fill justify-center hover:bg-lightHoverBgBtn/20 hover:text-white border border-dashed border-lightHoverBgBtn dark:border-darkBtn rounded-md`}
                                         >
                                             <BsPlus className='text-lightHoverBgBtn dark:text-darkBtn' />
-                                            <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Supplier</span>
+                                            <span className='text-lightHoverBgBtn dark:text-darkBtn ml-1'>Add Customer</span>
                                         </button>
                                     )}
                                 </div>
@@ -1398,7 +1392,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                 </div>
                                 <div className="h-[80%] p-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Sale No</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Sale Return No</label>
                                         <input
                                             type="text"
                                             name="poNumber"
@@ -1410,7 +1404,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Purchase Sale Date</label>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Sale Return Date</label>
                                         <input
                                             type="date"
                                             name="poDate"
@@ -1429,7 +1423,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                             onClick={() => setIsOpen(!isOpen)}
                                             className="w-48 px-4 py-2.5  border border-gray-300 rounded-lg bg-white hover:bg-gray-50 flex items-center justify-between focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
                                         >
-                                            <span className="font-medium text-gray-900">{selectedInv?.piNumber}</span>
+                                            <span className="font-medium text-gray-900">{selectedInv?.siNumber}</span>
                                             <span className={`transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}>
                                                 <MdOutlineKeyboardArrowDown />
                                             </span>
@@ -1454,7 +1448,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                                 <div className="max-h-[18rem] overflow-y-auto py-2 custom-scroll">
                                                     {filteredPurchaseInvoices.length === 0 ? (
                                                         <div className="px-4 py-10 text-center text-gray-500 text-sm">
-                                                            No matching year found
+                                                            No matching inv found
                                                         </div>
                                                     ) : (
                                                         filteredPurchaseInvoices.map((inv) => (
@@ -1465,7 +1459,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                     ${inv._id === selectedInv?._id ? "bg-emerald-50 text-emerald-700 font-medium" : "text-gray-700"}
                   `}
                                                             >
-                                                                <span>{inv.piNumber}</span>
+                                                                <span>{inv.siNumber}</span>
                                                                 {inv._id === selectedInv?._id && <span className="text-emerald-600">✓</span>}
                                                             </div>
                                                         ))
@@ -1965,8 +1959,8 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                                     onClick={() => handleSelectSupplier(supplier)}
                                                 >
                                                     <div>
-                                                        <p className="font-medium">{supplier.name}</p>
-                                                        <p className="text-sm">{supplier.contactPerson} - {supplier.emailContact}</p>
+                                                        <p className="font-medium">{supplier.firstName}</p>
+                                                        <p className="text-sm">{supplier.email} - {supplier.phone}</p>
                                                     </div>
                                                     {formData.supplier?._id === supplier._id && (
                                                         <GoCheck className="text-green-500" />

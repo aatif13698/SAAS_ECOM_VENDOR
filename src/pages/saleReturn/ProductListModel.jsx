@@ -743,9 +743,9 @@ function ProductListModel({
 
     async function getInvLinkedItems() {
         try {
-            const res = await stockService.getStockListOfSupplierByPurchaseId(
+            const res = await stockService.getStockListOfCustomerBySaleId(
                 supplier || null,
-                selectedInv._id
+                selectedInv._id 
             );
             setTotalRows(res?.data?.count || 0);
             setPaginationData(res?.data?.stocks || []);
@@ -774,16 +774,16 @@ function ProductListModel({
         if (selectedInv) {
             // Do nothing here; linked items are fetched separately
         } else if (supplier) {
-            fetchStockData(
-                page,
-                perPage,
-                keyWord,
-                level,
-                levelId,
-                selectedCategory,
-                selectedSubCategory,
-                supplier
-            );
+            // fetchStockData(
+            //     page,
+            //     perPage,
+            //     keyWord,
+            //     level,
+            //     levelId,
+            //     selectedCategory,
+            //     selectedSubCategory,
+            //     supplier
+            // );
         } else {
             setTotalRows(0);
             setPaginationData([]);

@@ -12,6 +12,7 @@ import paymentOutSlice from "./slices/paymentOut/paymentOutSlice";
 import quotationSlice from "./slices/quotation/quotationSlice";
 import performaSlice from "./slices/performa/performaSlice";
 import saleInvoiceSlice from "./slices/saleInvoice/saleInvoiceSlice";
+import saleReturnSlice from "./slices/saleReturns/saleReturnSlice";
 import paymentInSlice from "./slices/paymentIn/paymentInSlice";
 
 import debitNoteSlice from "./slices/debitNote/debitNoteSlice";
@@ -45,6 +46,7 @@ const rootReducer = {
   quotationSlice,
   performaSlice,
   saleInvoiceSlice,
+  saleReturnSlice,
   paymentInSlice,
   financialYearChangeSclice,
 

@@ -493,6 +493,7 @@ function App() {
 
                 <Route path="sales-returns-list" element={<ListSaleReturn />} />
                 <Route path="create-sales-returns" element={<SaleReturn />} />
+                <Route path="view/sale-returns/:id" element={<ViewSaleReturn />} />
 
 
 

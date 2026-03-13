@@ -28,7 +28,7 @@ import { useSelector } from "react-redux";
 import { formatDate } from "@fullcalendar/core";
 
 import CryptoJS from "crypto-js";
-import purchaseReturnService from "@/services/purchaseReturn/purchaseReturn.service";
+import saleReturnService from "@/services/saleReturn/saleReturn.service";
 
 // Secret key for encryption
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -133,7 +133,7 @@ const ListSaleReturn = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate(`/view/purchase-returns/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
+        navigate(`/view/sale-returns/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
         // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
@@ -258,23 +258,23 @@ const ListSaleReturn = ({ noFade, scrollContent }) => {
         },
         {
             name: "Date",
-            selector: (row) => formatDate(row?.prDate),
+            selector: (row) => formatDate(row?.srDate),
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "PO Number",
-            selector: (row) => row?.prNumber,
+            name: "SR Number",
+            selector: (row) => row?.srNumber,
             sortable: true,
             style: {
                 width: "20px", // Set the desired width here
             },
         },
         {
-            name: "Supplier",
-            selector: (row) => row?.supplier?.name,
+            name: "Customer",
+            selector: (row) => row?.customer?.firstName,
             sortable: false,
 
         },
@@ -362,9 +362,9 @@ const ListSaleReturn = ({ noFade, scrollContent }) => {
         debounceFunction(
             async (nextValue) => {
                 try {
-                    const response = await purchaseReturnService.getList(page, nextValue, perPage, currentLevel, levelId);
+                    const response = await saleReturnService.getList(page, nextValue, perPage, currentLevel, levelId);
                     setTotalRows(response?.data?.count);
-                    setPaginationData(response?.data?.purchaseReturns);
+                    setPaginationData(response?.data?.saleReturns);
                 } catch (error) {
                     console.error("Error while fetching:", error);
                 }
@@ -377,9 +377,9 @@ const ListSaleReturn = ({ noFade, scrollContent }) => {
 
     async function getList() {
         try {
-            const response = await purchaseReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await saleReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseReturns);
+            setPaginationData(response?.data?.saleReturns);
             setPending(false);
         } catch (error) {
             setPending(false);
@@ -397,9 +397,9 @@ const ListSaleReturn = ({ noFade, scrollContent }) => {
     // ------Performing Action when page change -----------
     const handlePageChange = async (page) => {
         try {
-            const response = await purchaseReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await saleReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseReturns);
+            setPaginationData(response?.data?.saleReturns);
             setPage(page);
         } catch (error) {
             console.log("error while fetching");
@@ -408,9 +408,9 @@ const ListSaleReturn = ({ noFade, scrollContent }) => {
     // ------Handling Action after the perPage data change ---------
     const handlePerRowChange = async (perPage) => {
         try {
-            const response = await purchaseReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
+            const response = await saleReturnService.getList(page, keyWord, perPage, currentLevel, levelId);
             setTotalRows(response?.data?.count);
-            setPaginationData(response?.data?.purchaseReturns);
+            setPaginationData(response?.data?.saleReturns);
             setPerPage(perPage);
         } catch (error) {
             console.log("error while fetching");

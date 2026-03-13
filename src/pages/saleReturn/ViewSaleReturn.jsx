@@ -6,8 +6,9 @@ import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiDotsVerticalR
 import { FiLoader } from 'react-icons/fi';
 import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import { useDispatch } from 'react-redux';
-import purchaseReturnService from "@/services/purchaseReturn/purchaseReturn.service";
-import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+import saleReturnService from '@/services/saleReturn/saleReturn.service';
+// import purchasePaymentConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
+import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
 import { Dialog, Transition } from "@headlessui/react";
 import Icon from "@/components/ui/Icon";
 import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service";
@@ -76,7 +77,8 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                 return {
                     ...prev,
                     totalAmount: poData?.grandTotal,
-                    balance: poData?.balance
+                    balance: poData?.balance,
+                    paidAmount: poData?.balance
                 }
             })
         }
@@ -105,12 +107,17 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
         // setRefresh((prev) => prev + 1)
     };
 
+    const [balanceError, setBalanceError] = useState(null)
+
     function handleInputChange(e) {
         const { name, value } = e.target;
         if (name == "paidAmount") {
             if (value > formData?.balance) {
-                toast.error("Can not enter more that balance");
+                // toast.error("Can not enter more that balance");
+                setBalanceError("Can not enter more than balance")
                 return
+            } else {
+                setBalanceError(null)
             }
         }
         setFormData(prev => ({
@@ -121,7 +128,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
 
     const loadData = async (currentLevel, levelId, method) => {
         try {
-            const configures = await salePaymentInConfigureService.getPaymentFromLedgers(currentLevel, levelId);
+            const configures = await purchasePaymentConfigureService.getPaymentFromLedgers(currentLevel, levelId);
             console.log("configures", configures);
             let ledgerArray = [];
             if (method == "cash" && configures.data.cashLedgers?.length > 0) {
@@ -174,7 +181,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
         try {
             const currentDate = new Date();
             const financialYear = getFiscalYearRange(currentDate);
-            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_in");
+            const response = await transactionSeriesService.getNextSerialNumber(financialYear, "payment_out");
             setCurrentWorkingFy(response?.data?.financialYear)
             const nextNumber = Number(response?.data?.series?.nextNum) + 1;
             const series = `${response?.data?.series?.prefix + "" + nextNumber}`;
@@ -215,7 +222,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
             console.log("dataObject", dataObject);
 
             setLoading2(true);
-            const response = await salePaymentInConfigureService?.createPaymentReceived(dataObject);
+            const response = await purchasePaymentConfigureService?.createPaymentOut(dataObject);
             setLoading2(false);
             setRefreshCount((prev) => prev + 1);
             closeModal();
@@ -249,7 +256,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
         async function getInvoice(id) {
             try {
                 setLoading(true)
-                const response = await purchaseReturnService.getParticular(id);
+                const response = await saleReturnService.getParticular(id);
                 console.log("response aaa", response?.data);
                 setPoData(response?.data);
                 setLoading(false)
@@ -292,7 +299,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
 
         const opt = {
             margin: [5, 5, 15, 5],
-            filename: `PO-${poData.poNumber || 'unknown'}.pdf`,
+            filename: `SR-${poData.poNumber || 'unknown'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
                 scale: 2,
@@ -368,7 +375,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                 <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-returns-list")}>
                     <BiArrowBack className="text-xl" />
                     <h3 className="md:text-lg text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        Purchase Returns # {poData?.prNumber || 'N/A'}
+                        Sale Returns # {poData?.prNumber || 'N/A'}
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
@@ -381,7 +388,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                             <button onClick={() => setOpenPaymentForm(true)} title="Download PDF"
                                 className="bg-emerald-500 h-8 p-2 flex items-center text-white rounded-lg cursor-pointer"
                             >
-                                Receive Amount
+                                Refund Amount
                             </button>
                             : ""
                     }
@@ -430,9 +437,9 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
 
                 {/* Header */}
                 <div className="text-center mb-8" style={{ lineHeight: 1.2 }}>
-                    <h1 style={{ fontSize: '26pt', margin: 0, color: '#1a1a1a' }}>PURCHASE RETURN</h1>
+                    <h1 style={{ fontSize: '26pt', margin: 0, color: '#1a1a1a' }}>SALE RETURN</h1>
                     <p style={{ margin: '8px 0', fontSize: '12pt', color: '#444' }}>
-                        <strong>SI Number:</strong> {poData.prNumber || 'N/A'} &nbsp;|&nbsp; <strong>Date:</strong> {poData.prDate ? formatDate(poData.prDate) : 'N/A'}
+                        <strong>SR Number:</strong> {poData.srNumber || 'N/A'} &nbsp;|&nbsp; <strong>Date:</strong> {poData.srDate ? formatDate(poData.srDate) : 'N/A'}
                     </p>
                 </div>
 
@@ -629,7 +636,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                                         className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                                     >
                                         <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-                                            Receive Payment
+                                            Refund Amount
                                         </h2>
                                         <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                                             <Icon icon="heroicons-outline:x" />
@@ -637,9 +644,21 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                                     </div>
 
                                     <div
-                                        className={`px-0 py-8 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
+                                        className={`px-0 pt-4 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
                                             }`}
                                     >
+
+                                        {
+                                            balanceError &&
+
+                                            <div className='px-4 relative mx-4 py-4 mb-2 rounded-lg text-red-600 bg-red-200 flex justify-center items-center'>
+                                                {balanceError}
+                                                <button onClick={() => setBalanceError(null)} className=" absolute top-1 right-2 text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                                                    <Icon icon="heroicons-outline:x" />
+                                                </button>
+                                            </div>
+                                        }
+
 
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4 bg-gray-100 rounded-lg mx-4">
 
@@ -647,14 +666,14 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                                                 <span>Total Balance: {formData?.balance}</span>
                                             </div>
 
-                                            <div>
+                                            {/* <div>
                                                 <span>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
-                                            </div>
+                                            </div> */}
 
                                         </div>
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4">
                                             <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment In No</label>
+                                                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Out No</label>
                                                 <input
                                                     type="text"
                                                     name="paymentInNumber"
@@ -669,7 +688,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                                                     htmlFor="paidAmount"
                                                     className="block text-sm font-medium text-gray-700"
                                                 >
-                                                    Amount Received
+                                                    Refund Amount
                                                 </label>
                                                 <div className="relative">
                                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
@@ -691,10 +710,12 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
 
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <input type="checkbox"
+
+                                                    <span className='text-red-600'>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
+                                                    {/* <input type="checkbox"
                                                         onChange={(e) => { if (e.target.checked) { setFormData((prev) => ({ ...prev, paidAmount: poData?.balance, })); } }}
                                                     />
-                                                    <span>Mark full amount</span>
+                                                    <span>Mark full amount</span> */}
                                                 </div>
                                             </div>
 
@@ -754,7 +775,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                                                     htmlFor="payedFrom"
                                                     className="block text-sm font-medium text-gray-700"
                                                 >
-                                                    Received In
+                                                    Paid From
                                                 </label>
                                                 <select
                                                     id="payedFrom"
