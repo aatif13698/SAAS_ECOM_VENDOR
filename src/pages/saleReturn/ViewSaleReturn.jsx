@@ -200,13 +200,13 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                 businessUnit: poData?.businessUnit,
                 branch: poData?.branch,
                 warehouse: poData?.warehouse,
-                supplier: poData?.supplier?._id,
-                supplierLedger: poData?.supplierLedger,
-                paymentInNumber: series,
-                paymentInDate: formData.paymentInDate,
+                customer: poData?.customer?._id,
+                customerLedger: poData?.customerLedger,
+                paymentOutNumber: series,
+                paymentOutDate: formData.paymentInDate,
                 notes: formData.notes,
                 paymentMethod: formData.paymentMethod,
-                receivedIn: formData.payedFrom,
+                payedFrom: formData.payedFrom,
                 paidAmount: formData.paidAmount,
                 balance: formData.balance,
                 payments: [{
@@ -222,7 +222,7 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
             console.log("dataObject", dataObject);
 
             setLoading2(true);
-            const response = await purchasePaymentConfigureService?.createPaymentOut(dataObject);
+            const response = await purchasePaymentConfigureService?.createPaymentOutForSaleReturn(dataObject);
             setLoading2(false);
             setRefreshCount((prev) => prev + 1);
             closeModal();
@@ -422,10 +422,10 @@ function ViewSaleReturn({ centered, noFade, scrollContent }) {
                         )}
                     </div> */}
                 </div>
-            </div>
+            </div>       
             <div
                 ref={pdfRef}
-                className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0 print:bg-white"
+                className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg  print:shadow-none print:p-0 print:mt-0 print:bg-white"
                 style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '10pt', color: '#1a1a1a' }}
             >
                 {/* Status Badge - Dynamic */}
