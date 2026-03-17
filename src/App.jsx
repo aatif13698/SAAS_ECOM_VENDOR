@@ -137,6 +137,10 @@ const ListSaleReturn = lazy(() => import("./pages/saleReturn/ListSaleReturn"));
 const SaleReturn = lazy(() => import("./pages/saleReturn/SaleReturn"));
 const ViewSaleReturn = lazy(() => import("./pages/saleReturn/ViewSaleReturn"));
 
+const ListCreditNote = lazy(() => import("./pages/creditNote/ListCreditNote"));
+const CreditNote = lazy(() => import("./pages/creditNote/CreditNote"));
+const ViewCreditNote = lazy(() => import("./pages/creditNote/ViewCreditNote"));
+
 
 // statement
 
@@ -494,6 +498,11 @@ function App() {
                 <Route path="sales-returns-list" element={<ListSaleReturn />} />
                 <Route path="create-sales-returns" element={<SaleReturn />} />
                 <Route path="view/sale-returns/:id" element={<ViewSaleReturn />} />
+
+                <Route path="credit-note-list" element={<ListCreditNote />} />
+                <Route path="create-credit-note" element={<CreditNote />} />
+                <Route path="view/credit-note/:id" element={<ViewCreditNote />} />
+
 
 
 
