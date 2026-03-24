@@ -1961,6 +1961,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                                                     <div>
                                                         <p className="font-medium">{supplier.firstName}</p>
                                                         <p className="text-sm">{supplier.email} - {supplier.phone}</p>
+                                                        <p className="text-sm">Balance: <span className={`${Number(supplier?.ledgerData?.balance) < 0 ? "text-red-600" : "text-green-600"}`}> {Number(supplier?.ledgerData?.balance) < 0 ? "-" : "+"} {Number(supplier?.ledgerData?.balance).toFixed(2) }</span> </p>
                                                     </div>
                                                     {formData.supplier?._id === supplier._id && (
                                                         <GoCheck className="text-green-500" />
