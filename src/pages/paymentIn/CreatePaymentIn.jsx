@@ -169,7 +169,7 @@ const CreatePaymentIn = ({ noFade, scrollContent }) => {
                 notes: paymentInDrafData?.notes,
                 paymentMethod: paymentInDrafData?.paymentMethod,
                 paidAmount: paymentInDrafData?.paidAmount,
-                payedFrom: paymentInDrafData?.payedFrom,
+                receivedIn: paymentInDrafData?.payedFrom,
                 balance: paymentInDrafData?.balance
             })
         });

@@ -163,8 +163,8 @@ const PaymentIn = ({ noFade, scrollContent }) => {
             },
         },
         {
-            name: "Supplier",
-            selector: (row) => row?.customer?.firstName+" "+row?.customer?.lastName,
+            name: "User",
+            selector: (row) => row?.fromLedger?.ledgerName,
             sortable: false,
 
         },

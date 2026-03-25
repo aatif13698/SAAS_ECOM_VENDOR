@@ -163,8 +163,8 @@ const PaymentOut = ({ noFade, scrollContent }) => {
             },
         },
         {
-            name: "Supplier",
-            selector: (row) => row?.supplier?.name,
+            name: "User",
+            selector: (row) => row?.toLedger?.ledgerName,
             sortable: false,
 
         },

@@ -120,6 +120,7 @@ const ViewPaymentOut = () => {
         paymentOutNumber,
         paymentOutDate,
         supplier,
+        toLedger,
         warehouse,
         branch,
         businessUnit,
@@ -169,11 +170,11 @@ const ViewPaymentOut = () => {
                             Paid To
                         </h3>
 
-                        {supplier ? (
+                        {toLedger && supplier ? (
                             <div className="space-y-2 text-sm">
                                 <div>
                                     <span className="font-medium text-gray-700 dark:text-gray-300">Name:</span>{' '}
-                                    {supplier.name}
+                                    {supplier?.name}
                                 </div>
                                 {supplier.contactPerson && (
                                     <div>
