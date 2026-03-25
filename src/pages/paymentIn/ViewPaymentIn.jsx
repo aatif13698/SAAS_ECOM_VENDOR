@@ -99,6 +99,8 @@ const ViewPaymentIn = () => {
 
         } else if (type == "purchase_return") {
             navigate(`/view/purchase-returns/${encryptId(id)}`, { state: { id: id, name: "view" } });
+        } else if(type == "debit_note"){
+             navigate(`/view/debit-note/${encryptId(id)}`, { state: { id: id, name: "view" } });
         }
 
 
@@ -182,14 +184,14 @@ const ViewPaymentIn = () => {
                             <div className="space-y-2 text-sm">
                                 <div>
                                     <span className="font-medium text-gray-700 dark:text-gray-300">Name:</span>{' '}
-                                    {type == "sale_invoice" ? customer?.firstName + " " + customer?.className : type == "purchase_return" ? customer?.name : ""}
+                                    {type == "sale_invoice" ? customer?.firstName + " " + customer?.className : type == "purchase_return" || type == "debit_note"  ? customer?.name : ""}
                                 </div>
                                 <div>
-                                    <span className="font-medium">Contact Nmber:</span> {type == "sale_invoice" ? customer?.phone : type == "purchase_return" ? customer?.contactNumber : ""}
+                                    <span className="font-medium">Contact Nmber:</span> {type == "sale_invoice" ? customer?.phone : type == "purchase_return" || type == "debit_note" ? customer?.contactNumber : ""}
                                 </div>
 
                                 <div>
-                                    <span className="font-medium">Email:</span> {type == "sale_invoice" ? customer?.email : type == "purchase_return" ? customer?.emailContact : ""}
+                                    <span className="font-medium">Email:</span> {type == "sale_invoice" ? customer?.email : type == "purchase_return" || type == "debit_note" ? customer?.emailContact : ""}
                                 </div>
                             </div>
                         ) : (
@@ -293,10 +295,10 @@ const ViewPaymentIn = () => {
                                             className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
-                                                {type == "sale_invoice" ? formatDate(alloc?.id?.siDate) : type == "purchase_return" ? formatDate(alloc?.id?.prDate) : ""}
+                                                {type == "sale_invoice" ? formatDate(alloc?.id?.siDate) : type == "purchase_return" ? formatDate(alloc?.id?.prDate) :  type == "debit_note" ? formatDate(alloc?.id?.dnDate)  : ""}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700">
-                                                {type == "sale_invoice" ? alloc?.id?.siNumber : type == "purchase_return" ? alloc?.id?.prNumber : '—'}
+                                                {type == "sale_invoice" ? alloc?.id?.siNumber : type == "purchase_return" ? alloc?.id?.prNumber : type == "debit_note" ? alloc?.id?.dnNumber : '—'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
                                                 ₹{formatCurrency(alloc?.id?.totalOrderAmount)}
