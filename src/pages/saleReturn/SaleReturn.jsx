@@ -786,7 +786,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
         const totalIGST = formData.items.reduce((sum, item) => sum + item.igst, 0);
         const grandTotal = totalTaxable + totalTaxes;
         const roundOffAmount = formData.roundOff ? Math.round(grandTotal) - grandTotal : 0;
-        const finalTotal = grandTotal + roundOffAmount;
+        const finalTotal = Number(grandTotal + roundOffAmount).toFixed(2) ;
 
         return {
             totalTaxable,
@@ -1104,7 +1104,7 @@ const SaleReturn = ({ noFade, scrollContent }) => {
                 paymentMethod: formData?.paymentMethod,
                 payedFrom: formData?.payedFrom,
                 paidAmount: formData?.paidAmount,
-                balance: formData?.balance,
+                balance: Number(formData?.balance).toFixed(2) ,
 
                 grandTotal: totals.grandTotal,
 
