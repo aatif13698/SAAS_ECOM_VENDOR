@@ -6,15 +6,16 @@ import { BiArrowBack, BiEdit, BiMailSend, BiDownload, BiPrinter, BiDotsVerticalR
 import { FiLoader } from 'react-icons/fi';
 import html2pdf from 'html2pdf.js'; // npm install html2pdf.js
 import { useDispatch } from 'react-redux';
-import creditNoteService from '../../services/creditNote/creditNote.service';
-// import purchasePaymentConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
-import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
+import creditNoteService from '@/services/creditNote/creditNote.service';
+import salePaymentInConfigureService from '../../services/salePaymentInConfigure/salePaymentInConfigure.service';
 import { Dialog, Transition } from "@headlessui/react";
 import Icon from "@/components/ui/Icon";
 import transactionSeriesService from "../../services/transactionSeries/tansactionSeries.service";
 import Button from '../../components/ui/Button';
 import CryptoJS from "crypto-js";
 import toast from 'react-hot-toast';
+import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
+import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -42,6 +43,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
     const [loading, setLoading] = useState(true);
 
     const [openPaymentForm, setOpenPaymentForm] = useState(false);
+    const [openInvoiceForm, setOpenInvoiceForm] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const [refreshCount, setRefreshCount] = useState(0);
 
@@ -107,17 +109,34 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
         // setRefresh((prev) => prev + 1)
     };
 
-    const [balanceError, setBalanceError] = useState(null)
+    const closeInvoiceModal = () => {
+        setOpenInvoiceForm(false);
+        setLoading2(false)
+        setFormData((prev) => ({
+            ...prev,
+            totalAmount: 0,
+            paidAmount: 0,
+            paymentMethod: "",
+            payedFrom: "",
+            paymentInDate: new Date().toISOString().split('T')[0],
+            notes: ""
+        }));
+        setFormDataErr((prev) => ({
+            ...prev,
+            name: "",
+            description: "",
+            slug: "",
+            icon: "",
+        }));
+        // setRefresh((prev) => prev + 1)
+    };
 
     function handleInputChange(e) {
         const { name, value } = e.target;
         if (name == "paidAmount") {
             if (value > formData?.balance) {
-                // toast.error("Can not enter more that balance");
-                setBalanceError("Can not enter more than balance")
+                toast.error("Can not enter more that balance");
                 return
-            } else {
-                setBalanceError(null)
             }
         }
         setFormData(prev => ({
@@ -200,13 +219,13 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                 businessUnit: poData?.businessUnit,
                 branch: poData?.branch,
                 warehouse: poData?.warehouse,
-                customer: poData?.customer?._id,
-                customerLedger: poData?.customerLedger,
-                paymentOutNumber: series,
-                paymentOutDate: formData.paymentInDate,
+                supplier: poData?.supplier?._id,
+                supplierLedger: poData?.supplierLedger,
+                paymentInNumber: series,
+                paymentInDate: formData.paymentInDate,
                 notes: formData.notes,
                 paymentMethod: formData.paymentMethod,
-                payedFrom: formData.payedFrom,
+                receivedIn: formData.payedFrom,
                 paidAmount: formData.paidAmount,
                 balance: formData.balance,
                 payments: [{
@@ -222,7 +241,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
             console.log("dataObject", dataObject);
 
             setLoading2(true);
-            const response = await purchasePaymentConfigureService?.createPaymentOutForSaleReturn(dataObject);
+            const response = await salePaymentInConfigureService?.createPaymentReceivedDn(dataObject);
             setLoading2(false);
             setRefreshCount((prev) => prev + 1);
             closeModal();
@@ -234,6 +253,8 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
             console.log("Error submitting payment out:", message);
         }
     };
+
+
 
 
 
@@ -299,7 +320,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
 
         const opt = {
             margin: [5, 5, 15, 5],
-            filename: `SR-${poData.poNumber || 'unknown'}.pdf`,
+            filename: `PO-${poData.poNumber || 'unknown'}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: {
                 scale: 2,
@@ -361,6 +382,140 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
     }
 
 
+    // invoice clearance 
+    const [unPaidInvoices, setUnpaidInvoices] = useState([]);
+    const [allocations, setAllocations] = useState([]);
+    const [totalUnpaid, setTotalUnpaid] = useState(0);
+    const [totalSettled, setTotalSettled] = useState(0);
+    const [loading3, setLoading3] = useState(false);
+
+    console.log("totalSettled", totalSettled);
+
+    const [formData2, setFormData2] = useState({
+        totalAmount: 0,
+        paidAmount: 0,
+        balance: 0,
+        paymentMethod: "",
+        payedFrom: "",
+        paymentInDate: new Date().toISOString().split('T')[0],
+        notes: ""
+
+    });
+
+    console.log("allocations", allocations);
+    console.log("formData2", formData2);
+
+    useEffect(() => {
+        const unpaid = unPaidInvoices.reduce((sum, inv) => sum + inv.balance, 0);
+        setTotalUnpaid(unpaid);
+        const settled = allocations.reduce((sum, a) => sum + a.applied, 0);
+        setTotalSettled(settled);
+        setFormData2(prev => ({ ...prev, paidAmount: settled, balance: unpaid - settled }));
+    }, [unPaidInvoices, allocations]);
+
+    useEffect(() => {
+        if (poData?.supplier) {
+            // setCurrentSupplierId(formData?.supplier?._id);
+            getUnPaidInvoices(poData?.supplier?._id, poData?.supplier?.ledgerLinkedId);
+        }
+    }, [poData?.supplier]);
+
+    async function getUnPaidInvoices(supplier, supplierLedger) {
+        try {
+            const response = await purchaseInvoiceService.getUnpaidInvoices("warehouse", poData?.warehouse, supplier, supplierLedger);
+            if (response?.data?.purchaseInvoices?.length > 0) {
+                const formatedInvoices = response.data.purchaseInvoices.map(inv => ({
+                    _id: inv._id,
+                    piDate: inv.piDate,
+                    supplier: inv.supplier,
+                    supplierLedger: inv.supplierLedger,
+                    piNumber: inv.piNumber,
+                    totalOrderAmount: inv.totalOrderAmount,
+                    paidAmount: inv.paidAmount,
+                    balance: inv.balance
+                }));
+                setUnpaidInvoices(formatedInvoices);
+            } else {
+                setUnpaidInvoices([]);
+            }
+        } catch (error) {
+            console.log("Error fetching unpaid invoices:", error);
+        }
+    }
+
+    const [overCreditError, setOverCreditError] = useState(null)
+
+    const handleSubmit2 = async (e) => {
+        e.preventDefault();
+        try {
+
+            if (Number(poData?.balance) - Number(totalSettled) < 0) {
+                setOverCreditError("Over credit can't be proceed.");
+                return
+            } else if (Number(totalSettled) == 0) {
+                setOverCreditError("Please enter amount to apply credit");
+                return
+            } else {
+                setOverCreditError(null)
+            }
+
+
+            const dataObject = {
+                debitNoteId: poData?._id,
+                clientId: localStorage.getItem("saas_client_clientId"),
+                level: "warehouse",
+                businessUnit: poData?.businessUnit,
+                branch: poData?.branch,
+                warehouse: poData?.warehouse,
+                paidAmount: formData2.paidAmount,
+                payments: allocations.filter(a => a.applied > 0).map(a => ({
+                    purchaseInvoice: a._id,
+                    amount: a.applied
+                }))
+            };
+
+            if (currentWorkingFy && currentWorkingFy?._id) {
+                dataObject.financialYear = currentWorkingFy?._id
+            }
+
+            console.log("dataObject1111", dataObject);
+
+            setLoading3(true);
+            const response = await salePaymentInConfigureService?.applyCreditToInv(dataObject);
+            setLoading3(false);
+            setRefreshCount((prev) => prev + 1);
+            closeInvoiceModal();
+            toast.success('Credit submitted successfully!');
+        } catch (error) {
+            setLoading3(false);
+            const message = error?.response?.data?.message;
+            toast.error(message);
+            console.log("Error submitting credit:", message);
+        }
+    };
+
+    useEffect(() => {
+        if (unPaidInvoices.length > 0) {
+            const sorted = [...unPaidInvoices].sort((a, b) => new Date(a.piDate) - new Date(b.piDate));
+            setAllocations(sorted.map(inv => ({ ...inv, applied: 0, isFixed: false })));
+        } else {
+            setAllocations([]);
+        }
+    }, [unPaidInvoices]);
+
+    useEffect(() => {
+        if (poData) {
+            setFormData2((prev) => {
+                return {
+                    ...prev,
+                    totalAmount: poData?.grandTotal,
+                    balance: poData?.balance
+                }
+            })
+        }
+    }, [poData])
+
+
     if (loading) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -372,60 +527,42 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
     return (
         <div className="relative min-h-screen pb-8 bg-gray-300 rounded-md dark:bg-gray-900">
             <div className="sticky top-14 z-10 bg-white dark:bg-gray-800 p-4 flex justify-between items-center shadow-md">
-                <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/purchase-returns-list")}>
+                <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/credit-note-list")}>
                     <BiArrowBack className="text-xl" />
                     <h3 className="md:text-lg text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        Sale Returns # {poData?.srNumber || 'N/A'}
+                        Credit Note # {poData?.dnNumber || 'N/A'}
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">
-
-                    {/* <button onClick={handleEdit} title="Edit" className="hover:text-blue-500">
-                        <BiEdit className="text-xl" />
-                    </button> */}
                     {
                         poData?.balance > 0 ?
-                            <button onClick={() => setOpenPaymentForm(true)} title="Download PDF"
+                            <button onClick={() => setOpenInvoiceForm(true)}
+                                className="bg-emerald-500 h-8 p-2 flex items-center text-white rounded-lg cursor-pointer"
+                            >
+                                Clear Invoice
+                            </button>
+                            : ""
+                    }
+                    {
+                        poData?.balance > 0 ?
+                            <button onClick={() => setOpenPaymentForm(true)}
                                 className="bg-emerald-500 h-8 p-2 flex items-center text-white rounded-lg cursor-pointer"
                             >
                                 Refund Amount
                             </button>
                             : ""
                     }
-
                     <button onClick={handleDownload} title="Download PDF" className="hover:text-blue-500">
                         <BiDownload className="text-xl" />
                     </button>
                     <button onClick={handlePrint} title="Print PDF" className="hover:text-blue-500">
                         <BiPrinter className="text-xl" />
                     </button>
-                    {/* <div className="relative" ref={dropdownRef}>
-                        <button
-                            onClick={() => setShowDropdown(!showDropdown)}
-                            title="Change Status"
-                            className="flex items-center hover:text-blue-500"
-                        >
-                            <BiDotsVerticalRounded className="text-2xl" />
-                        </button>
-                        {showDropdown && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 shadow-lg rounded-md py-1 z-20 border border-gray-200 dark:border-gray-700">
-                                {statuses.map(status => (
-                                    <button
-                                        key={status}
-                                        onClick={() => handleStatusChange(status)}
-                                        className={`block ${poData?.status == status ? "bg-blue-300" : ""} px-4 py-2 text-sm  dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 w-full text-left capitalize`}
-                                    >
-                                        {status.replace('_', ' ')}
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div> */}
                 </div>
-            </div>       
+            </div>
             <div
                 ref={pdfRef}
-                className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg  print:shadow-none print:p-0 print:mt-0 print:bg-white"
+                className="md:max-w-4xl max-w-full relative mx-auto bg-white dark:bg-gray-800 p-6 md:p-8 mt-6 shadow-lg rounded-lg print:shadow-none print:p-0 print:mt-0 print:bg-white"
                 style={{ fontFamily: 'Arial, Helvetica, sans-serif', fontSize: '10pt', color: '#1a1a1a' }}
             >
                 {/* Status Badge - Dynamic */}
@@ -437,9 +574,9 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
 
                 {/* Header */}
                 <div className="text-center mb-8" style={{ lineHeight: 1.2 }}>
-                    <h1 style={{ fontSize: '26pt', margin: 0, color: '#1a1a1a' }}>SALE RETURN</h1>
+                    <h1 style={{ fontSize: '26pt', margin: 0, color: '#1a1a1a' }}>CREDIT NOTE</h1>
                     <p style={{ margin: '8px 0', fontSize: '12pt', color: '#444' }}>
-                        <strong>SR Number:</strong> {poData.srNumber || 'N/A'} &nbsp;|&nbsp; <strong>Date:</strong> {poData.srDate ? formatDate(poData.srDate) : 'N/A'}
+                        <strong>CN Number:</strong> {poData.cnNumber || 'N/A'} &nbsp;|&nbsp; <strong>Date:</strong> {poData.cnDate ? formatDate(poData.cnDate) : 'N/A'}
                     </p>
                 </div>
 
@@ -454,12 +591,12 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                         <p>aayesha@yopmail.com</p>
                     </div>
                     <div style={{ width: '32%' }}>
-                        <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Customer)</h3>
-                        <p><strong>{poData.customer?.firstName + " " + poData.customer?.lastName || 'N/A'}</strong></p>
-                        <p>{poData.customer?.address || 'N/A'}</p>
-                        <p>{poData.customer?.city || ''}, {poData.customer?.state || ''} - {poData.customer?.ZipCode || ''}</p>
-                        <p>Phone: {poData.customer?.phone || 'N/A'}</p>
-                        <p>Email: {poData.customer?.email || 'N/A'}</p>
+                        <h3 style={{ fontSize: '14pt', margin: '0 0 12px 0', color: '#1a1a1a', borderBottom: '2px solid #1a1a1a', paddingBottom: '2px' }}>To (Supplier)</h3>
+                        <p><strong>{poData.supplier?.name || 'N/A'}</strong></p>
+                        <p>{poData.supplier?.address || 'N/A'}</p>
+                        <p>{poData.supplier?.city || ''}, {poData.supplier?.state || ''} - {poData.supplier?.ZipCode || ''}</p>
+                        <p>Phone: {poData.supplier?.phone || 'N/A'}</p>
+                        <p>Email: {poData.supplier?.email || 'N/A'}</p>
                     </div>
 
                     <div style={{ width: '32%' }}>
@@ -636,7 +773,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                         className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
                                     >
                                         <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
-                                            Refund Amount
+                                            Receive Payment
                                         </h2>
                                         <button onClick={closeModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
                                             <Icon icon="heroicons-outline:x" />
@@ -644,21 +781,9 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                     </div>
 
                                     <div
-                                        className={`px-0 pt-4 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
+                                        className={`px-0 py-8 ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
                                             }`}
                                     >
-
-                                        {
-                                            balanceError &&
-
-                                            <div className='px-4 relative mx-4 py-4 mb-2 rounded-lg text-red-600 bg-red-200 flex justify-center items-center'>
-                                                {balanceError}
-                                                <button onClick={() => setBalanceError(null)} className=" absolute top-1 right-2 text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
-                                                    <Icon icon="heroicons-outline:x" />
-                                                </button>
-                                            </div>
-                                        }
-
 
                                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 p-4 bg-gray-100 rounded-lg mx-4">
 
@@ -688,7 +813,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                                     htmlFor="paidAmount"
                                                     className="block text-sm font-medium text-gray-700"
                                                 >
-                                                    Refund Amount
+                                                    Amount Received
                                                 </label>
                                                 <div className="relative">
                                                     <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
@@ -710,36 +835,14 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
 
                                                 </div>
                                                 <div className="flex items-center gap-2">
-
-                                                    <span className='text-red-600'>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
+                                                    <span className='text-green-500'>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
                                                     {/* <input type="checkbox"
                                                         onChange={(e) => { if (e.target.checked) { setFormData((prev) => ({ ...prev, paidAmount: poData?.balance, })); } }}
                                                     />
                                                     <span>Mark full amount</span> */}
                                                 </div>
                                             </div>
-
-                                            {/* <div className="flex items-end pb-0.5">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setFormData(prev => ({
-                                                            ...prev,
-                                                            paidAmount: poData?.balance,
-
-                                                        }));
-
-                                                    }}
-                                                    // disabled={totals.finalTotal <= 0}
-                                                    className="px-4 py-2 border border-dashed w-full border-emerald-500 text-emerald-500 text-sm font-medium rounded-lg
-                   hover:bg-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:ring-offset-2
-                   disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                                >
-                                                    Mark Full Amount
-                                                </button>
-                                            </div> */}
                                         </div>
-
                                         <hr />
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 overflow-hidden p-4">
 
@@ -775,7 +878,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                                     htmlFor="payedFrom"
                                                     className="block text-sm font-medium text-gray-700"
                                                 >
-                                                    Paid From
+                                                    Payed From
                                                 </label>
                                                 <select
                                                     id="payedFrom"
@@ -833,7 +936,6 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
 
                                         </div>
                                     </div>
-
                                     {(
                                         <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
                                             <div className="flex gap-2">
@@ -843,7 +945,6 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                                     className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
                                                     onClick={() => closeModal()}
                                                 />
-
                                                 <Button
                                                     text={`Save`}
                                                     // className="border bg-blue-gray-300 rounded px-5 py-2"
@@ -851,8 +952,6 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                                     onClick={handleSubmit}
                                                     isLoading={loading2}
                                                 />
-
-
                                             </div>
                                         </div>
                                     )}
@@ -862,6 +961,238 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                     </div>
                 </Dialog>
             </Transition>
+
+
+            {/* invoice clearance */}
+            <Transition appear show={openInvoiceForm} as={Fragment}>
+                <Dialog
+                    as="div"
+                    className="relative z-[99999]"
+                    onClose={closeInvoiceModal}
+                >
+                    {(
+                        <Transition.Child
+                            as={Fragment}
+                            enter={noFade ? "" : "duration-300 ease-out"}
+                            enterFrom={noFade ? "" : "opacity-0"}
+                            enterTo={noFade ? "" : "opacity-100"}
+                            leave={noFade ? "" : "duration-200 ease-in"}
+                            leaveFrom={noFade ? "" : "opacity-100"}
+                            leaveTo={noFade ? "" : "opacity-0"}
+                        >
+                            <div className="fixed inset-0 bg-slate-900/50 backdrop-filter backdrop-blur-sm" />
+                        </Transition.Child>
+                    )}
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div
+                            className={`flex min-h-full justify-center items-start text-center p-6  "
+                                    }`}
+                        >
+                            <Transition.Child
+                                as={Fragment}
+                                enter={noFade ? "" : "duration-300  ease-out"}
+                                enterFrom={noFade ? "" : "opacity-0 scale-95"}
+                                enterTo={noFade ? "" : "opacity-100 scale-100"}
+                                leave={noFade ? "" : "duration-200 ease-in"}
+                                leaveFrom={noFade ? "" : "opacity-100 scale-100"}
+                                leaveTo={noFade ? "" : "opacity-0 scale-95"}
+                            >
+                                <Dialog.Panel
+                                    className={`w-full transform overflow-hidden rounded-md
+                                        text-left align-middle shadow-xl transition-alll max-w-7xl bg-light`}
+                                >
+                                    <div
+                                        className={`relative overflow-hidden py-4 px-5 text-lightModalHeaderColor flex justify-between bg-white border-b border-lightBorderColor dark:bg-darkInput dark:border-b dark:border-darkSecondary `}
+                                    >
+                                        <h2 className="capitalize leading-6 tracking-wider  text-xl font-semibold text-lightModalHeaderColor dark:text-darkTitleColor">
+                                            App credit from DN: # {poData?.dnNumber}
+                                        </h2>
+                                        <button onClick={closeInvoiceModal} className=" text-lightmodalCrosscolor hover:text-lightmodalbtnText text-[22px]">
+                                            <Icon icon="heroicons-outline:x" />
+                                        </button>
+                                    </div>
+
+                                    <div
+                                        className={`px-0  ${scrollContent ? "overflow-y-auto max-h-[400px]" : ""
+                                            }`}
+                                    >
+
+                                        <div className="bg-white dark:bg-transparent lg:col-span-2 md:col-span-2  border border-gray-200 col-span-3">
+                                            <div className='bg-white dark:bg-transparent dark:border-b-[2px] dark:border-white p-4 rounded-t-lg flex justify-between items-center'>
+                                                <h3 className="text-lg font-medium text-gray-700">Apply to Invoices</h3>
+                                                <span>Available Credits: {'₹'} <span className='font-bold'>{poData?.balance}</span></span>
+                                            </div>
+
+                                            {
+                                                overCreditError &&
+                                                <div className='text-center text-red-700 bg-red-100 my-2 p-2 rounded-md mx-3'>
+                                                    <span>{overCreditError}</span>
+
+                                                </div>
+
+                                            }
+
+
+                                            <div className="overflow-x-auto">
+                                                {allocations.length > 0 ? (
+                                                    <>
+                                                        <table className="min-w-full divide-y divide-gray-300 dark:divide-gray-600 border border-gray-300 dark:border-gray-600">
+                                                            <thead className="bg-gray-100 dark:bg-gray-800">
+                                                                <tr className="border-b border-gray-300 dark:border-gray-600">
+
+                                                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">
+                                                                        Date
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">
+                                                                        Invoice Number
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">
+                                                                        Invoice Amount
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider border-r border-gray-300 dark:border-gray-600">
+                                                                        Balance
+                                                                    </th>
+                                                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                                                        Credit Amount
+                                                                    </th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody className="bg-white divide-y divide-gray-200 dark:bg-transparent dark:divide-gray-700">
+                                                                {allocations.map((alloc) => {
+                                                                    return (
+                                                                        <tr key={alloc._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
+                                                                                {formatDate(alloc.piDate)}
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
+                                                                                {alloc.piNumber}
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
+                                                                                {alloc.totalOrderAmount.toFixed(2)}
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
+                                                                                {alloc.balance.toFixed(2)}
+                                                                            </td>
+                                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600 dark:text-blue-400">
+                                                                                {/* {alloc.applied.toFixed(2)} */}
+                                                                                <div className="relative">
+                                                                                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+                                                                                        {'₹'}
+                                                                                    </span>
+                                                                                    <input
+                                                                                        // id="paidAmount"
+                                                                                        // name="paidAmount"
+                                                                                        type="number"
+                                                                                        value={alloc.applied ?? ''}
+                                                                                        onChange={(e) => {
+                                                                                            const value = e.target.value;
+                                                                                            const newAllocations = allocations.map((item) => {
+                                                                                                if (item?._id == alloc._id) {
+                                                                                                    if (item.balance < Number(value)) {
+                                                                                                        return item
+                                                                                                    } else {
+                                                                                                        return {
+                                                                                                            ...item,
+                                                                                                            applied: Number(value)
+                                                                                                        }
+                                                                                                    }
+                                                                                                } else {
+                                                                                                    return item
+                                                                                                }
+                                                                                            })
+                                                                                            setAllocations(newAllocations)
+
+                                                                                        }}
+                                                                                        step="0.01"
+                                                                                        min="0"
+                                                                                        className="block  pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg text-sm
+                     focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500
+                     disabled:bg-gray-100 disabled:text-gray-500 transition-colors"
+                                                                                        placeholder="0.00"
+                                                                                    />
+
+                                                                                </div>
+                                                                            </td>
+                                                                        </tr>
+                                                                    )
+                                                                })}
+                                                            </tbody>
+                                                        </table>
+
+                                                        {/* Summary footer with proper borders */}
+                                                        <div className="grid grid-cols-6 bg-white dark:bg-gray-900 border-t border-gray-300 dark:border-gray-600">
+
+                                                            {/* <div className="px-6 py-4  flex justify-start col-span-2 relative bg-gray-100 dark:bg-gray-800">
+                                                                <div className=" whitespace-nowrap text-sm">
+                                                                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Remaining: </span>
+                                                                    <span className="font-semibold text-red-600 dark:text-red-400">
+                                                                        {(totalUnpaid - totalSettled).toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <div className="px-6 py-4 col-span-2 flex gap-2 items-center justify-end  border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800">
+                                                                <div className="text-xs font-medium text-gray-700 dark:text-gray-300">Total Unpaid:</div>
+                                                                <div className="text-sm font-semibold text-green-700 dark:text-green-400">
+                                                                    {totalUnpaid.toFixed(2)}
+                                                                </div>
+                                                            </div> */}
+                                                            {/* <div className="px-6 py-4  flex justify-end items-center gap-2 col-span-2 relative bg-gray-100 dark:bg-gray-800">
+                                                                <div className="text-xs font-medium text-gray-700 dark:text-gray-300">Total Settled:</div>
+                                                                <div className="text-sm font-semibold text-blue-700 dark:text-blue-400 ">
+                                                                    {totalSettled.toFixed(2)}
+                                                                </div>
+                                                            </div> */}
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <div className="p-8 text-center text-gray-500 dark:text-gray-400 border-t border-gray-300 dark:border-gray-600">
+                                                        No unpaid invoices available.
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className='flex justify-end mx-2 my-4'>
+                                                <div className='flex flex-col p-2 rounded-md bg-gray-300 min-w-[20rem]'>
+                                                    <div className='flex justify-between'>
+                                                        <span>Total Amount To Credit:</span>
+                                                        <span className='text-right min-w-[10rem] font-bold'>{totalSettled !== 0 ? totalSettled.toFixed(2) : "0.00"}</span>
+                                                    </div>
+                                                    <div className='flex justify-between'>
+                                                        <span>Remaining Credit:</span>
+                                                        <span className='text-right min-w-[10rem] font-bold'>{(Number(poData?.balance) - Number(totalSettled)).toFixed(2)} <span className='text-red-600 text-sm'>{Number(poData?.balance) - Number(totalSettled) < 0 ? "(Over Credit)" : ""}</span></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {(
+                                        <div className="px-4 py-3 flex justify-end space-x-3 border-t border-slate-100 dark:border-darkSecondary  bg-white dark:bg-darkInput ">
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    text="Cancel"
+                                                    // className="border bg-red-300 rounded px-5 py-2"
+                                                    className="bg-lightmodalBgBtnHover lightmodalBgBtn text-white hover:bg-lightmodalBgBtn hover:text-lightmodalbtnText  px-4 py-2 rounded"
+                                                    onClick={() => closeInvoiceModal()}
+                                                />
+                                                <Button
+                                                    text={`Save`}
+                                                    // className="border bg-blue-gray-300 rounded px-5 py-2"
+                                                    className={` bg-lightBtn hover:bg-lightBtnHover dark:bg-darkBtn hover:dark:bg-darkBtnHover text-white dark:hover:text-black-900  px-4 py-2 rounded`}
+                                                    onClick={handleSubmit2}
+                                                    isLoading={loading2}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
+
+
+
 
 
 

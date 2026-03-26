@@ -133,7 +133,7 @@ const ListCreditNote = ({ noFade, scrollContent }) => {
         const id = row._id;
         const name = "view"
         setIsViewed(true);
-        navigate(`/view/sale-returns/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
+        navigate(`/view/credit-note/${encryptId(row._id)}`, { state: { id: row._id, name: "view" } });
         // navigate("/view/purchase-invoice", { state: { id, row, name } });
     };
     const handleEdit = (row) => {
