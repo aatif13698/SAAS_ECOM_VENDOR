@@ -530,7 +530,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                 <div className="flex items-center gap-3 cursor-pointer hover:text-blue-500" onClick={() => navigate("/credit-note-list")}>
                     <BiArrowBack className="text-xl" />
                     <h3 className="md:text-lg text-sm font-semibold text-gray-800 dark:text-gray-200">
-                        Credit Note # {poData?.dnNumber || 'N/A'}
+                        Credit Note # {poData?.cnNumber || 'N/A'}
                     </h3>
                 </div>
                 <div className="flex items-center gap-4 text-gray-600 dark:text-gray-300">

@@ -92,9 +92,13 @@ const ViewPaymentOut = () => {
 
 
     function navigateToInvoice(id) {
-        
-        navigate(`/view/purchase-invoice/${encryptId(id)}`, { state: { id: id, name: "view" } });
-
+        if (type == "purchase_invoice") {
+            navigate(`/view/purchase-invoice/${encryptId(id)}`, { state: { id: id, name: "view" } });
+        } else if ("sale_return") {
+            navigate(`/view/sale-returns/${encryptId(id)}`, { state: { id: id, name: "view" } });
+        } else if ("credit_note") {
+            navigate(`/view/credit-note/${encryptId(id)}`, { state: { id: id, name: "view" } });
+        }
     }
 
 
@@ -127,12 +131,12 @@ const ViewPaymentOut = () => {
         paymentMethod,
         paidAmount = 0,
         notes,
+        type,
         // Assuming these come from backend when you implement allocation
         invoices = [],
     } = paymentOut;
 
-    console.log("invoices", invoices);
-    
+
 
     const totalSettled = invoices.reduce((sum, item) => sum + (item.settlementAmount || 0), 0);
     const totalUnpaid = invoices.reduce((sum, item) => sum + (item.balance || 0), 0) + paidAmount;
@@ -174,23 +178,14 @@ const ViewPaymentOut = () => {
                             <div className="space-y-2 text-sm">
                                 <div>
                                     <span className="font-medium text-gray-700 dark:text-gray-300">Name:</span>{' '}
-                                    {supplier?.name}
+                                    {type == "purchase_invoice" ? supplier?.name : type == "sale_return" || type == "credit_note" ? supplier?.firstName + " " + supplier?.className : ""}
                                 </div>
-                                {supplier.contactPerson && (
-                                    <div>
-                                        <span className="font-medium">Contact Person:</span> {supplier.contactPerson}
-                                    </div>
-                                )}
-                                {supplier.contactNumber && (
-                                    <div>
-                                        <span className="font-medium">Phone:</span> {supplier.contactNumber}
-                                    </div>
-                                )}
-                                {supplier.emailContact && (
-                                    <div>
-                                        <span className="font-medium">Email:</span> {supplier.emailContact}
-                                    </div>
-                                )}
+                                <div>
+                                    <span className="font-medium">Contact Nmber:</span> {type == "purchase_invoice" ? supplier?.contactNumber : type == "sale_return" || type == "credit_note" ? supplier?.phone : ""}
+                                </div>
+                                <div>
+                                    <span className="font-medium">Email:</span> {type == "purchase_invoice" ? supplier?.emailContact : type == "sale_return" || type == "credit_note" ? supplier?.email : ""}
+                                </div>
                                 {supplier.address && (
                                     <div>
                                         <span className="font-medium">Address:</span>{' '}
@@ -312,10 +307,10 @@ const ViewPaymentOut = () => {
                                             className="hover:bg-gray-50 dark:hover:bg-gray-700/40 transition-colors"
                                         >
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
-                                                {formatDate(alloc?.id?.piDate)}
+                                                {type == "purchase_invoice" ? formatDate(alloc?.id?.piDate) : type == "sale_return" ? formatDate(alloc?.id?.srDate) : type == "credit_note" ? formatDate(alloc?.id?.cnDate) : ""}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100 border-r border-gray-200 dark:border-gray-700">
-                                                {alloc?.id?.piNumber || '—'}
+                                                {type == "purchase_invoice" ? alloc?.id?.piNumber : type == "sale_return" ? alloc?.id?.srNumber : type == "credit_note" ? alloc?.id?.cnNumber : '—'}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
                                                 ₹{formatCurrency(alloc?.id?.totalOrderAmount)}
