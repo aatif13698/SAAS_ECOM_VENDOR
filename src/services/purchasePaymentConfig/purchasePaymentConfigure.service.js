@@ -74,6 +74,17 @@ const createPaymentOutForSaleReturn = async (data) => {
 };
 
 
+const createPaymentOutForCreditNote = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/payment/out/create/payment/out/creditNote`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
 const getPaymentOut = async (page, keyWord, perPage, currentLevel, levelId) => {
     const authToken = await localStorage.getItem("saas_client_token");
     const clientId = localStorage.getItem("saas_client_clientId");
@@ -125,6 +136,7 @@ export default {
     getPaymentFromLedgers,
     createPaymentOut,
     createPaymentOutForSaleReturn,
+    createPaymentOutForCreditNote,
     getPaymentOut,
     getParticularPaymentOut
 }

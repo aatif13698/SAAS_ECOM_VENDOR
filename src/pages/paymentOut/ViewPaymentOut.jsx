@@ -94,9 +94,9 @@ const ViewPaymentOut = () => {
     function navigateToInvoice(id) {
         if (type == "purchase_invoice") {
             navigate(`/view/purchase-invoice/${encryptId(id)}`, { state: { id: id, name: "view" } });
-        } else if ("sale_return") {
+        } else if (type == "sale_return") {
             navigate(`/view/sale-returns/${encryptId(id)}`, { state: { id: id, name: "view" } });
-        } else if ("credit_note") {
+        } else if (type == "credit_note") {
             navigate(`/view/credit-note/${encryptId(id)}`, { state: { id: id, name: "view" } });
         }
     }

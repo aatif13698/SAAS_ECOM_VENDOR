@@ -219,15 +219,15 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                 businessUnit: poData?.businessUnit,
                 branch: poData?.branch,
                 warehouse: poData?.warehouse,
-                supplier: poData?.supplier?._id,
-                supplierLedger: poData?.supplierLedger,
-                paymentInNumber: series,
-                paymentInDate: formData.paymentInDate,
+                customer: poData?.customer?._id,
+                customerLedger: poData?.customerLedger,
+                paymentOutNumber: series,
+                paymentOutDate: formData.paymentInDate,
                 notes: formData.notes,
                 paymentMethod: formData.paymentMethod,
-                receivedIn: formData.payedFrom,
-                paidAmount: formData.paidAmount,
-                balance: formData.balance,
+                payedFrom: formData.payedFrom,
+                paidAmount: Number(formData.paidAmount).toFixed(2),
+                balance: Number(formData.balance).toFixed(2),
                 payments: [{
                     saleInvoice: poData?._id,
                     amount: formData?.paidAmount
@@ -241,7 +241,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
             console.log("dataObject", dataObject);
 
             setLoading2(true);
-            const response = await salePaymentInConfigureService?.createPaymentReceivedDn(dataObject);
+            const response = await purchasePaymentConfigureService?.createPaymentOutForCreditNote(dataObject);
             setLoading2(false);
             setRefreshCount((prev) => prev + 1);
             closeModal();
@@ -835,7 +835,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
 
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className='text-green-500'>Remaining Balance: {Number(formData?.balance) - Number(formData?.paidAmount)}</span>
+                                                    <span className='text-green-500'>Remaining Balance:  {Number(Number(formData?.balance).toFixed(2) - Number(formData?.paidAmount).toFixed(2)).toFixed(2)}</span>
                                                     {/* <input type="checkbox"
                                                         onChange={(e) => { if (e.target.checked) { setFormData((prev) => ({ ...prev, paidAmount: poData?.balance, })); } }}
                                                     />
