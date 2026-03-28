@@ -344,14 +344,14 @@ function ViewSaleInvoice() {
                             <span className="label">Grand Total:</span> <span>₹{formatCurrency(grandTotal)}</span>
                         </p>
                         {
-                            poData?.payedFrom && poData?.payedFrom?.length > 0 && poData?.payedFrom?.map((ledg) => {
+                            poData?.receivedIn && poData?.receivedIn?.length > 0 && poData?.receivedIn?.map((ledg) => {
                                 const type = ledg?.paymentType
                                 return (
                                     <p className={` font-semibold ${type == "Payment" ? "text-gray-600" : type == "Settlement" ? "text-gray-600" : ""} `} style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>{ledg?.paymentType}:</span> <span>(-) ₹{formatCurrency(ledg?.amount)}</span></p>
                                 )
                             })
                         }
-                        <p className='text-green-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p>
+                        {/* <p className='text-green-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Paid Amount:</span> <span>₹{formatCurrency(poData.paidAmount)}</span></p> */}
                         <p className='text-blue-600 font-semibold' style={{ margin: '6px 0', display: 'flex', justifyContent: 'space-between' }}><span className="label" style={{ fontWeight: 'bold' }}>Balance Due:</span> <span>₹{formatCurrency(poData.balance)}</span></p>
                     </div>
                 </div>
