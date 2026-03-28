@@ -127,6 +127,19 @@ const getParticularPaymentOut = async (id) => {
 };
 
 
+const applyCreditToInv = async (data) => {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/dn/apply/credit/to/invoice`, data, {
+        headers: {
+            Authorization: `Bearer ${authToken}`,
+        }
+
+    });
+};
+
+
+
+
 
 
 
@@ -138,5 +151,6 @@ export default {
     createPaymentOutForSaleReturn,
     createPaymentOutForCreditNote,
     getPaymentOut,
-    getParticularPaymentOut
+    getParticularPaymentOut,
+    applyCreditToInv
 }

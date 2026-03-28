@@ -126,7 +126,7 @@ const getParticularPaymentIn = async (id) => {
 
 const applyCreditToInv = async (data) => {
     const authToken = localStorage.getItem("saas_client_token");
-    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/purhcase/dn/apply/credit/to/invoice`, data, {
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/sale/cn/apply/credit/to/invoice`, data, {
         headers: {
             Authorization: `Bearer ${authToken}`,
         }

@@ -16,6 +16,7 @@ import CryptoJS from "crypto-js";
 import toast from 'react-hot-toast';
 import purchaseInvoiceService from '@/services/purchaseInvoice/purchaseInvoice.service';
 import purchasePaymentConfigureService from '@/services/purchasePaymentConfig/purchasePaymentConfigure.service';
+import saleInvoiceService from '@/services/saleInvoice/saleInvoice.service';
 
 // Secret key for decryption (same as used for encryption)
 const SECRET_KEY = import.meta.env.VITE_ENCRYPTION_KEY || "my-secret-key";
@@ -414,22 +415,22 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
     }, [unPaidInvoices, allocations]);
 
     useEffect(() => {
-        if (poData?.supplier) {
+        if (poData?.customer) {
             // setCurrentSupplierId(formData?.supplier?._id);
-            getUnPaidInvoices(poData?.supplier?._id, poData?.supplier?.ledgerLinkedId);
+            getUnPaidInvoices(poData?.customer?._id, poData?.customer?.ledgerLinkedId);
         }
-    }, [poData?.supplier]);
+    }, [poData?.customer]);
 
-    async function getUnPaidInvoices(supplier, supplierLedger) {
+    async function getUnPaidInvoices(customer, customerLedger) {
         try {
-            const response = await purchaseInvoiceService.getUnpaidInvoices("warehouse", poData?.warehouse, supplier, supplierLedger);
-            if (response?.data?.purchaseInvoices?.length > 0) {
-                const formatedInvoices = response.data.purchaseInvoices.map(inv => ({
+            const response = await saleInvoiceService.getUnpaidInvoices("warehouse", poData?.warehouse, customer, customerLedger);
+            if (response?.data?.invoices?.length > 0) {
+                const formatedInvoices = response.data.invoices.map(inv => ({
                     _id: inv._id,
-                    piDate: inv.piDate,
-                    supplier: inv.supplier,
-                    supplierLedger: inv.supplierLedger,
-                    piNumber: inv.piNumber,
+                    siDate: inv.siDate,
+                    customer: inv.customer,
+                    customerLedger: inv.customerLedger,
+                    siNumber: inv.siNumber,
                     totalOrderAmount: inv.totalOrderAmount,
                     paidAmount: inv.paidAmount,
                     balance: inv.balance
@@ -461,7 +462,7 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
 
 
             const dataObject = {
-                debitNoteId: poData?._id,
+                creditNoteId: poData?._id,
                 clientId: localStorage.getItem("saas_client_clientId"),
                 level: "warehouse",
                 businessUnit: poData?.businessUnit,
@@ -1062,10 +1063,10 @@ function ViewCreditNote({ centered, noFade, scrollContent }) {
                                                                     return (
                                                                         <tr key={alloc._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
-                                                                                {formatDate(alloc.piDate)}
+                                                                                {formatDate(alloc.siDate)}
                                                                             </td>
                                                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
-                                                                                {alloc.piNumber}
+                                                                                {alloc.siNumber}
                                                                             </td>
                                                                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-200 border-r border-gray-200 dark:border-gray-700">
                                                                                 {alloc.totalOrderAmount.toFixed(2)}
