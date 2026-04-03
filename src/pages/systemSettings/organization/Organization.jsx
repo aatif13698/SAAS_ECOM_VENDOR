@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // Install: npm install axios
+import authService from '@/services/authService';
 
 const API_BASE = '/api'; // Change to your actual backend base URL
 
@@ -34,26 +35,28 @@ function Organization() {
   useEffect(() => {
     const fetchOrganization = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/organization`);
-        if (res.data && res.data._id) {
-          setOrgData(res.data);
+        const res = await authService.getOrgInfo();
+        console.log("res?.data?.data", res?.data?.data);
+        
+        if (res?.data?.data && res?.data?.data._id) {
+          setOrgData(res?.data?.data);
           setFormData({
-            name: res.data.name || '',
-            description: res.data.description || '',
-            fullAddress: res.data.fullAddress || '',
-            phone: res.data.phone || '',
-            email: res.data.email || '',
-            instaLink: res.data.instaLink || '',
-            showInsta: res.data.showInsta || false,
-            facebookLink: res.data.facebookLink || '',
-            showFacebook: res.data.showFacebook || false,
-            linkedinLink: res.data.linkedinLink || '',
-            showLinkedin: res.data.showLinkedin || false,
-            telegramLink: res.data.telegramLink || '',
-            showTelegram: res.data.showTelegram || false,
+            name: res?.data?.data?.name || '',
+            description: res?.data?.data?.description || '',
+            fullAddress: res?.data?.data?.fullAddress || '',
+            phone: res?.data?.data?.phone || '',
+            email: res?.data?.data?.email || '',
+            instaLink: res?.data?.data?.instaLink || '',
+            showInsta: res?.data?.data?.showInsta || false,
+            facebookLink: res?.data?.data?.facebookLink || '',
+            showFacebook: res?.data?.data?.showFacebook || false,
+            linkedinLink: res?.data?.data?.linkedinLink || '',
+            showLinkedin: res?.data?.data?.showLinkedin || false,
+            telegramLink: res?.data?.data?.telegramLink || '',
+            showTelegram: res?.data?.data?.showTelegram || false,
           });
-          setLongLogoPreview(res.data.longLogo || '');
-          setShortLogoPreview(res.data.shortLogo || '');
+          setLongLogoPreview(res?.data?.data?.longLogo || '');
+          setShortLogoPreview(res?.data?.data?.shortLogo || '');
         } else {
           setIsEditing(true); // No data → directly show create form
         }
@@ -105,6 +108,9 @@ function Organization() {
       submitData.append(key, formData[key]);
     });
 
+    const clientId = localStorage.getItem("saas_client_clientId");
+    submitData.append('clientId', clientId);
+
     // Append files (if new files selected)
     if (longLogoFile) submitData.append('longLogo', longLogoFile);
     if (shortLogoFile) submitData.append('shortLogo', shortLogoFile);
@@ -113,17 +119,16 @@ function Organization() {
       let res;
       if (orgData && orgData._id) {
         // Update
-        res = await axios.put(`${API_BASE}/organization/${orgData._id}`, submitData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        setOrgData(res.data);
+        res = await authService.updateOrgInfo(submitData, orgData._id)
+        setOrgData(res?.data);
       } else {
         // Create
-        res = await axios.post(`${API_BASE}/organization`, submitData, {
-          headers: { 'Content-Type': 'multipart/form-data' },
-        });
-        setOrgData(res.data);
+        res = await authService.createOrgInfo(submitData);
+        setOrgData(res?.data);
       }
+
+      console.log("res", res);
+      
 
       setMessage({ type: 'success', text: 'Organization saved successfully!' });
       setIsEditing(false);
@@ -344,9 +349,9 @@ function Organization() {
               {['insta', 'facebook', 'linkedin', 'telegram'].map(platform => {
                 const key = platform + 'Link';
                 const showKey = 'show' + platform.charAt(0).toUpperCase() + platform.slice(1);
-                const label = platform === 'insta' ? 'Instagram' : 
-                             platform === 'facebook' ? 'Facebook' : 
-                             platform === 'linkedin' ? 'LinkedIn' : 'Telegram';
+                const label = platform === 'insta' ? 'Instagram' :
+                  platform === 'facebook' ? 'Facebook' :
+                    platform === 'linkedin' ? 'LinkedIn' : 'Telegram';
 
                 return (
                   <div key={platform} className="flex flex-col md:flex-row gap-4 items-start md:items-center">

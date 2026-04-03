@@ -192,6 +192,58 @@ const getAttendanceData = async (id, start, end) => {
 };
 
 
+const createOrgInfo = async (data) => {
+  try {
+    const authToken = localStorage.getItem("saas_client_token");
+    return await axios.post(`${import.meta.env.VITE_BASE_URL}/api/vendor/auth/organization`, data, {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      }
+    });
+  } catch (error) {
+    console.error("Error creating info:", error);
+    throw error; // Re-throw the error to be handled by the calling code
+  }
+};
+
+const updateOrgInfo = async (data, id) => {
+  console.log("data", data);
+  const authToken = localStorage.getItem("saas_client_token");
+  try {
+    const response = await axios.put(
+      `${import.meta.env.VITE_BASE_URL}/api/vendor/auth/organization/${id}`,
+      data, // Pass the data as the second parameter
+      {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        }
+      }
+    );
+
+
+    return response.data; // Assuming you want to return the response data
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error; // Re-throw the error to be handled by the calling code
+  }
+};
+
+
+const getOrgInfo = async () => {
+  const authToken = localStorage.getItem("saas_client_token");
+  const clinetId = localStorage.getItem("saas_client_clientId");
+  return await axios.get(
+    `${import.meta.env.VITE_BASE_URL}/api/vendor/auth/organization/${clinetId}`,
+    {
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+      }
+    }
+  );
+};
+
+
+
 
 
 // const logout = () => {
@@ -202,5 +254,9 @@ const getAttendanceData = async (id, start, end) => {
 /* eslint import/no-anonymous-default-export: [2, {"allowObject": true}] */
 export default {
   Login, LoginStaff, OtpSignIn, staffOtpSignIn, getProfile, updateProfile, forgotPassword, resetPassword, punch,
-  check, getAttendanceData
+  check, getAttendanceData,
+
+  createOrgInfo,
+  updateOrgInfo,
+  getOrgInfo
 };
