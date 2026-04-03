@@ -23,6 +23,7 @@ import RoleList from '../rolesAndPermission/RolesList';
 import SaleSetting from "./SaleSettings";
 import GeneralSettings from "./GeneralSettings";
 import { useNavigate } from 'react-router-dom';
+import Organization from "./organization/Organization"
 
 const menuItems = [
   {
@@ -262,6 +263,7 @@ export default function SystemSettings() {
             {activeSection === 'purchase-config' && <PurchaseSettings />}
             {activeSection === 'sale-config' && <SaleSetting />}
             {activeSection === 'role' && <RoleList />}
+            {activeSection === 'organization' && <Organization />}
 
             {/* Placeholder for remaining sections */}
             {['inventory', 'products', 'stocks', 'accounting', 'vendors', 'notifications', 'integrations'].includes(activeSection) && (
