@@ -1481,16 +1481,16 @@ const CreateStock = ({ noFade, scrollContent }) => {
                                                         </p>
                                                     </div>
                                                     <div className="flex flex-col items-end gap-3 w-full md:w-auto">
-                                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                                                        <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 text-sm">
                                                             <div className="text-gray-700 dark:text-gray-200">
-                                                                <span className="font-medium">Opening:</span> {item?.openingStock}
+                                                                <span className="font-medium">Total Stocks:</span> {item?.finalStock}
                                                             </div>
-                                                            <div className="text-gray-700 dark:text-gray-200">
+                                                            {/* <div className="text-gray-700 dark:text-gray-200">
                                                                 <span className="font-medium">Online:</span> {item?.onlineStock}
                                                             </div>
                                                             <div className="text-gray-700 dark:text-gray-200">
                                                                 <span className="font-medium">Offline:</span> {item?.offlineStock}
-                                                            </div>
+                                                            </div> */}
                                                         </div>
                                                         <button
                                                             onClick={() => onEditStock(item)}
